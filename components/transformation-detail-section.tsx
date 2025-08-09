@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { Sparkles } from "lucide-react"
-import { cn } from "@/lib/utils" // Assuming cn utility is available
+import { cn } from "@/lib/utils" // Utility for conditionally joining class names
 
 interface TransformationDetailSectionProps {
   name: string
