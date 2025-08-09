@@ -1,136 +1,181 @@
 "use client"
 
 import type React from "react"
-
-import { useId, useState } from "react"
-import Link from "next/link"
-import { Send, MessageCircle } from "lucide-react"
+import { useState, useId } from "react"
+import { MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 
 type FormState = {
   name: string
   email: string
+  phone: string
   message: string
 }
 
 export default function ContactClientPage() {
-  const nameId = useId()
-  const emailId = useId()
-  const messageId = useId()
-  const [state, setState] = useState<FormState>({ name: "", email: "", message: "" })
-  const [submitting, setSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const formId = useId()
+  const [state, setState] = useState<FormState>({ name: "", email: "", phone: "", message: "" })
   const [submitted, setSubmitted] = useState<null | "ok" | "error">(null)
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setSubmitting(true)
+    setIsSubmitting(true)
     setSubmitted(null)
     try {
-      // Simulate async submit; hook up to a Server Action when ready.
+      const data = new FormData(e.currentTarget)
+      // TODO: Wire to server action in app/actions/contact.ts if desired.
+      // await submitContact(data)
+
+      // Simulate latency for UX feedback
       await new Promise((r) => setTimeout(r, 800))
       setSubmitted("ok")
-      setState({ name: "", email: "", message: "" })
-    } catch {
+      e.currentTarget.reset()
+    } catch (err) {
+      console.error(err)
       setSubmitted("error")
     } finally {
-      setSubmitting(false)
+      setIsSubmitting(false)
     }
   }
 
-  const whatsappHref = "https://wa.me/31600000000?text=Hoi%20Evotion%2C%20ik%20heb%20een%20vraag%20over%20coaching."
+  const whatsappHref =
+    // Replace with your real number, format: https://wa.me/<countrycode><number>
+    "https://wa.me/31600000000?text=Hoi%20Evotion%20Coach,%20ik%20heb%20een%20vraag%20over%20coaching."
 
   return (
-    <section className="container mx-auto max-w-5xl px-4 py-10 md:py-16">
+    <main className="mx-auto w-full max-w-5xl px-4 py-10 md:py-16">
+      <div className="mb-8 text-center md:mb-12">
+        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Neem contact op</h1>
+        <p className="mt-2 text-muted-foreground">
+          Stel je vraag of plan een gratis kennismaking. We reageren meestal binnen 24 uur.
+        </p>
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="border border-zinc-200">
+        {/* Contact form */}
+        <Card className="animate-in fade-in slide-in-from-left-2 duration-500 border border-zinc-200">
           <CardHeader>
-            <CardTitle className="text-2xl font-semibold">Neem contact op</CardTitle>
+            <CardTitle className="text-2xl font-semibold">Stuur ons een bericht</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={onSubmit} className="space-y-5">
+            <form aria-labelledby={formId} onSubmit={onSubmit} className="space-y-4">
+              <span id={formId} className="sr-only">
+                Contactformulier
+              </span>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label htmlFor="name" className="text-sm font-medium">
+                    Naam
+                  </label>
+                  <Input
+                    id="name"
+                    name="name"
+                    required
+                    placeholder="Jouw naam"
+                    autoComplete="name"
+                    value={state.name}
+                    onChange={(e) => setState((s) => ({ ...s, name: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="email" className="text-sm font-medium">
+                    E-mail
+                  </label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    placeholder="jij@example.com"
+                    autoComplete="email"
+                    value={state.email}
+                    onChange={(e) => setState((s) => ({ ...s, email: e.target.value }))}
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor={nameId}>Naam</Label>
+                <label htmlFor="phone" className="text-sm font-medium">
+                  Telefoon (optioneel)
+                </label>
                 <Input
-                  id={nameId}
-                  name="name"
-                  placeholder="Jouw naam"
-                  value={state.name}
-                  onChange={(e) => setState((s) => ({ ...s, name: e.target.value }))}
-                  required
-                  aria-required="true"
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  placeholder="06 12345678"
+                  autoComplete="tel"
+                  value={state.phone}
+                  onChange={(e) => setState((s) => ({ ...s, phone: e.target.value }))}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor={emailId}>E‑mail</Label>
-                <Input
-                  id={emailId}
-                  name="email"
-                  type="email"
-                  placeholder="jij@voorbeeld.nl"
-                  value={state.email}
-                  onChange={(e) => setState((s) => ({ ...s, email: e.target.value }))}
-                  required
-                  aria-required="true"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor={messageId}>Bericht</Label>
+                <label htmlFor="message" className="text-sm font-medium">
+                  Bericht
+                </label>
                 <Textarea
-                  id={messageId}
+                  id="message"
                   name="message"
-                  placeholder="Waar kunnen we je mee helpen?"
+                  required
+                  placeholder="Vertel ons waar we je mee kunnen helpen..."
                   rows={5}
                   value={state.message}
                   onChange={(e) => setState((s) => ({ ...s, message: e.target.value }))}
-                  required
-                  aria-required="true"
                 />
               </div>
 
               <div className="flex items-center gap-3">
-                <Button type="submit" disabled={submitting} className="min-w-32">
-                  <Send className="mr-2 h-4 w-4" />
-                  {submitting ? "Versturen…" : "Verstuur"}
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Versturen..." : "Verstuur"}
                 </Button>
-                {submitted === "ok" && (
-                  <span role="status" aria-live="polite" className="text-sm text-green-600">
-                    Bedankt! We nemen snel contact op.
-                  </span>
-                )}
-                {submitted === "error" && (
-                  <span role="status" aria-live="polite" className="text-sm text-red-600">
-                    Er ging iets mis. Probeer het later opnieuw.
-                  </span>
-                )}
+
+                <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className="inline-flex">
+                  <Button type="button" variant="secondary" className="gap-2">
+                    <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                    <span>Start chat</span>
+                  </Button>
+                </a>
               </div>
+
+              <p className="text-xs text-muted-foreground">
+                Door te verzenden ga je akkoord met onze verwerking van je gegevens uitsluitend om op je bericht te
+                reageren.
+              </p>
             </form>
           </CardContent>
         </Card>
 
-        <Card className="border border-zinc-200">
+        {/* Info panel */}
+        <Card className="animate-in fade-in slide-in-from-right-2 duration-500 border border-zinc-200">
           <CardHeader>
-            <CardTitle className="text-2xl font-semibold">WhatsApp</CardTitle>
+            <CardTitle className="text-2xl font-semibold">Onze gegevens</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-zinc-600">Liever direct chatten? Start een WhatsApp gesprek en krijg snel antwoord.</p>
-            <div className="flex flex-wrap items-center gap-3">
-              <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
-                <Link href={whatsappHref} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  start chat
-                </Link>
-              </Button>
-              <p className="text-xs text-zinc-500">Bereikbaar op werkdagen tussen 09:00–17:00.</p>
-            </div>
+          <CardContent className="space-y-3 text-sm">
+            <p>
+              E-mail:{" "}
+              <a className="underline hover:no-underline" href="mailto:info@evotioncoaching.nl">
+                info@evotioncoaching.nl
+              </a>
+            </p>
+            <p>
+              WhatsApp:{" "}
+              <a className="underline hover:no-underline" href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                +31 6 00000000
+              </a>
+            </p>
+            <p>Beschikbaar: ma–vr, 09:00–18:00</p>
+            <p className="text-muted-foreground">
+              Liever direct plannen? Stuur “KENNISMAKING” via WhatsApp, dan sturen wij je een kalenderlink.
+            </p>
           </CardContent>
         </Card>
       </div>
-    </section>
+    </main>
   )
 }
