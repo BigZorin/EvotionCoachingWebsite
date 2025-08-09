@@ -25,7 +25,7 @@ export function ParticleSystem({
 }: ParticleSystemProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const particlesRef = useRef<Particle[]>([])
-  const animationRef = useRef<number | null>(null)
+  const animationRef = useRef<number>()
 
   useEffect(() => {
     const canvas = canvasRef.current

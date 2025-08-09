@@ -17,7 +17,7 @@ export function useOptimizedTypewriter(text: string, speed = 50) {
     setIsComplete(false)
 
     let lastUpdate = 0
-    const { cleanup } = addAnimation(
+    const cleanup = addAnimation(
       "typewriter",
       (deltaTime, timestamp) => {
         if (timestamp - lastUpdate < speed) return true
@@ -60,7 +60,7 @@ export function useOptimizedCountUp(
 
     let startTime: number | null = null
 
-    const { cleanup } = addAnimation(
+    const cleanup = addAnimation(
       "countup",
       (deltaTime, timestamp) => {
         if (!startTime) startTime = timestamp

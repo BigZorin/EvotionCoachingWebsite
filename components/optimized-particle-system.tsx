@@ -107,7 +107,7 @@ export function OptimizedParticleSystem({
     handleResize()
 
     // Optimized animation loop
-    const { cleanup } = addAnimation(
+    const cleanup = addAnimation(
       "particle-system",
       (deltaTime: number) => {
         if (!isVisibleRef.current) return true // Skip rendering when not visible

@@ -20,7 +20,7 @@ export function useOptimizedScroll() {
 
   const lastScrollY = useRef(0)
   const lastTimestamp = useRef(0)
-  const scrollTimeout = useRef<NodeJS.Timeout | null>(null)
+  const scrollTimeout = useRef<NodeJS.Timeout>()
   const { addAnimation } = useAnimationManager()
 
   useEffect(() => {
@@ -101,7 +101,7 @@ export function useOptimizedParallax({ speed = 0.5, offset = 0 }: { speed?: numb
 
     observer.observe(element)
 
-    const { cleanup } = addAnimation(
+    const cleanup = addAnimation(
       "parallax",
       () => {
         if (!isInViewRef.current) return true

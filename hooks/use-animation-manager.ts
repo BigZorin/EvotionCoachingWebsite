@@ -99,63 +99,21 @@ const globalAnimationManager = new AnimationManager()
 
 export function useAnimationManager() {
   const taskIds = useRef<Set<string>>(new Set())
-  const idMapping = useRef<Map<string, Set<string>>>(new Map())
 
-  /**
-   * Registers an animation callback.
-   * Returns the unique animation id and a cleanup function.
-   * The returned id can be used with `removeAnimation` to stop the
-   * animation manually.
-   */
-  const addAnimation = useCallback(
-    (id: string, callback: AnimationTask["callback"], priority = 0) => {
-      const uniqueId = `${id}-${Math.random().toString(36).substr(2, 9)}`
-      taskIds.current.add(uniqueId)
-      globalAnimationManager.addTask(uniqueId, callback, priority)
+  const addAnimation = useCallback((id: string, callback: AnimationTask["callback"], priority = 0) => {
+    const uniqueId = `${id}-${Math.random().toString(36).substr(2, 9)}`
+    taskIds.current.add(uniqueId)
+    globalAnimationManager.addTask(uniqueId, callback, priority)
 
-      if (!idMapping.current.has(id)) {
-        idMapping.current.set(id, new Set())
-      }
-      idMapping.current.get(id)!.add(uniqueId)
-
-      const cleanup = () => {
-        taskIds.current.delete(uniqueId)
-        globalAnimationManager.removeTask(uniqueId)
-        const set = idMapping.current.get(id)
-        if (set) {
-          set.delete(uniqueId)
-          if (set.size === 0) {
-            idMapping.current.delete(id)
-          }
-        }
-      }
-
-      return { id: uniqueId, cleanup }
-    },
-    [],
-  )
-
-  /**
-   * Removes an animation. Accepts either the unique id returned from
-   * `addAnimation` or the external id to remove all associated animations.
-   */
-  const removeAnimation = useCallback((id: string) => {
-    if (idMapping.current.has(id)) {
-      const ids = idMapping.current.get(id)!
-      ids.forEach((uid) => {
-        globalAnimationManager.removeTask(uid)
-        taskIds.current.delete(uid)
-      })
-      idMapping.current.delete(id)
-    } else {
-      globalAnimationManager.removeTask(id)
-      taskIds.current.delete(id)
-      idMapping.current.forEach((set, key) => {
-        if (set.delete(id) && set.size === 0) {
-          idMapping.current.delete(key)
-        }
-      })
+    return () => {
+      taskIds.current.delete(uniqueId)
+      globalAnimationManager.removeTask(uniqueId)
     }
+  }, [])
+
+  const removeAnimation = useCallback((id: string) => {
+    globalAnimationManager.removeTask(id)
+    taskIds.current.delete(id)
   }, [])
 
   const getStats = useCallback(() => {
@@ -166,11 +124,11 @@ export function useAnimationManager() {
     return () => {
       // Cleanup all tasks when component unmounts
       taskIds.current.forEach((id) => {
-        removeAnimation(id)
+        globalAnimationManager.removeTask(id)
       })
       taskIds.current.clear()
     }
-  }, [removeAnimation])
+  }, [])
 
   return { addAnimation, removeAnimation, getStats }
 }

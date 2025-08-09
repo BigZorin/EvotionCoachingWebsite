@@ -97,7 +97,7 @@ export function Footer() {
             <div className="flex">
               <input
                 type="email"
-                placeholder="Je e-mail"
+                placeholder="Je email"
                 className="flex-1 px-4 py-2 rounded-l-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-secondary text-sm"
               />
               <Button className="bg-secondary hover:bg-secondary/90 text-primary px-4 py-2 rounded-r-lg border border-secondary font-semibold text-sm flex items-center gap-2">
