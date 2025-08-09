@@ -20,7 +20,7 @@ export function useOptimizedScroll() {
 
   const lastScrollY = useRef(0)
   const lastTimestamp = useRef(0)
-  const scrollTimeout = useRef<NodeJS.Timeout>()
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null)
   const { addAnimation } = useAnimationManager()
 
   useEffect(() => {
