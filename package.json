@@ -6,7 +6,8 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "test": "tsc lib/utils.test.ts --module commonjs --target es2019 --esModuleInterop --moduleResolution node --skipLibCheck --outDir dist-tests && node --test dist-tests/utils.test.js && rm -rf dist-tests"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
