@@ -1,192 +1,136 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import type React from "react"
+
+import { useId, useState } from "react"
 import Link from "next/link"
-import { Mail, Phone, MessageCircle, Send, CheckCircle2 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Send, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 
+type FormState = {
+  name: string
+  email: string
+  message: string
+}
+
 export default function ContactClientPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const nameId = useId()
+  const emailId = useId()
+  const messageId = useId()
+  const [state, setState] = useState<FormState>({ name: "", email: "", message: "" })
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState<null | "ok" | "error">(null)
 
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setError(null)
-    setIsSubmitting(true)
-
-    // Simulate send. You can wire this to a Server Action later.
-    await new Promise((r) => setTimeout(r, 900))
-
-    setIsSubmitting(false)
-    setSubmitted(true)
+    setSubmitting(true)
+    setSubmitted(null)
+    try {
+      // Simulate async submit; hook up to a Server Action when ready.
+      await new Promise((r) => setTimeout(r, 800))
+      setSubmitted("ok")
+      setState({ name: "", email: "", message: "" })
+    } catch {
+      setSubmitted("error")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-12 sm:py-16">
-      <section className="mb-10 space-y-3 text-center animate-in fade-in-0 duration-500">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Neem contact op</h1>
-        <p className="text-muted-foreground">
-          We reageren meestal binnen 24 uur. Liever direct contact? Start een WhatsApp-chat.
-        </p>
-      </section>
+  const whatsappHref = "https://wa.me/31600000000?text=Hoi%20Evotion%2C%20ik%20heb%20een%20vraag%20over%20coaching."
 
-      <section className="grid grid-cols-1 gap-6 md:grid-cols-5">
-        {/* Form */}
-        <Card className="md:col-span-3 animate-in fade-in-0 slide-in-from-left-4 duration-500">
+  return (
+    <section className="container mx-auto max-w-5xl px-4 py-10 md:py-16">
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="border border-zinc-200">
           <CardHeader>
-            <CardTitle>Stuur ons een bericht</CardTitle>
-            <CardDescription>Vul je gegevens in en vertel kort waar we je mee kunnen helpen.</CardDescription>
+            <CardTitle className="text-2xl font-semibold">Neem contact op</CardTitle>
           </CardHeader>
           <CardContent>
-            {submitted ? (
-              <div className="flex items-start gap-3 rounded-md border border-green-200 bg-green-50 p-4 text-green-700">
-                <CheckCircle2 className="mt-0.5 size-5" aria-hidden="true" />
-                <div>
-                  <p className="font-medium">Bedankt voor je bericht!</p>
-                  <p className="text-sm">
-                    We hebben je inzending ontvangen en nemen zo snel mogelijk contact met je op.
-                  </p>
-                </div>
+            <form onSubmit={onSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor={nameId}>Naam</Label>
+                <Input
+                  id={nameId}
+                  name="name"
+                  placeholder="Jouw naam"
+                  value={state.name}
+                  onChange={(e) => setState((s) => ({ ...s, name: e.target.value }))}
+                  required
+                  aria-required="true"
+                />
               </div>
-            ) : (
-              <form className="space-y-5" onSubmit={onSubmit} aria-describedby={error ? "form-error" : undefined}>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Naam</Label>
-                    <Input id="name" name="name" placeholder="Jouw naam" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">E-mail</Label>
-                    <Input id="email" name="email" type="email" placeholder="jij@voorbeeld.nl" required />
-                  </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Telefoon (optioneel)</Label>
-                  <Input id="phone" name="phone" type="tel" placeholder="06 12345678" />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor={emailId}>E‑mail</Label>
+                <Input
+                  id={emailId}
+                  name="email"
+                  type="email"
+                  placeholder="jij@voorbeeld.nl"
+                  value={state.email}
+                  onChange={(e) => setState((s) => ({ ...s, email: e.target.value }))}
+                  required
+                  aria-required="true"
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="subject">Onderwerp</Label>
-                  <Input id="subject" name="subject" placeholder="Waar kunnen we mee helpen?" required />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor={messageId}>Bericht</Label>
+                <Textarea
+                  id={messageId}
+                  name="message"
+                  placeholder="Waar kunnen we je mee helpen?"
+                  rows={5}
+                  value={state.message}
+                  onChange={(e) => setState((s) => ({ ...s, message: e.target.value }))}
+                  required
+                  aria-required="true"
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="message">Bericht</Label>
-                  <Textarea
-                    id="message"
-                    name="message"
-                    placeholder="Vertel kort over je doelen of vraag..."
-                    rows={5}
-                    required
-                  />
-                </div>
-
-                {error && (
-                  <p id="form-error" className="text-sm text-red-600">
-                    {error}
-                  </p>
+              <div className="flex items-center gap-3">
+                <Button type="submit" disabled={submitting} className="min-w-32">
+                  <Send className="mr-2 h-4 w-4" />
+                  {submitting ? "Versturen…" : "Verstuur"}
+                </Button>
+                {submitted === "ok" && (
+                  <span role="status" aria-live="polite" className="text-sm text-green-600">
+                    Bedankt! We nemen snel contact op.
+                  </span>
                 )}
-
-                <div className="flex items-center gap-3">
-                  <Button
-                    type="submit"
-                    className="bg-purple-600 text-white hover:bg-purple-700"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <span className="inline-flex items-center gap-2">
-                        <Send className="size-4 animate-pulse" aria-hidden="true" />
-                        Versturen...
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-2">
-                        <Send className="size-4" aria-hidden="true" />
-                        Verstuur bericht
-                      </span>
-                    )}
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => {
-                      const form = document.querySelector("form")
-                      form?.reset()
-                      setError(null)
-                    }}
-                  >
-                    Reset
-                  </Button>
-                </div>
-
-                <p className="text-xs text-muted-foreground">
-                  Door te verzenden ga je akkoord met onze verwerking van je gegevens om je aanvraag te behandelen.
-                </p>
-              </form>
-            )}
+                {submitted === "error" && (
+                  <span role="status" aria-live="polite" className="text-sm text-red-600">
+                    Er ging iets mis. Probeer het later opnieuw.
+                  </span>
+                )}
+              </div>
+            </form>
           </CardContent>
         </Card>
 
-        {/* Direct contact options */}
-        <div className="flex flex-col gap-6 md:col-span-2">
-          <Card className="animate-in fade-in-0 slide-in-from-right-4 duration-500">
-            <CardHeader>
-              <CardTitle>WhatsApp</CardTitle>
-              <CardDescription>Chat direct met ons team. We antwoorden doorgaans snel.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <div className="rounded-md bg-purple-100 p-2 text-purple-700">
-                  <MessageCircle className="size-5" aria-hidden="true" />
-                </div>
-                <div>
-                  <p className="font-medium">Start chat</p>
-                  <p className="text-sm text-muted-foreground">
-                    Stel je vraag of deel je doel en we denken direct met je mee.
-                  </p>
-                </div>
-              </div>
-              <Button asChild className="bg-purple-600 text-white hover:bg-purple-700">
-                <a
-                  href="https://wa.me/31600000000?text=Hi%20Evotion%20Coaching%2C%20ik%20heb%20een%20vraag%20over..."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Start chat via WhatsApp"
-                >
-                  Start chat
-                </a>
+        <Card className="border border-zinc-200">
+          <CardHeader>
+            <CardTitle className="text-2xl font-semibold">WhatsApp</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-zinc-600">Liever direct chatten? Start een WhatsApp gesprek en krijg snel antwoord.</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                <Link href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  start chat
+                </Link>
               </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="animate-in fade-in-0 slide-in-from-right-6 duration-500">
-            <CardHeader>
-              <CardTitle>Andere contactopties</CardTitle>
-              <CardDescription>Je kunt ons ook mailen of bellen.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-3">
-                <Mail className="size-5 text-muted-foreground" aria-hidden="true" />
-                <Link href="mailto:info@evotioncoaching.nl" className="underline underline-offset-2">
-                  info@evotioncoaching.nl
-                </Link>
-              </div>
-              <div className="flex items-center gap-3">
-                <Phone className="size-5 text-muted-foreground" aria-hidden="true" />
-                <Link href="tel:+31600000000" className="underline underline-offset-2">
-                  +31 6 00000000
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-    </main>
+              <p className="text-xs text-zinc-500">Bereikbaar op werkdagen tussen 09:00–17:00.</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
   )
 }
