@@ -179,6 +179,8 @@ export default function EvotionCoachingDesktop() {
               allow="autoplay; encrypted-media"
               allowFullScreen
               style={{ pointerEvents: "none" }}
+              title="Evotion Coaching introductievideo"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-black/70"></div>
             <div
