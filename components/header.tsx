@@ -22,6 +22,7 @@ import {
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [expandedMobileMenu, setExpandedMobileMenu] = useState<string | null>(null)
+  const [expandedDesktopMenu, setExpandedDesktopMenu] = useState<string | null>(null)
   const pathname = usePathname()
 
   const toggleMobileSubmenu = (menu: string) => {
@@ -30,6 +31,10 @@ export function Header() {
     } else {
       setExpandedMobileMenu(menu)
     }
+  }
+
+  const toggleDesktopMenu = (menu: string) => {
+    setExpandedDesktopMenu((prev) => (prev === menu ? null : menu))
   }
 
   const isActive = (path: string) => {
@@ -54,14 +59,36 @@ export function Header() {
           <nav className="hidden lg:flex items-center justify-center flex-1">
             <div className="flex items-center space-x-8">
               {/* Coaching Dropdown */}
-              <div className="relative group">
-                <button className="text-gray-700 hover:text-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-primary/5 flex items-center gap-1">
+              <div
+                className="relative"
+                onMouseEnter={() => setExpandedDesktopMenu("coaching")}
+                onMouseLeave={() => setExpandedDesktopMenu(null)}
+              >
+                <button
+                  className="text-gray-700 hover:text-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-primary/5 flex items-center gap-1"
+                  aria-haspopup="true"
+                  aria-expanded={expandedDesktopMenu === "coaching"}
+                  onClick={() => toggleDesktopMenu("coaching")}
+                  onFocus={() => setExpandedDesktopMenu("coaching")}
+                >
                   Coaching
-                  <ChevronDown className="w-4 h-4 group-hover:rotate-180 transition-transform duration-200" />
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      expandedDesktopMenu === "coaching" ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
 
                 {/* Dropdown Menu */}
-                <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                <div
+                  className={`absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 transition-all duration-300 z-50 ${
+                    expandedDesktopMenu === "coaching"
+                      ? "opacity-100 visible"
+                      : "opacity-0 invisible"
+                  }`}
+                  onMouseEnter={() => setExpandedDesktopMenu("coaching")}
+                  onMouseLeave={() => setExpandedDesktopMenu(null)}
+                >
                   <div className="p-2">
                     <Link
                       href="/personal-training"
@@ -124,14 +151,36 @@ export function Header() {
               </div>
 
               {/* Over Ons Dropdown */}
-              <div className="relative group">
-                <button className="text-gray-700 hover:text-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-primary/5 flex items-center gap-1">
+              <div
+                className="relative"
+                onMouseEnter={() => setExpandedDesktopMenu("over-ons")}
+                onMouseLeave={() => setExpandedDesktopMenu(null)}
+              >
+                <button
+                  className="text-gray-700 hover:text-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-primary/5 flex items-center gap-1"
+                  aria-haspopup="true"
+                  aria-expanded={expandedDesktopMenu === "over-ons"}
+                  onClick={() => toggleDesktopMenu("over-ons")}
+                  onFocus={() => setExpandedDesktopMenu("over-ons")}
+                >
                   Over Ons
-                  <ChevronDown className="w-4 h-4 group-hover:rotate-180 transition-transform duration-200" />
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      expandedDesktopMenu === "over-ons" ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
 
                 {/* Dropdown Menu */}
-                <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                <div
+                  className={`absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 transition-all duration-300 z-50 ${
+                    expandedDesktopMenu === "over-ons"
+                      ? "opacity-100 visible"
+                      : "opacity-0 invisible"
+                  }`}
+                  onMouseEnter={() => setExpandedDesktopMenu("over-ons")}
+                  onMouseLeave={() => setExpandedDesktopMenu(null)}
+                >
                   <div className="p-2">
                     <Link
                       href="/over-ons/visie-missie"
@@ -194,14 +243,36 @@ export function Header() {
               </div>
 
               {/* Gratis Dropdown */}
-              <div className="relative group">
-                <button className="text-gray-700 hover:text-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-primary/5 flex items-center gap-1">
+              <div
+                className="relative"
+                onMouseEnter={() => setExpandedDesktopMenu("gratis")}
+                onMouseLeave={() => setExpandedDesktopMenu(null)}
+              >
+                <button
+                  className="text-gray-700 hover:text-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-primary/5 flex items-center gap-1"
+                  aria-haspopup="true"
+                  aria-expanded={expandedDesktopMenu === "gratis"}
+                  onClick={() => toggleDesktopMenu("gratis")}
+                  onFocus={() => setExpandedDesktopMenu("gratis")}
+                >
                   Gratis
-                  <ChevronDown className="w-4 h-4 group-hover:rotate-180 transition-transform duration-200" />
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      expandedDesktopMenu === "gratis" ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
 
                 {/* Dropdown Menu */}
-                <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                <div
+                  className={`absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 transition-all duration-300 z-50 ${
+                    expandedDesktopMenu === "gratis"
+                      ? "opacity-100 visible"
+                      : "opacity-0 invisible"
+                  }`}
+                  onMouseEnter={() => setExpandedDesktopMenu("gratis")}
+                  onMouseLeave={() => setExpandedDesktopMenu(null)}
+                >
                   <div className="p-2">
                     <a
                       href="https://voedingvervanger.evotion-coaching.nl/"
