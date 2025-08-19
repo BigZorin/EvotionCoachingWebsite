@@ -674,13 +674,13 @@ export default function EvotionCoachingDesktop() {
               <div className="relative mx-auto w-96 h-[720px] transform hover:scale-105 transition-all duration-500 group">
                 <div className="absolute -inset-[2px] rounded-[3.1rem] bg-gradient-to-br from-[#1e1839] via-[#bad4e1] to-[#1e1839] blur-[10px] opacity-40 group-hover:opacity-70 transition-opacity" />
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black rounded-[3rem] shadow-2xl border-8 border-gray-700 group-hover:shadow-3xl transition-shadow duration-500"></div>
-                <div className="absolute inset-4 bg-black rounded-[2.5rem] overflow-hidden ev-photo-frame">
+                <div className="absolute inset-4 bg-white rounded-[2.5rem] overflow-hidden ev-photo-frame flex items-center justify-center">
                   <Image
-                    src="/images/evotion-logo-mockup-mobile-new.png"
-                    alt="Evotion App Interface"
+                    src="/images/evotion-logo-mockup-desktop.png"
+                    alt="Evotion Logo Mockup"
                     fill
                     sizes="(min-width: 1024px) 24rem, 90vw"
-                    className="object-contain group-hover:scale-110 transition-transform duration-700 p-4"
+                    className="object-contain group-hover:scale-110 transition-transform duration-700 p-8"
                   />
                 </div>
               </div>
@@ -875,7 +875,7 @@ export default function EvotionCoachingDesktop() {
               </p>
               <Button
                 size="lg"
-                className="ev-shine bg-gradient-to-r from-evotion-primary to-evotion-primary hover:opacity-95 text-white px-12 py-6 text-xl font-semibold shadow-2xl transform hover:scale-105 transition-all duration-300 group"
+                className="ev-shine bg-gradient-to-r from-evotion-primary to-evotion-primary hover:opacity-95 text-white px-12 py-6 text-xl font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 group"
               >
                 <span className="flex items-center gap-3">
                   Start Jouw Transformatie
