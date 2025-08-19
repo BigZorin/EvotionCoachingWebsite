@@ -2,13 +2,25 @@ import type { Metadata } from "next"
 import EvotionAppClientPage from "./EvotionAppClientPage"
 
 export const metadata: Metadata = {
-  title: "Evotion Coaching App - Jouw Personal Trainer in je Zak | Evotion Coaching",
+  title: "Evotion Coaching App — Jouw Personal Trainer in je Zak",
   description:
-    "Ontdek de Evotion Coaching App: jouw persoonlijke fitness companion met workouts, voedingsschema's, voortgang tracking en directe coaching. Download nu gratis!",
-  keywords: "Evotion app, fitness app, personal training app, workout app, voeding app, coaching app, fitness tracking",
+    "Ontdek de Evotion Coaching App: persoonlijke workouts, voedingstracking, directe coach contact en voortgangsinzichten. Exclusief voor coaching klanten.",
+  keywords: [
+    "evotion coaching app",
+    "fitness app nederland",
+    "personal training app",
+    "workout tracking app",
+    "voeding app",
+    "coaching app",
+    "fitness begeleiding",
+  ],
+  alternates: { canonical: "/over-ons/evotion-app" },
   openGraph: {
-    title: "Evotion Coaching App - Jouw Personal Trainer in je Zak",
-    description: "De complete fitness app met persoonlijke coaching, workouts en voedingsschema's. Download nu gratis!",
+    title: "Evotion Coaching App — Jouw Personal Trainer in je Zak",
+    description:
+      "Persoonlijke workouts, voedingstracking, directe coach contact en voortgangsinzichten — alles in één krachtige app.",
+    url: "https://www.evotion-coaching.nl/over-ons/evotion-app",
+    type: "website",
     images: [
       {
         url: "/images/evotion-app-login.jpg",
@@ -18,8 +30,14 @@ export const metadata: Metadata = {
       },
     ],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Evotion Coaching App",
+    description: "Jouw personal trainer altijd binnen handbereik. Exclusief voor coaching klanten.",
+    images: ["/images/evotion-app-login.jpg"],
+  },
 }
 
-export default function EvotionAppPage() {
+export default function Page() {
   return <EvotionAppClientPage />
 }

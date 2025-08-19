@@ -34,6 +34,7 @@ export function OptimizedParticleSystem({
   const { addAnimation } = useAnimationManager()
   const isVisibleRef = useRef(true)
   const lastResizeRef = useRef(0)
+  const resizeTimeoutRef = useRef<NodeJS.Timeout>()
 
   // Optimized particle creation with object pooling
   const createParticle = useCallback(
@@ -52,30 +53,48 @@ export function OptimizedParticleSystem({
     [colors, intensity],
   )
 
-  // Throttled resize handler
+  // Heavily throttled resize handler to prevent ResizeObserver loops
   const handleResize = useCallback(() => {
     const now = performance.now()
-    if (now - lastResizeRef.current < 100) return // Throttle to 10fps
+    if (now - lastResizeRef.current < 200) return // Increased throttle to 200ms
 
     lastResizeRef.current = now
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const rect = canvas.getBoundingClientRect()
-    const dpr = Math.min(window.devicePixelRatio || 1, 2) // Cap at 2x for performance
-
-    canvas.width = rect.width * dpr
-    canvas.height = rect.height * dpr
-    canvas.style.width = `${rect.width}px`
-    canvas.style.height = `${rect.height}px`
-
-    const ctx = canvas.getContext("2d")
-    if (ctx) {
-      ctx.scale(dpr, dpr)
+    // Clear any pending resize timeout
+    if (resizeTimeoutRef.current) {
+      clearTimeout(resizeTimeoutRef.current)
     }
 
-    // Recreate particles for new canvas size
-    particlesRef.current = Array.from({ length: particleCount }, () => createParticle(canvas))
+    // Debounce the actual resize operation
+    resizeTimeoutRef.current = setTimeout(() => {
+      try {
+        const rect = canvas.getBoundingClientRect()
+        const dpr = Math.min(window.devicePixelRatio || 1, 2) // Cap at 2x for performance
+
+        // Only resize if dimensions actually changed
+        const newWidth = rect.width * dpr
+        const newHeight = rect.height * dpr
+
+        if (canvas.width !== newWidth || canvas.height !== newHeight) {
+          canvas.width = newWidth
+          canvas.height = newHeight
+          canvas.style.width = `${rect.width}px`
+          canvas.style.height = `${rect.height}px`
+
+          const ctx = canvas.getContext("2d")
+          if (ctx) {
+            ctx.scale(dpr, dpr)
+          }
+
+          // Recreate particles for new canvas size
+          particlesRef.current = Array.from({ length: particleCount }, () => createParticle(canvas))
+        }
+      } catch (error) {
+        console.warn("Canvas resize error:", error)
+      }
+    }, 100)
   }, [particleCount, createParticle])
 
   // Intersection Observer for performance
@@ -106,84 +125,91 @@ export function OptimizedParticleSystem({
 
     handleResize()
 
+    // Use ResizeObserver with heavy debouncing
+    const resizeObserver = new ResizeObserver((entries) => {
+      // Only handle resize if canvas is visible and mounted
+      if (isVisibleRef.current && canvas.parentElement) {
+        handleResize()
+      }
+    })
+
+    resizeObserver.observe(canvas)
+
     // Optimized animation loop
     const cleanup = addAnimation(
       "particle-system",
       (deltaTime: number) => {
-        if (!isVisibleRef.current) return true // Skip rendering when not visible
+        if (!isVisibleRef.current || !canvas.parentElement) return true // Skip rendering when not visible or unmounted
 
         const particles = particlesRef.current
-        const canvas = canvasRef.current!
+        if (!particles.length) return true
 
-        // Clear with optimized method
-        ctx.clearRect(
-          0,
-          0,
-          canvas.width / (window.devicePixelRatio || 1),
-          canvas.height / (window.devicePixelRatio || 1),
-        )
+        try {
+          const dpr = window.devicePixelRatio || 1
+          const canvasWidth = canvas.width / dpr
+          const canvasHeight = canvas.height / dpr
 
-        // Batch particle updates and rendering
-        ctx.save()
+          // Clear with optimized method
+          ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 
-        for (let i = 0; i < particles.length; i++) {
-          const particle = particles[i]
+          // Batch particle updates and rendering
+          ctx.save()
 
-          // Update particle
-          particle.life += deltaTime
-          particle.x += particle.vx * (deltaTime / 16.67) // Normalize to 60fps
-          particle.y += particle.vy * (deltaTime / 16.67)
+          for (let i = 0; i < particles.length; i++) {
+            const particle = particles[i]
 
-          // Lifecycle management
-          const lifeRatio = particle.life / particle.maxLife
-          if (lifeRatio < 0.1) {
-            particle.opacity = particle.baseOpacity * (lifeRatio / 0.1)
-          } else if (lifeRatio > 0.9) {
-            particle.opacity = particle.baseOpacity * ((1 - lifeRatio) / 0.1)
-          } else {
-            particle.opacity = particle.baseOpacity + Math.sin(particle.life * 0.001 + particle.x * 0.01) * 0.1
+            // Update particle
+            particle.life += deltaTime
+            particle.x += particle.vx * (deltaTime / 16.67) // Normalize to 60fps
+            particle.y += particle.vy * (deltaTime / 16.67)
+
+            // Lifecycle management
+            const lifeRatio = particle.life / particle.maxLife
+            if (lifeRatio < 0.1) {
+              particle.opacity = particle.baseOpacity * (lifeRatio / 0.1)
+            } else if (lifeRatio > 0.9) {
+              particle.opacity = particle.baseOpacity * ((1 - lifeRatio) / 0.1)
+            } else {
+              particle.opacity = particle.baseOpacity + Math.sin(particle.life * 0.001 + particle.x * 0.01) * 0.1
+            }
+
+            // Wrap around edges
+            if (particle.x < -particle.size) particle.x = canvasWidth + particle.size
+            if (particle.x > canvasWidth + particle.size) particle.x = -particle.size
+            if (particle.y < -particle.size) particle.y = canvasHeight + particle.size
+            if (particle.y > canvasHeight + particle.size) particle.y = -particle.size
+
+            // Reset particle if life exceeded
+            if (particle.life > particle.maxLife) {
+              Object.assign(particle, createParticle(canvas))
+            }
+
+            // Render particle (batched)
+            if (particle.opacity > 0.01) {
+              ctx.globalAlpha = Math.max(0, Math.min(1, particle.opacity))
+              ctx.fillStyle = particle.color
+              ctx.beginPath()
+              ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
+              ctx.fill()
+            }
           }
 
-          // Wrap around edges
-          if (particle.x < -particle.size) particle.x = canvas.width / (window.devicePixelRatio || 1) + particle.size
-          if (particle.x > canvas.width / (window.devicePixelRatio || 1) + particle.size) particle.x = -particle.size
-          if (particle.y < -particle.size) particle.y = canvas.height / (window.devicePixelRatio || 1) + particle.size
-          if (particle.y > canvas.height / (window.devicePixelRatio || 1) + particle.size) particle.y = -particle.size
-
-          // Reset particle if life exceeded
-          if (particle.life > particle.maxLife) {
-            Object.assign(particle, createParticle(canvas))
-          }
-
-          // Render particle (batched)
-          if (particle.opacity > 0.01) {
-            ctx.globalAlpha = Math.max(0, Math.min(1, particle.opacity))
-            ctx.fillStyle = particle.color
-            ctx.beginPath()
-            ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
-            ctx.fill()
-          }
+          ctx.restore()
+        } catch (error) {
+          console.warn("Particle animation error:", error)
         }
 
-        ctx.restore()
         return true // Continue animation
       },
       1,
     ) // High priority
 
-    // Throttled resize listener
-    let resizeTimeout: NodeJS.Timeout
-    const throttledResize = () => {
-      clearTimeout(resizeTimeout)
-      resizeTimeout = setTimeout(handleResize, 100)
-    }
-
-    window.addEventListener("resize", throttledResize, { passive: true })
-
     return () => {
       cleanup()
-      window.removeEventListener("resize", throttledResize)
-      clearTimeout(resizeTimeout)
+      resizeObserver.disconnect()
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current)
+      }
     }
   }, [addAnimation, createParticle, handleResize, particleCount])
 

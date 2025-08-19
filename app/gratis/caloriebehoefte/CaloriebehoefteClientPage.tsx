@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { ArrowRight, ChevronRight, Heart, Users, TrendingUp } from "lucide-react"
+import { ArrowRight, ChevronRight, Heart, Users, TrendingUp, Flame, Activity, Target } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -63,57 +63,23 @@ export default function CaloriebehoefteClientPage() {
   const [isTyping, setIsTyping] = useState(false)
   const [showNextButton, setShowNextButton] = useState(false)
 
+  // Animated counters on results
+  const [displayBMR, setDisplayBMR] = useState(0)
+  const [displayTDEE, setDisplayTDEE] = useState(0)
+  const [displayTarget, setDisplayTarget] = useState(0)
+  const rafRef = useRef<number | null>(null)
+
   const steps: Step[] = [
-    {
-      id: 0,
-      title: "Welkom",
-      description: "Welkom bij de Evotion Caloriebehoefte Calculator",
-    },
-    {
-      id: 1,
-      title: "Persoonlijke gegevens",
-      description: "We hebben je naam nodig",
-    },
-    {
-      id: 2,
-      title: "Contact",
-      description: "Hoe kunnen we je bereiken?",
-    },
-    {
-      id: 3,
-      title: "Geslacht",
-      description: "Wat is je geslacht?",
-    },
-    {
-      id: 4,
-      title: "Leeftijd",
-      description: "Wat is je leeftijd?",
-    },
-    {
-      id: 5,
-      title: "Gewicht",
-      description: "Wat is je huidige gewicht?",
-    },
-    {
-      id: 6,
-      title: "Lengte",
-      description: "Wat is je lengte?",
-    },
-    {
-      id: 7,
-      title: "Activiteitsniveau",
-      description: "Hoe actief ben je?",
-    },
-    {
-      id: 8,
-      title: "Doel",
-      description: "Wat is je doel?",
-    },
-    {
-      id: 9,
-      title: "Berekenen",
-      description: "We berekenen je caloriebehoefte",
-    },
+    { id: 0, title: "Welkom", description: "Welkom bij de Evotion Caloriebehoefte Calculator" },
+    { id: 1, title: "Persoonlijke gegevens", description: "We hebben je naam nodig" },
+    { id: 2, title: "Contact", description: "Hoe kunnen we je bereiken?" },
+    { id: 3, title: "Geslacht", description: "Wat is je geslacht?" },
+    { id: 4, title: "Leeftijd", description: "Wat is je leeftijd?" },
+    { id: 5, title: "Gewicht", description: "Wat is je huidige gewicht?" },
+    { id: 6, title: "Lengte", description: "Wat is je lengte?" },
+    { id: 7, title: "Activiteitsniveau", description: "Hoe actief ben je?" },
+    { id: 8, title: "Doel", description: "Wat is je doel?" },
+    { id: 9, title: "Berekenen", description: "We berekenen je caloriebehoefte" },
   ]
 
   const welcomeMessages = [
@@ -212,17 +178,11 @@ export default function CaloriebehoefteClientPage() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true)
-
-    // Bereken calorieën
     const result = calculateCalories()
     setCalorieResult(result)
 
     try {
-      // Hier zou je normaal gesproken een API call doen om de data te versturen
-      // Voor nu simuleren we dit met een timeout
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      // Simuleer een succesvolle verzending
+      await new Promise((resolve) => setTimeout(resolve, 1200))
       setIsSubmitted(true)
       setCurrentStep(currentStep + 1)
     } catch (error) {
@@ -246,7 +206,7 @@ export default function CaloriebehoefteClientPage() {
       case 0:
         return (
           <div className="space-y-6 text-center">
-            {/* Desktop versie */}
+            {/* Desktop */}
             <div className="hidden sm:block">
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold tracking-tight text-primary">
@@ -261,7 +221,7 @@ export default function CaloriebehoefteClientPage() {
               </div>
             </div>
 
-            {/* Mobiele versie */}
+            {/* Mobiel */}
             <div className="sm:hidden">
               <div className="space-y-2">
                 <h2 className="text-base font-bold tracking-tight text-primary mb-1">
@@ -280,12 +240,9 @@ export default function CaloriebehoefteClientPage() {
       case 1:
         return (
           <div className="space-y-6 text-center">
-            {/* Desktop versie */}
+            {/* Desktop */}
             <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-4 animate-fade-in">
                   <div className="space-y-2">
@@ -308,12 +265,9 @@ export default function CaloriebehoefteClientPage() {
               )}
             </div>
 
-            {/* Mobiele versie */}
+            {/* Mobiel */}
             <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-2 animate-fade-in">
                   <div className="space-y-1">
@@ -340,12 +294,9 @@ export default function CaloriebehoefteClientPage() {
       case 2:
         return (
           <div className="space-y-6 text-center">
-            {/* Desktop versie */}
+            {/* Desktop */}
             <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-4 animate-fade-in">
                   <div className="space-y-4">
@@ -384,12 +335,9 @@ export default function CaloriebehoefteClientPage() {
               )}
             </div>
 
-            {/* Mobiele versie */}
+            {/* Mobiel */}
             <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-2 animate-fade-in">
                   <div className="space-y-2">
@@ -432,12 +380,9 @@ export default function CaloriebehoefteClientPage() {
       case 3:
         return (
           <div className="space-y-6 text-center">
-            {/* Desktop versie */}
+            {/* Desktop */}
             <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-4 animate-fade-in">
                   <div className="space-y-2">
@@ -464,12 +409,9 @@ export default function CaloriebehoefteClientPage() {
               )}
             </div>
 
-            {/* Mobiele versie */}
+            {/* Mobiel */}
             <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-2 animate-fade-in">
                   <div className="space-y-1">
@@ -504,12 +446,9 @@ export default function CaloriebehoefteClientPage() {
       case 4:
         return (
           <div className="space-y-6 text-center">
-            {/* Desktop versie */}
+            {/* Desktop */}
             <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-4 animate-fade-in">
                   <div className="space-y-2">
@@ -534,12 +473,9 @@ export default function CaloriebehoefteClientPage() {
               )}
             </div>
 
-            {/* Mobiele versie */}
+            {/* Mobiel */}
             <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-2 animate-fade-in">
                   <div className="space-y-1">
@@ -568,12 +504,9 @@ export default function CaloriebehoefteClientPage() {
       case 5:
         return (
           <div className="space-y-6 text-center">
-            {/* Desktop versie */}
+            {/* Desktop */}
             <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-4 animate-fade-in">
                   <div className="space-y-2">
@@ -598,12 +531,9 @@ export default function CaloriebehoefteClientPage() {
               )}
             </div>
 
-            {/* Mobiele versie */}
+            {/* Mobiel */}
             <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-2 animate-fade-in">
                   <div className="space-y-1">
@@ -632,12 +562,9 @@ export default function CaloriebehoefteClientPage() {
       case 6:
         return (
           <div className="space-y-6 text-center">
-            {/* Desktop versie */}
+            {/* Desktop */}
             <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-4 animate-fade-in">
                   <div className="space-y-2">
@@ -662,12 +589,9 @@ export default function CaloriebehoefteClientPage() {
               )}
             </div>
 
-            {/* Mobiele versie */}
+            {/* Mobiel */}
             <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-2 animate-fade-in">
                   <div className="space-y-1">
@@ -696,12 +620,9 @@ export default function CaloriebehoefteClientPage() {
       case 7:
         return (
           <div className="space-y-6 text-center">
-            {/* Desktop versie */}
+            {/* Desktop */}
             <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-4 animate-fade-in">
                   <div className="space-y-2">
@@ -741,12 +662,9 @@ export default function CaloriebehoefteClientPage() {
               )}
             </div>
 
-            {/* Mobiele versie */}
+            {/* Mobiel */}
             <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-2 animate-fade-in">
                   <div className="space-y-1">
@@ -790,12 +708,9 @@ export default function CaloriebehoefteClientPage() {
       case 8:
         return (
           <div className="space-y-6 text-center">
-            {/* Desktop versie */}
+            {/* Desktop */}
             <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-4 animate-fade-in">
                   <div className="space-y-2">
@@ -826,12 +741,9 @@ export default function CaloriebehoefteClientPage() {
               )}
             </div>
 
-            {/* Mobiele versie */}
+            {/* Mobiel */}
             <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
+              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
               {showNextButton && (
                 <div className="space-y-2 animate-fade-in">
                   <div className="space-y-1">
@@ -866,7 +778,7 @@ export default function CaloriebehoefteClientPage() {
       case 9:
         return (
           <div className="space-y-8 text-center">
-            {/* Desktop versie */}
+            {/* Desktop */}
             <div className="hidden sm:block">
               <h2 className="text-2xl font-bold tracking-tight text-primary mb-4">
                 {typingEffect}
@@ -875,75 +787,86 @@ export default function CaloriebehoefteClientPage() {
               {!isTyping && showNextButton && calorieResult && (
                 <div className="space-y-8 animate-fade-in">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+                    <Card className="bg-white border">
                       <CardContent className="p-4 md:p-6 text-center">
-                        <h3 className="text-lg font-semibold text-gray-700 mb-2">Basaal Metabolisme</h3>
-                        <p className="text-3xl font-bold text-primary">{calorieResult.bmr} kcal</p>
+                        <div className="flex items-center justify-center gap-2 mb-2 text-primary">
+                          <Flame className="h-5 w-5" />
+                          <h3 className="text-lg font-semibold text-gray-700">Basaal Metabolisme</h3>
+                        </div>
+                        <p className="text-3xl font-extrabold text-primary tabular-nums">{displayBMR} kcal</p>
                         <p className="text-sm text-gray-500 mt-2">Calorieën die je lichaam in rust verbruikt</p>
                       </CardContent>
                     </Card>
-                    <Card className="bg-gradient-to-br from-secondary/5 to-secondary/10 border-secondary/20">
+                    <Card className="bg-white border">
                       <CardContent className="p-4 md:p-6 text-center">
-                        <h3 className="text-lg font-semibold text-gray-700 mb-2">Dagelijks Verbruik</h3>
-                        <p className="text-3xl font-bold text-secondary">{calorieResult.tdee} kcal</p>
+                        <div className="flex items-center justify-center gap-2 mb-2 text-primary">
+                          <Activity className="h-5 w-5" />
+                          <h3 className="text-lg font-semibold text-gray-700">Dagelijks Verbruik</h3>
+                        </div>
+                        <p className="text-3xl font-extrabold text-primary tabular-nums">{displayTDEE} kcal</p>
                         <p className="text-sm text-gray-500 mt-2">Totale calorieën die je dagelijks verbruikt</p>
                       </CardContent>
                     </Card>
-                    <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
+                    <Card className="bg-white border">
                       <CardContent className="p-4 md:p-6 text-center">
-                        <h3 className="text-lg font-semibold text-gray-700 mb-2">Doelcalorieën</h3>
-                        <p className="text-3xl font-bold text-primary">{calorieResult.target} kcal</p>
+                        <div className="flex items-center justify-center gap-2 mb-2 text-primary">
+                          <Target className="h-5 w-5" />
+                          <h3 className="text-lg font-semibold text-gray-700">Doelcalorieën</h3>
+                        </div>
+                        <p className="text-3xl font-extrabold text-primary tabular-nums">{displayTarget} kcal</p>
                         <p className="text-sm text-gray-500 mt-2">Aanbevolen dagelijkse inname voor je doel</p>
                       </CardContent>
                     </Card>
                   </div>
 
-                  <div className="bg-gray-50 p-4 md:p-6 rounded-xl border border-gray-100">
-                    <h3 className="text-xl font-bold text-primary mb-4">Aanbevolen Macronutriënten</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-sm font-medium">Eiwitten: {calorieResult.protein}g</span>
-                          <span className="text-sm text-gray-500">
-                            {Math.round((calorieResult.protein * 4 * 100) / calorieResult.target)}%
-                          </span>
+                  <div className="rounded-2xl border bg-white">
+                    <div className="rounded-2xl p-4 md:p-6">
+                      <h3 className="text-xl font-bold text-primary mb-4">Aanbevolen Macronutriënten</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <span className="text-sm font-medium">Eiwitten: {calorieResult.protein}g</span>
+                            <span className="text-sm text-gray-500">
+                              {Math.round((calorieResult.protein * 4 * 100) / calorieResult.target)}%
+                            </span>
+                          </div>
+                          <Progress
+                            value={(calorieResult.protein * 4 * 100) / calorieResult.target}
+                            className="h-2 bg-gray-200"
+                            indicatorClassName="bg-primary"
+                          />
                         </div>
-                        <Progress
-                          value={(calorieResult.protein * 4 * 100) / calorieResult.target}
-                          className="h-2 bg-gray-200"
-                          indicatorClassName="bg-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-sm font-medium">Koolhydraten: {calorieResult.carbs}g</span>
-                          <span className="text-sm text-gray-500">
-                            {Math.round((calorieResult.carbs * 4 * 100) / calorieResult.target)}%
-                          </span>
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <span className="text-sm font-medium">Koolhydraten: {calorieResult.carbs}g</span>
+                            <span className="text-sm text-gray-500">
+                              {Math.round((calorieResult.carbs * 4 * 100) / calorieResult.target)}%
+                            </span>
+                          </div>
+                          <Progress
+                            value={(calorieResult.carbs * 4 * 100) / calorieResult.target}
+                            className="h-2 bg-gray-200"
+                            indicatorClassName="bg-green-600"
+                          />
                         </div>
-                        <Progress
-                          value={(calorieResult.carbs * 4 * 100) / calorieResult.target}
-                          className="h-2 bg-gray-200"
-                          indicatorClassName="bg-green-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-sm font-medium">Vetten: {calorieResult.fat}g</span>
-                          <span className="text-sm text-gray-500">
-                            {Math.round((calorieResult.fat * 9 * 100) / calorieResult.target)}%
-                          </span>
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <span className="text-sm font-medium">Vetten: {calorieResult.fat}g</span>
+                            <span className="text-sm text-gray-500">
+                              {Math.round((calorieResult.fat * 9 * 100) / calorieResult.target)}%
+                            </span>
+                          </div>
+                          <Progress
+                            value={(calorieResult.fat * 9 * 100) / calorieResult.target}
+                            className="h-2 bg-gray-200"
+                            indicatorClassName="bg-amber-500"
+                          />
                         </div>
-                        <Progress
-                          value={(calorieResult.fat * 9 * 100) / calorieResult.target}
-                          className="h-2 bg-gray-200"
-                          indicatorClassName="bg-yellow-500"
-                        />
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-primary/5 to-secondary/5 p-4 md:p-6 rounded-xl border border-primary/10">
+                  <div className="p-4 md:p-6 rounded-2xl border bg-gray-50">
                     <h3 className="text-xl font-bold text-primary mb-4">Onze Aanbeveling</h3>
                     <p className="text-gray-700 mb-6">
                       Op basis van je gegevens en doelen denken we dat de volgende coaching optie het beste bij je past:
@@ -951,13 +874,15 @@ export default function CaloriebehoefteClientPage() {
 
                     {calorieResult.recommendedCoaching === "premium-coaching" && (
                       <div className="flex flex-col items-center gap-4">
-                        <div className="w-20 h-20 bg-gradient-to-br from-secondary/20 to-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                        <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center flex-shrink-0">
                           <Heart className="w-10 h-10 text-primary" />
                         </div>
                         <div>
                           <h4 className="text-lg font-bold text-primary mb-2 flex items-center justify-center">
                             Premium Coaching
-                            <Badge className="ml-2 bg-secondary text-primary">Aanbevolen</Badge>
+                            <Badge className="ml-2" variant="secondary">
+                              Aanbevolen
+                            </Badge>
                           </h4>
                           <p className="text-gray-600 mb-4">
                             Voor jouw activiteitsniveau en doelen raden we onze Premium Coaching aan. Dit combineert
@@ -972,13 +897,15 @@ export default function CaloriebehoefteClientPage() {
 
                     {calorieResult.recommendedCoaching === "12-weken-vetverlies" && (
                       <div className="flex flex-col items-center gap-4">
-                        <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+                        <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center flex-shrink-0">
                           <TrendingUp className="w-10 h-10 text-primary" />
                         </div>
                         <div>
                           <h4 className="text-lg font-bold text-primary mb-2 flex items-center justify-center">
                             12-Weken Vetverlies
-                            <Badge className="ml-2 bg-secondary text-primary">Aanbevolen</Badge>
+                            <Badge className="ml-2" variant="secondary">
+                              Aanbevolen
+                            </Badge>
                           </h4>
                           <p className="text-gray-600 mb-4">
                             Voor jouw vetverliesdoel raden we ons 12-Weken Vetverlies programma aan. Dit intensieve
@@ -993,13 +920,15 @@ export default function CaloriebehoefteClientPage() {
 
                     {calorieResult.recommendedCoaching === "online-coaching" && (
                       <div className="flex flex-col items-center gap-4">
-                        <div className="w-20 h-20 bg-gradient-to-br from-secondary/20 to-secondary/30 rounded-2xl flex items-center justify-center flex-shrink-0">
+                        <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center flex-shrink-0">
                           <Users className="w-10 h-10 text-primary" />
                         </div>
                         <div>
                           <h4 className="text-lg font-bold text-primary mb-2 flex items-center justify-center">
                             Online Coaching
-                            <Badge className="ml-2 bg-secondary text-primary">Aanbevolen</Badge>
+                            <Badge className="ml-2" variant="secondary">
+                              Aanbevolen
+                            </Badge>
                           </h4>
                           <p className="text-gray-600 mb-4">
                             Voor jouw doelen en activiteitsniveau raden we onze Online Coaching aan. Dit geeft je
@@ -1031,7 +960,7 @@ export default function CaloriebehoefteClientPage() {
               )}
             </div>
 
-            {/* Mobiele versie */}
+            {/* Mobiel */}
             <div className="sm:hidden">
               <h2 className="text-base font-bold tracking-tight text-primary mb-2">
                 {typingEffect}
@@ -1040,75 +969,86 @@ export default function CaloriebehoefteClientPage() {
               {!isTyping && showNextButton && calorieResult && (
                 <div className="space-y-6 animate-fade-in">
                   <div className="grid grid-cols-1 gap-3">
-                    <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+                    <Card className="bg-white border">
                       <CardContent className="p-3 text-center">
-                        <h3 className="text-sm font-semibold text-gray-700 mb-1">Basaal Metabolisme</h3>
-                        <p className="text-xl font-bold text-primary">{calorieResult.bmr} kcal</p>
+                        <div className="flex items-center justify-center gap-2 mb-1 text-primary">
+                          <Flame className="h-4 w-4" />
+                          <h3 className="text-sm font-semibold text-gray-700">Basaal Metabolisme</h3>
+                        </div>
+                        <p className="text-xl font-extrabold text-primary tabular-nums">{displayBMR} kcal</p>
                         <p className="text-xs text-gray-500 mt-1">Calorieën die je lichaam in rust verbruikt</p>
                       </CardContent>
                     </Card>
-                    <Card className="bg-gradient-to-br from-secondary/5 to-secondary/10 border-secondary/20">
+                    <Card className="bg-white border">
                       <CardContent className="p-3 text-center">
-                        <h3 className="text-sm font-semibold text-gray-700 mb-1">Dagelijks Verbruik</h3>
-                        <p className="text-xl font-bold text-secondary">{calorieResult.tdee} kcal</p>
+                        <div className="flex items-center justify-center gap-2 mb-1 text-primary">
+                          <Activity className="h-4 w-4" />
+                          <h3 className="text-sm font-semibold text-gray-700">Dagelijks Verbruik</h3>
+                        </div>
+                        <p className="text-xl font-extrabold text-primary tabular-nums">{displayTDEE} kcal</p>
                         <p className="text-xs text-gray-500 mt-1">Totale calorieën die je dagelijks verbruikt</p>
                       </CardContent>
                     </Card>
-                    <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
+                    <Card className="bg-white border">
                       <CardContent className="p-3 text-center">
-                        <h3 className="text-sm font-semibold text-gray-700 mb-1">Doelcalorieën</h3>
-                        <p className="text-xl font-bold text-primary">{calorieResult.target} kcal</p>
+                        <div className="flex items-center justify-center gap-2 mb-1 text-primary">
+                          <Target className="h-4 w-4" />
+                          <h3 className="text-sm font-semibold text-gray-700">Doelcalorieën</h3>
+                        </div>
+                        <p className="text-xl font-extrabold text-primary tabular-nums">{displayTarget} kcal</p>
                         <p className="text-xs text-gray-500 mt-1">Aanbevolen dagelijkse inname voor je doel</p>
                       </CardContent>
                     </Card>
                   </div>
 
-                  <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <h3 className="text-sm font-bold text-primary mb-3">Aanbevolen Macronutriënten</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-xs font-medium">Eiwitten: {calorieResult.protein}g</span>
-                          <span className="text-xs text-gray-500">
-                            {Math.round((calorieResult.protein * 4 * 100) / calorieResult.target)}%
-                          </span>
+                  <div className="rounded-xl border bg-white">
+                    <div className="rounded-xl p-3">
+                      <h3 className="text-sm font-bold text-primary mb-3">Aanbevolen Macronutriënten</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <span className="text-xs font-medium">Eiwitten: {calorieResult.protein}g</span>
+                            <span className="text-xs text-gray-500">
+                              {Math.round((calorieResult.protein * 4 * 100) / calorieResult.target)}%
+                            </span>
+                          </div>
+                          <Progress
+                            value={(calorieResult.protein * 4 * 100) / calorieResult.target}
+                            className="h-1.5 bg-gray-200"
+                            indicatorClassName="bg-primary"
+                          />
                         </div>
-                        <Progress
-                          value={(calorieResult.protein * 4 * 100) / calorieResult.target}
-                          className="h-1.5 bg-gray-200"
-                          indicatorClassName="bg-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-xs font-medium">Koolhydraten: {calorieResult.carbs}g</span>
-                          <span className="text-xs text-gray-500">
-                            {Math.round((calorieResult.carbs * 4 * 100) / calorieResult.target)}%
-                          </span>
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <span className="text-xs font-medium">Koolhydraten: {calorieResult.carbs}g</span>
+                            <span className="text-xs text-gray-500">
+                              {Math.round((calorieResult.carbs * 4 * 100) / calorieResult.target)}%
+                            </span>
+                          </div>
+                          <Progress
+                            value={(calorieResult.carbs * 4 * 100) / calorieResult.target}
+                            className="h-1.5 bg-gray-200"
+                            indicatorClassName="bg-green-600"
+                          />
                         </div>
-                        <Progress
-                          value={(calorieResult.carbs * 4 * 100) / calorieResult.target}
-                          className="h-1.5 bg-gray-200"
-                          indicatorClassName="bg-green-500"
-                        />
-                      </div>
-                      <div>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-xs font-medium">Vetten: {calorieResult.fat}g</span>
-                          <span className="text-xs text-gray-500">
-                            {Math.round((calorieResult.fat * 9 * 100) / calorieResult.target)}%
-                          </span>
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <span className="text-xs font-medium">Vetten: {calorieResult.fat}g</span>
+                            <span className="text-xs text-gray-500">
+                              {Math.round((calorieResult.fat * 9 * 100) / calorieResult.target)}%
+                            </span>
+                          </div>
+                          <Progress
+                            value={(calorieResult.fat * 9 * 100) / calorieResult.target}
+                            className="h-1.5 bg-gray-200"
+                            indicatorClassName="bg-amber-500"
+                          />
                         </div>
-                        <Progress
-                          value={(calorieResult.fat * 9 * 100) / calorieResult.target}
-                          className="h-1.5 bg-gray-200"
-                          indicatorClassName="bg-yellow-500"
-                        />
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-primary/5 to-secondary/5 p-3 rounded-xl border border-primary/10">
+                  <div className="p-3 rounded-xl border bg-gray-50">
                     <h3 className="text-sm font-bold text-primary mb-2">Onze Aanbeveling</h3>
                     <p className="text-xs text-gray-700 mb-3">
                       Op basis van je gegevens en doelen denken we dat de volgende coaching optie het beste bij je past:
@@ -1116,17 +1056,18 @@ export default function CaloriebehoefteClientPage() {
 
                     {calorieResult.recommendedCoaching === "premium-coaching" && (
                       <div className="flex flex-col items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-secondary/20 to-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
                           <Heart className="w-6 h-6 text-primary" />
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-primary mb-1 flex items-center justify-center">
                             Premium Coaching
-                            <Badge className="ml-1 bg-secondary text-primary text-[10px] px-1">Aanbevolen</Badge>
+                            <Badge className="ml-1" variant="secondary">
+                              Aanbevolen
+                            </Badge>
                           </h4>
                           <p className="text-xs text-gray-600 mb-3">
-                            Voor jouw activiteitsniveau en doelen raden we onze Premium Coaching aan. Dit combineert
-                            persoonlijke training met online begeleiding voor optimale resultaten.
+                            Persoonlijke training met online begeleiding voor optimale resultaten.
                           </p>
                           <Button asChild className="w-full text-xs py-1 h-8">
                             <a href="/premium-coaching">Bekijk Premium Coaching</a>
@@ -1137,18 +1078,17 @@ export default function CaloriebehoefteClientPage() {
 
                     {calorieResult.recommendedCoaching === "12-weken-vetverlies" && (
                       <div className="flex flex-col items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-primary/10 to-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
                           <TrendingUp className="w-6 h-6 text-primary" />
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-primary mb-1 flex items-center justify-center">
                             12-Weken Vetverlies
-                            <Badge className="ml-1 bg-secondary text-primary text-[10px] px-1">Aanbevolen</Badge>
+                            <Badge className="ml-1" variant="secondary">
+                              Aanbevolen
+                            </Badge>
                           </h4>
-                          <p className="text-xs text-gray-600 mb-3">
-                            Voor jouw vetverliesdoel raden we ons 12-Weken Vetverlies programma aan. Dit intensieve
-                            programma is speciaal ontworpen voor maximaal vetverlies en lichaamstransformatie.
-                          </p>
+                          <p className="text-xs text-gray-600 mb-3">Intensief programma voor maximaal vetverlies.</p>
                           <Button asChild className="w-full text-xs py-1 h-8">
                             <a href="/12-weken-vetverlies">Bekijk 12-Weken Vetverlies</a>
                           </Button>
@@ -1158,17 +1098,18 @@ export default function CaloriebehoefteClientPage() {
 
                     {calorieResult.recommendedCoaching === "online-coaching" && (
                       <div className="flex flex-col items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-secondary/20 to-secondary/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
                           <Users className="w-6 h-6 text-primary" />
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-primary mb-1 flex items-center justify-center">
                             Online Coaching
-                            <Badge className="ml-1 bg-secondary text-primary text-[10px] px-1">Aanbevolen</Badge>
+                            <Badge className="ml-1" variant="secondary">
+                              Aanbevolen
+                            </Badge>
                           </h4>
                           <p className="text-xs text-gray-600 mb-3">
-                            Voor jouw doelen en activiteitsniveau raden we onze Online Coaching aan. Dit geeft je
-                            flexibiliteit en volledige begeleiding via onze app en platform.
+                            Flexibiliteit en volledige begeleiding via onze app.
                           </p>
                           <Button asChild className="w-full text-xs py-1 h-8">
                             <a href="/online-coaching">Bekijk Online Coaching</a>
@@ -1235,102 +1176,127 @@ export default function CaloriebehoefteClientPage() {
     }
   }
 
+  // Typewriter per stap
   useEffect(() => {
-    if (currentStep === 0) {
-      setIsTyping(true)
-      let currentText = ""
-      let currentMessageIndex = 0
-      let currentCharIndex = 0
-      const messages = getStepMessage()
+    setIsTyping(true)
+    let currentText = ""
+    let currentMessageIndex = 0
+    let currentCharIndex = 0
+    const messages = getStepMessage()
 
-      const typingInterval = setInterval(() => {
-        if (currentMessageIndex < messages.length) {
-          if (currentCharIndex < messages[currentMessageIndex].length) {
-            currentText += messages[currentMessageIndex][currentCharIndex]
-            setTypingEffect(currentText)
-            currentCharIndex++
-          } else {
-            currentText += "\n\n"
-            currentMessageIndex++
-            currentCharIndex = 0
-          }
+    const typingInterval = setInterval(() => {
+      if (currentMessageIndex < messages.length) {
+        if (currentCharIndex < messages[currentMessageIndex].length) {
+          currentText += messages[currentMessageIndex][currentCharIndex]
+          setTypingEffect(currentText)
+          currentCharIndex++
         } else {
-          clearInterval(typingInterval)
-          setIsTyping(false)
-          setShowNextButton(true)
+          currentText += currentStep === 0 ? "\n\n" : "\n"
+          currentMessageIndex++
+          currentCharIndex = 0
         }
-      }, 30)
+      } else {
+        clearInterval(typingInterval)
+        setIsTyping(false)
+        setShowNextButton(true)
+      }
+    }, 30)
 
-      return () => clearInterval(typingInterval)
-    } else {
-      setIsTyping(true)
-      let currentText = ""
-      let currentMessageIndex = 0
-      let currentCharIndex = 0
-      const messages = getStepMessage()
-
-      const typingInterval = setInterval(() => {
-        if (currentMessageIndex < messages.length) {
-          if (currentCharIndex < messages[currentMessageIndex].length) {
-            currentText += messages[currentMessageIndex][currentCharIndex]
-            setTypingEffect(currentText)
-            currentCharIndex++
-          } else {
-            currentText += "\n"
-            currentMessageIndex++
-            currentCharIndex = 0
-          }
-        } else {
-          clearInterval(typingInterval)
-          setIsTyping(false)
-          setShowNextButton(true)
-        }
-      }, 30)
-
-      return () => clearInterval(typingInterval)
-    }
+    return () => clearInterval(typingInterval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep])
+
+  // Animate result counters when results step is visible
+  useEffect(() => {
+    if (currentStep !== 9 || !calorieResult) return
+
+    const duration = 900
+    const start = performance.now()
+
+    const fromBMR = 0
+    const fromTDEE = 0
+    const fromTarget = 0
+
+    const toBMR = calorieResult.bmr
+    const toTDEE = calorieResult.tdee
+    const toTarget = calorieResult.target
+
+    const easeOut = (t: number) => 1 - Math.pow(1 - t, 3)
+
+    const tick = (now: number) => {
+      const elapsed = now - start
+      const t = Math.min(1, elapsed / duration)
+      const e = easeOut(t)
+
+      setDisplayBMR(Math.round(fromBMR + (toBMR - fromBMR) * e))
+      setDisplayTDEE(Math.round(fromTDEE + (toTDEE - fromTDEE) * e))
+      setDisplayTarget(Math.round(fromTarget + (toTarget - fromTarget) * e))
+
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(tick)
+      } else {
+        rafRef.current = null
+      }
+    }
+
+    rafRef.current = requestAnimationFrame(tick)
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [currentStep, calorieResult])
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Header />
 
-      <div className="container mx-auto px-4 py-12 max-w-4xl flex-grow">
-        {/* Desktop versie */}
-        <div className="hidden sm:block mb-10">
-          <h1 className="text-4xl font-bold text-primary text-center">Caloriebehoefte Berekenen</h1>
-          <p className="text-gray-600 text-center mt-4 max-w-2xl mx-auto">
-            Bereken je dagelijkse caloriebehoefte en krijg een persoonlijk voedingsadvies op basis van je doelen en
-            activiteitsniveau.
-          </p>
-        </div>
-
-        {/* Mobiele versie */}
-        <div className="sm:hidden mb-6">
-          <h1 className="text-xl font-bold text-primary text-center">Caloriebehoefte Berekenen</h1>
-          <p className="text-gray-600 text-center mt-2 max-w-2xl mx-auto text-xs">
-            Bereken je caloriebehoefte en krijg een persoonlijk voedingsadvies.
-          </p>
-        </div>
-
-        <div className="mb-8 sm:mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">
-              Stap {currentStep + 1} van {steps.length}
-            </span>
-            <span className="text-sm font-medium text-primary">
-              {Math.round(((currentStep + 1) / steps.length) * 100)}%
-            </span>
+      <main className="flex-1">
+        <section className="container mx-auto px-4 py-10 sm:py-12 max-w-4xl">
+          {/* Page hero heading */}
+          <div className="text-center mb-8 sm:mb-10">
+            <div className="inline-flex items-center gap-2 rounded-full border text-primary border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium">
+              Gratis tool
+            </div>
+            <h1 className="mt-3 text-3xl sm:text-4xl font-extrabold text-primary tracking-tight">
+              Caloriebehoefte Berekenen
+            </h1>
+            <p className="text-gray-600 mt-3 sm:mt-4 max-w-2xl mx-auto">
+              Bereken je dagelijkse caloriebehoefte en krijg een persoonlijk voedingsadvies op basis van je doelen en
+              activiteitsniveau.
+            </p>
           </div>
-          <Progress value={((currentStep + 1) / steps.length) * 100} className="h-2" indicatorClassName="bg-primary" />
-        </div>
 
-        <Card className="border border-gray-200 shadow-sm">
-          <CardContent className="p-4 md:p-8">
-            <div className={currentStep < 9 ? "min-h-[300px] sm:min-h-[400px]" : ""}>{getStepContent()}</div>
-          </CardContent>
-        </Card>
-      </div>
+          {/* Progress */}
+          <div className="mb-7 sm:mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-700">
+                Stap {currentStep + 1} van {steps.length}
+              </span>
+              <span className="text-sm font-semibold text-primary">
+                {Math.round(((currentStep + 1) / steps.length) * 100)}%
+              </span>
+            </div>
+            <Progress
+              value={((currentStep + 1) / steps.length) * 100}
+              className="h-2"
+              indicatorClassName="bg-primary"
+            />
+          </div>
+
+          {/* Main card (solid surface, no gradient) */}
+          <Card className="rounded-2xl bg-white border shadow-sm">
+            <CardContent className="p-4 md:p-8">
+              <div className={currentStep < 9 ? "min-h-[300px] sm:min-h-[400px]" : ""}>{getStepContent()}</div>
+            </CardContent>
+          </Card>
+
+          {/* Footer note below card */}
+          {currentStep < 9 && (
+            <div className="text-center mt-6 sm:mt-8 text-xs text-gray-500">
+              Je gegevens worden vertrouwelijk behandeld en uitsluitend gebruikt voor je persoonlijke advies.
+            </div>
+          )}
+        </section>
+      </main>
 
       <Footer />
     </div>

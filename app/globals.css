@@ -29,6 +29,8 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --evotion-primary: #1e1839;
+    --evotion-secondary: #bad4e1;
   }
 
   .dark {
@@ -69,11 +71,6 @@
 }
 
 /* Custom Evotion Coaching styles */
-:root {
-  --evotion-primary: #1e1839;
-  --evotion-secondary: #bad4e1;
-}
-
 .text-evotion-primary {
   color: var(--evotion-primary);
 }
@@ -264,4 +261,90 @@ div[style*="Built with"] {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Visual polish utilities */
+.ev-glow {
+  box-shadow: 0 6px 28px rgba(186, 212, 225, 0.25), 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Gradient border wrapper */
+.ev-gradient-border {
+  position: relative;
+  border: 1px solid transparent;
+  background: linear-gradient(#ffffff, #ffffff) padding-box,
+    conic-gradient(from 180deg at 50% 50%, #1e1839, #bad4e1, #1e1839) border-box;
+  border-radius: 1rem;
+}
+
+/* Photo frame subtle gradient edge */
+.ev-photo-frame {
+  position: relative;
+}
+.ev-photo-frame::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(186, 212, 225, 0.6), rgba(30, 24, 57, 0.4));
+  filter: blur(8px);
+  opacity: 0.25;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Button shine effect */
+.ev-shine {
+  position: relative;
+  overflow: hidden;
+}
+.ev-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.35) 50%, transparent 100%);
+  transform: skewX(-20deg);
+  animation: ev-shine-slide 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes ev-shine-slide {
+  0% {
+    left: -150%;
+  }
+  60% {
+    left: 150%;
+  }
+  100% {
+    left: 150%;
+  }
+}
+
+/* Decorative gradient orbs */
+.ev-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(30px);
+  opacity: 0.35;
+  animation: float 6s ease-in-out infinite;
+  background: radial-gradient(circle at 30% 30%, rgba(186, 212, 225, 0.8), rgba(30, 24, 57, 0.6));
+}
+.ev-orb--lg {
+  width: 420px;
+  height: 420px;
+}
+.ev-orb--md {
+  width: 300px;
+  height: 300px;
+}
+.ev-orb--sm {
+  width: 180px;
+  height: 180px;
+}
+
+/* Improve transform performance on large sections */
+section {
+  transform: translate3d(0, 0, 0);
 }

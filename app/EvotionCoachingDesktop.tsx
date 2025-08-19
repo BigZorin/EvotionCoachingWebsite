@@ -39,7 +39,7 @@ export default function EvotionCoachingDesktop() {
   const heroParallax = useOptimizedParallax({ speed: 0.3 })
   const statsRef = useRef<HTMLDivElement>(null)
   const [statsVisible, setStatsVisible] = useState(false)
-  const [activeTestimonial, setActiveTestimonial] = useState(0)
+
   const testimonials = [
     {
       name: "Wouter Baerveldt",
@@ -79,7 +79,6 @@ export default function EvotionCoachingDesktop() {
     },
   ]
 
-  // Replace typewriter hook
   const { displayText: typewriterText, isComplete } = useOptimizedTypewriter("EVOTION COACHING", 100)
 
   const [formData, setFormData] = useState({
@@ -112,14 +111,6 @@ export default function EvotionCoachingDesktop() {
       observer.disconnect()
     }
   }, [statsVisible])
-
-  // Testimonial rotation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [testimonials.length])
 
   useEffect(() => {
     setIsLoaded(true)
@@ -157,7 +148,7 @@ export default function EvotionCoachingDesktop() {
       } else {
         setSubmitMessage({ type: "error", text: result.error || "Er ging iets mis." })
       }
-    } catch (error) {
+    } catch {
       setSubmitMessage({ type: "error", text: "Er ging iets mis bij het verzenden." })
     } finally {
       setIsSubmitting(false)
@@ -168,9 +159,9 @@ export default function EvotionCoachingDesktop() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      {/* Enhanced Hero Section */}
+      {/* HERO */}
       <section className="relative py-32 min-h-screen flex items-center overflow-hidden">
-        {/* Video Background with Enhanced Overlay */}
+        {/* Video + overlays */}
         <div className="absolute inset-0 z-0">
           <div className="relative w-full h-full">
             <iframe
@@ -179,8 +170,12 @@ export default function EvotionCoachingDesktop() {
               allow="autoplay; encrypted-media"
               allowFullScreen
               style={{ pointerEvents: "none" }}
+              title="Evotion Coaching introductievideo"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-black/70"></div>
+
+            {/* Animated gradient veil */}
             <div
               className="absolute inset-0"
               style={{
@@ -193,11 +188,11 @@ export default function EvotionCoachingDesktop() {
                 backgroundSize: "400% 400%",
                 animation: "gradientShift 15s ease infinite",
               }}
-            ></div>
+            />
           </div>
         </div>
 
-        {/* Desktop Content with Enhanced Animations */}
+        {/* Content */}
         <div
           ref={heroParallax.ref}
           className="container mx-auto px-6 relative z-10"
@@ -205,30 +200,30 @@ export default function EvotionCoachingDesktop() {
         >
           <div className="max-w-6xl mx-auto text-center space-y-10">
             <div className="space-y-8">
-              {/* Enhanced Social Proof Badges */}
+              {/* Social proof */}
               <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
-                <Badge className="bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm text-base px-6 py-3 transform hover:scale-105 transition-all duration-300 animate-fade-in-up">
-                  <Award className="w-4 h-4 mr-2 animate-pulse text-white" />
+                <Badge className="bg-white/15 text-white hover:bg-white/25 backdrop-blur-sm text-base px-6 py-3 transform hover:scale-105 transition-all duration-300 animate-fade-in-up ev-glow">
+                  <Award className="w-4 h-4 mr-2 text-white" />
                   Gecertificeerde Personal Trainers
                 </Badge>
                 <Badge
-                  className="bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm text-base px-6 py-3 transform hover:scale-105 transition-all duration-300 animate-fade-in-up"
+                  className="bg-white/15 text-white hover:bg-white/25 backdrop-blur-sm text-base px-6 py-3 transform hover:scale-105 transition-all duration-300 animate-fade-in-up ev-glow"
                   style={{ animationDelay: "0.2s" }}
                 >
-                  <Shield className="w-4 h-4 mr-2 animate-pulse text-white" />
+                  <Shield className="w-4 h-4 mr-2 text-white" />
                   100% Geld Terug Garantie
                 </Badge>
               </div>
 
-              {/* Animated main heading with enhanced typography */}
-              <h1 className="text-7xl xl:text-8xl font-bold text-white leading-tight tracking-tight animate-fade-in-up">
-                <span className="inline-block">
+              {/* Heading */}
+              <h1 className="text-7xl xl:text-8xl font-extrabold text-white leading-tight tracking-tight animate-fade-in-up">
+                <span className="inline-block drop-shadow-[0_4px_24px_rgba(186,212,225,0.35)]">
                   {isLoaded ? typewriterText : "EVOTION COACHING"}
                   {!isComplete && <span className="animate-pulse">|</span>}
                 </span>
               </h1>
 
-              {/* Animated subtitle with enhanced gradient */}
+              {/* Subheading */}
               <h2
                 className="text-4xl xl:text-5xl font-semibold text-white leading-tight mb-4 animate-fade-in-up"
                 style={{ animationDelay: "0.5s" }}
@@ -238,7 +233,7 @@ export default function EvotionCoachingDesktop() {
                 </span>
               </h2>
 
-              {/* Enhanced description with better spacing */}
+              {/* Description */}
               <div
                 className="text-2xl xl:text-3xl text-gray-200 leading-relaxed max-w-4xl mx-auto animate-fade-in-up space-y-6"
                 style={{ animationDelay: "1s" }}
@@ -249,17 +244,17 @@ export default function EvotionCoachingDesktop() {
                 </p>
               </div>
 
-              {/* Enhanced Value Props with Better Styling */}
+              {/* Value props */}
               <div className="flex flex-wrap items-center justify-center gap-8 mt-10 pt-6">
                 <div
-                  className="flex items-center gap-3 text-white font-bold bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full text-lg transform hover:scale-105 transition-all duration-300 animate-fade-in-left border border-white/20 hover:border-white/40"
+                  className="flex items-center gap-3 text-white font-semibold bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full text-lg transform hover:scale-105 transition-all duration-300 animate-fade-in-left border border-white/20 hover:border-white/40 ev-glow"
                   style={{ animationDelay: "1.2s" }}
                 >
                   <Clock className="w-6 h-6 text-white" />
                   <span>Zie resultaten binnen 4 weken</span>
                 </div>
                 <div
-                  className="flex items-center gap-3 text-white font-bold bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full text-lg transform hover:scale-105 transition-all duration-300 animate-fade-in-right border border-white/20 hover:border-white/40"
+                  className="flex items-center gap-3 text-white font-semibold bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full text-lg transform hover:scale-105 transition-all duration-300 animate-fade-in-right border border-white/20 hover:border-white/40 ev-glow"
                   style={{ animationDelay: "1.4s" }}
                 >
                   <Flame className="w-6 h-6 text-white" />
@@ -268,22 +263,21 @@ export default function EvotionCoachingDesktop() {
               </div>
             </div>
 
-            {/* Enhanced CTA Buttons with Better Hover Effects */}
+            {/* CTAs */}
             <div className="flex flex-wrap gap-6 justify-center animate-fade-in-up" style={{ animationDelay: "1.6s" }}>
               <Button
                 size="lg"
-                className="bg-white text-evotion-primary hover:bg-gray-100 px-12 py-7 text-2xl font-semibold shadow-2xl transform hover:scale-105 transition-all duration-300 group relative overflow-hidden rounded-xl"
+                className="ev-shine bg-white text-evotion-primary hover:bg-gray-100 px-12 py-7 text-2xl font-semibold shadow-2xl transform hover:scale-105 transition-all duration-300 group relative overflow-hidden rounded-xl"
               >
                 <span className="relative z-10 flex items-center gap-3">
                   Start Jouw Transformatie
                   <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-evotion-primary/20 to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="border-2 border-white text-white hover:bg-white hover:text-evotion-primary px-12 py-7 text-2xl font-semibold bg-transparent transform hover:scale-105 transition-all duration-300 group relative overflow-hidden backdrop-blur-sm rounded-xl"
+                className="ev-shine border-2 border-white/70 text-white hover:bg-white hover:text-evotion-primary px-12 py-7 text-2xl font-semibold bg-transparent transform hover:scale-105 transition-all duration-300 group relative overflow-hidden backdrop-blur-sm rounded-xl"
               >
                 <span className="relative z-10 flex items-center gap-3">
                   Gratis Consult
@@ -292,59 +286,43 @@ export default function EvotionCoachingDesktop() {
               </Button>
             </div>
 
-            {/* Enhanced Animated Statistics with Better Animations */}
-            <div ref={statsRef} className="grid grid-cols-4 gap-12 pt-20 max-w-5xl mx-auto">
-              <div
-                className={`text-center transform hover:scale-110 transition-all duration-700 ${
-                  statsVisible ? "animate-fade-in-up opacity-100" : "opacity-0"
-                }`}
-                style={{ animationDelay: "2s" }}
-              >
-                <div className="text-6xl font-bold text-white mb-3">100+</div>
-                <div className="text-xl text-gray-200">Tevreden Klanten</div>
-              </div>
-              <div
-                className={`text-center transform hover:scale-110 transition-all duration-700 ${
-                  statsVisible ? "animate-fade-in-up opacity-100" : "opacity-0"
-                }`}
-                style={{ animationDelay: "2.2s" }}
-              >
-                <div className="text-6xl font-bold text-white mb-3">5.0</div>
-                <div className="text-xl text-gray-200">Google Rating</div>
-                <div className="flex justify-center mt-2">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="w-5 h-5 text-yellow-400 fill-current"
-                      style={{ animation: `pulse 2s infinite ${i * 0.3}s` }}
-                    />
-                  ))}
+            {/* Stats */}
+            <div
+              ref={statsRef}
+              className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 pt-16 md:pt-20 max-w-5xl mx-auto"
+            >
+              {[
+                { k: "100+", v: "Tevreden Klanten" },
+                { k: "5.0", v: "Google Rating" },
+                { k: "95%", v: "Succesvol" },
+                { k: "10+", v: "Jaar Ervaring" },
+              ].map((s, i) => (
+                <div
+                  key={s.v}
+                  className={`text-center transform hover:scale-110 transition-all duration-700 ${
+                    statsVisible ? "animate-fade-in-up opacity-100" : "opacity-0"
+                  }`}
+                  style={{ animationDelay: `${2 + i * 0.2}s` }}
+                >
+                  <div className="text-5xl md:text-6xl font-extrabold text-white mb-2 drop-shadow-[0_6px_24px_rgba(0,0,0,0.35)]">
+                    {s.k}
+                  </div>
+                  <div className="text-lg md:text-xl text-gray-200">{s.v}</div>
+                  {s.v === "Google Rating" && (
+                    <div className="flex justify-center mt-2">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-              <div
-                className={`text-center transform hover:scale-110 transition-all duration-700 ${
-                  statsVisible ? "animate-fade-in-up opacity-100" : "opacity-0"
-                }`}
-                style={{ animationDelay: "2.4s" }}
-              >
-                <div className="text-6xl font-bold text-white mb-3">95%</div>
-                <div className="text-xl text-gray-200">Succesvol</div>
-              </div>
-              <div
-                className={`text-center transform hover:scale-110 transition-all duration-700 ${
-                  statsVisible ? "animate-fade-in-up opacity-100" : "opacity-0"
-                }`}
-                style={{ animationDelay: "2.6s" }}
-              >
-                <div className="text-6xl font-bold text-white mb-3">10+</div>
-                <div className="text-xl text-gray-200">Jaar Ervaring</div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Enhanced Scroll indicator with Better Animation */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 animate-bounce">
+        {/* Scroll hint */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce">
           <div className="group cursor-pointer">
             <div className="w-8 h-12 border-2 border-white/50 rounded-full flex justify-center group-hover:border-white transition-colors duration-300">
               <div className="w-1.5 h-3 bg-white/50 rounded-full mt-2 animate-pulse group-hover:bg-white transition-colors duration-300"></div>
@@ -353,13 +331,22 @@ export default function EvotionCoachingDesktop() {
         </div>
       </section>
 
-      {/* Enhanced Diensten Section with Better Cards */}
+      {/* SERVICES */}
       <section
         id="diensten"
-        className="py-28 relative bg-gradient-to-br from-white via-gray-50/30 to-white border-t-8 border-evotion-primary/20"
+        className="py-28 relative bg-gradient-to-br from-white via-gray-50/30 to-white border-t-8 border-evotion-primary/10"
       >
+        {/* soft grid pattern */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 1px 1px, rgba(30,24,57,0.6) 1px, transparent 0), radial-gradient(circle at 3px 3px, rgba(186,212,225,0.6) 1px, transparent 0)",
+            backgroundSize: "28px 28px, 28px 28px",
+          }}
+        />
         <div className="container mx-auto px-6 relative z-10">
-          {/* Enhanced Header with Better Typography */}
+          {/* Header */}
           <div className="text-center space-y-8 mb-20">
             <Badge className="bg-evotion-primary/10 text-evotion-primary border border-evotion-primary/20 text-lg px-6 py-3 shadow-lg">
               <Target className="w-5 h-5 mr-2 text-evotion-primary" />
@@ -374,10 +361,10 @@ export default function EvotionCoachingDesktop() {
             </p>
           </div>
 
-          {/* Enhanced Service Cards with Better Hover Effects - 3 Cards */}
+          {/* Cards */}
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Premium Coaching Card - Enhanced */}
-            <Card className="group relative overflow-hidden border-2 border-gray-200 hover:border-evotion-primary/50 transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-3 bg-gradient-to-br from-white to-gray-50/50">
+            {/* Premium */}
+            <Card className="group relative overflow-hidden ev-gradient-border bg-white/80 backdrop-blur border-transparent transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-2">
               <div className="absolute top-4 right-4 z-10">
                 <Badge className="bg-evotion-primary text-white font-bold px-3 py-1 shadow-lg animate-pulse text-xs">
                   <Award className="w-3 h-3 mr-1 text-white" />
@@ -398,27 +385,22 @@ export default function EvotionCoachingDesktop() {
                     </p>
                   </div>
                 </div>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-base">Wekelijkse 1-op-1 sessies</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-base">Persoonlijk trainingsschema</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-base">24/7 WhatsApp support</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-base">Voedingsschema op maat</span>
-                  </div>
-                </div>
-                <div className="pt-4">
+                <ul className="space-y-3">
+                  {[
+                    "Wekelijkse 1-op-1 sessies",
+                    "Persoonlijk trainingsschema",
+                    "24/7 WhatsApp support",
+                    "Voedingsschema op maat",
+                  ].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-gray-700">
+                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      <span className="text-base">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="pt-2">
                   <Link href="/premium-coaching">
-                    <Button className="w-full bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white py-3 text-base font-semibold group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
+                    <Button className="ev-shine w-full bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white py-3 text-base font-semibold transition-all duration-300 transform group-hover:scale-[1.02]">
                       Meer Informatie
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                     </Button>
@@ -427,8 +409,8 @@ export default function EvotionCoachingDesktop() {
               </CardContent>
             </Card>
 
-            {/* Online Coaching Card - Enhanced */}
-            <Card className="group relative overflow-hidden border-2 border-gray-200 hover:border-evotion-primary/50 transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-3 bg-gradient-to-br from-white to-gray-50/50">
+            {/* Online */}
+            <Card className="group relative overflow-hidden ev-gradient-border bg-white/80 backdrop-blur border-transparent transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-2">
               <CardContent className="p-8 space-y-6">
                 <div className="space-y-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xl">
@@ -443,27 +425,22 @@ export default function EvotionCoachingDesktop() {
                     </p>
                   </div>
                 </div>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-base">Maandelijkse check-ins</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-base">Toegang tot Evotion App</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-base">Trainingsschema's</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-base">Voedingsrichtlijnen</span>
-                  </div>
-                </div>
-                <div className="pt-4">
+                <ul className="space-y-3">
+                  {[
+                    "Maandelijkse check-ins",
+                    "Toegang tot Evotion App",
+                    "Trainingsschema's",
+                    "Voedingsrichtlijnen",
+                  ].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-gray-700">
+                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      <span className="text-base">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="pt-2">
                   <Link href="/online-coaching">
-                    <Button className="w-full bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white py-3 text-base font-semibold group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
+                    <Button className="ev-shine w-full bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white py-3 text-base font-semibold transition-all duration-300 transform group-hover:scale-[1.02]">
                       Meer Informatie
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                     </Button>
@@ -472,8 +449,8 @@ export default function EvotionCoachingDesktop() {
               </CardContent>
             </Card>
 
-            {/* 12 Weken Vetverlies Card - Enhanced */}
-            <Card className="group relative overflow-hidden border-2 border-gray-200 hover:border-evotion-primary/50 transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-3 bg-gradient-to-br from-white to-gray-50/50">
+            {/* 12 Weken */}
+            <Card className="group relative overflow-hidden ev-gradient-border bg-white/80 backdrop-blur border-transparent transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-2">
               <div className="absolute top-4 right-4 z-10">
                 <Badge className="bg-evotion-primary text-white font-bold px-3 py-1 shadow-lg text-xs">
                   <Shield className="w-3 h-3 mr-1 text-white" />
@@ -494,27 +471,22 @@ export default function EvotionCoachingDesktop() {
                     </p>
                   </div>
                 </div>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-base">12 weken intensieve begeleiding</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-base">Geld-terug-garantie</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-base">Wekelijkse metingen</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-base">Complete lifestyle coaching</span>
-                  </div>
-                </div>
-                <div className="pt-4">
+                <ul className="space-y-3">
+                  {[
+                    "12 weken intensieve begeleiding",
+                    "Geld-terug-garantie",
+                    "Wekelijkse metingen",
+                    "Complete lifestyle coaching",
+                  ].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-gray-700">
+                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      <span className="text-base">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="pt-2">
                   <Link href="/12-weken-vetverlies">
-                    <Button className="w-full bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white py-3 text-base font-semibold group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
+                    <Button className="ev-shine w-full bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white py-3 text-base font-semibold transition-all duration-300 transform group-hover:scale-[1.02]">
                       Meer Informatie
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                     </Button>
@@ -524,9 +496,9 @@ export default function EvotionCoachingDesktop() {
             </Card>
           </div>
 
-          {/* Enhanced CTA Section */}
+          {/* CTA */}
           <div className="text-center mt-20 space-y-8">
-            <div className="bg-gradient-to-r from-evotion-primary/10 to-evotion-primary/10 rounded-3xl p-12 max-w-4xl mx-auto border border-evotion-primary/20 shadow-xl">
+            <div className="ev-gradient-border bg-white/80 backdrop-blur rounded-3xl p-12 max-w-4xl mx-auto border-transparent shadow-xl">
               <h3 className="text-4xl font-bold text-gray-900 mb-6">Niet zeker welk programma bij jou past?</h3>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
                 Boek een gratis kennismakingsgesprek en ontdek samen met ons welke aanpak het beste bij jouw doelen en
@@ -534,7 +506,7 @@ export default function EvotionCoachingDesktop() {
               </p>
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white px-12 py-6 text-xl font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 group"
+                className="ev-shine bg-gradient-to-r from-evotion-primary to-evotion-primary hover:opacity-95 text-white px-12 py-6 text-xl font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 group"
               >
                 <span className="flex items-center gap-3">
                   Gratis Kennismakingsgesprek
@@ -546,23 +518,19 @@ export default function EvotionCoachingDesktop() {
         </div>
       </section>
 
-      {/* New Personal Training Section */}
+      {/* PERSONAL TRAINING */}
       <section className="py-28 bg-gradient-to-br from-gray-900 via-evotion-primary to-evotion-primary relative overflow-hidden">
-        {/* Enhanced Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent"></div>
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-              backgroundSize: "40px 40px",
-            }}
-          ></div>
-        </div>
-
+        {/* subtle rays */}
+        <div
+          className="absolute inset-0 opacity-[0.06] pointer-events-none"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 10%, white 2px, transparent 0), radial-gradient(circle at 80% 60%, white 2px, transparent 0)",
+            backgroundSize: "60px 60px, 60px 60px",
+          }}
+        />
         <div className="container mx-auto px-6 relative z-10">
           <div className="grid lg:grid-cols-2 gap-20 items-center max-w-7xl mx-auto">
-            {/* Enhanced Content Side */}
             <div className="space-y-10">
               <div className="space-y-8">
                 <Badge className="bg-white/20 text-white border border-white/30 text-lg px-6 py-3 backdrop-blur-sm shadow-lg">
@@ -578,49 +546,32 @@ export default function EvotionCoachingDesktop() {
                 </p>
               </div>
 
-              {/* Enhanced Feature List */}
               <div className="grid gap-6">
-                <div className="flex items-center gap-6 bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 group">
-                  <div className="w-16 h-16 bg-gradient-to-br from-white to-white rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <Dumbbell className="w-8 h-8 text-evotion-primary" />
+                {[
+                  { icon: Dumbbell, title: "Persoonlijke Training Sessies", desc: "Volledige aandacht van je trainer" },
+                  { icon: Target, title: "Aangepaste Oefeningen", desc: "Perfect afgestemd op jouw doelen" },
+                  { icon: Calendar, title: "Flexibele Planning", desc: "Plan sessies wanneer het jou past" },
+                ].map((f, idx) => (
+                  <div
+                    key={f.title}
+                    className="flex items-center gap-6 bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 group"
+                  >
+                    <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                      <f.icon className="w-8 h-8 text-evotion-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-white mb-1">{f.title}</h3>
+                      <p className="text-lg text-gray-300">{f.desc}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-white mb-2">Persoonlijke Training Sessies</h3>
-                    <p className="text-lg text-gray-300">
-                      Volledige aandacht van je gecertificeerde trainer tijdens elke sessie
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-6 bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 group">
-                  <div className="w-16 h-16 bg-gradient-to-br from-white to-white rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <Target className="w-8 h-8 text-evotion-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-white mb-2">Aangepaste Oefeningen</h3>
-                    <p className="text-lg text-gray-300">
-                      Trainingen perfect afgestemd op jouw niveau, doelen en fysieke mogelijkheden
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-6 bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 group">
-                  <div className="w-16 h-16 bg-gradient-to-br from-white to-white rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <Calendar className="w-8 h-8 text-evotion-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-white mb-2">Flexibele Planning</h3>
-                    <p className="text-lg text-gray-300">Plan je sessies op tijden en locaties die bij jou passen</p>
-                  </div>
-                </div>
+                ))}
               </div>
 
-              {/* Enhanced CTA */}
-              <div className="pt-8">
+              <div className="pt-2">
                 <Link href="/personal-training">
                   <Button
                     size="lg"
-                    className="bg-white text-evotion-primary hover:bg-gray-100 px-12 py-6 text-xl font-semibold shadow-2xl transform hover:scale-105 transition-all duration-300 group"
+                    className="ev-shine bg-white text-evotion-primary hover:bg-gray-100 px-12 py-6 text-xl font-semibold shadow-2xl transform hover:scale-105 transition-all duration-300 group"
                   >
                     <span className="flex items-center gap-3">
                       Meer over Personal Training
@@ -631,23 +582,25 @@ export default function EvotionCoachingDesktop() {
               </div>
             </div>
 
-            {/* Enhanced Studio Image */}
+            {/* Image */}
             <div className="relative">
-              <div className="relative mx-auto w-full h-[500px] transform hover:scale-105 transition-all duration-500 group rounded-3xl overflow-hidden shadow-2xl">
+              <div className="relative mx-auto w-full h-[500px] rounded-3xl overflow-hidden shadow-2xl ev-photo-frame">
                 <Image
                   src="/images/personal-training-session.jpeg"
                   alt="Personal Training Begeleiding"
                   fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-700"
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  className="object-cover will-change-transform transition-transform duration-700 hover:scale-105"
+                  priority={false}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
               </div>
 
-              {/* Enhanced Floating Elements */}
-              <div className="absolute -top-8 -left-8 w-20 h-20 bg-gradient-to-br from-white to-white rounded-2xl flex items-center justify-center shadow-xl animate-float">
+              {/* Floating icons */}
+              <div className="absolute -top-8 -left-8 w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-xl animate-float">
                 <Award className="w-10 h-10 text-evotion-primary" />
               </div>
-              <div className="absolute -bottom-8 -right-8 w-20 h-20 bg-gradient-to-br from-white to-white rounded-2xl flex items-center justify-center shadow-xl animate-float-delayed">
+              <div className="absolute -bottom-8 -right-8 w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-xl animate-float-delayed">
                 <Star className="w-10 h-10 text-evotion-primary" />
               </div>
             </div>
@@ -655,23 +608,18 @@ export default function EvotionCoachingDesktop() {
         </div>
       </section>
 
-      {/* Enhanced App Section with Better Visual Hierarchy */}
-      <section className="py-28 bg-gradient-to-br from-white via-gray-50/30 to-white">
-        {/* Enhanced Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0 bg-gradient-to-r from-evotion-primary/5 to-transparent"></div>
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `radial-gradient(circle at 2px 2px, #bad4e1 1px, transparent 0)`,
-              backgroundSize: "40px 40px",
-            }}
-          ></div>
-        </div>
-
+      {/* APP */}
+      <section className="py-28 bg-gradient-to-br from-white via-gray-50/30 to-white relative">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage: "radial-gradient(circle at 2px 2px, #bad4e1 1px, transparent 0)",
+            backgroundSize: "40px 40px",
+          }}
+        />
         <div className="container mx-auto px-6 relative z-10">
           <div className="grid lg:grid-cols-2 gap-20 items-center max-w-7xl mx-auto">
-            {/* Enhanced Content Side */}
+            {/* Content */}
             <div className="space-y-10">
               <div className="space-y-8">
                 <Badge className="bg-evotion-primary/10 text-evotion-primary border border-evotion-primary/20 text-lg px-6 py-3 shadow-lg">
@@ -687,44 +635,31 @@ export default function EvotionCoachingDesktop() {
                 </p>
               </div>
 
-              {/* Enhanced Feature List */}
               <div className="grid gap-6">
-                <div className="flex items-center gap-6 bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:bg-gray-100 transition-all duration-300 group">
-                  <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <Target className="w-8 h-8 text-white" />
+                {[
+                  { icon: Target, t: "Gepersonaliseerde Trainingen", d: "Schema's voor jouw niveau en doelen" },
+                  { icon: Sparkles, t: "Voedingsadvies op Maat", d: "Plannen passend bij jouw smaak" },
+                  { icon: MessageCircle, t: "Directe Coach Communicatie", d: "Chat direct met je coach" },
+                ].map((f) => (
+                  <div
+                    key={f.t}
+                    className="flex items-center gap-6 bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:bg-gray-100 transition-all duration-300 group"
+                  >
+                    <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                      <f.icon className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">{f.t}</h3>
+                      <p className="text-lg text-gray-600">{f.d}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Gepersonaliseerde Trainingen</h3>
-                    <p className="text-lg text-gray-600">Trainingsschema's aangepast aan jouw niveau en doelen</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-6 bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:bg-gray-100 transition-all duration-300 group">
-                  <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <Sparkles className="w-8 h-8 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Voedingsadvies op Maat</h3>
-                    <p className="text-lg text-gray-600">Maaltijdplannen die passen bij jouw smaak en levensstijl</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-6 bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:bg-gray-100 transition-all duration-300 group">
-                  <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <MessageCircle className="w-8 h-8 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Directe Coach Communicatie</h3>
-                    <p className="text-lg text-gray-600">Chat rechtstreeks met je coach voor vragen en motivatie</p>
-                  </div>
-                </div>
+                ))}
               </div>
 
-              {/* Enhanced Download CTA */}
-              <div className="pt-8">
+              <div className="pt-2">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white px-12 py-6 text-xl font-semibold shadow-2xl transform hover:scale-105 transition-all duration-300 group"
+                  className="ev-shine bg-gradient-to-r from-evotion-primary to-evotion-primary hover:opacity-95 text-white px-12 py-6 text-xl font-semibold shadow-2xl transform hover:scale-105 transition-all duration-300 group"
                 >
                   <span className="flex items-center gap-3">
                     Download de App
@@ -734,28 +669,26 @@ export default function EvotionCoachingDesktop() {
               </div>
             </div>
 
-            {/* Enhanced App Mockup - Larger */}
+            {/* Mockup */}
             <div className="relative">
               <div className="relative mx-auto w-96 h-[720px] transform hover:scale-105 transition-all duration-500 group">
-                {/* Enhanced Phone Frame */}
+                <div className="absolute -inset-[2px] rounded-[3.1rem] bg-gradient-to-br from-[#1e1839] via-[#bad4e1] to-[#1e1839] blur-[10px] opacity-40 group-hover:opacity-70 transition-opacity" />
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black rounded-[3rem] shadow-2xl border-8 border-gray-700 group-hover:shadow-3xl transition-shadow duration-500"></div>
-                <div className="absolute inset-4 bg-black rounded-[2.5rem] overflow-hidden">
+                <div className="absolute inset-4 bg-black rounded-[2.5rem] overflow-hidden ev-photo-frame">
                   <Image
-                    src="/images/evotion-app-login.jpg"
+                    src="/images/evotion-logo-mockup-mobile-new.png"
                     alt="Evotion App Interface"
                     fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                    sizes="(min-width: 1024px) 24rem, 90vw"
+                    className="object-contain group-hover:scale-110 transition-transform duration-700 p-4"
                   />
                 </div>
-                {/* Enhanced Glow Effect */}
-                <div className="absolute -inset-4 bg-gradient-to-r from-evotion-primary/20 via-transparent to-evotion-primary/20 rounded-[4rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
 
-              {/* Enhanced Floating Elements */}
-              <div className="absolute -top-8 -left-8 w-20 h-20 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-2xl flex items-center justify-center shadow-xl animate-float">
+              <div className="absolute -top-8 -left-8 w-20 h-20 bg-evotion-primary rounded-2xl flex items-center justify-center shadow-xl animate-float">
                 <Star className="w-10 h-10 text-white" />
               </div>
-              <div className="absolute -bottom-8 -right-8 w-20 h-20 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-2xl flex items-center justify-center shadow-xl animate-float-delayed">
+              <div className="absolute -bottom-8 -right-8 w-20 h-20 bg-evotion-primary rounded-2xl flex items-center justify-center shadow-xl animate-float-delayed">
                 <CheckCircle className="w-10 h-10 text-white" />
               </div>
             </div>
@@ -763,10 +696,9 @@ export default function EvotionCoachingDesktop() {
         </div>
       </section>
 
-      {/* Enhanced Transformaties Section - Card Layout */}
-      <section className="py-28 bg-gradient-to-br from-white via-gray-50/50 to-white">
+      {/* TRANSFORMATIES */}
+      <section className="py-28 bg-gradient-to-br from-white via-gray-50/50 to-white relative">
         <div className="container mx-auto px-6">
-          {/* Enhanced Header */}
           <div className="text-center space-y-8 mb-20">
             <Badge className="bg-evotion-primary/10 text-evotion-primary border border-evotion-primary/20 text-lg px-6 py-3 shadow-lg">
               <TrendingUp className="w-5 h-5 mr-2 text-evotion-primary" />
@@ -781,10 +713,9 @@ export default function EvotionCoachingDesktop() {
             </p>
           </div>
 
-          {/* Enhanced Transformation Cards - Combined Layout */}
           <div className="space-y-12 max-w-7xl mx-auto">
-            {/* Martin's Transformation Card */}
-            <Card className="group overflow-hidden border-2 border-gray-200 hover:border-evotion-primary/50 transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-2">
+            {/* Martin */}
+            <Card className="group overflow-hidden ev-gradient-border border-transparent transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
               <CardContent className="p-0">
                 <div className="grid lg:grid-cols-2 gap-0">
                   <div className="relative aspect-square overflow-hidden">
@@ -792,6 +723,7 @@ export default function EvotionCoachingDesktop() {
                       src="/images/martin-transformation-new.png"
                       alt="Martin's transformatie - 10.7kg gewichtsverlies"
                       fill
+                      sizes="(min-width: 1024px) 50vw, 100vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                     <div className="absolute top-4 left-4">
@@ -817,26 +749,24 @@ export default function EvotionCoachingDesktop() {
                       </p>
                     </div>
                     <div className="flex items-center gap-6 pt-4 border-t border-gray-200">
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-evotion-primary">-10.7kg</div>
-                        <div className="text-sm text-gray-500">gewichtsverlies</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-evotion-primary">11</div>
-                        <div className="text-sm text-gray-500">weken</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-evotion-primary">100%</div>
-                        <div className="text-sm text-gray-500">leiderschap</div>
-                      </div>
+                      {[
+                        { k: "-10.7kg", v: "gewichtsverlies" },
+                        { k: "11", v: "weken" },
+                        { k: "100%", v: "leiderschap" },
+                      ].map((x) => (
+                        <div key={x.v} className="text-center">
+                          <div className="text-3xl font-bold text-evotion-primary">{x.k}</div>
+                          <div className="text-sm text-gray-500">{x.v}</div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Salim's Transformation Card */}
-            <Card className="group overflow-hidden border-2 border-gray-200 hover:border-evotion-primary/50 transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-2">
+            {/* Salim */}
+            <Card className="group overflow-hidden ev-gradient-border border-transparent transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
               <CardContent className="p-0">
                 <div className="grid lg:grid-cols-2 gap-0">
                   <div className="p-8 lg:p-12 flex flex-col justify-center space-y-6 lg:order-1">
@@ -856,18 +786,16 @@ export default function EvotionCoachingDesktop() {
                       </p>
                     </div>
                     <div className="flex items-center gap-6 pt-4 border-t border-gray-200">
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-evotion-primary">-8.1kg</div>
-                        <div className="text-sm text-gray-500">gewichtsverlies</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-evotion-primary">100%</div>
-                        <div className="text-sm text-gray-500">duurzaam resultaat</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-evotion-primary">10/10</div>
-                        <div className="text-sm text-gray-500">zelfvertrouwen</div>
-                      </div>
+                      {[
+                        { k: "-8.1kg", v: "gewichtsverlies" },
+                        { k: "100%", v: "duurzaam resultaat" },
+                        { k: "10/10", v: "zelfvertrouwen" },
+                      ].map((x) => (
+                        <div key={x.v} className="text-center">
+                          <div className="text-3xl font-bold text-evotion-primary">{x.k}</div>
+                          <div className="text-sm text-gray-500">{x.v}</div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                   <div className="relative aspect-square overflow-hidden lg:order-2">
@@ -875,6 +803,7 @@ export default function EvotionCoachingDesktop() {
                       src="/images/salim-transformation-new.png"
                       alt="Salim's transformatie - 8.1kg gewichtsverlies"
                       fill
+                      sizes="(min-width: 1024px) 50vw, 100vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                   </div>
@@ -882,8 +811,8 @@ export default function EvotionCoachingDesktop() {
               </CardContent>
             </Card>
 
-            {/* Wouter's Transformation Card */}
-            <Card className="group overflow-hidden border-2 border-gray-200 hover:border-evotion-primary/50 transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-2">
+            {/* Wouter */}
+            <Card className="group overflow-hidden ev-gradient-border border-transparent transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
               <CardContent className="p-0">
                 <div className="grid lg:grid-cols-2 gap-0">
                   <div className="relative aspect-square overflow-hidden">
@@ -891,6 +820,7 @@ export default function EvotionCoachingDesktop() {
                       src="/images/wouter-transformation-new.png"
                       alt="Wouter's body recomposition transformatie"
                       fill
+                      sizes="(min-width: 1024px) 50vw, 100vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                     <div className="absolute top-4 left-4">
@@ -916,18 +846,16 @@ export default function EvotionCoachingDesktop() {
                       </p>
                     </div>
                     <div className="flex items-center gap-6 pt-4 border-t border-gray-200">
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-evotion-primary">8</div>
-                        <div className="text-sm text-gray-500">weken programma</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-evotion-primary">Recomp</div>
-                        <div className="text-sm text-gray-500">body transformation</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-evotion-primary">100%</div>
-                        <div className="text-sm text-gray-500">definitie</div>
-                      </div>
+                      {[
+                        { k: "8", v: "weken programma" },
+                        { k: "Recomp", v: "body transformation" },
+                        { k: "100%", v: "definitie" },
+                      ].map((x) => (
+                        <div key={x.v} className="text-center">
+                          <div className="text-3xl font-bold text-evotion-primary">{x.k}</div>
+                          <div className="text-sm text-gray-500">{x.v}</div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -935,9 +863,9 @@ export default function EvotionCoachingDesktop() {
             </Card>
           </div>
 
-          {/* Enhanced Results CTA */}
+          {/* CTA */}
           <div className="text-center mt-20">
-            <div className="bg-gradient-to-r from-evotion-primary/10 to-evotion-primary/10 rounded-3xl p-12 max-w-4xl mx-auto border border-evotion-primary/20 shadow-xl">
+            <div className="ev-gradient-border bg-white/80 backdrop-blur rounded-3xl p-12 max-w-4xl mx-auto border-transparent shadow-xl">
               <h3 className="text-4xl font-bold text-gray-900 mb-6">
                 Klaar om jouw eigen <span className="text-evotion-primary">succesverhaal</span> te schrijven?
               </h3>
@@ -947,7 +875,7 @@ export default function EvotionCoachingDesktop() {
               </p>
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white px-12 py-6 text-xl font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 group"
+                className="ev-shine bg-gradient-to-r from-evotion-primary to-evotion-primary hover:opacity-95 text-white px-12 py-6 text-xl font-semibold shadow-2xl transform hover:scale-105 transition-all duration-300 group"
               >
                 <span className="flex items-center gap-3">
                   Start Jouw Transformatie
@@ -959,10 +887,9 @@ export default function EvotionCoachingDesktop() {
         </div>
       </section>
 
-      {/* Enhanced Google Reviews Section */}
+      {/* REVIEWS */}
       <section className="py-28 bg-gradient-to-br from-gray-900 via-evotion-primary to-evotion-primary relative overflow-hidden">
-        {/* Enhanced Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0 opacity-5 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"></div>
           <div
             className="absolute inset-0"
@@ -970,27 +897,22 @@ export default function EvotionCoachingDesktop() {
               backgroundImage: `radial-gradient(circle at 3px 3px, white 2px, transparent 0)`,
               backgroundSize: "60px 60px",
             }}
-          ></div>
+          />
         </div>
 
         <div className="container mx-auto px-6 relative z-10">
-          {/* Enhanced Header */}
           <div className="text-center space-y-8 mb-20">
             <Badge className="bg-white/20 text-white border border-white/30 text-lg px-6 py-3 backdrop-blur-sm shadow-lg">
               <Star className="w-5 h-5 mr-2 text-white" />
               Google Reviews
             </Badge>
             <h2 className="text-5xl md:text-6xl font-black text-white leading-tight">
-              Wat Onze Klanten <span style={{ color: "#bad4e1" }}>Zeggen</span>
+              Wat Onze Klanten <span className="text-evotion-secondary">Zeggen</span>
             </h2>
             <div className="flex items-center justify-center gap-4">
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="w-8 h-8 text-yellow-400 fill-current"
-                    style={{ animation: `pulse 2s infinite ${i * 0.2}s` }}
-                  />
+                  <Star key={i} className="w-8 h-8 text-yellow-400 fill-current" />
                 ))}
               </div>
               <span className="text-3xl font-bold text-white">5.0</span>
@@ -998,24 +920,23 @@ export default function EvotionCoachingDesktop() {
             </div>
           </div>
 
-          {/* Enhanced Reviews Grid - Desktop 3 columns, 2 rows */}
           <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            {testimonials.map((testimonial, index) => (
+            {testimonials.map((t) => (
               <Card
-                key={index}
+                key={t.name}
                 className="bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-2 group"
               >
                 <CardContent className="p-8 space-y-6">
                   <div className="flex items-center gap-4">
                     <div
-                      className={`w-16 h-16 ${testimonial.color} rounded-full flex items-center justify-center ${
-                        testimonial.color === "bg-white" ? "text-evotion-primary" : "text-white"
+                      className={`w-16 h-16 ${t.color} rounded-full flex items-center justify-center ${
+                        t.color === "bg-white" ? "text-evotion-primary" : "text-white"
                       } font-bold text-xl shadow-lg group-hover:scale-110 transition-transform duration-300`}
                     >
-                      {testimonial.initial}
+                      {t.initial}
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-white">{testimonial.name}</h3>
+                      <h3 className="text-xl font-bold text-white">{t.name}</h3>
                       <div className="flex mt-1">
                         {[...Array(5)].map((_, i) => (
                           <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
@@ -1023,7 +944,7 @@ export default function EvotionCoachingDesktop() {
                       </div>
                     </div>
                   </div>
-                  <p className="text-lg text-gray-200 leading-relaxed italic">"{testimonial.text}"</p>
+                  <p className="text-lg text-gray-200 leading-relaxed italic">"{t.text}"</p>
                   <div className="flex items-center gap-2 pt-4 border-t border-white/20">
                     <div className="w-6 h-6 bg-white rounded-sm flex items-center justify-center">
                       <span className="text-xs font-bold text-blue-600">G</span>
@@ -1035,12 +956,11 @@ export default function EvotionCoachingDesktop() {
             ))}
           </div>
 
-          {/* Enhanced More Reviews CTA */}
           <div className="text-center mt-16">
             <Button
               variant="outline"
               size="lg"
-              className="border-2 border-white text-white hover:bg-white hover:text-evotion-primary px-12 py-6 text-xl font-semibold bg-transparent transform hover:scale-105 transition-all duration-300 group backdrop-blur-sm"
+              className="ev-shine border-2 border-white text-white hover:bg-white hover:text-evotion-primary px-12 py-6 text-xl font-semibold bg-transparent transform hover:scale-105 transition-all duration-300 group backdrop-blur-sm"
             >
               <span className="flex items-center gap-3">
                 Bekijk Alle Reviews
@@ -1051,10 +971,9 @@ export default function EvotionCoachingDesktop() {
         </div>
       </section>
 
-      {/* Enhanced Contact Section */}
+      {/* CONTACT */}
       <section id="contact" className="py-28 bg-gradient-to-br from-white via-gray-50/50 to-white">
         <div className="container mx-auto px-6">
-          {/* Enhanced Header */}
           <div className="text-center space-y-8 mb-20">
             <Badge className="bg-evotion-primary/10 text-evotion-primary border border-evotion-primary/20 text-lg px-6 py-3 shadow-lg">
               <MessageCircle className="w-5 h-5 mr-2 text-evotion-primary" />
@@ -1070,7 +989,6 @@ export default function EvotionCoachingDesktop() {
           </div>
 
           <div className="grid lg:grid-cols-2 gap-20 max-w-7xl mx-auto">
-            {/* Enhanced Contact Options */}
             <div className="space-y-10">
               <div className="space-y-8">
                 <h3 className="text-4xl font-bold text-gray-900">Neem Direct Contact Op</h3>
@@ -1081,51 +999,56 @@ export default function EvotionCoachingDesktop() {
               </div>
 
               <div className="space-y-6">
-                <div className="flex items-center gap-6 bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:bg-gray-100 transition-all duration-300 group">
-                  <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <Phone className="w-8 h-8 text-white" />
+                {[
+                  {
+                    icon: Phone,
+                    title: "Bel Ons Direct",
+                    desc: "+31 6 10935077",
+                    hint: "Ma-Vr: 9:00-18:00",
+                  },
+                  {
+                    icon: MessageCircle,
+                    title: "WhatsApp",
+                    desc: "Begin Chat",
+                    hint: "Snelle reactie gegarandeerd",
+                    href: "https://wa.me/31610935077?text=Hoi%20Martin%2C%20ik%20heb%20interesse%20in%20jullie%20coaching%20programma%27s.%20Kunnen%20we%20een%20kennismakingsgesprek%20inplannen%3F",
+                  },
+                  {
+                    icon: Mail,
+                    title: "Email",
+                    desc: "info@evotion-coaching.nl",
+                    hint: "Reactie binnen 24 uur",
+                  },
+                ].map((c) => (
+                  <div
+                    key={c.title}
+                    className="flex items-center gap-6 bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:bg-gray-100 transition-all duration-300 group"
+                  >
+                    <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                      <c.icon className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-2xl font-bold text-gray-900 mb-1">{c.title}</h4>
+                      <p className="text-lg text-gray-700">{c.desc}</p>
+                      <p className="text-sm text-gray-500">{c.hint}</p>
+                      {c.href && (
+                        <a
+                          href={c.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-evotion-primary hover:underline"
+                        >
+                          Open WhatsApp <ArrowRight className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-2xl font-bold text-gray-900 mb-2">Bel Ons Direct</h4>
-                    <p className="text-lg text-gray-600">+31 6 10935077</p>
-                    <p className="text-sm text-gray-500">Ma-Vr: 9:00-18:00</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-6 bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:bg-gray-100 transition-all duration-300 group">
-                  <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <MessageCircle className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-2xl font-bold text-gray-900 mb-2">WhatsApp</h4>
-                    <p className="text-sm text-gray-500 mb-4">Snelle reactie gegarandeerd</p>
-                    <a
-                      href="https://wa.me/31610935077?text=Hoi%20Martin%2C%20ik%20heb%20interesse%20in%20jullie%20coaching%20programma%27s.%20Kunnen%20we%20een%20kennismakingsgesprek%20inplannen%3F"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-3 bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white px-6 py-3 rounded-lg text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg"
-                    >
-                      <MessageCircle className="w-5 h-5" />
-                      Begin Chat
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-6 bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:bg-gray-100 transition-all duration-300 group">
-                  <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <Mail className="w-8 h-8 text-white" />
-                  </div>
-                  <div>
-                    <h4 className="text-2xl font-bold text-gray-900 mb-2">Email</h4>
-                    <p className="text-lg text-gray-600">info@evotion-coaching.nl</p>
-                    <p className="text-sm text-gray-500">Reactie binnen 24 uur</p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
-            {/* Enhanced Contact Form */}
-            <Card className="border-2 border-gray-200 shadow-xl">
+            {/* Contact form */}
+            <Card className="ev-gradient-border border-transparent shadow-xl">
               <CardContent className="p-8">
                 <div className="space-y-6">
                   <div className="text-center space-y-4">
@@ -1142,7 +1065,6 @@ export default function EvotionCoachingDesktop() {
                           Voornaam *
                         </label>
                         <input
-                          type="text"
                           id="firstName"
                           name="firstName"
                           value={formData.firstName}
@@ -1156,7 +1078,6 @@ export default function EvotionCoachingDesktop() {
                           Achternaam *
                         </label>
                         <input
-                          type="text"
                           id="lastName"
                           name="lastName"
                           value={formData.lastName}
@@ -1172,8 +1093,8 @@ export default function EvotionCoachingDesktop() {
                         Email *
                       </label>
                       <input
-                        type="email"
                         id="email"
+                        type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
@@ -1187,8 +1108,8 @@ export default function EvotionCoachingDesktop() {
                         Telefoonnummer
                       </label>
                       <input
-                        type="tel"
                         id="phone"
+                        type="tel"
                         name="phone"
                         value={formData.phone}
                         onChange={handleInputChange}
@@ -1234,7 +1155,7 @@ export default function EvotionCoachingDesktop() {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white py-4 text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      className="ev-shine w-full bg-gradient-to-r from-evotion-primary to-evotion-primary hover:opacity-95 text-white py-4 text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
                       {isSubmitting ? (
                         <span className="flex items-center gap-3">
