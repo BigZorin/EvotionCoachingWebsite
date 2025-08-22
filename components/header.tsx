@@ -261,8 +261,11 @@ export function Header() {
                 <span className="font-medium">Mijn Account</span>
               </a>
             </Button>
-            <Button className="bg-primary hover:bg-primary/90 text-white px-6 py-2 font-semibold text-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
-              Gratis Consult
+            <Button
+              className="bg-primary hover:bg-primary/90 text-white px-6 py-2 font-semibold text-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+              asChild
+            >
+              <Link href="/contact">Gratis Consult</Link>
             </Button>
           </div>
 
@@ -541,9 +544,11 @@ export function Header() {
                 </Button>
                 <Button
                   className="w-full bg-primary hover:bg-primary/90 text-white py-3 text-sm font-semibold border border-primary hover:border-primary/80 transition-all duration-200"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  asChild
                 >
-                  Start Nu
+                  <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}>
+                    Gratis Consult
+                  </Link>
                 </Button>
               </div>
             </div>
