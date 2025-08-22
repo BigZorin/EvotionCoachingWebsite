@@ -15,6 +15,7 @@ import { ArrowRight, ChevronRight, Heart, Users, TrendingUp, Flame, Activity, Ta
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { submitCalorieForm } from "@/app/actions/caloriebehoefte"
 
 type FormData = {
   naam: string
@@ -182,11 +183,23 @@ export default function CaloriebehoefteClientPage() {
     setCalorieResult(result)
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1200))
+      // Send the form data and results via server action
+      const response = await submitCalorieForm(formData, result)
+
+      if (response.success) {
+        setIsSubmitted(true)
+        setCurrentStep(currentStep + 1)
+      } else {
+        console.error("Error submitting form:", response.error)
+        // Still show results to user even if email fails
+        setIsSubmitted(true)
+        setCurrentStep(currentStep + 1)
+      }
+    } catch (error) {
+      console.error("Error submitting calorie form:", error)
+      // Still show results to user even if email fails
       setIsSubmitted(true)
       setCurrentStep(currentStep + 1)
-    } catch (error) {
-      console.error("Er is een fout opgetreden bij het verzenden van het formulier:", error)
     } finally {
       setIsSubmitting(false)
     }
