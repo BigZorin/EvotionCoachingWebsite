@@ -11,7 +11,18 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { ArrowRight, ChevronRight, Heart, Users, TrendingUp, Flame, Activity, Target } from "lucide-react"
+import {
+  ArrowRight,
+  ChevronRight,
+  Heart,
+  Users,
+  TrendingUp,
+  Flame,
+  Activity,
+  Target,
+  Calculator,
+  Zap,
+} from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { sendCaloriebehoefteEmail } from "@/app/actions/caloriebehoefte"
@@ -84,8 +95,8 @@ export default function CaloriebehoefteClientPage() {
 
   const welcomeMessages = [
     "Welkom bij de Evotion Caloriebehoefte Calculator!",
-    "Ik ga je helpen om je dagelijkse caloriebehoefte te berekenen.",
-    "Hiermee krijg je inzicht in hoeveel calorieën en macronutriënten je nodig hebt om je doel te bereiken.",
+    "Ik ga je helpen om je dagelijkse caloriebehoefte te berekenen voor effectief afvallen en vetverlies.",
+    "Met deze gratis calculator krijg je inzicht in je BMR, TDEE en hoeveel calorieën je nodig hebt om je doel te bereiken.",
     "Laten we beginnen met een paar vragen...",
   ]
 
@@ -138,7 +149,7 @@ export default function CaloriebehoefteClientPage() {
     let target = 0
     switch (formData.doel) {
       case "afvallen":
-        target = tdee * 0.85 // 15% calorie-tekort
+        target = tdee * 0.85 // 15% calorie-tekort voor vetverlies
         break
       case "behouden":
         target = tdee
@@ -150,12 +161,12 @@ export default function CaloriebehoefteClientPage() {
         target = tdee
     }
 
-    // Macronutriënten berekening
-    const protein = formData.gewicht * 2 // 2g eiwit per kg lichaamsgewicht
+    // Macronutriënten berekening voor optimaal vetverlies
+    const protein = formData.gewicht * 2 // 2g eiwit per kg lichaamsgewicht voor vetverlies
     const fat = (target * 0.25) / 9 // 25% van calorieën uit vet (9 cal per gram)
     const carbs = (target - protein * 4 - fat * 9) / 4 // Rest uit koolhydraten (4 cal per gram)
 
-    // Aanbevolen coaching
+    // Aanbevolen coaching op basis van doel
     let recommendedCoaching = ""
     if (formData.activiteit === "zeer_actief" || formData.activiteit === "actief") {
       recommendedCoaching = "premium-coaching"
@@ -263,7 +274,7 @@ export default function CaloriebehoefteClientPage() {
                 </h2>
                 {showNextButton && (
                   <Button onClick={nextStep} className="mt-6 animate-fade-in">
-                    Laten we beginnen <ChevronRight className="ml-2 h-4 w-4" />
+                    Start caloriebehoefte berekenen <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
                 )}
               </div>
@@ -278,7 +289,7 @@ export default function CaloriebehoefteClientPage() {
                 </h2>
                 {showNextButton && (
                   <Button onClick={nextStep} className="mt-3 animate-fade-in text-xs">
-                    Laten we beginnen <ChevronRight className="ml-2 h-3 w-3" />
+                    Start berekenen <ChevronRight className="ml-2 h-3 w-3" />
                   </Button>
                 )}
               </div>
@@ -350,7 +361,7 @@ export default function CaloriebehoefteClientPage() {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="email-desktop" className="block">
-                        E-mailadres
+                        E-mailadres (voor je persoonlijke caloriebehoefte resultaten)
                       </Label>
                       <Input
                         id="email-desktop"
@@ -391,7 +402,7 @@ export default function CaloriebehoefteClientPage() {
                   <div className="space-y-2">
                     <div className="space-y-1">
                       <Label htmlFor="email-mobile" className="block text-xs">
-                        E-mailadres
+                        E-mailadres (voor resultaten)
                       </Label>
                       <Input
                         id="email-mobile"
@@ -434,7 +445,7 @@ export default function CaloriebehoefteClientPage() {
               {showNextButton && (
                 <div className="space-y-4 animate-fade-in">
                   <div className="space-y-2">
-                    <Label className="block">Wat is je geslacht?</Label>
+                    <Label className="block">Wat is je geslacht? (Voor accurate BMR berekening)</Label>
                     <RadioGroup
                       value={formData.geslacht}
                       onValueChange={(value) => handleSelectChange("geslacht", value)}
@@ -463,7 +474,7 @@ export default function CaloriebehoefteClientPage() {
               {showNextButton && (
                 <div className="space-y-2 animate-fade-in">
                   <div className="space-y-1">
-                    <Label className="block text-xs">Wat is je geslacht?</Label>
+                    <Label className="block text-xs">Geslacht? (Voor BMR berekening)</Label>
                     <RadioGroup
                       value={formData.geslacht}
                       onValueChange={(value) => handleSelectChange("geslacht", value)}
@@ -501,7 +512,7 @@ export default function CaloriebehoefteClientPage() {
                 <div className="space-y-4 animate-fade-in">
                   <div className="space-y-2">
                     <Label htmlFor="leeftijd-desktop" className="block">
-                      Wat is je leeftijd?
+                      Wat is je leeftijd? (Voor metabolisme berekening)
                     </Label>
                     <Input
                       id="leeftijd-desktop"
@@ -528,7 +539,7 @@ export default function CaloriebehoefteClientPage() {
                 <div className="space-y-2 animate-fade-in">
                   <div className="space-y-1">
                     <Label htmlFor="leeftijd-mobile" className="block text-xs">
-                      Wat is je leeftijd?
+                      Leeftijd? (Voor metabolisme)
                     </Label>
                     <Input
                       id="leeftijd-mobile"
@@ -559,7 +570,7 @@ export default function CaloriebehoefteClientPage() {
                 <div className="space-y-4 animate-fade-in">
                   <div className="space-y-2">
                     <Label htmlFor="gewicht-desktop" className="block">
-                      Wat is je huidige gewicht in kg?
+                      Wat is je huidige gewicht in kg? (Voor caloriebehoefte berekening)
                     </Label>
                     <Input
                       id="gewicht-desktop"
@@ -586,7 +597,7 @@ export default function CaloriebehoefteClientPage() {
                 <div className="space-y-2 animate-fade-in">
                   <div className="space-y-1">
                     <Label htmlFor="gewicht-mobile" className="block text-xs">
-                      Wat is je huidige gewicht in kg?
+                      Gewicht in kg? (Voor berekening)
                     </Label>
                     <Input
                       id="gewicht-mobile"
@@ -617,7 +628,7 @@ export default function CaloriebehoefteClientPage() {
                 <div className="space-y-4 animate-fade-in">
                   <div className="space-y-2">
                     <Label htmlFor="lengte-desktop" className="block">
-                      Wat is je lengte in cm?
+                      Wat is je lengte in cm? (Voor BMR en TDEE berekening)
                     </Label>
                     <Input
                       id="lengte-desktop"
@@ -644,7 +655,7 @@ export default function CaloriebehoefteClientPage() {
                 <div className="space-y-2 animate-fade-in">
                   <div className="space-y-1">
                     <Label htmlFor="lengte-mobile" className="block text-xs">
-                      Wat is je lengte in cm?
+                      Lengte in cm? (Voor TDEE)
                     </Label>
                     <Input
                       id="lengte-mobile"
@@ -675,7 +686,7 @@ export default function CaloriebehoefteClientPage() {
                 <div className="space-y-4 animate-fade-in">
                   <div className="space-y-2">
                     <Label htmlFor="activiteit-desktop" className="block">
-                      Hoe zou je je activiteitsniveau omschrijven?
+                      Hoe zou je je activiteitsniveau omschrijven? (Voor TDEE berekening)
                     </Label>
                     <Select
                       value={formData.activiteit}
@@ -717,30 +728,30 @@ export default function CaloriebehoefteClientPage() {
                 <div className="space-y-2 animate-fade-in">
                   <div className="space-y-1">
                     <Label htmlFor="activiteit-mobile" className="block text-xs">
-                      Hoe zou je je activiteitsniveau omschrijven?
+                      Activiteitsniveau? (Voor TDEE)
                     </Label>
                     <Select
                       value={formData.activiteit}
                       onValueChange={(value) => handleSelectChange("activiteit", value)}
                     >
                       <SelectTrigger id="activiteit-mobile" className="max-w-[200px] mx-auto text-center text-xs">
-                        <SelectValue placeholder="Selecteer je activiteitsniveau" />
+                        <SelectValue placeholder="Selecteer activiteit" />
                       </SelectTrigger>
                       <SelectContent align="center">
                         <SelectItem value="sedentair" className="text-center text-xs">
-                          Sedentair (weinig tot geen beweging)
+                          Sedentair (weinig beweging)
                         </SelectItem>
                         <SelectItem value="licht" className="text-center text-xs">
-                          Licht actief (1-2x per week sporten)
+                          Licht actief (1-2x per week)
                         </SelectItem>
                         <SelectItem value="matig" className="text-center text-xs">
-                          Matig actief (3-5x per week sporten)
+                          Matig actief (3-5x per week)
                         </SelectItem>
                         <SelectItem value="actief" className="text-center text-xs">
                           Actief (dagelijks sporten)
                         </SelectItem>
                         <SelectItem value="zeer_actief" className="text-center text-xs">
-                          Zeer actief (intensieve training)
+                          Zeer actief (intensief)
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -763,7 +774,7 @@ export default function CaloriebehoefteClientPage() {
                 <div className="space-y-4 animate-fade-in">
                   <div className="space-y-2">
                     <Label htmlFor="doel-desktop" className="block">
-                      Wat is je belangrijkste doel?
+                      Wat is je belangrijkste doel? (Voor calorie deficit/surplus berekening)
                     </Label>
                     <Select value={formData.doel} onValueChange={(value) => handleSelectChange("doel", value)}>
                       <SelectTrigger id="doel-desktop" className="max-w-md mx-auto">
@@ -771,19 +782,19 @@ export default function CaloriebehoefteClientPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="afvallen" className="text-left">
-                          Afvallen / Vet verliezen
+                          Afvallen / Vet verliezen (calorie deficit)
                         </SelectItem>
                         <SelectItem value="behouden" className="text-left">
                           Gewicht behouden / Recomposition
                         </SelectItem>
                         <SelectItem value="aankomen" className="text-left">
-                          Aankomen / Spieropbouw
+                          Aankomen / Spieropbouw (calorie surplus)
                         </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <Button onClick={handleSubmit} disabled={isSubmitting} className="mx-auto">
-                    {isSubmitting ? <>Berekenen...</> : <>Bereken mijn caloriebehoefte</>}
+                    {isSubmitting ? <>Berekenen...</> : <>Bereken mijn caloriebehoefte voor afvallen</>}
                   </Button>
                 </div>
               )}
@@ -796,18 +807,18 @@ export default function CaloriebehoefteClientPage() {
                 <div className="space-y-2 animate-fade-in">
                   <div className="space-y-1">
                     <Label htmlFor="doel-mobile" className="block text-xs">
-                      Wat is je belangrijkste doel?
+                      Doel? (Voor calorie berekening)
                     </Label>
                     <Select value={formData.doel} onValueChange={(value) => handleSelectChange("doel", value)}>
                       <SelectTrigger id="doel-mobile" className="max-w-[200px] mx-auto text-center text-xs">
-                        <SelectValue placeholder="Selecteer je doel" />
+                        <SelectValue placeholder="Selecteer doel" />
                       </SelectTrigger>
                       <SelectContent align="center">
                         <SelectItem value="afvallen" className="text-center justify-center text-xs">
-                          Afvallen / Vet verliezen
+                          Afvallen / Vetverlies
                         </SelectItem>
                         <SelectItem value="behouden" className="text-center justify-center text-xs">
-                          Gewicht behouden / Recomposition
+                          Gewicht behouden
                         </SelectItem>
                         <SelectItem value="aankomen" className="text-center justify-center text-xs">
                           Aankomen / Spieropbouw
@@ -816,7 +827,7 @@ export default function CaloriebehoefteClientPage() {
                     </Select>
                   </div>
                   <Button onClick={handleSubmit} disabled={isSubmitting} className="mx-auto text-xs">
-                    {isSubmitting ? <>Berekenen...</> : <>Bereken mijn caloriebehoefte</>}
+                    {isSubmitting ? <>Berekenen...</> : <>Bereken caloriebehoefte</>}
                   </Button>
                 </div>
               )}
@@ -839,41 +850,45 @@ export default function CaloriebehoefteClientPage() {
                       <CardContent className="p-4 md:p-6 text-center">
                         <div className="flex items-center justify-center gap-2 mb-2 text-primary">
                           <Flame className="h-5 w-5" />
-                          <h3 className="text-lg font-semibold text-gray-700">Basaal Metabolisme</h3>
+                          <h3 className="text-lg font-semibold text-gray-700">BMR Berekening</h3>
                         </div>
                         <p className="text-3xl font-extrabold text-primary tabular-nums">{displayBMR} kcal</p>
-                        <p className="text-sm text-gray-500 mt-2">Calorieën die je lichaam in rust verbruikt</p>
+                        <p className="text-sm text-gray-500 mt-2">Basaal Metabolisme - calorieën in rust</p>
                       </CardContent>
                     </Card>
                     <Card className="bg-white border">
                       <CardContent className="p-4 md:p-6 text-center">
                         <div className="flex items-center justify-center gap-2 mb-2 text-primary">
                           <Activity className="h-5 w-5" />
-                          <h3 className="text-lg font-semibold text-gray-700">Dagelijks Verbruik</h3>
+                          <h3 className="text-lg font-semibold text-gray-700">TDEE Berekening</h3>
                         </div>
                         <p className="text-3xl font-extrabold text-primary tabular-nums">{displayTDEE} kcal</p>
-                        <p className="text-sm text-gray-500 mt-2">Totale calorieën die je dagelijks verbruikt</p>
+                        <p className="text-sm text-gray-500 mt-2">Totaal Dagelijks Energieverbruik</p>
                       </CardContent>
                     </Card>
                     <Card className="bg-white border">
                       <CardContent className="p-4 md:p-6 text-center">
                         <div className="flex items-center justify-center gap-2 mb-2 text-primary">
                           <Target className="h-5 w-5" />
-                          <h3 className="text-lg font-semibold text-gray-700">Doelcalorieën</h3>
+                          <h3 className="text-lg font-semibold text-gray-700">Caloriebehoefte Afvallen</h3>
                         </div>
                         <p className="text-3xl font-extrabold text-primary tabular-nums">{displayTarget} kcal</p>
-                        <p className="text-sm text-gray-500 mt-2">Aanbevolen dagelijkse inname voor je doel</p>
+                        <p className="text-sm text-gray-500 mt-2">Dagelijkse calorieën voor je doel</p>
                       </CardContent>
                     </Card>
                   </div>
 
                   <div className="rounded-2xl border bg-white">
                     <div className="rounded-2xl p-4 md:p-6">
-                      <h3 className="text-xl font-bold text-primary mb-4">Aanbevolen Macronutriënten</h3>
+                      <h3 className="text-xl font-bold text-primary mb-4">
+                        Macronutriënten Berekening voor Vetverlies
+                      </h3>
                       <div className="space-y-4">
                         <div>
                           <div className="flex justify-between mb-1">
-                            <span className="text-sm font-medium">Eiwitten: {calorieResult.protein}g</span>
+                            <span className="text-sm font-medium">
+                              Eiwitten: {calorieResult.protein}g (voor vetverlies)
+                            </span>
                             <span className="text-sm text-gray-500">
                               {Math.round((calorieResult.protein * 4 * 100) / calorieResult.target)}%
                             </span>
@@ -918,12 +933,14 @@ export default function CaloriebehoefteClientPage() {
                     <div className="p-6 md:p-8">
                       <div className="text-center mb-8">
                         <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-700/50 rounded-2xl mb-4 border border-slate-600">
-                          <Target className="w-8 h-8 text-slate-200" />
+                          <Calculator className="w-8 h-8 text-slate-200" />
                         </div>
-                        <h3 className="text-2xl md:text-3xl font-bold mb-3 text-slate-100">Persoonlijke Aanbeveling</h3>
+                        <h3 className="text-2xl md:text-3xl font-bold mb-3 text-slate-100">
+                          Persoonlijke Coaching Aanbeveling
+                        </h3>
                         <p className="text-slate-300 text-lg max-w-2xl mx-auto">
-                          Op basis van jouw specifieke gegevens en doelen hebben we het meest geschikte programma voor
-                          je geselecteerd
+                          Op basis van jouw caloriebehoefte berekening en afvaldoelen hebben we het meest effectieve
+                          programma voor je geselecteerd
                         </p>
                       </div>
 
@@ -939,13 +956,14 @@ export default function CaloriebehoefteClientPage() {
                               <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
                                 <h4 className="text-2xl font-bold text-slate-100">Premium Coaching</h4>
                                 <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30">
-                                  <span className="text-amber-300 font-semibold text-sm">Aanbevolen</span>
+                                  <span className="text-amber-300 font-semibold text-sm">
+                                    Aanbevolen voor Actieve Mensen
+                                  </span>
                                 </div>
                               </div>
                               <p className="text-slate-300 mb-6 leading-relaxed">
-                                Voor jouw hoge activiteitsniveau en ambitieuze doelen is Premium Coaching de ideale
-                                keuze. Persoonlijke training gecombineerd met 24/7 online begeleiding voor maximale
-                                resultaten.
+                                Voor jouw hoge activiteitsniveau is Premium Coaching ideaal. Persoonlijke training
+                                gecombineerd met 24/7 online begeleiding voor maximale vetverlies resultaten.
                               </p>
                               <div className="grid md:grid-cols-2 gap-4 mb-6">
                                 <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
@@ -971,12 +989,12 @@ export default function CaloriebehoefteClientPage() {
                                 <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
                                   <h5 className="font-semibold mb-3 text-slate-200 flex items-center gap-2">
                                     <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                                    Jouw voordelen
+                                    Vetverlies voordelen
                                   </h5>
                                   <ul className="text-sm text-slate-300 space-y-2">
                                     <li className="flex items-center gap-2">
                                       <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      3x snellere resultaten
+                                      3x snellere vetverlies
                                     </li>
                                     <li className="flex items-center gap-2">
                                       <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
@@ -1010,29 +1028,29 @@ export default function CaloriebehoefteClientPage() {
                             </div>
                             <div className="flex-1 text-center md:text-left">
                               <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
-                                <h4 className="text-2xl font-bold text-slate-100">12-Weken Vetverlies</h4>
+                                <h4 className="text-2xl font-bold text-slate-100">12-Weken Vetverlies Programma</h4>
                                 <div className="inline-flex items-center px-3 py-1 rounded-full bg-orange-500/20 border border-orange-500/30">
-                                  <span className="text-orange-300 font-semibold text-sm">Transformatie</span>
+                                  <span className="text-orange-300 font-semibold text-sm">Perfect voor Afvallen</span>
                                 </div>
                               </div>
                               <p className="text-slate-300 mb-6 leading-relaxed">
-                                Perfect voor jouw vetverliesdoel! Dit intensieve 12-weken programma is speciaal
-                                ontworpen voor maximale vetverbranding en zichtbare lichaamstransformatie.
+                                Perfect voor jouw afvaldoel! Dit intensieve 12-weken programma is speciaal ontworpen
+                                voor maximale vetverlies en zichtbare lichaamstransformatie.
                               </p>
                               <div className="grid md:grid-cols-2 gap-4 mb-6">
                                 <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
                                   <h5 className="font-semibold mb-3 text-slate-200 flex items-center gap-2">
                                     <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                                    Waarom 12-Weken
+                                    Waarom 12-Weken Vetverlies
                                   </h5>
                                   <ul className="text-sm text-slate-300 space-y-2">
                                     <li className="flex items-center gap-2">
                                       <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Bewezen vetverliesmethode
+                                      Bewezen vetverlies methode
                                     </li>
                                     <li className="flex items-center gap-2">
                                       <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Intensieve begeleiding
+                                      Intensieve afval begeleiding
                                     </li>
                                     <li className="flex items-center gap-2">
                                       <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
@@ -1043,7 +1061,7 @@ export default function CaloriebehoefteClientPage() {
                                 <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
                                   <h5 className="font-semibold mb-3 text-slate-200 flex items-center gap-2">
                                     <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                                    Jouw resultaat
+                                    Jouw afval resultaat
                                   </h5>
                                   <ul className="text-sm text-slate-300 space-y-2">
                                     <li className="flex items-center gap-2">
@@ -1065,7 +1083,7 @@ export default function CaloriebehoefteClientPage() {
                                 asChild
                                 className="bg-slate-100 text-slate-900 hover:bg-white font-semibold px-8 py-3 text-lg shadow-lg border-0"
                               >
-                                <a href="/12-weken-vetverlies">Start 12-Weken Programma</a>
+                                <a href="/12-weken-vetverlies">Start 12-Weken Vetverlies</a>
                               </Button>
                             </div>
                           </div>
@@ -1082,25 +1100,25 @@ export default function CaloriebehoefteClientPage() {
                             </div>
                             <div className="flex-1 text-center md:text-left">
                               <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
-                                <h4 className="text-2xl font-bold text-slate-100">Online Coaching</h4>
+                                <h4 className="text-2xl font-bold text-slate-100">Online Coaching voor Afvallen</h4>
                                 <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30">
-                                  <span className="text-blue-300 font-semibold text-sm">Flexibel</span>
+                                  <span className="text-blue-300 font-semibold text-sm">Flexibel Afvallen</span>
                                 </div>
                               </div>
                               <p className="text-slate-300 mb-6 leading-relaxed">
                                 Ideaal voor jouw lifestyle! Online Coaching geeft je de flexibiliteit om op je eigen
-                                tempo te werken, met volledige professionele begeleiding via onze geavanceerde app.
+                                tempo af te vallen, met volledige professionele begeleiding via onze app.
                               </p>
                               <div className="grid md:grid-cols-2 gap-4 mb-6">
                                 <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
                                   <h5 className="font-semibold mb-3 text-slate-200 flex items-center gap-2">
                                     <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                                    Waarom Online
+                                    Waarom Online Afvallen
                                   </h5>
                                   <ul className="text-sm text-slate-300 space-y-2">
                                     <li className="flex items-center gap-2">
                                       <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Train wanneer jij wilt
+                                      Afvallen wanneer jij wilt
                                     </li>
                                     <li className="flex items-center gap-2">
                                       <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
@@ -1124,7 +1142,7 @@ export default function CaloriebehoefteClientPage() {
                                     </li>
                                     <li className="flex items-center gap-2">
                                       <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Zelfstandig trainen
+                                      Zelfstandig afvallen
                                     </li>
                                     <li className="flex items-center gap-2">
                                       <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
@@ -1146,10 +1164,12 @@ export default function CaloriebehoefteClientPage() {
 
                       <div className="mt-8 text-center">
                         <div className="bg-slate-800/30 rounded-lg p-6 mb-6 border border-slate-600/30">
-                          <h4 className="font-bold text-lg mb-2 text-amber-300">Speciale Actie</h4>
+                          <h4 className="font-bold text-lg mb-2 text-amber-300">
+                            Speciale Actie voor Caloriebehoefte Calculator Gebruikers
+                          </h4>
                           <p className="text-slate-300 text-sm">
-                            Boek binnen 48 uur een gratis kennismakingsgesprek en ontvang 20% korting op je eerste
-                            maand!
+                            Boek binnen 48 uur een gratis kennismakingsgesprek en ontvang 20% korting op je eerste maand
+                            coaching!
                           </p>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -1158,12 +1178,12 @@ export default function CaloriebehoefteClientPage() {
                             className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 text-lg font-semibold shadow-lg border-0"
                           >
                             <a
-                              href="https://wa.me/31610935077?text=Hoi%20Martin%2C%20ik%20heb%20net%20mijn%20caloriebehoefte%20berekend%20en%20wil%20graag%20meer%20weten%20over%20de%20coaching%20programma%27s%20en%20de%2020%25%20korting!"
+                              href="https://wa.me/31610935077?text=Hoi%20Martin%2C%20ik%20heb%20net%20mijn%20caloriebehoefte%20berekend%20voor%20afvallen%20en%20wil%20graag%20meer%20weten%20over%20de%20coaching%20programma%27s%20en%20de%2020%25%20korting!"
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex items-center gap-2"
                             >
-                              💬 WhatsApp: Gratis Consult
+                              💬 WhatsApp: Gratis Afval Consult
                             </a>
                           </Button>
                           <Button
@@ -1181,8 +1201,8 @@ export default function CaloriebehoefteClientPage() {
 
                   <div className="text-center">
                     <p className="text-gray-600 mb-4">
-                      We hebben je resultaten ook naar je e-mail gestuurd. Heb je vragen? Neem gerust contact met ons
-                      op!
+                      We hebben je caloriebehoefte resultaten ook naar je e-mail gestuurd. Heb je vragen over afvallen
+                      of vetverlies? Neem gerust contact met ons op!
                     </p>
                     <div className="flex flex-col md:flex-row justify-center gap-3">
                       <Button variant="outline" onClick={() => router.push("/")} className="w-full md:w-auto">
@@ -1210,37 +1230,37 @@ export default function CaloriebehoefteClientPage() {
                       <CardContent className="p-3 text-center">
                         <div className="flex items-center justify-center gap-2 mb-1 text-primary">
                           <Flame className="h-4 w-4" />
-                          <h3 className="text-sm font-semibold text-gray-700">Basaal Metabolisme</h3>
+                          <h3 className="text-sm font-semibold text-gray-700">BMR Berekening</h3>
                         </div>
                         <p className="text-xl font-extrabold text-primary tabular-nums">{displayBMR} kcal</p>
-                        <p className="text-xs text-gray-500 mt-1">Calorieën die je lichaam in rust verbruikt</p>
+                        <p className="text-xs text-gray-500 mt-1">Basaal metabolisme in rust</p>
                       </CardContent>
                     </Card>
                     <Card className="bg-white border">
                       <CardContent className="p-3 text-center">
                         <div className="flex items-center justify-center gap-2 mb-1 text-primary">
                           <Activity className="h-4 w-4" />
-                          <h3 className="text-sm font-semibold text-gray-700">Dagelijks Verbruik</h3>
+                          <h3 className="text-sm font-semibold text-gray-700">TDEE Berekening</h3>
                         </div>
                         <p className="text-xl font-extrabold text-primary tabular-nums">{displayTDEE} kcal</p>
-                        <p className="text-xs text-gray-500 mt-1">Totale calorieën die je dagelijks verbruikt</p>
+                        <p className="text-xs text-gray-500 mt-1">Totaal dagelijks energieverbruik</p>
                       </CardContent>
                     </Card>
                     <Card className="bg-white border">
                       <CardContent className="p-3 text-center">
                         <div className="flex items-center justify-center gap-2 mb-1 text-primary">
                           <Target className="h-4 w-4" />
-                          <h3 className="text-sm font-semibold text-gray-700">Doelcalorieën</h3>
+                          <h3 className="text-sm font-semibold text-gray-700">Caloriebehoefte Afvallen</h3>
                         </div>
                         <p className="text-xl font-extrabold text-primary tabular-nums">{displayTarget} kcal</p>
-                        <p className="text-xs text-gray-500 mt-1">Aanbevolen dagelijkse inname voor je doel</p>
+                        <p className="text-xs text-gray-500 mt-1">Dagelijkse calorieën voor afvallen</p>
                       </CardContent>
                     </Card>
                   </div>
 
                   <div className="rounded-xl border bg-white">
                     <div className="rounded-xl p-3">
-                      <h3 className="text-sm font-bold text-primary mb-3">Aanbevolen Macronutriënten</h3>
+                      <h3 className="text-sm font-bold text-primary mb-3">Macronutriënten voor Vetverlies</h3>
                       <div className="space-y-3">
                         <div>
                           <div className="flex justify-between mb-1">
@@ -1289,10 +1309,10 @@ export default function CaloriebehoefteClientPage() {
                     <div className="p-4">
                       <div className="text-center mb-6">
                         <div className="inline-flex items-center justify-center w-12 h-12 bg-slate-700/50 rounded-xl mb-3 border border-slate-600">
-                          <Target className="w-6 h-6 text-slate-200" />
+                          <Calculator className="w-6 h-6 text-slate-200" />
                         </div>
-                        <h3 className="text-lg font-bold mb-2 text-slate-100">Persoonlijke Aanbeveling</h3>
-                        <p className="text-slate-300 text-sm">Het meest geschikte programma voor jouw doelen</p>
+                        <h3 className="text-lg font-bold mb-2 text-slate-100">Coaching voor Afvallen</h3>
+                        <p className="text-slate-300 text-sm">Het beste programma voor jouw afvaldoelen</p>
                       </div>
 
                       {calorieResult.recommendedCoaching === "premium-coaching" && (
@@ -1304,12 +1324,12 @@ export default function CaloriebehoefteClientPage() {
                             <div className="flex items-center justify-center gap-2 mb-3">
                               <h4 className="text-lg font-bold text-slate-100">Premium Coaching</h4>
                               <div className="inline-flex items-center px-2 py-1 rounded-full bg-amber-500/20 border border-amber-500/30">
-                                <span className="text-amber-300 font-semibold text-xs">Aanbevolen</span>
+                                <span className="text-amber-300 font-semibold text-xs">Voor Actieve Mensen</span>
                               </div>
                             </div>
                             <p className="text-slate-300 text-sm mb-4 leading-relaxed">
-                              Persoonlijke training + online begeleiding voor maximale resultaten bij jouw hoge
-                              activiteitsniveau.
+                              Persoonlijke training + online begeleiding voor maximale vetverlies resultaten bij jouw
+                              hoge activiteitsniveau.
                             </p>
                             <div className="grid grid-cols-2 gap-3 mb-4">
                               <div className="bg-slate-700/30 rounded-lg p-2 border border-slate-600/30">
@@ -1321,7 +1341,7 @@ export default function CaloriebehoefteClientPage() {
                                 </ul>
                               </div>
                               <div className="bg-slate-700/30 rounded-lg p-2 border border-slate-600/30">
-                                <h5 className="font-semibold text-xs mb-1 text-slate-200">Resultaat</h5>
+                                <h5 className="font-semibold text-xs mb-1 text-slate-200">Vetverlies</h5>
                                 <ul className="text-xs text-slate-300 space-y-1">
                                   <li>• 3x sneller</li>
                                   <li>• Perfecte vorm</li>
@@ -1348,16 +1368,16 @@ export default function CaloriebehoefteClientPage() {
                             <div className="flex items-center justify-center gap-2 mb-3">
                               <h4 className="text-lg font-bold text-slate-100">12-Weken Vetverlies</h4>
                               <div className="inline-flex items-center px-2 py-1 rounded-full bg-orange-500/20 border border-orange-500/30">
-                                <span className="text-orange-300 font-semibold text-xs">Transform</span>
+                                <span className="text-orange-300 font-semibold text-xs">Perfect Afvallen</span>
                               </div>
                             </div>
                             <p className="text-slate-300 text-sm mb-4 leading-relaxed">
-                              Intensief 12-weken programma speciaal voor maximale vetverbranding en zichtbare
+                              Intensief 12-weken programma speciaal voor maximale vetverlies en zichtbare afval
                               transformatie.
                             </p>
                             <div className="grid grid-cols-2 gap-3 mb-4">
                               <div className="bg-slate-700/30 rounded-lg p-2 border border-slate-600/30">
-                                <h5 className="font-semibold text-xs mb-1 text-slate-200">Methode</h5>
+                                <h5 className="font-semibold text-xs mb-1 text-slate-200">Vetverlies Methode</h5>
                                 <ul className="text-xs text-slate-300 space-y-1">
                                   <li>• Bewezen systeem</li>
                                   <li>• Intensieve begeleiding</li>
@@ -1365,7 +1385,7 @@ export default function CaloriebehoefteClientPage() {
                                 </ul>
                               </div>
                               <div className="bg-slate-700/30 rounded-lg p-2 border border-slate-600/30">
-                                <h5 className="font-semibold text-xs mb-1 text-slate-200">Resultaat</h5>
+                                <h5 className="font-semibold text-xs mb-1 text-slate-200">Afval Resultaat</h5>
                                 <ul className="text-xs text-slate-300 space-y-1">
                                   <li>• 5-15kg verlies</li>
                                   <li>• Strak lichaam</li>
@@ -1377,7 +1397,7 @@ export default function CaloriebehoefteClientPage() {
                               asChild
                               className="w-full bg-slate-100 text-slate-900 hover:bg-white font-semibold text-sm py-2 shadow-lg border-0"
                             >
-                              <a href="/12-weken-vetverlies">Start 12-Weken</a>
+                              <a href="/12-weken-vetverlies">Start 12-Weken Vetverlies</a>
                             </Button>
                           </div>
                         </div>
@@ -1392,16 +1412,16 @@ export default function CaloriebehoefteClientPage() {
                             <div className="flex items-center justify-center gap-2 mb-3">
                               <h4 className="text-lg font-bold text-slate-100">Online Coaching</h4>
                               <div className="inline-flex items-center px-2 py-1 rounded-full bg-blue-500/20 border border-blue-500/30">
-                                <span className="text-blue-300 font-semibold text-xs">Flexibel</span>
+                                <span className="text-blue-300 font-semibold text-xs">Flexibel Afvallen</span>
                               </div>
                             </div>
                             <p className="text-slate-300 text-sm mb-4 leading-relaxed">
-                              Flexibele coaching via onze app. Perfect voor jouw lifestyle met volledige professionele
-                              begeleiding.
+                              Flexibele coaching via onze app. Perfect voor afvallen op jouw tempo met volledige
+                              professionele begeleiding.
                             </p>
                             <div className="grid grid-cols-2 gap-3 mb-4">
                               <div className="bg-slate-700/30 rounded-lg p-2 border border-slate-600/30">
-                                <h5 className="font-semibold text-xs mb-1 text-slate-200">Flexibel</h5>
+                                <h5 className="font-semibold text-xs mb-1 text-slate-200">Flexibel Afvallen</h5>
                                 <ul className="text-xs text-slate-300 space-y-1">
                                   <li>• Eigen tempo</li>
                                   <li>• App begeleiding</li>
@@ -1430,7 +1450,7 @@ export default function CaloriebehoefteClientPage() {
                       <div className="mt-6 text-center">
                         <div className="bg-slate-800/30 rounded-lg p-3 mb-4 border border-slate-600/30">
                           <h4 className="font-bold text-sm mb-1 text-amber-300">Speciale Actie</h4>
-                          <p className="text-slate-300 text-xs">Gratis consult + 20% korting binnen 48 uur!</p>
+                          <p className="text-slate-300 text-xs">Gratis afval consult + 20% korting binnen 48 uur!</p>
                         </div>
                         <div className="flex flex-col gap-2">
                           <Button
@@ -1438,12 +1458,12 @@ export default function CaloriebehoefteClientPage() {
                             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm py-2 shadow-lg border-0"
                           >
                             <a
-                              href="https://wa.me/31610935077?text=Hoi%20Martin%2C%20ik%20heb%20net%20mijn%20caloriebehoefte%20berekend%20en%20wil%20graag%20meer%20weten%20over%20de%20coaching%20en%20de%2020%25%20korting!"
+                              href="https://wa.me/31610935077?text=Hoi%20Martin%2C%20ik%20heb%20net%20mijn%20caloriebehoefte%20berekend%20voor%20afvallen%20en%20wil%20graag%20meer%20weten%20over%20de%20coaching%20en%20de%2020%25%20korting!"
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex items-center justify-center gap-2"
                             >
-                              💬 WhatsApp Consult
+                              💬 WhatsApp Afval Consult
                             </a>
                           </Button>
                           <Button
@@ -1461,8 +1481,8 @@ export default function CaloriebehoefteClientPage() {
 
                   <div className="text-center">
                     <p className="text-xs text-gray-600 mb-3">
-                      We hebben je resultaten ook naar je e-mail gestuurd. Heb je vragen? Neem gerust contact met ons
-                      op!
+                      We hebben je caloriebehoefte resultaten ook naar je e-mail gestuurd. Heb je vragen over afvallen?
+                      Neem gerust contact met ons op!
                     </p>
                     <div className="flex flex-col gap-2">
                       <Button variant="outline" onClick={() => router.push("/")} className="w-full text-xs py-1 h-8">
@@ -1488,28 +1508,28 @@ export default function CaloriebehoefteClientPage() {
       case 0:
         return welcomeMessages
       case 1:
-        return [`Hoi! Laten we beginnen.`, `Wat is je naam?`]
+        return [`Hoi! Laten we beginnen met je caloriebehoefte berekenen.`, `Wat is je naam?`]
       case 2:
         return [
           `Hey ${formData.naam}, aangenaam kennis te maken!`,
-          `Ik heb nog wat gegevens van je nodig om je caloriebehoefte te berekenen.`,
+          `Ik heb nog wat gegevens van je nodig om je caloriebehoefte voor afvallen te berekenen.`,
         ]
       case 3:
-        return [`Nu heb ik wat informatie over je lichaam nodig.`, `Wat is je geslacht?`]
+        return [`Nu heb ik wat informatie over je lichaam nodig voor de BMR berekening.`, `Wat is je geslacht?`]
       case 4:
-        return [`Wat is je leeftijd?`]
+        return [`Wat is je leeftijd? (Voor accurate metabolisme berekening)`]
       case 5:
-        return [`Wat is je huidige gewicht in kg?`]
+        return [`Wat is je huidige gewicht in kg? (Voor caloriebehoefte berekening)`]
       case 6:
-        return [`Wat is je lengte in cm?`]
+        return [`Wat is je lengte in cm? (Voor BMR en TDEE berekening)`]
       case 7:
-        return [`Hoe zou je je activiteitsniveau omschrijven?`]
+        return [`Hoe zou je je activiteitsniveau omschrijven? (Voor TDEE berekening)`]
       case 8:
-        return [`Wat is je belangrijkste doel?`]
+        return [`Wat is je belangrijkste doel? (Voor calorie deficit/surplus berekening)`]
       case 9:
         return [
-          `Geweldig, ${formData.naam}! Hier zijn je resultaten.`,
-          `Op basis van je gegevens hebben we je dagelijkse caloriebehoefte berekend.`,
+          `Geweldig, ${formData.naam}! Hier zijn je caloriebehoefte resultaten voor afvallen.`,
+          `Op basis van je gegevens hebben we je BMR, TDEE en dagelijkse caloriebehoefte berekend.`,
         ]
       default:
         return [""]
@@ -1594,15 +1614,34 @@ export default function CaloriebehoefteClientPage() {
           {/* Page hero heading */}
           <div className="text-center mb-8 sm:mb-10">
             <div className="inline-flex items-center gap-2 rounded-full border text-primary border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium">
-              Gratis tool
+              <Calculator className="h-3 w-3" />
+              Gratis caloriebehoefte calculator
             </div>
             <h1 className="mt-3 text-3xl sm:text-4xl font-extrabold text-primary tracking-tight">
-              Caloriebehoefte Berekenen
+              Caloriebehoefte Berekenen voor Afvallen
             </h1>
             <p className="text-gray-600 mt-3 sm:mt-4 max-w-2xl mx-auto">
-              Bereken je dagelijkse caloriebehoefte en krijg een persoonlijk voedingsadvies op basis van je doelen en
-              activiteitsniveau.
+              Bereken je dagelijkse caloriebehoefte, BMR en TDEE voor effectief afvallen en vetverlies. Inclusief
+              persoonlijk macronutriënten advies en coaching aanbeveling.
             </p>
+            <div className="flex flex-wrap justify-center gap-2 mt-4 text-xs text-gray-500">
+              <span className="inline-flex items-center gap-1">
+                <Zap className="h-3 w-3" />
+                BMR Berekening
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Activity className="h-3 w-3" />
+                TDEE Berekening
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Target className="h-3 w-3" />
+                Calorie Deficit
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Flame className="h-3 w-3" />
+                Vetverlies Plan
+              </span>
+            </div>
           </div>
 
           {/* Progress */}
@@ -1632,7 +1671,8 @@ export default function CaloriebehoefteClientPage() {
           {/* Footer note below card */}
           {currentStep < 9 && (
             <div className="text-center mt-6 sm:mt-8 text-xs text-gray-500">
-              Je gegevens worden vertrouwelijk behandeld en uitsluitend gebruikt voor je persoonlijke advies.
+              Je gegevens worden vertrouwelijk behandeld en uitsluitend gebruikt voor je persoonlijke caloriebehoefte
+              berekening en afval advies.
             </div>
           )}
         </section>
