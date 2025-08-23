@@ -138,8 +138,8 @@ export default function PersonalTrainingClientPage() {
   const benefits = [
     {
       icon: User,
-      title: "Persoonlijke Aandacht",
-      description: "100% focus van je gecertificeerde trainer tijdens elke sessie",
+      title: "Persoonlijke Trainer Sneek",
+      description: "100% focus van je gecertificeerde persoonlijke trainer in Sneek tijdens elke sessie",
     },
     {
       icon: Target,
@@ -153,8 +153,9 @@ export default function PersonalTrainingClientPage() {
     },
     {
       icon: Zap,
-      title: "Snellere Resultaten",
-      description: "Efficiëntere trainingen leiden tot snellere en betere resultaten",
+      title: "Sneller Vetverlies & Resultaten",
+      description:
+        "Efficiëntere trainingen voor vetverlies en spieropbouw leiden tot snellere en betere resultaten in Sneek",
     },
     {
       icon: Heart,
@@ -228,10 +229,11 @@ export default function PersonalTrainingClientPage() {
                   Personal Training
                 </Badge>
                 <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                  Persoonlijke Training met <span className="text-gray-700">Maximale Resultaten</span>
+                  Personal Training Sneek - <span className="text-gray-700">Jouw Persoonlijke Trainer</span>
                 </h1>
                 <p className="text-lg lg:text-xl text-gray-600 leading-relaxed">
-                  Ervaar de kracht van 1-op-1 begeleiding met onze gecertificeerde personal trainers. Bereik je doelen
+                  Op zoek naar een persoonlijke trainer in Sneek of omgeving? Ervaar de kracht van 1-op-1 begeleiding
+                  met onze gecertificeerde personal trainers. Bereik je doelen voor vetverlies, spieropbouw en fitness
                   sneller, veiliger en effectiever dan ooit tevoren.
                 </p>
               </div>
@@ -320,10 +322,11 @@ export default function PersonalTrainingClientPage() {
               Voordelen
             </Badge>
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Waarom Kiezen voor <span className="text-gray-700">Personal Training</span>?
+              Waarom Kiezen voor een <span className="text-gray-700">Persoonlijke Trainer in Sneek</span>?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Personal training biedt unieke voordelen die je niet krijgt bij groepslessen of zelfstandig trainen.
+              Personal training in Sneek biedt unieke voordelen die je niet krijgt bij groepslessen of zelfstandig
+              trainen. Onze persoonlijke trainers in Friesland zorgen voor maximale resultaten.
             </p>
           </div>
 
@@ -352,10 +355,11 @@ export default function PersonalTrainingClientPage() {
               Proces
             </Badge>
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Hoe werkt <span className="text-gray-700">Personal Training</span>?
+              Hoe werkt <span className="text-gray-700">Personal Training in Sneek</span>?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Van eerste kennismaking tot het bereiken van je doelen - zo ziet jouw reis eruit.
+              Van eerste kennismaking tot het bereiken van je doelen voor vetverlies of spieropbouw - zo ziet jouw reis
+              met een persoonlijke trainer in Friesland eruit.
             </p>
           </div>
 
@@ -400,6 +404,52 @@ export default function PersonalTrainingClientPage() {
                 )}
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Local SEO Section */}
+      <section className="py-16 lg:py-24 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <Badge className="bg-gray-100 text-gray-700 border-gray-200">
+              <Target className="w-4 h-4 mr-2" />
+              Personal Training Sneek
+            </Badge>
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900">
+              Jouw <span className="text-gray-700">Persoonlijke Trainer</span> in Sneek
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8 text-left">
+              <div className="space-y-4">
+                <h3 className="text-2xl font-bold text-gray-900">Vetverlies Sneek</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Wil je afvallen in Sneek? Onze persoonlijke trainers zijn gespecialiseerd in vetverlies en helpen je
+                  op een gezonde manier je ideale gewicht te bereiken. Met een op maat gemaakt voedings- en
+                  trainingsplan zie je snel resultaat.
+                </p>
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-2xl font-bold text-gray-900">Spieropbouw Friesland</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Spieren opbouwen in Friesland? Onze ervaren personal trainers in Sneek helpen je met krachttraining en
+                  spieropbouw. Van beginner tot gevorderd - we passen de training aan jouw niveau aan.
+                </p>
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-2xl font-bold text-gray-900">Fitness Coaching Sneek</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Zoek je een fitness coach in Sneek? Onze gecertificeerde trainers bieden complete begeleiding voor al
+                  je fitnessdoelen. Van conditie verbeteren tot kracht opbouwen - wij helpen je verder.
+                </p>
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-2xl font-bold text-gray-900">Personal Trainer Friesland</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Als ervaren personal trainers in Friesland kennen we de lokale gemeenschap. We bieden flexibele
+                  trainingstijden en locaties die perfect aansluiten bij jouw agenda en voorkeuren.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -499,11 +549,11 @@ export default function PersonalTrainingClientPage() {
                   Contact
                 </Badge>
                 <h2 className="text-4xl font-bold text-gray-900">
-                  Klaar om te <span className="text-gray-700">Starten</span>?
+                  Klaar om te <span className="text-gray-700">Starten met Personal Training</span>?
                 </h2>
                 <p className="text-xl text-gray-600 leading-relaxed">
-                  Neem contact met ons op voor een gratis kennismakingsgesprek en ontdek hoe personal training jouw
-                  leven kan veranderen.
+                  Neem contact met ons op voor een gratis kennismakingsgesprek met een persoonlijke trainer in Sneek en
+                  ontdek hoe personal training jouw leven kan veranderen.
                 </p>
               </div>
 
