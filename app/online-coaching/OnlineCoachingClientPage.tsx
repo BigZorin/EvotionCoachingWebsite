@@ -18,7 +18,7 @@ import {
   TrendingUp,
   ArrowRight,
   Award,
-  MessageCircle,
+  MapPin,
 } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
@@ -38,7 +38,7 @@ export default function OnlineCoachingClientPage() {
     },
     {
       icon: <User className="w-8 h-8 text-primary" />,
-      title: "Persoonlijke Coach",
+      title: "Persoonlijke Online Coach",
       description:
         "Ondanks dat het online is, werk je nog steeds met een persoonlijke coach die je programma aanpast aan jouw behoeften en voortgang.",
     },
@@ -121,86 +121,122 @@ export default function OnlineCoachingClientPage() {
 
   const packages = [
     {
-      title: "3 Maanden Coaching",
-      sessions: "12 weken begeleiding",
+      title: "3 Maanden Online Coaching",
+      sessions: "12 weken online begeleiding",
       price: "Op aanvraag",
       pricePerSession: "Maandelijks betalen mogelijk",
       features: [
-        "Gepersonaliseerd trainingsschema",
-        "Basis voedingsadvies",
-        "Wekelijkse check-ins",
+        "Gepersonaliseerd online trainingsschema",
+        "Basis voedingsadvies via app",
+        "Wekelijkse online check-ins",
         "Toegang tot Evotion App",
         "Onbeperkte coach support",
-        "Voortgangsanalyses",
+        "Online voortgangsanalyses",
       ],
       popular: false,
-      note: "Ideaal voor kennismaking",
+      note: "Ideaal voor kennismaking met online coaching",
     },
     {
-      title: "6 Maanden Coaching",
-      sessions: "24 weken begeleiding",
+      title: "6 Maanden Online Coaching",
+      sessions: "24 weken online begeleiding",
       price: "Op aanvraag",
       pricePerSession: "Beste prijs-kwaliteit verhouding",
       features: [
-        "Gepersonaliseerd trainingsschema",
-        "Uitgebreid voedingsplan",
-        "Onbeperkte coach support",
+        "Volledig gepersonaliseerd online programma",
+        "Uitgebreid online voedingsplan",
+        "Onbeperkte online coach support",
         "Wekelijkse video check-ins",
         "Toegang tot Evotion App",
-        "Voortgangsanalyses",
+        "Gedetailleerde online voortgangsanalyses",
         "Seizoensgebonden aanpassingen",
-        "Volledige roadmap doorlopen (Week 1-12+)",
-        "Optimalisatie & verfijning fase",
-        "Langetermijn gewoontes opbouwen",
+        "Volledige online transformatie cyclus",
+        "Online optimalisatie & verfijning fase",
+        "Langetermijn online gewoontes opbouwen",
       ],
       popular: true,
-      note: "Volledige transformatie cyclus",
+      note: "Volledige online transformatie cyclus",
     },
     {
-      title: "12 Maanden Coaching",
-      sessions: "52 weken begeleiding",
+      title: "12 Maanden Online Coaching",
+      sessions: "52 weken online begeleiding",
       price: "Op aanvraag",
-      pricePerSession: "Maximale transformatie",
+      pricePerSession: "Maximale online transformatie",
       features: [
-        "Volledig op maat gemaakt programma",
-        "Geavanceerd voedingsplan",
-        "Prioriteit coach support",
-        "Wekelijkse video calls",
+        "Volledig op maat gemaakt online programma",
+        "Geavanceerd online voedingsplan",
+        "Prioriteit online coach support",
+        "Wekelijkse online video calls",
         "Toegang tot Evotion App",
-        "Gedetailleerde voortgangsanalyses",
-        "Supplementadvies",
-        "Lange termijn strategie",
+        "Gedetailleerde online voortgangsanalyses",
+        "Online supplementadvies",
+        "Lange termijn online strategie",
       ],
       popular: false,
-      note: "Voor maximale resultaten",
+      note: "Voor maximale online resultaten",
     },
   ]
 
   const faqs = [
     {
-      question: "Hoe verschilt online coaching van personal training?",
+      question: "Hoe effectief is online coaching voor vetverlies?",
       answer:
-        "Online coaching biedt flexibiliteit qua tijd en locatie, terwijl personal training directe, hands-on begeleiding biedt. Bij online coaching krijg je nog steeds een gepersonaliseerd programma en regelmatige feedback van je coach, maar je voert de trainingen zelfstandig uit. Dit maakt het ideaal voor mensen met een druk schema of die liever in hun eigen omgeving trainen. De Evotion Coaching App zorgt ervoor dat je altijd verbonden blijft met je coach en je voortgang kunt bijhouden.",
+        "Online coaching is zeer effectief voor vetverlies. Onze online begeleiding heeft bewezen resultaten met gemiddeld 8-15kg vetverlies in 12 weken. Door de combinatie van gepersonaliseerde voedingsplannen, trainingsschema's en continue online support bereiken onze klanten duurzame resultaten. Online vetverlies coaching biedt de flexibiliteit om je programma te volgen wanneer het jou uitkomt, terwijl je nog steeds professionele begeleiding krijgt.",
     },
     {
-      question: "Heb ik speciale apparatuur nodig voor online coaching?",
+      question: "Wat maakt online personal training anders dan gewone fitness apps?",
       answer:
-        "Nee, we passen je programma aan op basis van de apparatuur die je tot je beschikking hebt. Of je nu thuis traint met minimale uitrusting, toegang hebt tot een volledig uitgeruste sportschool, of ergens daartussenin zit, we kunnen een effectief programma voor je samenstellen. Tijdens de intake bespreken we welke apparatuur je hebt en hoe we dit optimaal kunnen benutten voor je doelen. We kunnen ook alternatieven suggereren als je bepaalde apparatuur niet hebt.",
+        "Online personal training bij Evotion Coaching verschilt van gewone fitness apps doordat je een echte, gekwalificeerde personal trainer toegewezen krijgt. Je krijgt geen standaard programma's, maar volledig gepersonaliseerde trainingsschema's en voedingsplannen. Je online personal trainer past je programma continu aan op basis van je voortgang en feedback. Dit is geen geautomatiseerde app, maar echte menselijke begeleiding via digitale kanalen.",
     },
     {
-      question: "Hoe vaak heb ik contact met mijn coach?",
+      question: "Kan ik online spieropbouw bereiken zonder sportschool?",
       answer:
-        "Dit hangt af van het pakket dat je kiest. Bij het Basis pakket heb je wekelijkse check-ins, terwijl Premium en Elite pakketten frequenter contact bieden, inclusief video calls en onbeperkte chat support. Alle pakketten geven je toegang tot de Evotion Coaching App, waar je direct vragen kunt stellen en feedback kunt ontvangen op je trainingen en voeding. We streven ernaar om binnen 24 uur te reageren op alle vragen, en Premium en Elite klanten krijgen vaak nog snellere reacties.",
+        "Ja, online spieropbouw is zeker mogelijk, ook zonder sportschool. Onze online coaches stellen trainingsschema's samen die aangepast zijn aan jouw beschikbare apparatuur - of dat nu thuis is met minimale uitrusting of in een volledig uitgeruste sportschool. We hebben bewezen methodes voor online spieropbouw met lichaamsgewicht oefeningen, weerstandsbanden, of basic gewichten. Je online begeleiding wordt volledig aangepast aan jouw situatie.",
     },
     {
-      question: "Kan ik overstappen van online coaching naar personal training of andersom?",
+      question: "Hoe werkt online voedingsbegeleiding precies?",
       answer:
-        "Absoluut! Veel van onze klanten wisselen tussen online coaching en personal training, afhankelijk van hun schema en behoeften. We maken deze overgang naadloos door al je gegevens en voortgang bij te houden in ons systeem. Je kunt bijvoorbeeld beginnen met personal training om de basis te leggen en later overstappen naar online coaching als je meer zelfvertrouwen hebt. Of je kunt online coaching combineren met occasionele personal training sessies voor extra begeleiding. We bieden ook hybride pakketten aan die beide diensten combineren.",
+        "Online voedingsbegeleiding bij Evotion Coaching werkt via onze app waar je dagelijks je voeding kunt bijhouden. Je krijgt een gepersonaliseerd voedingsplan dat past bij je doelen (vetverlies, spieropbouw, of body recomposition). Je online coach bekijkt regelmatig je voedingsdagboek en geeft feedback en aanpassingen. We leren je ook de principes achter gezonde voeding, zodat je uiteindelijk zelfstandig goede keuzes kunt maken. Dit is veel persoonlijker dan standaard online dieet apps.",
     },
     {
-      question: "Is online coaching effectief voor beginners?",
+      question: "Is online fitness coaching geschikt voor beginners?",
       answer:
-        "Ja, online coaching kan zeer effectief zijn voor beginners. We besteden extra aandacht aan het leren van de juiste techniek via video-instructies, feedback op je eigen opnames, en gedetailleerde uitleg. Beginners krijgen vaak meer frequente check-ins om ervoor te zorgen dat ze op het juiste spoor zitten. We raden beginners aan om te starten met ons Premium pakket voor extra ondersteuning in de eerste maanden. Als je je zorgen maakt over techniek, kunnen we ook een combinatie van personal training en online coaching aanbevelen om je op weg te helpen.",
+        "Online fitness coaching is uitstekend geschikt voor beginners. Veel mensen voelen zich comfortabeler om thuis te beginnen met trainen onder begeleiding van een online personal trainer. We besteden extra aandacht aan het leren van de juiste techniek via video-instructies en feedback. Beginners krijgen vaak meer frequente online check-ins om ervoor te zorgen dat ze op het juiste spoor zitten. Online coaching elimineert de drempel van naar een sportschool gaan en biedt een veilige omgeving om te leren.",
+    },
+    {
+      question: "Wat zijn de voordelen van online coaching ten opzichte van offline coaching?",
+      answer:
+        "Online coaching biedt unieke voordelen: flexibiliteit om te trainen wanneer het jou uitkomt, geen reistijd naar een sportschool of trainer, vaak kosteneffectiever dan persoonlijke training, toegang tot je coach via de app wanneer je vragen hebt, en de mogelijkheid om je programma overal ter wereld te volgen. Je krijgt nog steeds persoonlijke begeleiding, maar met de vrijheid en flexibiliteit die past bij jouw levensstijl. Voor veel mensen is online coaching zelfs effectiever omdat het beter past in hun dagelijkse routine.",
+    },
+  ]
+
+  const seoServices = [
+    {
+      title: "Online Vetverlies Coaching",
+      description:
+        "Bereik je ideale gewicht met onze bewezen online vetverlies methode. Gepersonaliseerde voedingsplannen en trainingsschema's voor duurzaam gewichtsverlies.",
+      icon: <Flame className="w-8 h-8 text-primary" />,
+      keywords: "online vetverlies, online afvallen, gewichtsverlies coaching",
+    },
+    {
+      title: "Online Spieropbouw Begeleiding",
+      description:
+        "Bouw spiermassa op met professionele online begeleiding. Trainingsschema's en voedingsadvies voor optimale spieropbouw, thuis of in de sportschool.",
+      icon: <Trophy className="w-8 h-8 text-primary" />,
+      keywords: "online spieropbouw, muscle building, online fitness",
+    },
+    {
+      title: "Online Personal Training Nederland",
+      description:
+        "Krijg persoonlijke aandacht van een gekwalificeerde online personal trainer. Volledig op maat gemaakte programma's voor jouw specifieke doelen.",
+      icon: <User className="w-8 h-8 text-primary" />,
+      keywords: "online personal trainer, online fitness coaching, personal training",
+    },
+    {
+      title: "Online Voedingsbegeleiding",
+      description:
+        "Leer gezond eten met onze online voedingscoaches. Gepersonaliseerde voedingsplannen en continue begeleiding voor blijvende resultaten.",
+      icon: <Brain className="w-8 h-8 text-primary" />,
+      keywords: "online voedingsadvies, voedingsbegeleiding, online diëtist",
     },
   ]
 
@@ -224,18 +260,18 @@ export default function OnlineCoachingClientPage() {
         <div className="container mx-auto px-4 lg:px-6 relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-6 md:space-y-8">
             <Badge className="bg-secondary/20 text-white hover:bg-secondary/30 backdrop-blur-sm text-sm px-4 py-2">
-              <Smartphone className="w-4 h-4 mr-2" />
-              Flexibele Coaching Via Onze App
+              <MapPin className="w-4 h-4 mr-2" />
+              #1 Online Coaching Nederland
             </Badge>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
-              Online Coaching
+              Online Coaching Nederland
               <span className="block text-secondary">Voor Maximale Flexibiliteit</span>
             </h1>
 
             <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto">
-              Professionele coaching waar en wanneer het jou uitkomt. Krijg gepersonaliseerde trainingsschema's,
-              voedingsadvies en directe feedback van je coach via onze geavanceerde app.
+              De beste online personal training en coaching van Nederland. Professionele online begeleiding voor
+              vetverlies, spieropbouw en een gezondere levensstijl. Waar en wanneer het jou uitkomt.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
@@ -243,29 +279,90 @@ export default function OnlineCoachingClientPage() {
                 size="lg"
                 className="bg-white text-primary hover:bg-gray-100 px-8 py-6 text-lg font-semibold shadow-xl w-full sm:w-auto"
               >
-                Start Nu
+                Start Online Coaching
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-6 text-lg font-semibold bg-transparent w-full sm:w-auto"
               >
-                Bekijk Prijzen
+                Bekijk Online Pakketten
               </Button>
             </div>
 
             <div className="grid grid-cols-3 gap-4 pt-8 max-w-2xl mx-auto">
               <div className="text-center">
                 <div className="text-2xl md:text-3xl font-bold text-white mb-1">24/7</div>
-                <div className="text-xs md:text-sm text-white/80">Coach toegang</div>
+                <div className="text-xs md:text-sm text-white/80">Online toegang</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-white mb-1">100%</div>
-                <div className="text-xs md:text-sm text-white/80">Op maat gemaakt</div>
+                <div className="text-2xl md:text-3xl font-bold text-white mb-1">500+</div>
+                <div className="text-xs md:text-sm text-white/80">Online klanten</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl md:text-3xl font-bold text-white mb-1">95%</div>
-                <div className="text-xs md:text-sm text-white/80">Succesratio</div>
+                <div className="text-xs md:text-sm text-white/80">Online succesratio</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SEO Services Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4 lg:px-6">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <Badge className="bg-primary/10 text-primary mb-4">Online Diensten</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+              Online Coaching <span className="text-primary">Voor Elke Doelstelling</span>
+            </h2>
+            <p className="text-lg text-gray-600">
+              Of je nu online wilt afvallen, spieren wilt opbouwen, of gewoon fitter wilt worden - onze online coaches
+              begeleiden je naar succes.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            {seoServices.map((service, index) => (
+              <Card key={index} className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-primary">
+                <CardContent className="p-8">
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      {service.icon}
+                    </div>
+                    <div className="space-y-3">
+                      <h3 className="font-bold text-xl text-gray-900">{service.title}</h3>
+                      <p className="text-gray-600 leading-relaxed">{service.description}</p>
+                      <div className="text-sm text-primary font-medium">{service.keywords}</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Online Success Stats */}
+          <div className="bg-white rounded-2xl p-8 shadow-lg">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Waarom Kiezen Voor Online Coaching?</h3>
+              <p className="text-gray-600">Bewezen resultaten met online begeleiding door heel Nederland</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary mb-2">8-15kg</div>
+                <div className="text-sm text-gray-600">Gemiddeld online vetverlies</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary mb-2">3-8kg</div>
+                <div className="text-sm text-gray-600">Online spieropbouw</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary mb-2">12 weken</div>
+                <div className="text-sm text-gray-600">Zichtbare online resultaten</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary mb-2">500+</div>
+                <div className="text-sm text-gray-600">Tevreden online klanten</div>
               </div>
             </div>
           </div>
@@ -278,11 +375,11 @@ export default function OnlineCoachingClientPage() {
           <div className="text-center max-w-3xl mx-auto mb-16">
             <Badge className="bg-primary/10 text-primary mb-4">Voordelen</Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Waarom Kiezen Voor <span className="text-primary">Online Coaching?</span>
+              Waarom Evotion <span className="text-primary">Online Coaching?</span>
             </h2>
             <p className="text-lg text-gray-600">
-              Online coaching biedt flexibiliteit en persoonlijke begeleiding, perfect voor mensen met een druk schema
-              die toch professionele ondersteuning willen.
+              Online coaching biedt flexibiliteit en persoonlijke begeleiding, perfect voor mensen die professionele
+              ondersteuning willen zonder locatie- of tijdsbeperkingen.
             </p>
           </div>
 
@@ -338,11 +435,11 @@ export default function OnlineCoachingClientPage() {
             <div className="order-2 lg:order-1">
               <Badge className="bg-primary/10 text-primary mb-4">De Evotion App</Badge>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                Jouw Coach <span className="text-primary">Altijd Bij De Hand</span>
+                Jouw Online Coach <span className="text-primary">Altijd Bij De Hand</span>
               </h2>
               <p className="text-lg text-gray-600 mb-8">
-                Onze geavanceerde app is het centrale punt van je online coaching ervaring. Krijg toegang tot je
-                trainingsschema's, voedingsplannen en directe communicatie met je coach.
+                Onze geavanceerde app is het centrale punt van je online coaching ervaring. Krijg toegang tot je online
+                trainingsschema's, voedingsplannen en directe communicatie met je online personal trainer.
               </p>
 
               <div className="space-y-6">
@@ -351,9 +448,10 @@ export default function OnlineCoachingClientPage() {
                     <CheckCircle className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-gray-900 mb-1">Trainingsschema's & Video's</h3>
+                    <h3 className="font-bold text-lg text-gray-900 mb-1">Online Trainingsschema's & Video's</h3>
                     <p className="text-gray-600">
-                      Toegang tot je gepersonaliseerde trainingsschema's met video-instructies voor elke oefening.
+                      Toegang tot je gepersonaliseerde online trainingsschema's met video-instructies voor elke
+                      oefening.
                     </p>
                   </div>
                 </div>
@@ -363,9 +461,9 @@ export default function OnlineCoachingClientPage() {
                     <CheckCircle className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-gray-900 mb-1">Voortgangsmonitoring</h3>
+                    <h3 className="font-bold text-lg text-gray-900 mb-1">Online Voortgangsmonitoring</h3>
                     <p className="text-gray-600">
-                      Houd je voortgang bij met foto's, metingen en grafieken om je ontwikkeling te visualiseren.
+                      Houd je online voortgang bij met foto's, metingen en grafieken om je ontwikkeling te visualiseren.
                     </p>
                   </div>
                 </div>
@@ -375,16 +473,16 @@ export default function OnlineCoachingClientPage() {
                     <CheckCircle className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-gray-900 mb-1">Directe Coach Communicatie</h3>
+                    <h3 className="font-bold text-lg text-gray-900 mb-1">24/7 Online Coach Communicatie</h3>
                     <p className="text-gray-600">
-                      Stel vragen, deel updates en ontvang feedback van je coach via de ingebouwde chat functie.
+                      Stel vragen, deel updates en ontvang feedback van je online coach via de ingebouwde chat functie.
                     </p>
                   </div>
                 </div>
               </div>
 
               <div className="mt-10">
-                <Button className="bg-primary hover:bg-primary/90">Download De App</Button>
+                <Button className="bg-primary hover:bg-primary/90">Download De Online Coaching App</Button>
               </div>
             </div>
 
@@ -396,7 +494,7 @@ export default function OnlineCoachingClientPage() {
                   <div className="w-full h-full bg-white rounded-[32px] overflow-hidden">
                     <Image
                       src="/images/evotion-app-login.jpg"
-                      alt="Evotion Coaching App"
+                      alt="Evotion Online Coaching App"
                       width={280}
                       height={560}
                       className="w-full h-full object-cover"
@@ -409,19 +507,20 @@ export default function OnlineCoachingClientPage() {
         </div>
       </section>
 
-      {/* Roadmap Section */}
+      {/* Online Coaching Process */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4 lg:px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <Badge className="bg-primary/10 text-primary mb-4">
               <TrendingUp className="w-4 h-4 mr-2" />
-              Jouw Reis
+              Online Coaching Process
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
               Hoe werkt <span className="text-primary">Online Coaching?</span>
             </h2>
             <p className="text-lg text-gray-600">
-              Van intake tot langetermijn succes - zo begeleiden we je stap voor stap naar je doelen.
+              Van online intake tot langetermijn online succes - zo begeleiden we je stap voor stap naar je doelen via
+              onze online platform.
             </p>
           </div>
 
@@ -429,14 +528,12 @@ export default function OnlineCoachingClientPage() {
             <div className="space-y-8">
               {roadmapSteps.map((step, index) => (
                 <div key={index} className="flex gap-6 md:gap-8 group">
-                  {/* Step Number */}
                   <div className="flex-shrink-0">
                     <div className="w-16 h-16 md:w-20 md:h-20 bg-primary rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                       <span className="text-white font-bold text-xl md:text-2xl">{step.step}</span>
                     </div>
                   </div>
 
-                  {/* Content */}
                   <div className="flex-1 pb-8">
                     <div className="bg-gray-50 rounded-2xl p-6 md:p-8 group-hover:bg-gray-100 transition-colors duration-300">
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
@@ -449,85 +546,24 @@ export default function OnlineCoachingClientPage() {
                 </div>
               ))}
             </div>
-
-            {/* Bottom Summary */}
-            <div className="mt-16 text-center">
-              <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-2xl p-8 border border-primary/20">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <Trophy className="w-6 h-6 text-primary" />
-                  <h3 className="text-2xl font-bold text-gray-900">Jouw Succes is Ons Doel</h3>
-                </div>
-                <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                  Met deze bewezen aanpak hebben we al honderden mensen geholpen hun fitnessdoelen te bereiken. Jij bent
-                  de volgende!
-                </p>
-                <Button className="bg-primary hover:bg-primary/90 px-8 py-3">
-                  Begin Nu Je Transformatie
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Sweet Spot Highlight */}
-      <section className="py-16 bg-gradient-to-r from-primary/5 to-secondary/5">
-        <div className="container mx-auto px-4 lg:px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <Badge className="bg-primary/10 text-primary mb-6">
-              <Trophy className="w-4 h-4 mr-2" />
-              De Perfecte Duur
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Waarom <span className="text-primary">6 Maanden</span> de Ideale Keuze is
-            </h2>
-            <div className="grid md:grid-cols-3 gap-8 mt-12">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Target className="w-8 h-8 text-primary" />
-                </div>
-                <h3 className="font-bold text-lg mb-2">Volledige Roadmap</h3>
-                <p className="text-gray-600">
-                  Doorloop alle fasen van onze bewezen roadmap: van intake tot langetermijn succes (Week 1-12+)
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Brain className="w-8 h-8 text-primary" />
-                </div>
-                <h3 className="font-bold text-lg mb-2">Gewoontes Vormen</h3>
-                <p className="text-gray-600">
-                  6 maanden is wetenschappelijk bewezen de ideale tijd om blijvende gewoontes te ontwikkelen
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <BarChart className="w-8 h-8 text-primary" />
-                </div>
-                <h3 className="font-bold text-lg mb-2">Optimale Resultaten</h3>
-                <p className="text-gray-600">
-                  Tijd voor echte verfijning en optimalisatie van je programma voor maximale effectiviteit
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
+      {/* Online Coaching Packages */}
       <section className="py-16 lg:py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <Badge className="bg-primary/10 text-primary mb-6">
               <Trophy className="w-4 h-4 mr-2" />
-              Pakketten
+              Online Coaching Pakketten
             </Badge>
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Kies het <span className="text-primary">Pakket</span> dat bij je Past
+              Kies het <span className="text-primary">Online Pakket</span> dat bij je Past
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Van een kennismaking tot een complete transformatie - we hebben voor iedereen het juiste pakket.
+              Van een online kennismaking tot een complete online transformatie - we hebben voor iedereen het juiste
+              online coaching pakket.
             </p>
           </div>
 
@@ -575,26 +611,12 @@ export default function OnlineCoachingClientPage() {
                         : "bg-gray-900 hover:bg-gray-800 text-white"
                     }`}
                   >
-                    Selecteer Pakket
+                    Start Online Coaching
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </CardContent>
               </Card>
             ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <p className="text-gray-600 mb-6">
-              Niet zeker welk pakket het beste bij je past? We helpen je graag bij het maken van de juiste keuze.
-            </p>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-2 border-primary text-primary hover:bg-primary hover:text-white bg-transparent"
-            >
-              <MessageCircle className="w-5 h-5 mr-2" />
-              Neem Contact Op
-            </Button>
           </div>
         </div>
       </section>
@@ -605,10 +627,11 @@ export default function OnlineCoachingClientPage() {
           <div className="text-center max-w-3xl mx-auto mb-16">
             <Badge className="bg-primary/10 text-primary mb-4">FAQ</Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Veelgestelde <span className="text-primary">Vragen</span>
+              Veelgestelde Vragen Over <span className="text-primary">Online Coaching</span>
             </h2>
             <p className="text-lg text-gray-600">
-              Heb je vragen over online coaching? Hieronder vind je antwoorden op de meest gestelde vragen.
+              Heb je vragen over online coaching, online vetverlies, of online personal training? Hieronder vind je
+              antwoorden op de meest gestelde vragen.
             </p>
           </div>
 
@@ -639,8 +662,10 @@ export default function OnlineCoachingClientPage() {
           </div>
 
           <div className="text-center mt-12">
-            <p className="text-gray-500 mb-6">Heb je een andere vraag die hier niet beantwoord wordt?</p>
-            <Button className="bg-primary hover:bg-primary/90">Stel Je Vraag</Button>
+            <p className="text-gray-500 mb-6">
+              Heb je een andere vraag over online coaching die hier niet beantwoord wordt?
+            </p>
+            <Button className="bg-primary hover:bg-primary/90">Stel Je Online Coaching Vraag</Button>
           </div>
         </div>
       </section>
@@ -650,25 +675,25 @@ export default function OnlineCoachingClientPage() {
         <div className="container mx-auto px-4 lg:px-6">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-              Klaar Om Je <span className="text-secondary">Transformatie</span> Te Starten?
+              Klaar Om Je <span className="text-secondary">Online Transformatie</span> Te Starten?
             </h2>
             <p className="text-xl text-white/90 leading-relaxed">
-              Begin vandaag nog met online coaching en ervaar hoe professionele begeleiding, gecombineerd met maximale
-              flexibiliteit, je kan helpen je doelen te bereiken.
+              Begin vandaag nog met online coaching en ervaar hoe professionele online begeleiding je kan helpen je
+              doelen te bereiken. Sluit je aan bij 500+ tevreden online coaching klanten door heel Nederland.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <Button
                 size="lg"
                 className="bg-white text-primary hover:bg-gray-100 px-8 py-6 text-lg font-semibold shadow-xl w-full sm:w-auto"
               >
-                Start Nu
+                Start Online Coaching Nu
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-6 text-lg font-semibold bg-transparent w-full sm:w-auto"
               >
-                Bekijk Alle Diensten
+                Bekijk Alle Online Diensten
               </Button>
             </div>
           </div>
