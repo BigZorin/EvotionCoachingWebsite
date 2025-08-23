@@ -16,7 +16,6 @@ import {
   Star,
   CheckCircle,
   Target,
-  Award,
   ArrowRight,
   Phone,
   MessageCircle,
@@ -26,7 +25,7 @@ import {
   User,
   Zap,
   TrendingUp,
-  Sparkles,
+  Trophy,
 } from "lucide-react"
 
 function useAnimatedCounter(target: number, duration = 1400, startWhenVisible = true) {
@@ -36,13 +35,12 @@ function useAnimatedCounter(target: number, duration = 1400, startWhenVisible = 
 
   useEffect(() => {
     if (!startWhenVisible) {
-      // animate immediately
       let start: number | null = null
       let raf: number
       const step = (ts: number) => {
         if (start === null) start = ts
         const progress = Math.min((ts - start) / duration, 1)
-        const eased = 1 - Math.pow(1 - progress, 3) // easeOutCubic
+        const eased = 1 - Math.pow(1 - progress, 3)
         setValue(Math.floor(target * eased))
         if (progress < 1) {
           raf = requestAnimationFrame(step)
@@ -66,16 +64,13 @@ function useAnimatedCounter(target: number, duration = 1400, startWhenVisible = 
           const step = (ts: number) => {
             if (start === null) start = ts
             const progress = Math.min((ts - start) / duration, 1)
-            const eased = 1 - Math.pow(1 - progress, 3) // easeOutCubic
+            const eased = 1 - Math.pow(1 - progress, 3)
             setValue(Math.floor(target * eased))
             if (progress < 1) {
               raf = requestAnimationFrame(step)
             }
           }
           raf = requestAnimationFrame(step)
-          const cleanup = () => cancelAnimationFrame(raf)
-          // cleanup when unobserved
-          node.addEventListener("visibilitychange", cleanup, { once: true } as any)
         }
       },
       { threshold: 0.4 },
@@ -214,100 +209,81 @@ export default function PersonalTrainingClientPage() {
   ]
 
   const stat1 = useAnimatedCounter(100)
-  const stat2 = useAnimatedCounter(80)
+  const stat2 = useAnimatedCounter(70)
   const stat3 = useAnimatedCounter(10)
+  const stat4 = useAnimatedCounter(95)
 
   return (
     <div className="min-h-screen bg-white">
       <Header />
 
       {/* Hero Section */}
-      <section
-        aria-labelledby="pt-hero-title"
-        className="relative py-16 lg:py-24 text-white overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/95"
-      >
-        {/* Subtle pattern background */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
-            backgroundSize: "36px 36px",
-          }}
-        />
-        {/* Accent ring */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full"
-          style={{
-            background:
-              "conic-gradient(from 180deg at 50% 50%, rgba(186,212,225,0.25), rgba(30,24,57,0.35), rgba(186,212,225,0.25))",
-            filter: "blur(24px)",
-            opacity: 0.6,
-          }}
-        />
-
-        <div className="container mx-auto px-4 relative z-10">
+      <section className="py-16 lg:py-24 bg-white">
+        <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
               <div className="space-y-6">
-                <Badge className="bg-white/15 text-white border-white/30 backdrop-blur">
+                <Badge className="bg-gray-100 text-gray-700 border-gray-200">
                   <Dumbbell className="w-4 h-4 mr-2" />
                   Personal Training
                 </Badge>
-                <h1 id="pt-hero-title" className="text-4xl lg:text-6xl font-bold leading-tight">
-                  Persoonlijke Training met <span className="text-secondary">Maximale Resultaten</span>
+                <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                  Persoonlijke Training met <span className="text-gray-700">Maximale Resultaten</span>
                 </h1>
-                <p className="text-lg lg:text-xl text-white/90 leading-relaxed">
+                <p className="text-lg lg:text-xl text-gray-600 leading-relaxed">
                   Ervaar de kracht van 1-op-1 begeleiding met onze gecertificeerde personal trainers. Bereik je doelen
                   sneller, veiliger en effectiever dan ooit tevoren.
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button
-                  size="lg"
-                  className="ev-shine bg-white text-primary hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
-                >
+                <Button size="lg" className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 text-lg font-semibold">
                   <Calendar className="w-5 h-5 mr-2" />
                   Boek een Proefles
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-2 border-white text-white hover:bg-white hover:text-primary bg-transparent"
+                  className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
                 >
                   <Phone className="w-5 h-5 mr-2" />
                   Bel Direct
                 </Button>
               </div>
 
-              <div className="grid grid-cols-3 gap-6 pt-4 lg:pt-8">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-8">
                 <div className="text-center">
-                  <div ref={stat1.ref} className="text-3xl font-bold mb-1 tabular-nums">
+                  <div ref={stat1.ref} className="text-2xl lg:text-3xl font-bold mb-1 text-gray-900 tabular-nums">
                     {stat1.value}
-                    <span className="align-top text-xl">%</span>
+                    <span className="align-top text-lg">%</span>
                   </div>
-                  <div className="text-sm text-white/80">Persoonlijke Aandacht</div>
+                  <div className="text-sm text-gray-600">Persoonlijke Aandacht</div>
                 </div>
                 <div className="text-center">
-                  <div ref={stat2.ref} className="text-3xl font-bold mb-1">
+                  <div ref={stat2.ref} className="text-2xl lg:text-3xl font-bold mb-1 text-gray-900">
                     €{stat2.value}
                   </div>
-                  <div className="text-sm text-white/80">Per Sessie</div>
+                  <div className="text-sm text-gray-600">Vanaf per Sessie</div>
                 </div>
                 <div className="text-center">
-                  <div ref={stat3.ref} className="text-3xl font-bold mb-1">
+                  <div ref={stat3.ref} className="text-2xl lg:text-3xl font-bold mb-1 text-gray-900">
                     {stat3.value}
-                    <span className="align-top text-xl">+</span>
+                    <span className="align-top text-lg">+</span>
                   </div>
-                  <div className="text-sm text-white/80">Jaar Ervaring</div>
+                  <div className="text-sm text-gray-600">Jaar Ervaring</div>
+                </div>
+                <div className="text-center">
+                  <div ref={stat4.ref} className="text-2xl lg:text-3xl font-bold mb-1 text-gray-900">
+                    {stat4.value}
+                    <span className="align-top text-lg">%</span>
+                  </div>
+                  <div className="text-sm text-gray-600">Tevredenheid</div>
                 </div>
               </div>
             </div>
 
             <div className="relative">
-              <div className="ev-gradient-border ev-glow relative w-full h-[480px] lg:h-[520px] rounded-3xl overflow-hidden">
+              <div className="relative w-full h-[480px] lg:h-[520px] rounded-2xl overflow-hidden border border-gray-200">
                 <Image
                   src="/images/personal-training-session.jpeg"
                   alt="Personal Training Sessie bij Evotion Coaching"
@@ -316,29 +292,19 @@ export default function PersonalTrainingClientPage() {
                   sizes="(min-width: 1024px) 50vw, 100vw"
                   priority={false}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                <div className="absolute top-4 left-4 flex items-center gap-2 rounded-full bg-white/20 backdrop-blur px-3 py-1.5">
-                  <Star className="w-4 h-4 text-yellow-300" />
-                  <span className="text-xs font-medium">Top Beoordelingen</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+                <div className="absolute top-4 left-4 flex items-center gap-2 rounded-full bg-white/90 backdrop-blur px-3 py-1.5">
+                  <Star className="w-4 h-4 text-yellow-500" />
+                  <span className="text-xs font-medium text-gray-900">Top Beoordelingen</span>
                 </div>
                 <div className="absolute bottom-4 right-4">
-                  <div className="rounded-2xl bg-white/15 backdrop-blur px-4 py-3">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Sparkles className="w-4 h-4 text-secondary" />
-                      <span>1-op-1 Focus</span>
+                  <div className="rounded-xl bg-white/90 backdrop-blur px-4 py-3">
+                    <div className="flex items-center gap-2 text-sm text-gray-900">
+                      <Trophy className="w-4 h-4 text-gray-700" />
+                      <span className="font-medium">1-op-1 Focus</span>
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Floating badges */}
-              <div className="absolute -top-6 -left-6 w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-xl animate-float">
-                <Award className="w-8 h-8 text-primary" />
-                <span className="sr-only">{"Erkenning voor kwaliteit"}</span>
-              </div>
-              <div className="absolute -bottom-6 -right-6 w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-xl animate-float-delayed">
-                <Star className="w-8 h-8 text-primary" />
-                <span className="sr-only">{"Top beoordelingen"}</span>
               </div>
             </div>
           </div>
@@ -346,15 +312,15 @@ export default function PersonalTrainingClientPage() {
       </section>
 
       {/* Benefits Section */}
-      <section aria-labelledby="pt-benefits-title" className="py-16 lg:py-24 bg-white">
+      <section className="py-16 lg:py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <Badge className="bg-primary/10 text-primary mb-6">
+            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-6">
               <Target className="w-4 h-4 mr-2" />
               Voordelen
             </Badge>
-            <h2 id="pt-benefits-title" className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Waarom Kiezen voor <span className="text-primary">Personal Training</span>?
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+              Waarom Kiezen voor <span className="text-gray-700">Personal Training</span>?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Personal training biedt unieke voordelen die je niet krijgt bij groepslessen of zelfstandig trainen.
@@ -363,41 +329,30 @@ export default function PersonalTrainingClientPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {benefits.map((benefit, index) => (
-              <div key={index} className="group perspective">
-                <Card className="ev-gradient-border border-0 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-                  <CardContent className="relative p-8 text-center space-y-4">
-                    <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          background:
-                            "radial-gradient(600px circle at var(--x, 50%) var(--y, 50%), rgba(186,212,225,0.18), transparent 40%)",
-                        }}
-                      />
-                    </div>
-                    <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
-                      <benefit.icon className="w-8 h-8 text-primary" />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900">{benefit.title}</h3>
-                    <p className="text-gray-600 leading-relaxed">{benefit.description}</p>
-                  </CardContent>
-                </Card>
-              </div>
+              <Card key={index} className="border border-gray-200 hover:shadow-lg transition-all duration-300">
+                <CardContent className="p-8 text-center space-y-4">
+                  <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto">
+                    <benefit.icon className="w-8 h-8 text-gray-700" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">{benefit.title}</h3>
+                  <p className="text-gray-600 leading-relaxed">{benefit.description}</p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
       {/* Process Section */}
-      <section aria-labelledby="pt-process-title" className="py-16 lg:py-24 bg-white">
+      <section className="py-16 lg:py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <Badge className="bg-primary/10 text-primary mb-6">
+            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-6">
               <TrendingUp className="w-4 h-4 mr-2" />
               Proces
             </Badge>
-            <h2 id="pt-process-title" className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Hoe werkt <span className="text-primary">Personal Training</span>?
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+              Hoe werkt <span className="text-gray-700">Personal Training</span>?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Van eerste kennismaking tot het bereiken van je doelen - zo ziet jouw reis eruit.
@@ -431,17 +386,17 @@ export default function PersonalTrainingClientPage() {
             ].map((item, index) => (
               <Card
                 key={index}
-                className="relative text-center border-2 border-gray-200 hover:border-primary/50 transition-colors"
+                className="relative text-center border border-gray-200 hover:border-gray-300 transition-colors"
               >
                 <CardContent className="p-6 space-y-4">
-                  <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto text-white">
-                    <span className="text-2xl font-bold">{item.step}</span>
+                  <div className="w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center mx-auto text-white">
+                    <span className="text-xl font-bold">{item.step}</span>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900">{item.title}</h3>
                   <p className="text-gray-600 leading-relaxed">{item.description}</p>
                 </CardContent>
                 {index < 3 && (
-                  <div className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-12 h-[2px] bg-gradient-to-r from-gray-200 to-primary/40" />
+                  <div className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-12 h-[2px] bg-gray-200" />
                 )}
               </Card>
             ))}
@@ -450,15 +405,15 @@ export default function PersonalTrainingClientPage() {
       </section>
 
       {/* Packages Section */}
-      <section aria-labelledby="pt-packages-title" className="py-16 lg:py-24 bg-gray-50">
+      <section className="py-16 lg:py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <Badge className="bg-primary/10 text-primary mb-6">
+            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-6">
               <Dumbbell className="w-4 h-4 mr-2" />
               Pakketten
             </Badge>
-            <h2 id="pt-packages-title" className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Kies het <span className="text-primary">Pakket</span> dat bij je Past
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+              Kies het <span className="text-gray-700">Pakket</span> dat bij je Past
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Van een kennismaking tot een complete transformatie - we hebben voor iedereen het juiste pakket.
@@ -468,53 +423,51 @@ export default function PersonalTrainingClientPage() {
           <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {packages.map((pkg, index) => (
               <div key={index} className="relative">
-                <div className="ev-gradient-border ev-glow rounded-2xl">
-                  <Card
-                    className={`relative border-0 rounded-2xl transition-all duration-300 hover:shadow-2xl ${
-                      pkg.popular ? "scale-[1.03]" : "hover:-translate-y-1"
-                    }`}
-                  >
-                    {pkg.popular && (
-                      <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                        <Badge className="bg-primary text-white px-4 py-2 shadow-md">
-                          <Sparkles className="w-4 h-4 mr-1" />
-                          MEEST POPULAIR
-                        </Badge>
-                      </div>
-                    )}
+                <Card
+                  className={`relative border transition-all duration-300 hover:shadow-xl ${
+                    pkg.popular ? "border-gray-900 shadow-lg scale-[1.02]" : "border-gray-200 hover:-translate-y-1"
+                  }`}
+                >
+                  {pkg.popular && (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                      <Badge className="bg-gray-900 text-white px-4 py-2 shadow-md">
+                        <Star className="w-4 h-4 mr-1" />
+                        MEEST POPULAIR
+                      </Badge>
+                    </div>
+                  )}
 
-                    <CardContent className="p-8 space-y-6">
-                      <div className="text-center space-y-4">
-                        <h3 className="text-2xl font-bold text-gray-900">{pkg.title}</h3>
-                        <div className="space-y-2">
-                          <div className="text-4xl font-bold text-primary">{pkg.price}</div>
-                          <div className="text-sm text-gray-500">{pkg.pricePerSession}</div>
-                          <div className="text-lg font-medium text-gray-700">{pkg.sessions}</div>
+                  <CardContent className="p-8 space-y-6">
+                    <div className="text-center space-y-4">
+                      <h3 className="text-2xl font-bold text-gray-900">{pkg.title}</h3>
+                      <div className="space-y-2">
+                        <div className="text-4xl font-bold text-gray-900">{pkg.price}</div>
+                        <div className="text-sm text-gray-500">{pkg.pricePerSession}</div>
+                        <div className="text-lg font-medium text-gray-700">{pkg.sessions}</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {pkg.features.map((feature, idx) => (
+                        <div key={idx} className="flex items-center gap-3">
+                          <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                          <span className="text-gray-700">{feature}</span>
                         </div>
-                      </div>
+                      ))}
+                    </div>
 
-                      <div className="space-y-3">
-                        {pkg.features.map((feature, idx) => (
-                          <div key={idx} className="flex items-center gap-3">
-                            <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                            <span className="text-gray-700">{feature}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      <Button
-                        className={`ev-shine w-full py-3 text-lg font-semibold ${
-                          pkg.popular
-                            ? "bg-primary hover:bg-primary/90 text-white"
-                            : "bg-gray-900 hover:bg-gray-800 text-white"
-                        }`}
-                      >
-                        Kies dit Pakket
-                        <ArrowRight className="w-5 h-5 ml-2" />
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
+                    <Button
+                      className={`w-full py-3 text-lg font-semibold ${
+                        pkg.popular
+                          ? "bg-gray-900 hover:bg-gray-800 text-white"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-900"
+                      }`}
+                    >
+                      Kies dit Pakket
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
             ))}
           </div>
@@ -526,7 +479,7 @@ export default function PersonalTrainingClientPage() {
             <Button
               size="lg"
               variant="outline"
-              className="ev-shine border-2 border-primary text-primary hover:bg-primary hover:text-white bg-transparent"
+              className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
             >
               <MessageCircle className="w-5 h-5 mr-2" />
               Gratis Adviesgesprek
@@ -536,17 +489,17 @@ export default function PersonalTrainingClientPage() {
       </section>
 
       {/* Contact Section */}
-      <section aria-labelledby="pt-contact-title" className="py-16 lg:py-24 bg-gray-50">
+      <section className="py-16 lg:py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
             <div className="space-y-8">
               <div className="space-y-6">
-                <Badge className="bg-primary/10 text-primary">
+                <Badge className="bg-gray-100 text-gray-700 border-gray-200">
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Contact
                 </Badge>
-                <h2 id="pt-contact-title" className="text-4xl font-bold text-gray-900">
-                  Klaar om te <span className="text-primary">Starten</span>?
+                <h2 className="text-4xl font-bold text-gray-900">
+                  Klaar om te <span className="text-gray-700">Starten</span>?
                 </h2>
                 <p className="text-xl text-gray-600 leading-relaxed">
                   Neem contact met ons op voor een gratis kennismakingsgesprek en ontdek hoe personal training jouw
@@ -556,15 +509,15 @@ export default function PersonalTrainingClientPage() {
 
               <div className="space-y-4">
                 <a href="tel:0610935077" className="block">
-                  <Card className="border-gray-200 hover:border-primary/50 transition-colors cursor-pointer">
+                  <Card className="border border-gray-200 hover:border-gray-300 transition-colors cursor-pointer">
                     <CardContent className="p-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                          <Phone className="w-6 h-6 text-white" />
+                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <Phone className="w-6 h-6 text-gray-700" />
                         </div>
                         <div>
                           <h3 className="font-bold text-gray-900">Bel Direct</h3>
-                          <p className="text-primary font-medium">06 10 93 50 77</p>
+                          <p className="text-gray-700 font-medium">06 10 93 50 77</p>
                           <p className="text-sm text-gray-500">Ma-Vr: 9:00-18:00</p>
                         </div>
                       </div>
@@ -573,15 +526,15 @@ export default function PersonalTrainingClientPage() {
                 </a>
 
                 <a href="https://wa.me/31610935077" target="_blank" rel="noopener noreferrer" className="block">
-                  <Card className="border-gray-200 hover:border-primary/50 transition-colors cursor-pointer">
+                  <Card className="border border-gray-200 hover:border-gray-300 transition-colors cursor-pointer">
                     <CardContent className="p-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                          <MessageCircle className="w-6 h-6 text-white" />
+                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <MessageCircle className="w-6 h-6 text-gray-700" />
                         </div>
                         <div>
                           <h3 className="font-bold text-gray-900">WhatsApp</h3>
-                          <p className="text-primary font-medium">Start Chat</p>
+                          <p className="text-gray-700 font-medium">Start Chat</p>
                           <p className="text-sm text-gray-500">Snelle reactie gegarandeerd</p>
                         </div>
                       </div>
@@ -591,8 +544,8 @@ export default function PersonalTrainingClientPage() {
               </div>
             </div>
 
-            <div className="ev-gradient-border ev-glow rounded-2xl">
-              <Card className="border-0 rounded-2xl shadow-xl">
+            <div className="border border-gray-200 rounded-2xl">
+              <Card className="border-0 rounded-2xl shadow-sm">
                 <CardContent className="p-8">
                   <div className="space-y-6">
                     <div className="text-center space-y-4">
@@ -604,22 +557,47 @@ export default function PersonalTrainingClientPage() {
                       <div className="grid md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">Voornaam *</label>
-                          <Input name="firstName" value={formData.firstName} onChange={handleInputChange} required />
+                          <Input
+                            name="firstName"
+                            value={formData.firstName}
+                            onChange={handleInputChange}
+                            required
+                            className="border-gray-300 focus:border-gray-500 focus:ring-gray-500"
+                          />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">Achternaam *</label>
-                          <Input name="lastName" value={formData.lastName} onChange={handleInputChange} required />
+                          <Input
+                            name="lastName"
+                            value={formData.lastName}
+                            onChange={handleInputChange}
+                            required
+                            className="border-gray-300 focus:border-gray-500 focus:ring-gray-500"
+                          />
                         </div>
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-                        <Input type="email" name="email" value={formData.email} onChange={handleInputChange} required />
+                        <Input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          required
+                          className="border-gray-300 focus:border-gray-500 focus:ring-gray-500"
+                        />
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Telefoonnummer</label>
-                        <Input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} />
+                        <Input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          className="border-gray-300 focus:border-gray-500 focus:ring-gray-500"
+                        />
                       </div>
 
                       <div>
@@ -628,7 +606,7 @@ export default function PersonalTrainingClientPage() {
                           name="goal"
                           value={formData.goal}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
                         >
                           <option value="">Selecteer je doel</option>
                           <option value="gewichtsverlies">Gewichtsverlies</option>
@@ -647,7 +625,7 @@ export default function PersonalTrainingClientPage() {
                           value={formData.message}
                           onChange={handleInputChange}
                           rows={4}
-                          className="resize-none"
+                          className="resize-none border-gray-300 focus:border-gray-500 focus:ring-gray-500"
                           placeholder="Vertel ons meer over je doelen en ervaring..."
                         />
                       </div>
@@ -655,7 +633,7 @@ export default function PersonalTrainingClientPage() {
                       <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="ev-shine w-full bg-primary hover:bg-primary/90 text-white py-4 text-lg font-semibold"
+                        className="w-full bg-gray-900 hover:bg-gray-800 text-white py-4 text-lg font-semibold"
                       >
                         {isSubmitting ? (
                           <span className="flex items-center gap-3">

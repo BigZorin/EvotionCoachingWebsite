@@ -179,6 +179,17 @@ export default function EvotionCoachingMobile() {
     setSubmitMessage(null)
 
     try {
+      // Check if API key is available
+      if (!process.env.RESEND_API_KEY) {
+        console.error("RESEND_API_KEY is not set")
+        setSubmitMessage({
+          type: "error",
+          text: "Email service is niet beschikbaar. Bel ons direct op 06 10 93 50 77.",
+        })
+        return
+      }
+
+      // Initialize Resend with API key
       const result = await sendContactEmail({
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,

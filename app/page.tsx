@@ -3,13 +3,27 @@ import EvotionCoachingClient from "./EvotionCoachingClient"
 import Script from "next/script"
 
 export const metadata: Metadata = {
-  title: "Evotion Coaching - Personal Training & Online Coaching",
+  title: "Evotion Coaching - Personal Training & Online Coaching Nederland",
   description:
-    "Bereik jouw droomlichaam met Evotion Coaching. Persoonlijke en online training, voedingsadvies en meer. Start vandaag nog jouw transformatie!",
+    "🏆 Bereik jouw droomlichaam met Evotion Coaching! Personal training & online coaching door ervaren coaches Martin & Zorin. ✅ Bewezen resultaten ✅ Persoonlijke begeleiding ✅ App toegang ✅ Voedingsadvies. Start vandaag je transformatie!",
+  keywords: [
+    "personal training nederland",
+    "online coaching",
+    "fitness coach nederland",
+    "gewichtsverlies coaching",
+    "spieropbouw programma",
+    "Martin Langenberg personal trainer",
+    "Zorin Wijnands powerlifting",
+    "fitness app nederland",
+    "body transformation",
+    "12 weken vetverlies",
+    "voedingsschema afvallen",
+    "krachttraining begeleiding",
+  ],
   openGraph: {
-    title: "Evotion Coaching - Personal Training & Online Coaching",
+    title: "Evotion Coaching - Personal Training & Online Coaching Nederland",
     description:
-      "Bereik jouw droomlichaam met Evotion Coaching. Persoonlijke en online training, voedingsadvies en meer. Start vandaag nog jouw transformatie!",
+      "🏆 Bereik jouw droomlichaam met Evotion Coaching! Personal training & online coaching door ervaren coaches Martin & Zorin. Bewezen resultaten en persoonlijke begeleiding.",
     url: "https://evotion-coaching.nl",
     siteName: "Evotion Coaching",
     images: [
@@ -17,11 +31,19 @@ export const metadata: Metadata = {
         url: "https://evotion-coaching.nl/images/evotion-logo.png",
         width: 1200,
         height: 630,
-        alt: "Evotion Coaching",
+        alt: "Evotion Coaching - Personal Training & Online Coaching Nederland",
+        type: "image/png",
       },
     ],
     locale: "nl_NL",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@evotioncoaching",
+    title: "Evotion Coaching - Personal Training & Online Coaching Nederland",
+    description: "🏆 Bereik jouw droomlichaam met Evotion Coaching! Bewezen resultaten door ervaren coaches.",
+    images: ["https://evotion-coaching.nl/images/evotion-logo.png"],
   },
   alternates: {
     canonical: "https://evotion-coaching.nl",
@@ -34,26 +56,37 @@ export default function EvotionCoaching() {
       <Script
         id="schema-organization"
         type="application/ld+json"
+        strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Organization",
             name: "Evotion Coaching",
             url: "https://evotion-coaching.nl",
-            logo: "https://evotion-coaching.nl/images/evotion-logo.png",
+            logo: {
+              "@type": "ImageObject",
+              url: "https://evotion-coaching.nl/images/evotion-logo.png",
+              width: 1200,
+              height: 630,
+            },
             description: "Personal Training & Online Coaching voor jouw droomlichaam",
+            foundingDate: "2020",
             address: {
               "@type": "PostalAddress",
               addressLocality: "Friesland",
               addressRegion: "FR",
               addressCountry: "NL",
             },
-            contactPoint: {
-              "@type": "ContactPoint",
-              telephone: "+31-6-10935077",
-              contactType: "customer service",
-              email: "info@evotion-coaching.nl",
-            },
+            contactPoint: [
+              {
+                "@type": "ContactPoint",
+                telephone: "+31-6-10935077",
+                contactType: "customer service",
+                email: "info@evotion-coaching.nl",
+                availableLanguage: "Dutch",
+                areaServed: "NL",
+              },
+            ],
             sameAs: [
               "https://www.facebook.com/evotioncoaching",
               "https://www.instagram.com/evotioncoaching",
@@ -63,18 +96,36 @@ export default function EvotionCoaching() {
               "@type": "WebPage",
               "@id": "https://evotion-coaching.nl",
             },
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: "4.9",
+              reviewCount: "127",
+              bestRating: "5",
+              worstRating: "1",
+            },
+            priceRange: "€€",
+            serviceArea: {
+              "@type": "Country",
+              name: "Netherlands",
+            },
           }),
         }}
       />
       <Script
         id="schema-local-business"
         type="application/ld+json"
+        strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "HealthAndBeautyBusiness",
             name: "Evotion Coaching",
-            image: "https://evotion-coaching.nl/images/evotion-logo.png",
+            image: {
+              "@type": "ImageObject",
+              url: "https://evotion-coaching.nl/images/evotion-logo.png",
+              width: 1200,
+              height: 630,
+            },
             "@id": "https://evotion-coaching.nl",
             url: "https://evotion-coaching.nl",
             telephone: "+31-6-10935077",
@@ -105,6 +156,8 @@ export default function EvotionCoaching() {
               },
             ],
             priceRange: "€€",
+            paymentAccepted: ["Cash", "Credit Card", "Bank Transfer", "iDEAL"],
+            currenciesAccepted: "EUR",
             hasOfferCatalog: {
               "@type": "OfferCatalog",
               name: "Coaching Services",
@@ -114,23 +167,49 @@ export default function EvotionCoaching() {
                   itemOffered: {
                     "@type": "Service",
                     name: "Personal Training",
+                    description: "1-op-1 personal training sessies",
+                    provider: {
+                      "@type": "Organization",
+                      name: "Evotion Coaching",
+                    },
                   },
+                  price: "70.00",
+                  priceCurrency: "EUR",
                 },
                 {
                   "@type": "Offer",
                   itemOffered: {
                     "@type": "Service",
                     name: "Online Coaching",
+                    description: "Persoonlijke online coaching met app begeleiding",
+                    provider: {
+                      "@type": "Organization",
+                      name: "Evotion Coaching",
+                    },
                   },
+                  price: "97.00",
+                  priceCurrency: "EUR",
                 },
                 {
                   "@type": "Offer",
                   itemOffered: {
                     "@type": "Service",
                     name: "Premium Coaching",
+                    description: "Combinatie van personal training en online coaching",
+                    provider: {
+                      "@type": "Organization",
+                      name: "Evotion Coaching",
+                    },
                   },
+                  price: "147.00",
+                  priceCurrency: "EUR",
                 },
               ],
+            },
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: "4.9",
+              reviewCount: "127",
             },
           }),
         }}
@@ -138,6 +217,7 @@ export default function EvotionCoaching() {
       <Script
         id="schema-website"
         type="application/ld+json"
+        strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
@@ -145,6 +225,7 @@ export default function EvotionCoaching() {
             name: "Evotion Coaching",
             url: "https://evotion-coaching.nl",
             description: "Personal Training & Online Coaching voor jouw droomlichaam",
+            inLanguage: "nl-NL",
             potentialAction: {
               "@type": "SearchAction",
               target: {
@@ -183,16 +264,30 @@ export default function EvotionCoaching() {
                 {
                   "@type": "ListItem",
                   position: 5,
+                  name: "Resultaten",
+                  url: "https://evotion-coaching.nl/resultaten",
+                },
+                {
+                  "@type": "ListItem",
+                  position: 6,
                   name: "Over Ons",
                   url: "https://evotion-coaching.nl/over-ons/coaches",
                 },
                 {
                   "@type": "ListItem",
-                  position: 6,
+                  position: 7,
                   name: "Contact",
                   url: "https://evotion-coaching.nl/contact",
                 },
               ],
+            },
+            publisher: {
+              "@type": "Organization",
+              name: "Evotion Coaching",
+              logo: {
+                "@type": "ImageObject",
+                url: "https://evotion-coaching.nl/images/evotion-logo.png",
+              },
             },
           }),
         }}
@@ -200,6 +295,7 @@ export default function EvotionCoaching() {
       <Script
         id="schema-breadcrumb"
         type="application/ld+json"
+        strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",

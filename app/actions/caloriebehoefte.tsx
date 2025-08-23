@@ -24,6 +24,15 @@ interface CaloriebehoefteData {
 
 export async function sendCaloriebehoefteEmail(data: CaloriebehoefteData) {
   try {
+    // Check if API key is available
+    if (!process.env.RESEND_API_KEY) {
+      console.error("RESEND_API_KEY is not set")
+      return {
+        success: false,
+        error: "Email service is niet beschikbaar. Bel ons direct op 06 10 93 50 77.",
+      }
+    }
+
     // Email naar Evotion team
     const teamEmailResult = await resend.emails.send({
       from: "Evotion Website <noreply@evotion-coaching.nl>",
