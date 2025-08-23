@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     "🏆 Evotion - Dé fitness en coaching brand van Nederland. Ontdek waarom duizenden mensen kiezen voor Evotion coaching, training en begeleiding. ✅ Bewezen methodes ✅ Ervaren coaches ✅ Unieke app ✅ Resultaat gegarandeerd.",
   keywords: [
     "evotion",
+    "evotion coaching",
     "evotion fitness",
     "evotion brand",
     "evotion nederland",
@@ -17,11 +18,13 @@ export const metadata: Metadata = {
     "evotion resultaten",
     "evotion coaches",
     "evotion filosofie",
-    "fitness brand nederland",
+    "fitness brand friesland",
     "coaching merk",
     "evotion community",
     "evotion lifestyle",
     "evotion transformatie",
+    "personal training sneek",
+    "fitness coach friesland",
   ],
   openGraph: {
     title: "Evotion - De Toonaangevende Fitness & Coaching Brand in Nederland",

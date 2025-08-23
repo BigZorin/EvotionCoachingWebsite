@@ -7,11 +7,11 @@ export const metadata: Metadata = {
   description:
     "🏆 Bekijk de indrukwekkende transformaties van onze cliënten! ✅ Martin: -10.7kg in 11 weken ✅ Salim: -8.1kg in 26 weken ✅ Wouter: -2.1kg body recomp. Echte resultaten, echte mensen. Jij bent de volgende!",
   keywords: [
-    "fitness resultaten nederland",
-    "gewichtsverlies transformaties",
+    "fitness resultaten friesland",
+    "vetverlies transformaties",
     "body transformation voorbeelden",
     "afvallen resultaten",
-    "spieropbouw succes",
+    "vet verliezen succes",
     "fitness voor en na",
     "coaching resultaten",
     "body recomposition",
@@ -19,6 +19,8 @@ export const metadata: Metadata = {
     "fitness success stories",
     "personal training resultaten",
     "online coaching succes",
+    "12 weken vetverlies resultaten",
+    "online vetverliezen resultaten",
   ],
   openGraph: {
     title: "Resultaten & Transformaties - Bewezen Succes | Evotion Coaching",

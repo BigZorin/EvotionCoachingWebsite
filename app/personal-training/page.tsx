@@ -7,23 +7,25 @@ export const metadata: Metadata = {
   description:
     "🏆 Personal Training bij Evotion Coaching - 1-op-1 begeleiding door ervaren trainers. ✅ Persoonlijke schema's ✅ Voedingsadvies ✅ Bewezen resultaten. €70 per sessie. Boek nu je gratis consult!",
   keywords: [
-    "personal training nederland",
+    "personal training sneek",
     "personal trainer friesland",
+    "fitness coach friesland",
     "1-op-1 training",
     "fitness begeleiding",
     "krachttraining coach",
-    "gewichtsverlies personal trainer",
-    "spieropbouw begeleiding",
+    "afvallen personal trainer",
+    "vet verliezen begeleiding",
     "Martin Langenberg personal trainer",
     "Zorin Wijnands trainer",
     "personal training sessie",
-    "fitness coaching nederland",
+    "fitness coaching friesland",
     "body transformation trainer",
+    "vetverlies coaching",
   ],
   openGraph: {
     title: "Personal Training Nederland - 1-op-1 Begeleiding | Evotion Coaching",
     description:
-      "🏆 Personal Training bij Evotion Coaching - 1-op-1 begeleiding door ervaren trainers. Persoonlijke schema's, voedingsadvies en bewezen resultaten.",
+      "🏆 Personal Training bij Evotion Coaching - 1-op-1 begeleiding door ervaren trainers. Persoonlijke schema's, voedingsadvies en professionele coaching.",
     url: "https://evotion-coaching.nl/personal-training",
     siteName: "Evotion Coaching",
     images: [
