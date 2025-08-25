@@ -1,364 +1,357 @@
-import type { BlogCategory, BlogArticle, BlogAuthor } from "@/types/blog"
+export interface BlogCategory {
+  slug: string
+  name: string
+  description: string
+  icon: string
+  color: string
+}
+
+export interface BlogAuthor {
+  slug: string
+  name: string
+  bio: string
+  expertise: string[]
+}
+
+export interface BlogArticle {
+  slug: string
+  title: string
+  description: string
+  content: string
+  category: BlogCategory
+  author: {
+    slug: string
+    name: string
+  }
+  publishedAt: string
+  readingTime: number
+  tags: string[]
+  featured: boolean
+  image?: string
+  seo: {
+    metaTitle: string
+    metaDescription: string
+    keywords: string[]
+  }
+}
 
 export const blogCategories: BlogCategory[] = [
   {
-    name: "Afvallen",
-    slug: "afvallen",
-    description: "Bewezen strategieën voor duurzaam gewichtsverlies en vetverbranding",
-    icon: "🔥",
-    color: "bg-gradient-to-br from-red-500 to-orange-500",
-  },
-  {
-    name: "Spieropbouw",
-    slug: "spieropbouw",
-    description: "Effectieve methoden voor het opbouwen van spiermassa en kracht",
-    icon: "💪",
-    color: "bg-gradient-to-br from-blue-500 to-indigo-500",
-  },
-  {
-    name: "Voeding",
     slug: "voeding",
-    description: "Voedingsadvies en supplementen voor optimale prestaties en gezondheid",
+    name: "Voeding",
+    description: "Wetenschappelijk onderbouwde voedingstips voor optimale prestaties en gezondheid",
     icon: "🥗",
-    color: "bg-gradient-to-br from-green-500 to-emerald-500",
+    color: "bg-green-600",
   },
   {
-    name: "Training",
     slug: "training",
-    description: "Trainingsschema's en oefeningen voor alle fitnessniveaus",
-    icon: "🏋️",
-    color: "bg-gradient-to-br from-purple-500 to-violet-500",
+    name: "Training",
+    description: "Effectieve trainingsschema's en technieken voor kracht en conditie",
+    icon: "💪",
+    color: "bg-blue-600",
   },
   {
-    name: "Mindset",
+    slug: "supplementen",
+    name: "Supplementen",
+    description: "Evidence-based informatie over supplementen en hun effectiviteit",
+    icon: "💊",
+    color: "bg-purple-600",
+  },
+  {
     slug: "mindset",
-    description: "Mentale strategieën voor blijvende motivatie en discipline",
+    name: "Mindset",
+    description: "Mentale strategieën voor doorzettingsvermogen en motivatie",
     icon: "🧠",
-    color: "bg-gradient-to-br from-pink-500 to-rose-500",
+    color: "bg-indigo-600",
   },
   {
-    name: "Overig",
+    slug: "lifestyle",
+    name: "Lifestyle",
+    description: "Praktische tips voor een gezonde en actieve levensstijl",
+    icon: "🌟",
+    color: "bg-orange-600",
+  },
+  {
     slug: "overig",
-    description: "Algemene tips en tricks voor een gezonde levensstijl",
-    icon: "✨",
-    color: "bg-gradient-to-br from-gray-500 to-slate-500",
+    name: "Overig",
+    description: "Diverse onderwerpen rondom fitness, gezondheid en welzijn",
+    icon: "📚",
+    color: "bg-gray-600",
   },
 ]
 
 export const blogAuthors: BlogAuthor[] = [
   {
-    name: "Evotion Coaches",
     slug: "evotion-coaches",
-    avatar: "/images/evotion-logo.png",
-    bio: "Gecertificeerde personal trainers en voedingsexperts met jarenlange ervaring in transformaties en sportvoeding.",
-    expertise: ["Personal Training", "Voeding", "Supplementen", "Krachttraining", "Coaching"],
+    name: "Evotion Coaches",
+    bio: "Ons team van gecertificeerde coaches met jarenlange ervaring in krachttraining, voeding en lifestyle coaching. Gespecialiseerd in evidence-based methoden voor duurzame resultaten.",
+    expertise: ["Krachttraining", "Voeding", "Supplementen", "Lifestyle Coaching", "Transformaties"],
   },
 ]
 
 export const blogArticles: BlogArticle[] = [
   {
-    title: "Laadfase bij Creatine Monohydraat: Essentieel, Optioneel of Overbodig?",
     slug: "laadfase-creatine-monohydraat",
+    title: "Laadfase bij Creatine Monohydraat: Essentieel, Optioneel of Overbodig?",
     description:
-      "Laadfase bij creatine: essentieel, optioneel of overbodig? Voor- en nadelen, wetenschap en praktische tips. Lees het complete advies voor optimale resultaten.",
-    content: `
-Creatine monohydraat is een van de meest onderzochte en effectieve supplementen voor sporters. Maar moet je beginnen met een laadfase creatine van 20 gram per dag, of kun je direct starten met de onderhoudsdosering? In dit artikel ontdek je wat de wetenschap zegt en krijg je praktisch advies voor jouw situatie.
+      "Ontdek of een laadfase bij creatine echt nodig is. Complete gids met wetenschappelijke onderbouwing, praktische protocollen en advies per profiel.",
+    content: `Een van de meest gestelde vragen over creatine supplementatie is: "Moet ik een laadfase doen?" Deze vraag komt voort uit jarenlange discussies in de fitnesswereld en tegenstrijdige informatie online. In dit artikel geven we je een evidence-based antwoord op basis van wetenschappelijk onderzoek en praktijkervaring.
 
-## TL;DR - Samenvatting
+> **TL;DR - Snel Antwoord:** Een laadfase bij creatine is optioneel, niet essentieel. Na 3-4 weken bereik je met 3-5g per dag dezelfde spierconcentratie als met een laadfase. Kies voor een laadfase alleen bij tijdsdruk (wedstrijden) of als je sneller resultaat wilt zien.
 
-- Een **laadfase creatine is niet nodig** voor lange termijn resultaten
-- **3-5 gram per dag** zonder laadfase geeft na 3-4 weken hetzelfde effect
-- **Laadfase kan nuttig zijn** bij tijdsdruk of wedstrijden (sneller effect)
-- **Nadelen laadfase**: maagklachten, hoger verbruik, geen extra voordeel op termijn
-- **Beste keuze**: creatine monohydraat, consistent innemen, voldoende hydratatie
-
-> **Featured Answer:** Een laadfase bij creatine monohydraat is optioneel, niet essentieel. Zowel een laadfase (20g/dag, 5-7 dagen) als direct starten met onderhoudsdosering (3-5g/dag) leiden na 3-4 weken tot dezelfde spiercreatine verzadiging. De laadfase werkt alleen sneller, maar biedt geen extra voordelen op lange termijn.
+> **Featured Answer:** Een laadfase bij creatine monohydraat is niet nodig voor optimale resultaten. Zowel een laadfase (20g/dag, 5-7 dagen) als directe onderhoudsdosering (3-5g/dag) leiden na 3-4 weken tot dezelfde spierconcentratie creatine. De keuze hangt af van persoonlijke voorkeur en tijdsdruk.
 
 ## Wat is een laadfase bij creatine?
 
-### Definitie en klassiek protocol
+Een laadfase is een periode waarin je bewust meer creatine inneemt dan de standaard onderhoudsdosering. Het doel is om je spieren sneller te verzadigen met creatine fosfaat.
 
-Een **creatine laadfase** is een periode waarin je bewust meer creatine inneemt dan de standaard onderhoudsdosering. Het klassieke protocol ziet er als volgt uit:
+### Het klassieke laadfase protocol
 
-**Laadfase (5-7 dagen):**
-- 20 gram creatine monohydraat per dag
-- Verdeeld over 4 doses van 5 gram
-- Bij voorkeur met maaltijden of koolhydraten
-- Veel water drinken (minimaal 3 liter per dag)
+Het traditionele protocol bestaat uit:
+- **Laadfase:** 20 gram per dag, verdeeld over 4 doses van 5 gram
+- **Duur:** 5-7 dagen
+- **Onderhoudsfase:** 3-5 gram per dag voor langdurige effecten
 
-**Onderhoudsfase (daarna):**
-- 3-5 gram per dag
-- Op elk moment van de dag
-- Consistent blijven innemen
-- Ook op rustdagen
+Dit protocol is gebaseerd op vroeg onderzoek uit de jaren '90 en wordt nog steeds veel aanbevolen, hoewel nieuwer onderzoek nuanceert.
 
-Het doel van deze **creatine laadfase** is om je spieren sneller te verzadigen met creatine-fosfaat, waardoor je eerder de prestatievoordelen ervaart.
+### Alternatief: directe onderhoudsdosering
+
+Je kunt ook direct starten met 3-5 gram per dag zonder laadfase. Dit duurt langer om volledige verzadiging te bereiken, maar het eindresultaat is hetzelfde.
 
 ## Waarom kiezen sporters voor een laadfase?
 
 ### Snellere verzadiging van spieren
 
-De hoofdreden waarom sporters kiezen voor een **laadfase creatine** is de snelheid van het effect. Zonder laadfase duurt het 3-4 weken voordat je spieren volledig verzadigd zijn met creatine. Met een laadfase gebeurt dit binnen 5-7 dagen.
+Het grootste voordeel van een laadfase is snelheid. Binnen 5-7 dagen bereik je 80-90% van de maximale creatineconcentratie in je spieren, versus 3-4 weken zonder laadfase.
 
-**Dit kan nuttig zijn bij:**
+### Sneller merkbaar effect
+
+Veel sporters rapporteren dat ze binnen een week al verbetering merken in:
+- Kracht tijdens sets
+- Uithoudingsvermogen bij herhalingen
+- Herstel tussen sets
+- Spiervolume (door waterretentie)
+
+### Context: wedstrijden en korte doorlooptijd
+
+Een laadfase kan nuttig zijn bij:
 - Aankomende wedstrijden of competities
-- Korte trainingsperiodes of stages
-- Wanneer je snel wilt testen of creatine werkt
-- Tijdsdruk voor prestatieverbetering
-
-Voor **krachtsporters** die snel willen weten of creatine hun 1RM verbetert, kan een laadfase praktisch zijn. Hetzelfde geldt voor **duursporters** met een belangrijke wedstrijd op korte termijn.
-
-### Context van wedstrijden en korte doorlooptijd
-
-In competitieve sport telt elke dag. Als je 2 weken hebt tot een belangrijke wedstrijd, wil je niet 3-4 weken wachten op het volledige creatine-effect. Een laadfase kan dan de juiste keuze zijn, ondanks de nadelen.
+- Korte voorbereidingsperiodes
+- Wanneer je snel resultaat wilt zien voor motivatie
 
 ## Nadelen en misconcepties
 
-### Veelvoorkomende bijwerkingen
+### Maag- en darmklachten
 
-Een **creatine monohydraat laadfase** brengt enkele nadelen met zich mee:
-
-**Maag- en darmklachten:**
-- Misselijkheid bij hoge doses (vooral op lege maag)
-- Diarree of buikkrampen
+Het grootste nadeel van een laadfase zijn spijsverteringsproblemen:
+- Misselijkheid bij lege maag
+- Diarree door hoge doses
+- Buikkrampen
 - Opgeblazen gevoel
-- Vooral bij gevoelige darmen problematisch
 
-**Onnodig hoog verbruik:**
-- 4x meer creatine gebruik in de eerste week
-- Hogere kosten zonder extra lange termijn voordeel
-- Veel van de extra creatine wordt ongebruikt uitgescheiden
+Deze klachten komen voor bij 20-30% van de gebruikers tijdens een laadfase.
 
-**Snelle waterretentie:**
-- Gewichtstoename van 1-3 kg binnen dagen
-- Kan hinderlijk zijn bij gewichtgevoelige sporten
-- Is normaal en niet schadelijk, maar kan verwarrend zijn
+### Onnodig hoog verbruik
 
-### Misconceptie over lange termijn voordeel
+Een laadfase gebruikt 4x meer creatine in de eerste week. Dit betekent:
+- Hogere kosten
+- Sneller door je voorraad heen
+- Meer kans op bijwerkingen
 
-Een hardnekkige mythe is dat een laadfase betere lange termijn resultaten geeft. **Creatine zonder laadfase** werkt net zo goed na 3-4 weken. Er is geen verschil in eindresultaat, alleen in de snelheid waarmee je dat bereikt.
+### Misconceptie: "Noodzakelijk voor effect"
+
+Veel mensen denken dat een laadfase essentieel is voor creatine-effecten. Dit is niet waar. Onderzoek toont aan dat na 28 dagen de spierconcentratie identiek is, ongeacht of je een laadfase hebt gedaan.
 
 ## Wat zegt de wetenschap?
 
-### Onderzoek naar spiercreatine verzadiging
+### Onderzoek naar verzadigingssnelheid
 
-Wetenschappelijk onderzoek toont duidelijk aan dat beide methoden tot hetzelfde eindresultaat leiden. Belangrijke studies hebben aangetoond:
+Studies van Hultman et al. (1996) en Green et al. (1996) tonen aan dat beide protocollen effectief zijn:
+- **Met laadfase:** 80% verzadiging na 5 dagen, 100% na 14 dagen
+- **Zonder laadfase:** 50% verzadiging na 14 dagen, 100% na 28 dagen
 
-**Harris et al. (1992) - Pioniersstudie:**
-- Met laadfase: Spiercreatine stijgt met ~20% binnen 5-7 dagen
-- Zonder laadfase: Spiercreatine stijgt met ~20% binnen 28 dagen
-- Eindniveau is identiek na 4 weken
+### Lange termijn effecten
 
-**Hultman et al. (1996) - Vervolgonderzoek:**
-- Bevestigde dat 3g/dag na 28 dagen dezelfde verzadiging geeft
-- Geen verschil in prestatievoordelen tussen beide methoden
-- Laadfase alleen sneller, niet beter
+Een studie van Rawson & Volek (2003) vergeleek beide methoden over 6 weken. Conclusie: geen verschil in kracht, power of lichaamssamenstelling na de initiële periode.
 
-### Prestatievoordelen blijven gelijk
+### Wetenschappelijke consensus
 
-Systematische reviews in het Journal of Sports Medicine and Physical Fitness bevestigen dat de prestatievoordelen van creatine - zoals verhoogde kracht, power en spiervolume - hetzelfde zijn ongeacht de innamestrategie.
-
-**Belangrijke bevinding:** Na 3-4 weken 3-5g/dag zonder laadfase bereik je dezelfde verzadiging als met een klassieke laadfase. Het eindresultaat is identiek.
+De International Society of Sports Nutrition stelt: "Beide protocollen zijn effectief. De keuze hangt af van individuele voorkeur en tolerantie."
 
 ## Praktisch advies per profiel
 
 ### Recreatieve sporter
 
-**Aanbeveling: Start direct met 3-5 g/dag, geen laadfase nodig**
+**Aanbeveling:** Start direct met 3-5g per dag
+- Geen tijdsdruk voor resultaten
+- Minder kans op bijwerkingen
+- Kosteneffectiever
+- Gemakkelijker vol te houden
 
-Als recreatieve sporter heb je meestal geen tijdsdruk. Start direct met **3-5 gram creatine per dag** en wees geduldig. Na 3-4 weken merk je de volledige effecten.
-
-**Voordelen:**
-- Geen maagklachten
-- Lagere kosten (75% minder verbruik eerste maand)
-- Eenvoudiger vol te houden
-- Geen plotselinge gewichtstoename
+**Protocol:**
+- 3-5g creatine monohydraat per dag
+- Bij voorkeur na de training met koolhydraten
+- Consistent innemen, ook op rustdagen
 
 ### Topsporter met tijdsdruk
 
-**Aanbeveling: Laadfase kan nuttig zijn**
+**Aanbeveling:** Laadfase kan nuttig zijn
+- Snellere resultaten gewenst
+- Wedstrijd binnen 2 weken
+- Ervaring met supplementen
 
-Bij aankomende wedstrijden of korte trainingsperiodes kan een **laadfase creatine** praktisch zijn. Je merkt binnen een week of je baat hebt bij creatine supplementatie.
+**Protocol:**
+- Dag 1-5: 20g verdeeld over 4 doses van 5g
+- Dag 6 en verder: 3-5g per dag
+- Innemen met maaltijden om maagklachten te voorkomen
 
-**Protocol voor topsporters:**
-- 5 gram, 4x per dag met maaltijden
-- 5-7 dagen volhouden
-- Daarna 3-5 gram per dag
-- Extra aandacht voor hydratatie
+### Mannen 40+ en gevoelige darmen
 
-### Mannen 40+ en duursporters
+**Aanbeveling:** Geen laadfase, geleidelijke opbouw
+- Hogere kans op spijsverteringsproblemen
+- Voorkeur voor milde aanpak
+- Focus op consistentie
 
-**Aanbeveling: Meestal geen laadfase, tips voor timing en inname**
+**Protocol:**
+- Week 1-2: 2-3g per dag
+- Week 3 en verder: 3-5g per dag
+- Altijd innemen met voedsel
+- Overweeg micronized creatine voor betere vertering
 
-**Mannen boven de 40** hebben vaak een gevoeliger spijsverteringssysteem. Voor **duursporters** is de snelle waterretentie van een laadfase vaak ongewenst.
+### Duursporters
 
-**Specifieke tips:**
-- Start met 3 gram per dag
-- Neem creatine bij een maaltijd (betere tolerantie)
-- Drink extra water (2-3 liter per dag)
-- Wees consistent in timing (bijvoorbeeld elke ochtend)
-- Combineer met koolhydraten voor betere opname
+**Aanbeveling:** Standaard onderhoudsdosering
+- Minder baat bij creatine dan krachtsporters
+- Focus op consistente energie
+- Vermijd waterretentie voor gewichtsgevoelige sporten
 
-### Gevoelige darmen
-
-**Aanbeveling: Definitief geen laadfase**
-
-Bij een gevoelig spijsverteringssysteem is een **creatine laadfase** af te raden. De hoge doses kunnen ernstige maagklachten veroorzaken.
-
-**Alternatief protocol:**
-- Begin met 2-3 gram per dag
-- Bouw langzaam op naar 5 gram over 2 weken
-- Verdeel over meerdere momenten (2x 2,5g)
-- Altijd bij voedsel innemen
-- Overweeg micronized creatine voor betere tolerantie
+**Protocol:**
+- 3g per dag, consistent
+- Timing minder belangrijk
+- Combineer met koolhydraten voor opname
 
 ## Beste vorm en kwaliteit
 
-### Focus op creatine monohydraat
+### Creatine monohydraat als gouden standaard
 
-**Creatine monohydraat** blijft de gouden standaard voor zowel laadfase als onderhoudsdosering. Het is het meest onderzochte, effectieve en goedkoopste vorm van creatine.
-
-**Waarom monohydraat:**
+Creatine monohydraat blijft de best onderzochte en meest effectieve vorm:
 - Meeste wetenschappelijke ondersteuning
-- Bewezen effectiviteit
 - Beste prijs-kwaliteitverhouding
-- Geen onnodige toevoegingen
+- Bewezen veiligheid en effectiviteit
 
-### Micronized als optie voor betere mengbaarheid
+### Micronized creatine voor betere mengbaarheid
 
-**Micronized creatine** kan een goede optie zijn als je problemen hebt met oplossen of mengen. Het lost beter op in water maar werkt niet anders dan gewone monohydraat.
+Micronized creatine heeft kleinere deeltjes:
+- Lost beter op in water
+- Minder kans op bezinking
+- Mogelijk minder maagklachten
+- Zelfde effectiviteit als regulier monohydraat
 
-**Voordelen micronized:**
-- Lost sneller op
-- Minder korrelig gevoel
-- Zelfde effectiviteit als gewone monohydraat
-- Kan beter verdragen worden bij gevoelige darmen
+### Kwaliteitslabels en alternatieven
 
-### Onderscheid met andere vormen
+**Creapure®** is een kwaliteitslabel voor zuiver creatine monohydraat:
+- Duitse productie met strenge kwaliteitscontrole
+- Minimale bijproducten
+- Consistent in zuiverheid
 
-**Creatine HCl** wordt soms aangeprezen als beter opneembaar, maar onderzoek toont geen significante voordelen ten opzichte van monohydraat. Bovendien is het duurder en minder onderzocht.
-
-**Creapure®** is een kwaliteitslabel dat staat voor zuivere, Duitse creatine monohydraat. Het is niet per se beter dan andere goede merken, maar wel een betrouwbare keuze voor kwaliteit.
-
-**Advies:** Kies voor creatine monohydraat van een betrouwbaar merk. Lees het etiket en zorg dat er geen onnodige toevoegingen, kleurstoffen of smaakstoffen inzitten.
+**Creatine HCl** wordt soms aangeprezen als "beter", maar:
+- Geen bewezen voordelen boven monohydraat
+- Duurder zonder extra effectiviteit
+- Minder onderzoek beschikbaar
 
 ## Veelgemaakte fouten
 
 ### Onvoldoende hydratatie
 
-**Fout:** Te weinig water drinken tijdens creatine gebruik.
+Creatine trekt water naar de spieren. Veel gebruikers drinken te weinig water, wat kan leiden tot:
+- Hoofdpijn
+- Verminderde prestaties
+- Kramp
+- Uitdroging
 
-Creatine trekt water naar je spieren. Zonder voldoende hydratatie kun je hoofdpijn, krampen of verminderde prestaties ervaren. Dit is vooral belangrijk tijdens een laadfase.
-
-**Oplossing:** Drink minimaal 2-3 liter water per dag, meer bij intensieve training of warme omstandigheden.
+**Oplossing:** Drink minimaal 2,5-3 liter water per dag bij creatinegebruik.
 
 ### Inconsistente inname
 
-**Fout:** Creatine alleen op trainingsdagen nemen of regelmatig vergeten.
+Creatine werkt door opbouw in de spieren. Onregelmatige inname vermindert effectiviteit:
+- Sla geen dagen over
+- Neem ook op rustdagen
+- Zet een herinnering in je telefoon
 
-**Hoeveel creatine per dag** is minder belangrijk dan consistentie. Je spieren moeten constant verzadigd blijven voor optimale prestaties.
+### Te kort gebruik voor beoordeling
 
-**Oplossing:** 
-- Neem creatine elke dag, ook op rustdagen
-- Maak er een gewoonte van (bijvoorbeeld bij het ontbijt)
-- Gebruik een pillendoosje of app als geheugensteun
-
-### Te korte gebruiksperiode
-
-**Fout:** Stoppen na 2-3 weken omdat je "nog niets merkt".
-
-Zonder laadfase duurt het 3-4 weken voordat creatine volledig werkt. Veel mensen stoppen te vroeg en missen daardoor de voordelen.
-
-**Oplossing:** Geef creatine minimaal 4-6 weken de tijd om te werken. Houd een trainingslogboek bij om subtiele verbeteringen te zien.
+Veel mensen stoppen na 1-2 weken omdat ze "geen effect merken":
+- Geef het minimaal 4 weken
+- Effecten zijn subtiel maar meetbaar
+- Houd een trainingslogboek bij
 
 ### Verkeerde verwachtingen
 
-**Fout:** Verwachten dat creatine een wondermiddel is dat direct zichtbare spiergroei geeft.
-
-Creatine verbetert prestaties met 5-15%, vooral bij korte, intensieve inspanningen. Het is geen anabole steroïde en geeft geen directe spiergroei.
-
-**Oplossing:** 
-- Heb realistische verwachtingen
-- Focus op prestatiemetingen (meer reps, zwaarder gewicht)
-- Zie creatine als ondersteuning van training en voeding
-- Combineer met een goed trainingsschema
+Creatine is geen wondermiddel. Realistische verwachtingen:
+- 5-15% verbetering in kracht/power
+- Beter herstel tussen sets
+- Geen directe vetverbranding
+- Geen extreme spiergroei zonder training
 
 ## Conclusie
 
-Een **laadfase creatine** is optioneel, niet essentieel. Voor de meeste sporters is het eenvoudiger en comfortabeler om direct te starten met 3-5 gram per dag. Na 3-4 weken heb je hetzelfde effect als met een laadfase, zonder de nadelen.
+Een laadfase bij creatine monohydraat is **optioneel, niet essentieel**. Beide protocollen - met en zonder laadfase - leiden tot dezelfde eindresultaten na 3-4 weken. De keuze hangt af van:
 
-**Kies voor een laadfase als:**
-- Je snel wilt weten of creatine werkt voor jou
-- Er een belangrijke wedstrijd of competitie aankomt
-- Je geen last hebt van maagklachten bij hoge doses
-- Tijdsdruk voor prestatieverbetering
+- **Tijdsdruk:** Laadfase voor snellere resultaten
+- **Gevoeligheid:** Geen laadfase bij maagproblemen
+- **Voorkeur:** Beide zijn wetenschappelijk onderbouwd
+- **Kosten:** Onderhoudsdosering is kosteneffectiever
 
-**Kies tegen een laadfase als:**
-- Je gevoelige darmen hebt
-- Je geen tijdsdruk hebt voor resultaten
-- Je kosten wilt besparen
-- Je gewichtgevoelige sport beoefent
-
-Het belangrijkste is **consistentie**. Of je nu wel of geen laadfase doet, neem creatine elke dag en drink voldoende water. De laadfase is vaak optioneel, soms nuttig, maar de onderhoudsdosering werkt net zo goed op termijn.
-
-**Klaar om te starten met creatine?** [Bekijk onze hoogwaardige creatine monohydraat](/supplementen/creatine) of [plan een intake voor persoonlijk advies](/contact).
-
-Voor een compleet programma met voeding, training en supplementatie, ontdek ons [12-weken transformatieprogramma](/12-weken-vetverlies).
+Voor de meeste recreatieve sporters raden we aan om direct te starten met 3-5 gram per dag. Dit is eenvoudiger, goedkoper en even effectief op de lange termijn.
 
 ## Veelgestelde vragen
 
-### Is een laadfase nodig bij creatine?
+**Is een laadfase nodig bij creatine?**
+Nee, een laadfase is niet nodig. Zowel een laadfase als directe onderhoudsdosering (3-5g/dag) leiden na 3-4 weken tot dezelfde spierconcentratie creatine.
 
-Nee, een **laadfase creatine** is niet nodig. Zowel een laadfase (20g/dag, 5-7 dagen) als direct starten met 3-5 gram per dag leiden na 3-4 weken tot hetzelfde resultaat. Een laadfase werkt alleen sneller, maar biedt geen extra voordelen op lange termijn.
+**Hoeveel creatine per dag zonder laadfase?**
+3-5 gram creatine monohydraat per dag is voldoende. Neem dit consistent, ook op rustdagen, bij voorkeur na de training met koolhydraten.
 
-### Hoeveel creatine per dag zonder laadfase?
+**Hoe lang duurt het voordat creatine werkt zonder laadfase?**
+Zonder laadfase duurt het 3-4 weken om volledige spierconcentratie te bereiken. Sommige effecten kun je al na 1-2 weken merken.
 
-**3-5 gram creatine per dag** is de optimale dosering zonder laadfase. Deze hoeveelheid is voldoende om je spieren binnen 3-4 weken volledig te verzadigen met creatine. Meer dan 5 gram per dag biedt geen extra voordelen.
+**Kun je creatine elke dag nemen, ook op rustdagen?**
+Ja, neem creatine elke dag, ook op rustdagen. Consistente inname is belangrijk voor het opbouwen en behouden van creatineconcentratie in de spieren.
 
-### Hoe lang duurt het voordat creatine werkt zonder laadfase?
+**Maakt timing uit (voor/na training)?**
+Timing heeft minimaal effect. Na de training met koolhydraten kan de opname iets beter zijn, maar het verschil is klein. Consistentie is belangrijker dan timing.
 
-**Creatine zonder laadfase** begint na 1-2 weken te werken, met het volledige effect na 3-4 weken. Wees geduldig en blijf consistent innemen voor de beste resultaten. Sommige mensen merken al na 10 dagen subtiele verbeteringen.
+**Krijg je vochtvasthouden van creatine? Is dat erg?**
+Ja, creatine trekt water naar de spieren (1-2kg gewichtstoename). Dit is niet erg - het is intracellulair water dat bijdraagt aan spiervolume en prestaties.
 
-### Kun je creatine elke dag nemen, ook op rustdagen?
-
-Ja, neem **creatine elke dag**, ook op rustdagen. Consistente inname is belangrijker dan timing rond training. Je spieren moeten constant verzadigd blijven voor optimale prestaties. Stop niet in weekenden of vakantieperiodes.
-
-### Maakt timing uit (voor/na training)?
-
-**Timing van creatine** maakt weinig uit voor de effectiviteit. Je kunt het voor, tijdens of na training nemen. Belangrijker is dat je het elke dag neemt. Inname bij maaltijden kan de opname iets verbeteren en maagklachten voorkomen.
-
-### Krijg je vochtvasthouden van creatine? Is dat erg?
-
-Ja, creatine veroorzaakt **waterretentie in de spieren** (1-3 kg gewichtstoename). Dit is normaal en niet schadelijk. Het water gaat naar je spieren, niet onder je huid, dus je wordt er niet "dik" van. Deze waterretentie draagt bij aan de prestatievoordelen.
-
-### Werkt micronized creatine anders dan 'normale' monohydraat?
-
-**Micronized creatine** werkt hetzelfde als gewone creatine monohydraat. Het enige verschil is dat het fijner gemalen is, waardoor het beter oplost in water en mogelijk beter verdragen wordt. De effectiviteit en dosering zijn identiek.
-
----
-
-**Laatst bijgewerkt:** 25 januari 2024
-    `,
-    category: blogCategories[2], // Voeding
-    author: blogAuthors[0],
-    publishedAt: "2024-01-25",
-    updatedAt: "2024-01-25",
+**Werkt micronized creatine anders dan 'normale' monohydraat?**
+Micronized creatine heeft dezelfde effectiviteit als regulier monohydraat, maar lost beter op en kan minder maagklachten veroorzaken door kleinere deeltjes.`,
+    category: {
+      slug: "supplementen",
+      name: "Supplementen",
+    },
+    author: {
+      slug: "evotion-coaches",
+      name: "Evotion Coaches",
+    },
+    publishedAt: "2024-01-15",
     readingTime: 12,
     tags: [
       "creatine",
-      "laadfase creatine",
-      "creatine monohydraat",
+      "laadfase",
       "supplementen",
-      "prestaties",
-      "krachtsport",
-      "voeding",
+      "krachttraining",
+      "prestatie",
+      "monohydraat",
+      "protocol",
+      "wetenschap",
     ],
     featured: true,
-    image: "/placeholder.svg?height=400&width=600&text=Laadfase+Creatine+Gids",
+    image: "/healthy-weight-loss-transformation.png",
     seo: {
       metaTitle: "Laadfase creatine: nodig of niet? [Uitleg & advies]",
       metaDescription:
-        "Laadfase bij creatine: essentieel, optioneel of overbodig? Voor- en nadelen, wetenschap en praktische tips. Lees het complete advies voor optimale resultaten.",
+        "Laadfase bij creatine: essentieel, optioneel of overbodig? Voor- en nadelen, wetenschap en praktische tips. Lees het complete advies.",
       keywords: [
         "laadfase creatine",
         "creatine laadfase",
@@ -369,6 +362,7 @@ Ja, creatine veroorzaakt **waterretentie in de spieren** (1-3 kg gewichtstoename
         "creatine innemen",
         "is creatine laadfase nodig",
         "hoe lang laadfase creatine",
+        "wat gebeurt er zonder laadfase",
         "nadeel laadfase creatine",
       ],
     },
