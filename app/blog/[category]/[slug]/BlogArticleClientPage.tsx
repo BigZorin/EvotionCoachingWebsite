@@ -66,14 +66,14 @@ export function BlogArticleClientPage({ article }: BlogArticleClientPageProps) {
   const formatContent = (content: string) => {
     return (
       content
-        // Headers with proper anchor IDs
+        // Headers with proper anchor IDs - smaller mobile sizes
         .replace(/^## (.+)$/gm, (match, title) => {
           const id = title
             .toLowerCase()
             .replace(/[^a-z0-9\s-]/g, "")
             .replace(/\s+/g, "-")
             .replace(/^-|-$/g, "")
-          return `<h2 id="${id}" class="text-lg md:text-2xl font-semibold mt-4 md:mt-8 mb-2 md:mb-4 text-gray-800 scroll-mt-20">${title}</h2>`
+          return `<h2 id="${id}" class="text-base md:text-2xl font-semibold mt-4 md:mt-8 mb-2 md:mb-4 text-gray-800 scroll-mt-20">${title}</h2>`
         })
         .replace(/^### (.+)$/gm, (match, title) => {
           const id = title
@@ -81,7 +81,7 @@ export function BlogArticleClientPage({ article }: BlogArticleClientPageProps) {
             .replace(/[^a-z0-9\s-]/g, "")
             .replace(/\s+/g, "-")
             .replace(/^-|-$/g, "")
-          return `<h3 id="${id}" class="text-base md:text-xl font-medium mt-3 md:mt-6 mb-2 md:mb-3 text-gray-700 scroll-mt-20">${title}</h3>`
+          return `<h3 id="${id}" class="text-sm md:text-xl font-medium mt-3 md:mt-6 mb-2 md:mb-3 text-gray-700 scroll-mt-20">${title}</h3>`
         })
         // Bold and italic
         .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
