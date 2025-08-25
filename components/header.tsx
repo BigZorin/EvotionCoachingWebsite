@@ -17,6 +17,8 @@ import {
   Users2,
   Smartphone,
   BookOpen,
+  Calculator,
+  Utensils,
 } from "lucide-react"
 
 export function Header() {
@@ -33,7 +35,7 @@ export function Header() {
   }
 
   const isActive = (path: string) => {
-    return pathname === path
+    return pathname === path || pathname.startsWith(path)
   }
 
   return (
@@ -203,12 +205,28 @@ export function Header() {
                 {/* Dropdown Menu */}
                 <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                   <div className="p-2">
+                    <Link
+                      href="/blog"
+                      className={`block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium ${
+                        isActive("/blog") ? "bg-primary/5" : ""
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <BookOpen className="w-4 h-4 text-primary" />
+                        <div>
+                          <div className="font-semibold">Blog</div>
+                          <div className="text-xs text-gray-500">Gratis fitness & voeding tips</div>
+                        </div>
+                      </div>
+                    </Link>
                     <a
                       href="https://voedingvervanger.evotion-coaching.nl/"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium"
                     >
                       <div className="flex items-center gap-3">
-                        <Heart className="w-4 h-4 text-[#1e1839]" />
+                        <Utensils className="w-4 h-4 text-primary" />
                         <div className="flex-1">
                           <div className="font-semibold">Voedingsvervanger</div>
                           <div className="text-xs text-gray-500">Gratis tool</div>
@@ -222,7 +240,7 @@ export function Header() {
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Target className="w-4 h-4 text-[#1e1839]" />
+                        <Calculator className="w-4 h-4 text-primary" />
                         <div>
                           <div className="font-semibold">Caloriebehoefte Berekenen</div>
                           <div className="text-xs text-gray-500">Gratis calculator</div>
@@ -234,7 +252,7 @@ export function Header() {
               </div>
 
               <Link
-                href="/resultaten" // Aangepast naar de nieuwe pagina
+                href="/resultaten"
                 className={`text-gray-700 hover:text-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-primary/5 ${isActive("/resultaten") ? "text-primary bg-primary/5" : ""}`}
               >
                 Resultaten
@@ -479,12 +497,27 @@ export function Header() {
 
                     {expandedMobileMenu === "gratis" && (
                       <div className="pl-2 space-y-1 mt-2">
+                        <Link
+                          href="/blog"
+                          className={`flex items-center gap-3 text-gray-700 hover:text-primary hover:bg-primary/5 transition-colors py-3 px-3 rounded-lg text-sm ${
+                            isActive("/blog") ? "bg-primary/5" : ""
+                          }`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <BookOpen className="w-4 h-4 text-primary" />
+                          <div>
+                            <div className="font-medium">Blog</div>
+                            <div className="text-xs text-gray-500">Gratis fitness & voeding tips</div>
+                          </div>
+                        </Link>
                         <a
                           href="https://voedingvervanger.evotion-coaching.nl/"
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="flex items-center gap-3 text-gray-700 hover:text-primary hover:bg-primary/5 transition-colors py-3 px-3 rounded-lg text-sm"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
-                          <Heart className="w-4 h-4 text-[#1e1839]" />
+                          <Utensils className="w-4 h-4 text-primary" />
                           <div className="flex-1">
                             <div className="font-medium">Voedingsvervanger</div>
                             <div className="text-xs text-gray-500">Gratis tool</div>
@@ -497,7 +530,7 @@ export function Header() {
                           }`}
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
-                          <Target className="w-4 h-4 text-[#1e1839]" />
+                          <Calculator className="w-4 h-4 text-primary" />
                           <div>
                             <div className="font-medium">Caloriebehoefte Berekenen</div>
                             <div className="text-xs text-gray-500">Gratis calculator</div>
@@ -508,7 +541,7 @@ export function Header() {
                   </div>
 
                   <Link
-                    href="/resultaten" // Aangepast naar de nieuwe pagina
+                    href="/resultaten"
                     className={`block text-gray-700 hover:text-primary hover:bg-primary/5 transition-colors font-medium text-base py-3 px-3 rounded-lg border-b border-gray-100 mb-2 ${isActive("/resultaten") ? "bg-primary/5 text-primary" : ""}`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >

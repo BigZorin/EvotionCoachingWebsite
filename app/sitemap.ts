@@ -1,90 +1,134 @@
 import type { MetadataRoute } from "next"
+import { blogArticles, blogCategories } from "@/data/blog-articles"
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
+  const baseUrl = "https://evotioncoaching.nl"
+
+  // Static pages
+  const staticPages = [
     {
-      url: "https://evotion-coaching.nl",
+      url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: "daily",
+      changeFrequency: "weekly" as const,
       priority: 1,
     },
     {
-      url: "https://evotion-coaching.nl/personal-training",
+      url: `${baseUrl}/online-coaching`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "monthly" as const,
       priority: 0.9,
     },
     {
-      url: "https://evotion-coaching.nl/online-coaching",
+      url: `${baseUrl}/premium-coaching`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "monthly" as const,
       priority: 0.9,
     },
     {
-      url: "https://evotion-coaching.nl/premium-coaching",
+      url: `${baseUrl}/personal-training`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "monthly" as const,
       priority: 0.9,
     },
     {
-      url: "https://evotion-coaching.nl/12-weken-vetverlies",
+      url: `${baseUrl}/12-weken-vetverlies`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "monthly" as const,
       priority: 0.8,
     },
     {
-      url: "https://evotion-coaching.nl/resultaten",
+      url: `${baseUrl}/resultaten`,
       lastModified: new Date(),
-      changeFrequency: "weekly",
+      changeFrequency: "weekly" as const,
       priority: 0.8,
     },
     {
-      url: "https://evotion-coaching.nl/gratis/caloriebehoefte",
+      url: `${baseUrl}/evotion`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "monthly" as const,
       priority: 0.7,
     },
     {
-      url: "https://evotion-coaching.nl/over-ons/coaches",
+      url: `${baseUrl}/over-ons`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: "https://evotion-coaching.nl/over-ons/coaches/martin",
-      lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "monthly" as const,
       priority: 0.7,
     },
     {
-      url: "https://evotion-coaching.nl/over-ons/coaches/zorin",
+      url: `${baseUrl}/over-ons/visie-missie`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: "https://evotion-coaching.nl/over-ons/visie-missie",
-      lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "monthly" as const,
       priority: 0.6,
     },
     {
-      url: "https://evotion-coaching.nl/over-ons/kernwaarden",
+      url: `${baseUrl}/over-ons/kernwaarden`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "monthly" as const,
       priority: 0.6,
     },
     {
-      url: "https://evotion-coaching.nl/over-ons/evotion-app",
+      url: `${baseUrl}/over-ons/coaches`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "monthly" as const,
       priority: 0.7,
     },
     {
-      url: "https://evotion-coaching.nl/contact",
+      url: `${baseUrl}/over-ons/coaches/martin`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/over-ons/coaches/zorin`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/over-ons/evotion-app`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/contact`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/gratis/caloriebehoefte`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
       priority: 0.9,
     },
   ]
+
+  // Blog pages
+  const blogPages = [
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    },
+  ]
+
+  // Blog category pages
+  const blogCategoryPages = blogCategories.map((category) => ({
+    url: `${baseUrl}/blog/${category.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }))
+
+  // Blog article pages
+  const blogArticlePages = blogArticles.map((article) => ({
+    url: `${baseUrl}/blog/${article.category.slug}/${article.slug}`,
+    lastModified: new Date(article.publishedAt),
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }))
+
+  return [...staticPages, ...blogPages, ...blogCategoryPages, ...blogArticlePages]
 }
