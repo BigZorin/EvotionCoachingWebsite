@@ -73,7 +73,7 @@ export function BlogArticleClientPage({ article }: BlogArticleClientPageProps) {
             .replace(/[^a-z0-9\s-]/g, "")
             .replace(/\s+/g, "-")
             .replace(/^-|-$/g, "")
-          return `<h2 id="${id}" class="text-xl md:text-2xl font-semibold mt-6 md:mt-8 mb-3 md:mb-4 text-gray-800 scroll-mt-20">${title}</h2>`
+          return `<h2 id="${id}" class="text-lg md:text-2xl font-semibold mt-4 md:mt-8 mb-2 md:mb-4 text-gray-800 scroll-mt-20">${title}</h2>`
         })
         .replace(/^### (.+)$/gm, (match, title) => {
           const id = title
@@ -81,7 +81,7 @@ export function BlogArticleClientPage({ article }: BlogArticleClientPageProps) {
             .replace(/[^a-z0-9\s-]/g, "")
             .replace(/\s+/g, "-")
             .replace(/^-|-$/g, "")
-          return `<h3 id="${id}" class="text-lg md:text-xl font-medium mt-4 md:mt-6 mb-2 md:mb-3 text-gray-700 scroll-mt-20">${title}</h3>`
+          return `<h3 id="${id}" class="text-base md:text-xl font-medium mt-3 md:mt-6 mb-2 md:mb-3 text-gray-700 scroll-mt-20">${title}</h3>`
         })
         // Bold and italic
         .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
@@ -91,7 +91,7 @@ export function BlogArticleClientPage({ article }: BlogArticleClientPageProps) {
         // Blockquotes
         .replace(
           /^> \*\*(.+?):\*\* (.+)$/gm,
-          '<div class="border-l-4 border-blue-500 bg-blue-50 p-3 md:p-4 my-4 md:my-6 rounded-r"><p class="text-sm md:text-base text-gray-800"><strong class="font-semibold text-blue-800">$1:</strong> $2</p></div>',
+          '<div class="border-l-4 border-blue-500 bg-blue-50 p-3 md:p-4 my-4 md:my-6 rounded-r"><p class="text-xs md:text-base text-gray-800"><strong class="font-semibold text-blue-800">$1:</strong> $2</p></div>',
         )
         // Internal links
         .replace(
@@ -104,7 +104,7 @@ export function BlogArticleClientPage({ article }: BlogArticleClientPageProps) {
           '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline inline-flex items-center gap-1">$1 <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></a>',
         )
         // Line breaks and paragraphs
-        .replace(/\n\n/g, "</p><p class='mb-3 md:mb-4 text-sm md:text-base text-gray-700 leading-relaxed'>")
+        .replace(/\n\n/g, "</p><p class='mb-2 md:mb-4 text-xs md:text-base text-gray-700 leading-relaxed'>")
         .replace(/\n/g, "<br>")
     )
   }
@@ -149,11 +149,11 @@ export function BlogArticleClientPage({ article }: BlogArticleClientPageProps) {
               {article.category.name}
             </Badge>
 
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 leading-tight text-gray-900">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-4 md:mb-6 leading-tight text-gray-900">
               {article.title}
             </h1>
 
-            <p className="text-base md:text-xl text-gray-600 mb-6 md:mb-8 leading-relaxed">{article.description}</p>
+            <p className="text-sm md:text-xl text-gray-600 mb-6 md:mb-8 leading-relaxed">{article.description}</p>
 
             {/* Article Meta - Mobile Optimized */}
             <div className="flex flex-wrap items-center gap-3 md:gap-6 text-xs md:text-sm text-gray-500 mb-4 md:mb-6">
@@ -247,7 +247,7 @@ export function BlogArticleClientPage({ article }: BlogArticleClientPageProps) {
             <div
               className="article-content text-gray-700 leading-relaxed"
               dangerouslySetInnerHTML={{
-                __html: `<p class='mb-3 md:mb-4 text-sm md:text-base text-gray-700 leading-relaxed'>${formatContent(article.content)}</p>`,
+                __html: `<p class='mb-2 md:mb-4 text-xs md:text-base text-gray-700 leading-relaxed'>${formatContent(article.content)}</p>`,
               }}
             />
           </div>
@@ -318,7 +318,9 @@ export function BlogArticleClientPage({ article }: BlogArticleClientPageProps) {
 
           {/* CTA Section - Mobile Optimized */}
           <section className="mt-12 md:mt-16 bg-gray-900 rounded-lg p-6 md:p-8 text-white text-center">
-            <h2 className="text-xl md:text-3xl font-bold mb-3 md:mb-4">Klaar om te Starten met Creatine?</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-3 md:mb-4">
+              Klaar om te Starten met Creatine?
+            </h2>
             <p className="text-base md:text-xl mb-4 md:mb-6 text-gray-300">
               Ontdek onze hoogwaardige creatine of krijg persoonlijk advies van onze experts.
             </p>
