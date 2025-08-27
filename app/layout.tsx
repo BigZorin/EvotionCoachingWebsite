@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import CookieConsent from "@/components/cookie-consent"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -134,7 +135,10 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://evotion-coaching.nl" />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        {children}
+        <CookieConsent />
+      </body>
     </html>
   )
 }

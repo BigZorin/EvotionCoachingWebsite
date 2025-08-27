@@ -1,1682 +1,875 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Progress } from "@/components/ui/progress"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import { submitCaloriebehoefte } from "@/app/actions/caloriebehoefte"
+import { trackEvent } from "@/utils/cookie-utils"
 import {
-  ArrowRight,
-  ChevronRight,
-  Heart,
-  Users,
-  TrendingUp,
-  Flame,
+  Calculator,
+  User,
   Activity,
   Target,
-  Calculator,
+  TrendingUp,
+  CheckCircle,
+  ArrowRight,
+  Scale,
   Zap,
+  Heart,
+  Award,
+  Mail,
+  Phone,
 } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { sendCaloriebehoefteEmail } from "@/app/actions/caloriebehoefte"
 
-type FormData = {
-  naam: string
+interface FormData {
+  gender: string
+  age: string
+  weight: string
+  height: string
+  activityLevel: string
+  goal: string
+  name: string
   email: string
-  telefoon: string
-  geslacht: "man" | "vrouw"
-  leeftijd: number
-  gewicht: number
-  lengte: number
-  activiteit: string
-  doel: string
+  phone: string
 }
 
-type Step = {
-  id: number
-  title: string
-  description: string
+const initialFormData: FormData = {
+  gender: "",
+  age: "",
+  weight: "",
+  height: "",
+  activityLevel: "",
+  goal: "",
+  name: "",
+  email: "",
+  phone: "",
+}
+
+interface CalorieResult {
+  bmr: number
+  tdee: number
+  goalCalories: number
+  protein: number
+  carbs: number
+  fat: number
 }
 
 export default function CaloriebehoefteClientPage() {
-  const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(0)
-  const [formData, setFormData] = useState<FormData>({
-    naam: "",
-    email: "",
-    telefoon: "",
-    geslacht: "man",
-    leeftijd: 30,
-    gewicht: 75,
-    lengte: 180,
-    activiteit: "matig",
-    doel: "afvallen",
-  })
+  const [currentStep, setCurrentStep] = useState(1)
+  const [formData, setFormData] = useState<FormData>(initialFormData)
+  const [result, setResult] = useState<CalorieResult | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [calorieResult, setCalorieResult] = useState<{
-    bmr: number
-    tdee: number
-    target: number
-    protein: number
-    carbs: number
-    fat: number
-    recommendedCoaching: string
-  } | null>(null)
-  const [typingEffect, setTypingEffect] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
-  const [showNextButton, setShowNextButton] = useState(false)
 
-  // Animated counters on results
-  const [displayBMR, setDisplayBMR] = useState(0)
-  const [displayTDEE, setDisplayTDEE] = useState(0)
-  const [displayTarget, setDisplayTarget] = useState(0)
-  const rafRef = useRef<number | null>(null)
+  const totalSteps = 7
 
-  const steps: Step[] = [
-    { id: 0, title: "Welkom", description: "Welkom bij de Evotion Caloriebehoefte Calculator" },
-    { id: 1, title: "Persoonlijke gegevens", description: "We hebben je naam nodig" },
-    { id: 2, title: "Contact", description: "Hoe kunnen we je bereiken?" },
-    { id: 3, title: "Geslacht", description: "Wat is je geslacht?" },
-    { id: 4, title: "Leeftijd", description: "Wat is je leeftijd?" },
-    { id: 5, title: "Gewicht", description: "Wat is je huidige gewicht?" },
-    { id: 6, title: "Lengte", description: "Wat is je lengte?" },
-    { id: 7, title: "Activiteitsniveau", description: "Hoe actief ben je?" },
-    { id: 8, title: "Doel", description: "Wat is je doel?" },
-    { id: 9, title: "Berekenen", description: "We berekenen je caloriebehoefte" },
-  ]
+  // Load saved progress on component mount
+  useEffect(() => {
+    if (typeof window === "undefined") return
 
-  const welcomeMessages = [
-    "Welkom bij de Evotion Caloriebehoefte Calculator!",
-    "Ik ga je helpen om je dagelijkse caloriebehoefte te berekenen voor effectief afvallen en vetverlies.",
-    "Met deze gratis calculator krijg je inzicht in je BMR, TDEE en hoeveel calorieën je nodig hebt om je doel te bereiken.",
-    "Laten we beginnen met een paar vragen...",
-  ]
+    try {
+      const saved = localStorage.getItem("calorie-calculator-progress")
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (parsed && typeof parsed === "object") {
+          if (parsed.step && typeof parsed.step === "number") {
+            setCurrentStep(parsed.step)
+          }
+          if (parsed.data && typeof parsed.data === "object") {
+            setFormData({ ...initialFormData, ...parsed.data })
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error loading saved progress:", error)
+      // Clear corrupted data
+      try {
+        localStorage.removeItem("calorie-calculator-progress")
+      } catch (e) {
+        console.error("Error clearing corrupted data:", e)
+      }
+    }
+  }, [])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+  // Save progress whenever form data or step changes
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    if (currentStep > 1 || Object.values(formData).some((value) => value !== "")) {
+      try {
+        const dataToSave = {
+          step: currentStep,
+          data: formData,
+        }
+        localStorage.setItem("calorie-calculator-progress", JSON.stringify(dataToSave))
+      } catch (error) {
+        console.error("Error saving progress:", error)
+      }
+    }
+  }, [currentStep, formData])
+
+  const updateFormData = (field: keyof FormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }))
+  const nextStep = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep((prev) => prev + 1)
+      try {
+        trackEvent("calculator_step_completed", { step: currentStep })
+      } catch (error) {
+        console.error("Error tracking event:", error)
+      }
+    }
   }
 
-  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: Number.parseFloat(value) }))
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep((prev) => prev - 1)
+    }
   }
 
-  const calculateCalories = () => {
-    // BMR berekening met Mifflin-St Jeor formule
-    let bmr = 0
-    if (formData.geslacht === "man") {
-      bmr = 10 * formData.gewicht + 6.25 * formData.lengte - 5 * formData.leeftijd + 5
+  const calculateCalories = (): CalorieResult => {
+    const weight = Number.parseFloat(formData.weight) || 0
+    const height = Number.parseFloat(formData.height) || 0
+    const age = Number.parseFloat(formData.age) || 0
+
+    // Calculate BMR using Mifflin-St Jeor Equation
+    let bmr: number
+    if (formData.gender === "male") {
+      bmr = 10 * weight + 6.25 * height - 5 * age + 5
     } else {
-      bmr = 10 * formData.gewicht + 6.25 * formData.lengte - 5 * formData.leeftijd - 161
+      bmr = 10 * weight + 6.25 * height - 5 * age - 161
     }
 
-    // TDEE berekening op basis van activiteitsniveau
-    let tdee = 0
-    switch (formData.activiteit) {
-      case "sedentair":
-        tdee = bmr * 1.2
-        break
-      case "licht":
-        tdee = bmr * 1.375
-        break
-      case "matig":
-        tdee = bmr * 1.55
-        break
-      case "actief":
-        tdee = bmr * 1.725
-        break
-      case "zeer_actief":
-        tdee = bmr * 1.9
-        break
-      default:
-        tdee = bmr * 1.55
+    // Activity multipliers
+    const activityMultipliers: Record<string, number> = {
+      sedentary: 1.2,
+      light: 1.375,
+      moderate: 1.55,
+      active: 1.725,
+      very_active: 1.9,
     }
 
-    // Doelcalorieën op basis van doel
-    let target = 0
-    switch (formData.doel) {
-      case "afvallen":
-        target = tdee * 0.85 // 15% calorie-tekort voor vetverlies
-        break
-      case "behouden":
-        target = tdee
-        break
-      case "aankomen":
-        target = tdee * 1.15 // 15% calorie-overschot
-        break
-      default:
-        target = tdee
+    const multiplier = activityMultipliers[formData.activityLevel] || 1.2
+    const tdee = bmr * multiplier
+
+    // Goal adjustments
+    let goalCalories = tdee
+    if (formData.goal === "lose_weight") {
+      goalCalories = tdee - 500 // 500 calorie deficit
+    } else if (formData.goal === "gain_weight") {
+      goalCalories = tdee + 300 // 300 calorie surplus
     }
 
-    // Macronutriënten berekening voor optimaal vetverlies
-    const protein = formData.gewicht * 2 // 2g eiwit per kg lichaamsgewicht voor vetverlies
-    const fat = (target * 0.25) / 9 // 25% van calorieën uit vet (9 cal per gram)
-    const carbs = (target - protein * 4 - fat * 9) / 4 // Rest uit koolhydraten (4 cal per gram)
-
-    // Aanbevolen coaching op basis van doel
-    let recommendedCoaching = ""
-    if (formData.activiteit === "zeer_actief" || formData.activiteit === "actief") {
-      recommendedCoaching = "premium-coaching"
-    } else if (formData.doel === "afvallen") {
-      recommendedCoaching = "12-weken-vetverlies"
-    } else {
-      recommendedCoaching = "online-coaching"
-    }
+    // Macronutrient distribution (40% carbs, 30% protein, 30% fat)
+    const protein = (goalCalories * 0.3) / 4 // 4 calories per gram
+    const carbs = (goalCalories * 0.4) / 4 // 4 calories per gram
+    const fat = (goalCalories * 0.3) / 9 // 9 calories per gram
 
     return {
       bmr: Math.round(bmr),
       tdee: Math.round(tdee),
-      target: Math.round(target),
+      goalCalories: Math.round(goalCalories),
       protein: Math.round(protein),
       carbs: Math.round(carbs),
       fat: Math.round(fat),
-      recommendedCoaching,
     }
-  }
-
-  const getActivityLevelText = (level: string) => {
-    const levels: { [key: string]: string } = {
-      sedentair: "Sedentair (weinig tot geen beweging, kantoorwerk)",
-      licht: "Licht actief (lichte beweging, 1-2 keer per week sporten)",
-      matig: "Matig actief (matige beweging, 3-5 keer per week sporten)",
-      actief: "Actief (dagelijks sporten of fysiek werk)",
-      zeer_actief: "Zeer actief (intensieve training, 2x per dag sporten)",
-    }
-    return levels[level] || level
-  }
-
-  const getGoalText = (goal: string) => {
-    const goals: { [key: string]: string } = {
-      afvallen: "Afvallen / Vet verliezen",
-      behouden: "Gewicht behouden / Recomposition",
-      aankomen: "Aankomen / Spieropbouw",
-    }
-    return goals[goal] || goal
   }
 
   const handleSubmit = async () => {
     setIsSubmitting(true)
-    const result = calculateCalories()
-    setCalorieResult(result)
 
     try {
-      // Send the form data and results via server action
-      const response = await sendCaloriebehoefteEmail({
-        name: formData.naam,
-        email: formData.email,
-        phone: formData.telefoon,
-        age: formData.leeftijd,
-        gender: formData.geslacht,
-        weight: formData.gewicht,
-        height: formData.lengte,
-        activityLevel: getActivityLevelText(formData.activiteit),
-        goal: getGoalText(formData.doel),
-        bmr: result.bmr,
-        tdee: result.tdee,
-        goalCalories: result.target,
-        protein: result.protein,
-        carbs: result.carbs,
-        fat: result.fat,
+      const calculatedResult = calculateCalories()
+      setResult(calculatedResult)
+
+      // Submit to server action
+      const formDataObj = new FormData()
+
+      // Add form data safely
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          formDataObj.append(key, String(value))
+        }
       })
 
-      if (response.success) {
+      formDataObj.append("bmr", calculatedResult.bmr.toString())
+      formDataObj.append("tdee", calculatedResult.tdee.toString())
+      formDataObj.append("goalCalories", calculatedResult.goalCalories.toString())
+
+      const result = await submitCaloriebehoefte(formDataObj)
+
+      if (result && result.success) {
+        // Track completion
+        try {
+          trackEvent("calculator_completed", {
+            goal: formData.goal,
+            gender: formData.gender,
+            age_range: getAgeRange(Number.parseInt(formData.age) || 0),
+            activity_level: formData.activityLevel,
+          })
+        } catch (error) {
+          console.error("Error tracking completion:", error)
+        }
+
         setIsSubmitted(true)
-        setCurrentStep(currentStep + 1)
+        setCurrentStep(totalSteps + 1) // Move to results step
+
+        // Clear saved progress
+        try {
+          localStorage.removeItem("calorie-calculator-progress")
+        } catch (error) {
+          console.error("Error clearing progress:", error)
+        }
       } else {
-        console.error("Error submitting form:", response.error)
-        // Still show results to user even if email fails
-        setIsSubmitted(true)
-        setCurrentStep(currentStep + 1)
+        console.error("Submission failed:", result?.error || "Unknown error")
       }
     } catch (error) {
-      console.error("Error submitting calorie form:", error)
-      // Still show results to user even if email fails
-      setIsSubmitted(true)
-      setCurrentStep(currentStep + 1)
+      console.error("Error submitting form:", error)
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const nextStep = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
-      setTypingEffect("")
-      setIsTyping(true)
-      setShowNextButton(false)
-    }
+  const getAgeRange = (age: number): string => {
+    if (age < 25) return "18-24"
+    if (age < 35) return "25-34"
+    if (age < 45) return "35-44"
+    if (age < 55) return "45-54"
+    return "55+"
   }
 
-  const getStepContent = () => {
+  const getStepTitle = (step: number): string => {
+    const titles: Record<number, string> = {
+      1: "Welkom",
+      2: "Persoonlijke gegevens",
+      3: "Lichaamsgegevens",
+      4: "Activiteitsniveau",
+      5: "Jouw doel",
+      6: "Contactgegevens",
+      7: "Bevestiging",
+    }
+    return titles[step] || ""
+  }
+
+  const canProceed = (): boolean => {
     switch (currentStep) {
-      case 0:
-        return (
-          <div className="space-y-6 text-center">
-            {/* Desktop */}
-            <div className="hidden sm:block">
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold tracking-tight text-primary">
-                  {typingEffect}
-                  {isTyping && <span className="animate-pulse">|</span>}
-                </h2>
-                {showNextButton && (
-                  <Button onClick={nextStep} className="mt-6 animate-fade-in">
-                    Start caloriebehoefte berekenen <ChevronRight className="ml-2 h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Mobiel */}
-            <div className="sm:hidden">
-              <div className="space-y-2">
-                <h2 className="text-base font-bold tracking-tight text-primary mb-1">
-                  {typingEffect}
-                  {isTyping && <span className="animate-pulse">|</span>}
-                </h2>
-                {showNextButton && (
-                  <Button onClick={nextStep} className="mt-3 animate-fade-in text-xs">
-                    Start berekenen <ChevronRight className="ml-2 h-3 w-3" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        )
       case 1:
-        return (
-          <div className="space-y-6 text-center">
-            {/* Desktop */}
-            <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-4 animate-fade-in">
-                  <div className="space-y-2">
-                    <Label htmlFor="naam-desktop" className="block">
-                      Wat is je naam?
-                    </Label>
-                    <Input
-                      id="naam-desktop"
-                      name="naam"
-                      value={formData.naam}
-                      onChange={handleInputChange}
-                      placeholder="Voer je naam in"
-                      className="max-w-md mx-auto text-center"
-                    />
-                  </div>
-                  <Button onClick={nextStep} disabled={!formData.naam} className="mx-auto">
-                    Volgende <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Mobiel */}
-            <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-2 animate-fade-in">
-                  <div className="space-y-1">
-                    <Label htmlFor="naam-mobile" className="block text-xs">
-                      Wat is je naam?
-                    </Label>
-                    <Input
-                      id="naam-mobile"
-                      name="naam"
-                      value={formData.naam}
-                      onChange={handleInputChange}
-                      placeholder="Voer je naam in"
-                      className="max-w-[200px] mx-auto text-center text-xs"
-                    />
-                  </div>
-                  <Button onClick={nextStep} disabled={!formData.naam} className="mx-auto text-xs">
-                    Volgende <ArrowRight className="ml-2 h-3 w-3" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        )
+        return true
       case 2:
-        return (
-          <div className="space-y-6 text-center">
-            {/* Desktop */}
-            <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-4 animate-fade-in">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email-desktop" className="block">
-                        E-mailadres (voor je persoonlijke caloriebehoefte resultaten)
-                      </Label>
-                      <Input
-                        id="email-desktop"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="jouw@email.nl"
-                        className="max-w-md mx-auto text-center"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="telefoon-desktop" className="block">
-                        Telefoonnummer (optioneel)
-                      </Label>
-                      <Input
-                        id="telefoon-desktop"
-                        name="telefoon"
-                        value={formData.telefoon}
-                        onChange={handleInputChange}
-                        placeholder="06 12345678"
-                        className="max-w-md mx-auto text-center"
-                      />
-                    </div>
-                  </div>
-                  <Button onClick={nextStep} disabled={!formData.email} className="mx-auto">
-                    Volgende <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Mobiel */}
-            <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-2 animate-fade-in">
-                  <div className="space-y-2">
-                    <div className="space-y-1">
-                      <Label htmlFor="email-mobile" className="block text-xs">
-                        E-mailadres (voor resultaten)
-                      </Label>
-                      <Input
-                        id="email-mobile"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="jouw@email.nl"
-                        className="max-w-[200px] mx-auto text-center text-xs"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label htmlFor="telefoon-mobile" className="block text-xs">
-                        Telefoonnummer (optioneel)
-                      </Label>
-                      <Input
-                        id="telefoon-mobile"
-                        name="telefoon"
-                        value={formData.telefoon}
-                        onChange={handleInputChange}
-                        placeholder="06 12345678"
-                        className="max-w-[200px] mx-auto text-center text-xs"
-                      />
-                    </div>
-                  </div>
-                  <Button onClick={nextStep} disabled={!formData.email} className="mx-auto text-xs">
-                    Volgende <ArrowRight className="ml-2 h-3 w-3" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        )
+        return formData.gender !== "" && formData.age !== ""
       case 3:
-        return (
-          <div className="space-y-6 text-center">
-            {/* Desktop */}
-            <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-4 animate-fade-in">
-                  <div className="space-y-2">
-                    <Label className="block">Wat is je geslacht? (Voor accurate BMR berekening)</Label>
-                    <RadioGroup
-                      value={formData.geslacht}
-                      onValueChange={(value) => handleSelectChange("geslacht", value)}
-                      className="flex justify-center space-x-4"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="man" id="man-desktop" />
-                        <Label htmlFor="man-desktop">Man</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="vrouw" id="vrouw-desktop" />
-                        <Label htmlFor="vrouw-desktop">Vrouw</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                  <Button onClick={nextStep} className="mx-auto">
-                    Volgende <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Mobiel */}
-            <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-2 animate-fade-in">
-                  <div className="space-y-1">
-                    <Label className="block text-xs">Geslacht? (Voor BMR berekening)</Label>
-                    <RadioGroup
-                      value={formData.geslacht}
-                      onValueChange={(value) => handleSelectChange("geslacht", value)}
-                      className="flex justify-center space-x-4"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="man" id="man-mobile" />
-                        <Label htmlFor="man-mobile" className="text-xs">
-                          Man
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="vrouw" id="vrouw-mobile" />
-                        <Label htmlFor="vrouw-mobile" className="text-xs">
-                          Vrouw
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                  <Button onClick={nextStep} className="mx-auto text-xs">
-                    Volgende <ArrowRight className="ml-2 h-3 w-3" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        )
+        return formData.weight !== "" && formData.height !== ""
       case 4:
-        return (
-          <div className="space-y-6 text-center">
-            {/* Desktop */}
-            <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-4 animate-fade-in">
-                  <div className="space-y-2">
-                    <Label htmlFor="leeftijd-desktop" className="block">
-                      Wat is je leeftijd? (Voor metabolisme berekening)
-                    </Label>
-                    <Input
-                      id="leeftijd-desktop"
-                      name="leeftijd"
-                      type="number"
-                      min="18"
-                      max="100"
-                      value={formData.leeftijd}
-                      onChange={handleNumberChange}
-                      className="max-w-md mx-auto text-center"
-                    />
-                  </div>
-                  <Button onClick={nextStep} disabled={!formData.leeftijd} className="mx-auto">
-                    Volgende <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Mobiel */}
-            <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-2 animate-fade-in">
-                  <div className="space-y-1">
-                    <Label htmlFor="leeftijd-mobile" className="block text-xs">
-                      Leeftijd? (Voor metabolisme)
-                    </Label>
-                    <Input
-                      id="leeftijd-mobile"
-                      name="leeftijd"
-                      type="number"
-                      min="18"
-                      max="100"
-                      value={formData.leeftijd}
-                      onChange={handleNumberChange}
-                      className="max-w-[200px] mx-auto text-center text-xs"
-                    />
-                  </div>
-                  <Button onClick={nextStep} disabled={!formData.leeftijd} className="mx-auto text-xs">
-                    Volgende <ArrowRight className="ml-2 h-3 w-3" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        )
+        return formData.activityLevel !== ""
       case 5:
-        return (
-          <div className="space-y-6 text-center">
-            {/* Desktop */}
-            <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-4 animate-fade-in">
-                  <div className="space-y-2">
-                    <Label htmlFor="gewicht-desktop" className="block">
-                      Wat is je huidige gewicht in kg? (Voor caloriebehoefte berekening)
-                    </Label>
-                    <Input
-                      id="gewicht-desktop"
-                      name="gewicht"
-                      type="number"
-                      min="40"
-                      max="200"
-                      value={formData.gewicht}
-                      onChange={handleNumberChange}
-                      className="max-w-md mx-auto text-center"
-                    />
-                  </div>
-                  <Button onClick={nextStep} disabled={!formData.gewicht} className="mx-auto">
-                    Volgende <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Mobiel */}
-            <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-2 animate-fade-in">
-                  <div className="space-y-1">
-                    <Label htmlFor="gewicht-mobile" className="block text-xs">
-                      Gewicht in kg? (Voor berekening)
-                    </Label>
-                    <Input
-                      id="gewicht-mobile"
-                      name="gewicht"
-                      type="number"
-                      min="40"
-                      max="200"
-                      value={formData.gewicht}
-                      onChange={handleNumberChange}
-                      className="max-w-[200px] mx-auto text-center text-xs"
-                    />
-                  </div>
-                  <Button onClick={nextStep} disabled={!formData.gewicht} className="mx-auto text-xs">
-                    Volgende <ArrowRight className="ml-2 h-3 w-3" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        )
+        return formData.goal !== ""
       case 6:
-        return (
-          <div className="space-y-6 text-center">
-            {/* Desktop */}
-            <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-4 animate-fade-in">
-                  <div className="space-y-2">
-                    <Label htmlFor="lengte-desktop" className="block">
-                      Wat is je lengte in cm? (Voor BMR en TDEE berekening)
-                    </Label>
-                    <Input
-                      id="lengte-desktop"
-                      name="lengte"
-                      type="number"
-                      min="140"
-                      max="220"
-                      value={formData.lengte}
-                      onChange={handleNumberChange}
-                      className="max-w-md mx-auto text-center"
-                    />
-                  </div>
-                  <Button onClick={nextStep} disabled={!formData.lengte} className="mx-auto">
-                    Volgende <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Mobiel */}
-            <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-2 animate-fade-in">
-                  <div className="space-y-1">
-                    <Label htmlFor="lengte-mobile" className="block text-xs">
-                      Lengte in cm? (Voor TDEE)
-                    </Label>
-                    <Input
-                      id="lengte-mobile"
-                      name="lengte"
-                      type="number"
-                      min="140"
-                      max="220"
-                      value={formData.lengte}
-                      onChange={handleNumberChange}
-                      className="max-w-[200px] mx-auto text-center text-xs"
-                    />
-                  </div>
-                  <Button onClick={nextStep} disabled={!formData.lengte} className="mx-auto text-xs">
-                    Volgende <ArrowRight className="ml-2 h-3 w-3" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        )
+        return formData.name !== "" && formData.email !== ""
       case 7:
-        return (
-          <div className="space-y-6 text-center">
-            {/* Desktop */}
-            <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-4 animate-fade-in">
-                  <div className="space-y-2">
-                    <Label htmlFor="activiteit-desktop" className="block">
-                      Hoe zou je je activiteitsniveau omschrijven? (Voor TDEE berekening)
-                    </Label>
-                    <Select
-                      value={formData.activiteit}
-                      onValueChange={(value) => handleSelectChange("activiteit", value)}
-                    >
-                      <SelectTrigger id="activiteit-desktop" className="max-w-md mx-auto text-center">
-                        <SelectValue placeholder="Selecteer je activiteitsniveau" />
-                      </SelectTrigger>
-                      <SelectContent align="center">
-                        <SelectItem value="sedentair" className="text-center">
-                          Sedentair (weinig tot geen beweging, kantoorwerk)
-                        </SelectItem>
-                        <SelectItem value="licht" className="text-center">
-                          Licht actief (lichte beweging, 1-2 keer per week sporten)
-                        </SelectItem>
-                        <SelectItem value="matig" className="text-center">
-                          Matig actief (matige beweging, 3-5 keer per week sporten)
-                        </SelectItem>
-                        <SelectItem value="actief" className="text-center">
-                          Actief (dagelijks sporten of fysiek werk)
-                        </SelectItem>
-                        <SelectItem value="zeer_actief" className="text-center">
-                          Zeer actief (intensieve training, 2x per dag sporten)
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button onClick={nextStep} className="mx-auto">
-                    Volgende <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Mobiel */}
-            <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-2 animate-fade-in">
-                  <div className="space-y-1">
-                    <Label htmlFor="activiteit-mobile" className="block text-xs">
-                      Activiteitsniveau? (Voor TDEE)
-                    </Label>
-                    <Select
-                      value={formData.activiteit}
-                      onValueChange={(value) => handleSelectChange("activiteit", value)}
-                    >
-                      <SelectTrigger id="activiteit-mobile" className="max-w-[200px] mx-auto text-center text-xs">
-                        <SelectValue placeholder="Selecteer activiteit" />
-                      </SelectTrigger>
-                      <SelectContent align="center">
-                        <SelectItem value="sedentair" className="text-center text-xs">
-                          Sedentair (weinig beweging)
-                        </SelectItem>
-                        <SelectItem value="licht" className="text-center text-xs">
-                          Licht actief (1-2x per week)
-                        </SelectItem>
-                        <SelectItem value="matig" className="text-center text-xs">
-                          Matig actief (3-5x per week)
-                        </SelectItem>
-                        <SelectItem value="actief" className="text-center text-xs">
-                          Actief (dagelijks sporten)
-                        </SelectItem>
-                        <SelectItem value="zeer_actief" className="text-center text-xs">
-                          Zeer actief (intensief)
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button onClick={nextStep} className="mx-auto text-xs">
-                    Volgende <ArrowRight className="ml-2 h-3 w-3" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        )
-      case 8:
-        return (
-          <div className="space-y-6 text-center">
-            {/* Desktop */}
-            <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-2">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-4 animate-fade-in">
-                  <div className="space-y-2">
-                    <Label htmlFor="doel-desktop" className="block">
-                      Wat is je belangrijkste doel? (Voor calorie deficit/surplus berekening)
-                    </Label>
-                    <Select value={formData.doel} onValueChange={(value) => handleSelectChange("doel", value)}>
-                      <SelectTrigger id="doel-desktop" className="max-w-md mx-auto">
-                        <SelectValue placeholder="Selecteer je doel" className="text-center" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="afvallen" className="text-left">
-                          Afvallen / Vet verliezen (calorie deficit)
-                        </SelectItem>
-                        <SelectItem value="behouden" className="text-left">
-                          Gewicht behouden / Recomposition
-                        </SelectItem>
-                        <SelectItem value="aankomen" className="text-left">
-                          Aankomen / Spieropbouw (calorie surplus)
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button onClick={handleSubmit} disabled={isSubmitting} className="mx-auto">
-                    {isSubmitting ? <>Berekenen...</> : <>Bereken mijn caloriebehoefte voor afvallen</>}
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Mobiel */}
-            <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-1">{typingEffect}</h2>
-              {showNextButton && (
-                <div className="space-y-2 animate-fade-in">
-                  <div className="space-y-1">
-                    <Label htmlFor="doel-mobile" className="block text-xs">
-                      Doel? (Voor calorie berekening)
-                    </Label>
-                    <Select value={formData.doel} onValueChange={(value) => handleSelectChange("doel", value)}>
-                      <SelectTrigger id="doel-mobile" className="max-w-[200px] mx-auto text-center text-xs">
-                        <SelectValue placeholder="Selecteer doel" />
-                      </SelectTrigger>
-                      <SelectContent align="center">
-                        <SelectItem value="afvallen" className="text-center justify-center text-xs">
-                          Afvallen / Vetverlies
-                        </SelectItem>
-                        <SelectItem value="behouden" className="text-center justify-center text-xs">
-                          Gewicht behouden
-                        </SelectItem>
-                        <SelectItem value="aankomen" className="text-center justify-center text-xs">
-                          Aankomen / Spieropbouw
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button onClick={handleSubmit} disabled={isSubmitting} className="mx-auto text-xs">
-                    {isSubmitting ? <>Berekenen...</> : <>Bereken caloriebehoefte</>}
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        )
-      case 9:
-        return (
-          <div className="space-y-8 text-center">
-            {/* Desktop */}
-            <div className="hidden sm:block">
-              <h2 className="text-2xl font-bold tracking-tight text-primary mb-4">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
-              {!isTyping && showNextButton && calorieResult && (
-                <div className="space-y-8 animate-fade-in">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="bg-white border">
-                      <CardContent className="p-4 md:p-6 text-center">
-                        <div className="flex items-center justify-center gap-2 mb-2 text-primary">
-                          <Flame className="h-5 w-5" />
-                          <h3 className="text-lg font-semibold text-gray-700">BMR Berekening</h3>
-                        </div>
-                        <p className="text-3xl font-extrabold text-primary tabular-nums">{displayBMR} kcal</p>
-                        <p className="text-sm text-gray-500 mt-2">Basaal Metabolisme - calorieën in rust</p>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-white border">
-                      <CardContent className="p-4 md:p-6 text-center">
-                        <div className="flex items-center justify-center gap-2 mb-2 text-primary">
-                          <Activity className="h-5 w-5" />
-                          <h3 className="text-lg font-semibold text-gray-700">TDEE Berekening</h3>
-                        </div>
-                        <p className="text-3xl font-extrabold text-primary tabular-nums">{displayTDEE} kcal</p>
-                        <p className="text-sm text-gray-500 mt-2">Totaal Dagelijks Energieverbruik</p>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-white border">
-                      <CardContent className="p-4 md:p-6 text-center">
-                        <div className="flex items-center justify-center gap-2 mb-2 text-primary">
-                          <Target className="h-5 w-5" />
-                          <h3 className="text-lg font-semibold text-gray-700">Caloriebehoefte Afvallen</h3>
-                        </div>
-                        <p className="text-3xl font-extrabold text-primary tabular-nums">{displayTarget} kcal</p>
-                        <p className="text-sm text-gray-500 mt-2">Dagelijkse calorieën voor je doel</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <div className="rounded-2xl border bg-white">
-                    <div className="rounded-2xl p-4 md:p-6">
-                      <h3 className="text-xl font-bold text-primary mb-4">
-                        Macronutriënten Berekening voor Vetverlies
-                      </h3>
-                      <div className="space-y-4">
-                        <div>
-                          <div className="flex justify-between mb-1">
-                            <span className="text-sm font-medium">
-                              Eiwitten: {calorieResult.protein}g (voor vetverlies)
-                            </span>
-                            <span className="text-sm text-gray-500">
-                              {Math.round((calorieResult.protein * 4 * 100) / calorieResult.target)}%
-                            </span>
-                          </div>
-                          <Progress
-                            value={(calorieResult.protein * 4 * 100) / calorieResult.target}
-                            className="h-2 bg-gray-200"
-                            indicatorClassName="bg-primary"
-                          />
-                        </div>
-                        <div>
-                          <div className="flex justify-between mb-1">
-                            <span className="text-sm font-medium">Koolhydraten: {calorieResult.carbs}g</span>
-                            <span className="text-sm text-gray-500">
-                              {Math.round((calorieResult.carbs * 4 * 100) / calorieResult.target)}%
-                            </span>
-                          </div>
-                          <Progress
-                            value={(calorieResult.carbs * 4 * 100) / calorieResult.target}
-                            className="h-2 bg-gray-200"
-                            indicatorClassName="bg-green-600"
-                          />
-                        </div>
-                        <div>
-                          <div className="flex justify-between mb-1">
-                            <span className="text-sm font-medium">Vetten: {calorieResult.fat}g</span>
-                            <span className="text-sm text-gray-500">
-                              {Math.round((calorieResult.fat * 9 * 100) / calorieResult.target)}%
-                            </span>
-                          </div>
-                          <Progress
-                            value={(calorieResult.fat * 9 * 100) / calorieResult.target}
-                            className="h-2 bg-gray-200"
-                            indicatorClassName="bg-amber-500"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white rounded-2xl overflow-hidden shadow-2xl border border-slate-700">
-                    <div className="p-6 md:p-8">
-                      <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-700/50 rounded-2xl mb-4 border border-slate-600">
-                          <Calculator className="w-8 h-8 text-slate-200" />
-                        </div>
-                        <h3 className="text-2xl md:text-3xl font-bold mb-3 text-slate-100">
-                          Persoonlijke Coaching Aanbeveling
-                        </h3>
-                        <p className="text-slate-300 text-lg max-w-2xl mx-auto">
-                          Op basis van jouw caloriebehoefte berekening en afvaldoelen hebben we het meest effectieve
-                          programma voor je geselecteerd
-                        </p>
-                      </div>
-
-                      {calorieResult.recommendedCoaching === "premium-coaching" && (
-                        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-600/50">
-                          <div className="flex flex-col md:flex-row items-center gap-6">
-                            <div className="flex-shrink-0">
-                              <div className="w-20 h-20 bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl flex items-center justify-center shadow-lg border border-slate-500">
-                                <Heart className="w-10 h-10 text-slate-200" />
-                              </div>
-                            </div>
-                            <div className="flex-1 text-center md:text-left">
-                              <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
-                                <h4 className="text-2xl font-bold text-slate-100">Premium Coaching</h4>
-                                <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30">
-                                  <span className="text-amber-300 font-semibold text-sm">
-                                    Aanbevolen voor Actieve Mensen
-                                  </span>
-                                </div>
-                              </div>
-                              <p className="text-slate-300 mb-6 leading-relaxed">
-                                Voor jouw hoge activiteitsniveau is Premium Coaching ideaal. Persoonlijke training
-                                gecombineerd met 24/7 online begeleiding voor maximale vetverlies resultaten.
-                              </p>
-                              <div className="grid md:grid-cols-2 gap-4 mb-6">
-                                <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
-                                  <h5 className="font-semibold mb-3 text-slate-200 flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                                    Wat je krijgt
-                                  </h5>
-                                  <ul className="text-sm text-slate-300 space-y-2">
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      1-op-1 personal training
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Dagelijkse app begeleiding
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Wekelijkse voortgangsmetingen
-                                    </li>
-                                  </ul>
-                                </div>
-                                <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
-                                  <h5 className="font-semibold mb-3 text-slate-200 flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                                    Vetverlies voordelen
-                                  </h5>
-                                  <ul className="text-sm text-slate-300 space-y-2">
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      3x snellere vetverlies
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Perfecte techniek
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Maximale motivatie
-                                    </li>
-                                  </ul>
-                                </div>
-                              </div>
-                              <Button
-                                asChild
-                                className="bg-slate-100 text-slate-900 hover:bg-white font-semibold px-8 py-3 text-lg shadow-lg border-0"
-                              >
-                                <a href="/premium-coaching">Bekijk Premium Coaching</a>
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {calorieResult.recommendedCoaching === "12-weken-vetverlies" && (
-                        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-600/50">
-                          <div className="flex flex-col md:flex-row items-center gap-6">
-                            <div className="flex-shrink-0">
-                              <div className="w-20 h-20 bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl flex items-center justify-center shadow-lg border border-slate-500">
-                                <TrendingUp className="w-10 h-10 text-slate-200" />
-                              </div>
-                            </div>
-                            <div className="flex-1 text-center md:text-left">
-                              <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
-                                <h4 className="text-2xl font-bold text-slate-100">12-Weken Vetverlies Programma</h4>
-                                <div className="inline-flex items-center px-3 py-1 rounded-full bg-orange-500/20 border border-orange-500/30">
-                                  <span className="text-orange-300 font-semibold text-sm">Perfect voor Afvallen</span>
-                                </div>
-                              </div>
-                              <p className="text-slate-300 mb-6 leading-relaxed">
-                                Perfect voor jouw afvaldoel! Dit intensieve 12-weken programma is speciaal ontworpen
-                                voor maximale vetverlies en zichtbare lichaamstransformatie.
-                              </p>
-                              <div className="grid md:grid-cols-2 gap-4 mb-6">
-                                <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
-                                  <h5 className="font-semibold mb-3 text-slate-200 flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                                    Waarom 12-Weken Vetverlies
-                                  </h5>
-                                  <ul className="text-sm text-slate-300 space-y-2">
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Bewezen vetverlies methode
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Intensieve afval begeleiding
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Snelle zichtbare resultaten
-                                    </li>
-                                  </ul>
-                                </div>
-                                <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
-                                  <h5 className="font-semibold mb-3 text-slate-200 flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                                    Jouw afval resultaat
-                                  </h5>
-                                  <ul className="text-sm text-slate-300 space-y-2">
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      5-15kg vetverlies mogelijk
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Strakker lichaam
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Meer energie & focus
-                                    </li>
-                                  </ul>
-                                </div>
-                              </div>
-                              <Button
-                                asChild
-                                className="bg-slate-100 text-slate-900 hover:bg-white font-semibold px-8 py-3 text-lg shadow-lg border-0"
-                              >
-                                <a href="/12-weken-vetverlies">Start 12-Weken Vetverlies</a>
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {calorieResult.recommendedCoaching === "online-coaching" && (
-                        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-600/50">
-                          <div className="flex flex-col md:flex-row items-center gap-6">
-                            <div className="flex-shrink-0">
-                              <div className="w-20 h-20 bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl flex items-center justify-center shadow-lg border border-slate-500">
-                                <Users className="w-10 h-10 text-slate-200" />
-                              </div>
-                            </div>
-                            <div className="flex-1 text-center md:text-left">
-                              <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
-                                <h4 className="text-2xl font-bold text-slate-100">Online Coaching voor Afvallen</h4>
-                                <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30">
-                                  <span className="text-blue-300 font-semibold text-sm">Flexibel Afvallen</span>
-                                </div>
-                              </div>
-                              <p className="text-slate-300 mb-6 leading-relaxed">
-                                Ideaal voor jouw lifestyle! Online Coaching geeft je de flexibiliteit om op je eigen
-                                tempo af te vallen, met volledige professionele begeleiding via onze app.
-                              </p>
-                              <div className="grid md:grid-cols-2 gap-4 mb-6">
-                                <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
-                                  <h5 className="font-semibold mb-3 text-slate-200 flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                                    Waarom Online Afvallen
-                                  </h5>
-                                  <ul className="text-sm text-slate-300 space-y-2">
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Afvallen wanneer jij wilt
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Volledige app begeleiding
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Persoonlijk voedingsplan
-                                    </li>
-                                  </ul>
-                                </div>
-                                <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
-                                  <h5 className="font-semibold mb-3 text-slate-200 flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                                    Perfect voor jou
-                                  </h5>
-                                  <ul className="text-sm text-slate-300 space-y-2">
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Drukke agenda
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Zelfstandig afvallen
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                      <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
-                                      Betaalbare optie
-                                    </li>
-                                  </ul>
-                                </div>
-                              </div>
-                              <Button
-                                asChild
-                                className="bg-slate-100 text-slate-900 hover:bg-white font-semibold px-8 py-3 text-lg shadow-lg border-0"
-                              >
-                                <a href="/online-coaching">Start Online Coaching</a>
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="mt-8 text-center">
-                        <div className="bg-slate-800/30 rounded-lg p-6 mb-6 border border-slate-600/30">
-                          <h4 className="font-bold text-lg mb-2 text-amber-300">
-                            Speciale Actie voor Caloriebehoefte Calculator Gebruikers
-                          </h4>
-                          <p className="text-slate-300 text-sm">
-                            Boek binnen 48 uur een gratis kennismakingsgesprek en ontvang 20% korting op je eerste maand
-                            coaching!
-                          </p>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                          <Button
-                            asChild
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 text-lg font-semibold shadow-lg border-0"
-                          >
-                            <a
-                              href="https://wa.me/31610935077?text=Hoi%20Martin%2C%20ik%20heb%20net%20mijn%20caloriebehoefte%20berekend%20voor%20afvallen%20en%20wil%20graag%20meer%20weten%20over%20de%20coaching%20programma%27s%20en%20de%2020%25%20korting!"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2"
-                            >
-                              💬 WhatsApp: Gratis Afval Consult
-                            </a>
-                          </Button>
-                          <Button
-                            asChild
-                            className="bg-slate-700/50 border-2 border-slate-600 text-slate-200 hover:bg-slate-600 hover:text-white px-8 py-3 text-lg font-semibold"
-                          >
-                            <a href="/contact" className="flex items-center gap-2">
-                              📞 Bel Direct
-                            </a>
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="text-center">
-                    <p className="text-gray-600 mb-4">
-                      We hebben je caloriebehoefte resultaten ook naar je e-mail gestuurd. Heb je vragen over afvallen
-                      of vetverlies? Neem gerust contact met ons op!
-                    </p>
-                    <div className="flex flex-col md:flex-row justify-center gap-3">
-                      <Button variant="outline" onClick={() => router.push("/")} className="w-full md:w-auto">
-                        Terug naar home
-                      </Button>
-                      <Button asChild className="w-full md:w-auto">
-                        <a href="/#contact">Neem contact op</a>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Mobiel */}
-            <div className="sm:hidden">
-              <h2 className="text-base font-bold tracking-tight text-primary mb-2">
-                {typingEffect}
-                {isTyping && <span className="animate-pulse">|</span>}
-              </h2>
-              {!isTyping && showNextButton && calorieResult && (
-                <div className="space-y-6 animate-fade-in">
-                  <div className="grid grid-cols-1 gap-3">
-                    <Card className="bg-white border">
-                      <CardContent className="p-3 text-center">
-                        <div className="flex items-center justify-center gap-2 mb-1 text-primary">
-                          <Flame className="h-4 w-4" />
-                          <h3 className="text-sm font-semibold text-gray-700">BMR Berekening</h3>
-                        </div>
-                        <p className="text-xl font-extrabold text-primary tabular-nums">{displayBMR} kcal</p>
-                        <p className="text-xs text-gray-500 mt-1">Basaal metabolisme in rust</p>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-white border">
-                      <CardContent className="p-3 text-center">
-                        <div className="flex items-center justify-center gap-2 mb-1 text-primary">
-                          <Activity className="h-4 w-4" />
-                          <h3 className="text-sm font-semibold text-gray-700">TDEE Berekening</h3>
-                        </div>
-                        <p className="text-xl font-extrabold text-primary tabular-nums">{displayTDEE} kcal</p>
-                        <p className="text-xs text-gray-500 mt-1">Totaal dagelijks energieverbruik</p>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-white border">
-                      <CardContent className="p-3 text-center">
-                        <div className="flex items-center justify-center gap-2 mb-1 text-primary">
-                          <Target className="h-4 w-4" />
-                          <h3 className="text-sm font-semibold text-gray-700">Caloriebehoefte Afvallen</h3>
-                        </div>
-                        <p className="text-xl font-extrabold text-primary tabular-nums">{displayTarget} kcal</p>
-                        <p className="text-xs text-gray-500 mt-1">Dagelijkse calorieën voor afvallen</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <div className="rounded-xl border bg-white">
-                    <div className="rounded-xl p-3">
-                      <h3 className="text-sm font-bold text-primary mb-3">Macronutriënten voor Vetverlies</h3>
-                      <div className="space-y-3">
-                        <div>
-                          <div className="flex justify-between mb-1">
-                            <span className="text-xs font-medium">Eiwitten: {calorieResult.protein}g</span>
-                            <span className="text-xs text-gray-500">
-                              {Math.round((calorieResult.protein * 4 * 100) / calorieResult.target)}%
-                            </span>
-                          </div>
-                          <Progress
-                            value={(calorieResult.protein * 4 * 100) / calorieResult.target}
-                            className="h-1.5 bg-gray-200"
-                            indicatorClassName="bg-primary"
-                          />
-                        </div>
-                        <div>
-                          <div className="flex justify-between mb-1">
-                            <span className="text-xs font-medium">Koolhydraten: {calorieResult.carbs}g</span>
-                            <span className="text-xs text-gray-500">
-                              {Math.round((calorieResult.carbs * 4 * 100) / calorieResult.target)}%
-                            </span>
-                          </div>
-                          <Progress
-                            value={(calorieResult.carbs * 4 * 100) / calorieResult.target}
-                            className="h-1.5 bg-gray-200"
-                            indicatorClassName="bg-green-600"
-                          />
-                        </div>
-                        <div>
-                          <div className="flex justify-between mb-1">
-                            <span className="text-xs font-medium">Vetten: {calorieResult.fat}g</span>
-                            <span className="text-xs text-gray-500">
-                              {Math.round((calorieResult.fat * 9 * 100) / calorieResult.target)}%
-                            </span>
-                          </div>
-                          <Progress
-                            value={(calorieResult.fat * 9 * 100) / calorieResult.target}
-                            className="h-1.5 bg-gray-200"
-                            indicatorClassName="bg-amber-500"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white rounded-xl overflow-hidden shadow-lg border border-slate-700">
-                    <div className="p-4">
-                      <div className="text-center mb-6">
-                        <div className="inline-flex items-center justify-center w-12 h-12 bg-slate-700/50 rounded-xl mb-3 border border-slate-600">
-                          <Calculator className="w-6 h-6 text-slate-200" />
-                        </div>
-                        <h3 className="text-lg font-bold mb-2 text-slate-100">Coaching voor Afvallen</h3>
-                        <p className="text-slate-300 text-sm">Het beste programma voor jouw afvaldoelen</p>
-                      </div>
-
-                      {calorieResult.recommendedCoaching === "premium-coaching" && (
-                        <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600/50">
-                          <div className="text-center">
-                            <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg border border-slate-500">
-                              <Heart className="w-6 h-6 text-slate-200" />
-                            </div>
-                            <div className="flex items-center justify-center gap-2 mb-3">
-                              <h4 className="text-lg font-bold text-slate-100">Premium Coaching</h4>
-                              <div className="inline-flex items-center px-2 py-1 rounded-full bg-amber-500/20 border border-amber-500/30">
-                                <span className="text-amber-300 font-semibold text-xs">Voor Actieve Mensen</span>
-                              </div>
-                            </div>
-                            <p className="text-slate-300 text-sm mb-4 leading-relaxed">
-                              Persoonlijke training + online begeleiding voor maximale vetverlies resultaten bij jouw
-                              hoge activiteitsniveau.
-                            </p>
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                              <div className="bg-slate-700/30 rounded-lg p-2 border border-slate-600/30">
-                                <h5 className="font-semibold text-xs mb-1 text-slate-200">Inclusief</h5>
-                                <ul className="text-xs text-slate-300 space-y-1">
-                                  <li>• Personal training</li>
-                                  <li>• App begeleiding</li>
-                                  <li>• Voortgangsmetingen</li>
-                                </ul>
-                              </div>
-                              <div className="bg-slate-700/30 rounded-lg p-2 border border-slate-600/30">
-                                <h5 className="font-semibold text-xs mb-1 text-slate-200">Vetverlies</h5>
-                                <ul className="text-xs text-slate-300 space-y-1">
-                                  <li>• 3x sneller</li>
-                                  <li>• Perfecte vorm</li>
-                                  <li>• Max motivatie</li>
-                                </ul>
-                              </div>
-                            </div>
-                            <Button
-                              asChild
-                              className="w-full bg-slate-100 text-slate-900 hover:bg-white font-semibold text-sm py-2 shadow-lg border-0"
-                            >
-                              <a href="/premium-coaching">Bekijk Premium</a>
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-
-                      {calorieResult.recommendedCoaching === "12-weken-vetverlies" && (
-                        <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600/50">
-                          <div className="text-center">
-                            <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg border border-slate-500">
-                              <TrendingUp className="w-6 h-6 text-slate-200" />
-                            </div>
-                            <div className="flex items-center justify-center gap-2 mb-3">
-                              <h4 className="text-lg font-bold text-slate-100">12-Weken Vetverlies</h4>
-                              <div className="inline-flex items-center px-2 py-1 rounded-full bg-orange-500/20 border border-orange-500/30">
-                                <span className="text-orange-300 font-semibold text-xs">Perfect Afvallen</span>
-                              </div>
-                            </div>
-                            <p className="text-slate-300 text-sm mb-4 leading-relaxed">
-                              Intensief 12-weken programma speciaal voor maximale vetverlies en zichtbare afval
-                              transformatie.
-                            </p>
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                              <div className="bg-slate-700/30 rounded-lg p-2 border border-slate-600/30">
-                                <h5 className="font-semibold text-xs mb-1 text-slate-200">Vetverlies Methode</h5>
-                                <ul className="text-xs text-slate-300 space-y-1">
-                                  <li>• Bewezen systeem</li>
-                                  <li>• Intensieve begeleiding</li>
-                                  <li>• Snelle resultaten</li>
-                                </ul>
-                              </div>
-                              <div className="bg-slate-700/30 rounded-lg p-2 border border-slate-600/30">
-                                <h5 className="font-semibold text-xs mb-1 text-slate-200">Afval Resultaat</h5>
-                                <ul className="text-xs text-slate-300 space-y-1">
-                                  <li>• 5-15kg verlies</li>
-                                  <li>• Strak lichaam</li>
-                                  <li>• Meer energie</li>
-                                </ul>
-                              </div>
-                            </div>
-                            <Button
-                              asChild
-                              className="w-full bg-slate-100 text-slate-900 hover:bg-white font-semibold text-sm py-2 shadow-lg border-0"
-                            >
-                              <a href="/12-weken-vetverlies">Start 12-Weken Vetverlies</a>
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-
-                      {calorieResult.recommendedCoaching === "online-coaching" && (
-                        <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600/50">
-                          <div className="text-center">
-                            <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg border border-slate-500">
-                              <Users className="w-6 h-6 text-slate-200" />
-                            </div>
-                            <div className="flex items-center justify-center gap-2 mb-3">
-                              <h4 className="text-lg font-bold text-slate-100">Online Coaching</h4>
-                              <div className="inline-flex items-center px-2 py-1 rounded-full bg-blue-500/20 border border-blue-500/30">
-                                <span className="text-blue-300 font-semibold text-xs">Flexibel Afvallen</span>
-                              </div>
-                            </div>
-                            <p className="text-slate-300 text-sm mb-4 leading-relaxed">
-                              Flexibele coaching via onze app. Perfect voor afvallen op jouw tempo met volledige
-                              professionele begeleiding.
-                            </p>
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                              <div className="bg-slate-700/30 rounded-lg p-2 border border-slate-600/30">
-                                <h5 className="font-semibold text-xs mb-1 text-slate-200">Flexibel Afvallen</h5>
-                                <ul className="text-xs text-slate-300 space-y-1">
-                                  <li>• Eigen tempo</li>
-                                  <li>• App begeleiding</li>
-                                  <li>• Voedingsplan</li>
-                                </ul>
-                              </div>
-                              <div className="bg-slate-700/30 rounded-lg p-2 border border-slate-600/30">
-                                <h5 className="font-semibold text-xs mb-1 text-slate-200">Ideaal</h5>
-                                <ul className="text-xs text-slate-300 space-y-1">
-                                  <li>• Drukke agenda</li>
-                                  <li>• Zelfstandig</li>
-                                  <li>• Betaalbaar</li>
-                                </ul>
-                              </div>
-                            </div>
-                            <Button
-                              asChild
-                              className="w-full bg-slate-100 text-slate-900 hover:bg-white font-semibold text-sm py-2 shadow-lg border-0"
-                            >
-                              <a href="/online-coaching">Start Online</a>
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="mt-6 text-center">
-                        <div className="bg-slate-800/30 rounded-lg p-3 mb-4 border border-slate-600/30">
-                          <h4 className="font-bold text-sm mb-1 text-amber-300">Speciale Actie</h4>
-                          <p className="text-slate-300 text-xs">Gratis afval consult + 20% korting binnen 48 uur!</p>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <Button
-                            asChild
-                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm py-2 shadow-lg border-0"
-                          >
-                            <a
-                              href="https://wa.me/31610935077?text=Hoi%20Martin%2C%20ik%20heb%20net%20mijn%20caloriebehoefte%20berekend%20voor%20afvallen%20en%20wil%20graag%20meer%20weten%20over%20de%20coaching%20en%20de%2020%25%20korting!"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center justify-center gap-2"
-                            >
-                              💬 WhatsApp Afval Consult
-                            </a>
-                          </Button>
-                          <Button
-                            asChild
-                            className="w-full bg-slate-700/50 border border-slate-600 text-slate-200 hover:bg-slate-600 hover:text-white font-semibold text-sm py-2"
-                          >
-                            <a href="/contact" className="flex items-center justify-center gap-2">
-                              📞 Direct Bellen
-                            </a>
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="text-center">
-                    <p className="text-xs text-gray-600 mb-3">
-                      We hebben je caloriebehoefte resultaten ook naar je e-mail gestuurd. Heb je vragen over afvallen?
-                      Neem gerust contact met ons op!
-                    </p>
-                    <div className="flex flex-col gap-2">
-                      <Button variant="outline" onClick={() => router.push("/")} className="w-full text-xs py-1 h-8">
-                        Terug naar home
-                      </Button>
-                      <Button asChild className="w-full text-xs py-1 h-8">
-                        <a href="/#contact">Neem contact op</a>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )
+        return true
       default:
-        return null
+        return false
     }
   }
 
-  const getStepMessage = () => {
-    switch (currentStep) {
-      case 0:
-        return welcomeMessages
-      case 1:
-        return [`Hoi! Laten we beginnen met je caloriebehoefte berekenen.`, `Wat is je naam?`]
-      case 2:
-        return [
-          `Hey ${formData.naam}, aangenaam kennis te maken!`,
-          `Ik heb nog wat gegevens van je nodig om je caloriebehoefte voor afvallen te berekenen.`,
-        ]
-      case 3:
-        return [`Nu heb ik wat informatie over je lichaam nodig voor de BMR berekening.`, `Wat is je geslacht?`]
-      case 4:
-        return [`Wat is je leeftijd? (Voor accurate metabolisme berekening)`]
-      case 5:
-        return [`Wat is je huidige gewicht in kg? (Voor caloriebehoefte berekening)`]
-      case 6:
-        return [`Wat is je lengte in cm? (Voor BMR en TDEE berekening)`]
-      case 7:
-        return [`Hoe zou je je activiteitsniveau omschrijven? (Voor TDEE berekening)`]
-      case 8:
-        return [`Wat is je belangrijkste doel? (Voor calorie deficit/surplus berekening)`]
-      case 9:
-        return [
-          `Geweldig, ${formData.naam}! Hier zijn je caloriebehoefte resultaten voor afvallen.`,
-          `Op basis van je gegevens hebben we je BMR, TDEE en dagelijkse caloriebehoefte berekend.`,
-        ]
-      default:
-        return [""]
-    }
-  }
-
-  // Typewriter per stap
-  useEffect(() => {
-    setIsTyping(true)
-    let currentText = ""
-    let currentMessageIndex = 0
-    let currentCharIndex = 0
-    const messages = getStepMessage()
-
-    const typingInterval = setInterval(() => {
-      if (currentMessageIndex < messages.length) {
-        if (currentCharIndex < messages[currentMessageIndex].length) {
-          currentText += messages[currentMessageIndex][currentCharIndex]
-          setTypingEffect(currentText)
-          currentCharIndex++
-        } else {
-          currentText += currentStep === 0 ? "\n\n" : "\n"
-          currentMessageIndex++
-          currentCharIndex = 0
-        }
-      } else {
-        clearInterval(typingInterval)
-        setIsTyping(false)
-        setShowNextButton(true)
-      }
-    }, 30)
-
-    return () => clearInterval(typingInterval)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentStep])
-
-  // Animate result counters when results step is visible
-  useEffect(() => {
-    if (currentStep !== 9 || !calorieResult) return
-
-    const duration = 900
-    const start = performance.now()
-
-    const fromBMR = 0
-    const fromTDEE = 0
-    const fromTarget = 0
-
-    const toBMR = calorieResult.bmr
-    const toTDEE = calorieResult.tdee
-    const toTarget = calorieResult.target
-
-    const easeOut = (t: number) => 1 - Math.pow(1 - t, 3)
-
-    const tick = (now: number) => {
-      const elapsed = now - start
-      const t = Math.min(1, elapsed / duration)
-      const e = easeOut(t)
-
-      setDisplayBMR(Math.round(fromBMR + (toBMR - fromBMR) * e))
-      setDisplayTDEE(Math.round(fromTDEE + (toTDEE - fromTDEE) * e))
-      setDisplayTarget(Math.round(fromTarget + (toTarget - fromTarget) * e))
-
-      if (t < 1) {
-        rafRef.current = requestAnimationFrame(tick)
-      } else {
-        rafRef.current = null
-      }
-    }
-
-    rafRef.current = requestAnimationFrame(tick)
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    }
-  }, [currentStep, calorieResult])
+  const progressPercentage = (currentStep / totalSteps) * 100
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-[#1e1839] via-[#2a2054] to-[#1e1839]">
       <Header />
 
-      <main className="flex-1">
-        <section className="container mx-auto px-4 py-10 sm:py-12 max-w-4xl">
-          {/* Page hero heading */}
-          <div className="text-center mb-8 sm:mb-10">
-            <div className="inline-flex items-center gap-2 rounded-full border text-primary border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium">
-              <Calculator className="h-3 w-3" />
-              Gratis caloriebehoefte calculator
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center mb-4">
+              <Calculator className="w-12 h-12 text-[#bad4e1] mr-3" />
+              <h1 className="text-4xl font-bold text-white">Gratis Caloriebehoefte Calculator</h1>
             </div>
-            <h1 className="mt-3 text-3xl sm:text-4xl font-extrabold text-primary tracking-tight">
-              Caloriebehoefte Berekenen voor Afvallen
-            </h1>
-            <p className="text-gray-600 mt-3 sm:mt-4 max-w-2xl mx-auto">
-              Bereken je dagelijkse caloriebehoefte, BMR en TDEE voor effectief afvallen en vetverlies. Inclusief
-              persoonlijk macronutriënten advies en coaching aanbeveling.
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              Ontdek precies hoeveel calorieën jij nodig hebt om jouw doelen te bereiken
             </p>
-            <div className="flex flex-wrap justify-center gap-2 mt-4 text-xs text-gray-500">
-              <span className="inline-flex items-center gap-1">
-                <Zap className="h-3 w-3" />
-                BMR Berekening
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Activity className="h-3 w-3" />
-                TDEE Berekening
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Target className="h-3 w-3" />
-                Calorie Deficit
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Flame className="h-3 w-3" />
-                Vetverlies Plan
-              </span>
-            </div>
           </div>
 
-          {/* Progress */}
-          <div className="mb-7 sm:mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">
-                Stap {currentStep + 1} van {steps.length}
-              </span>
-              <span className="text-sm font-semibold text-primary">
-                {Math.round(((currentStep + 1) / steps.length) * 100)}%
-              </span>
-            </div>
-            <Progress
-              value={((currentStep + 1) / steps.length) * 100}
-              className="h-2"
-              indicatorClassName="bg-primary"
-            />
-          </div>
-
-          {/* Main card (solid surface, no gradient) */}
-          <Card className="rounded-2xl bg-white border shadow-sm">
-            <CardContent className="p-4 md:p-8">
-              <div className={currentStep < 9 ? "min-h-[300px] sm:min-h-[400px]" : ""}>{getStepContent()}</div>
-            </CardContent>
-          </Card>
-
-          {/* Footer note below card */}
-          {currentStep < 9 && (
-            <div className="text-center mt-6 sm:mt-8 text-xs text-gray-500">
-              Je gegevens worden vertrouwelijk behandeld en uitsluitend gebruikt voor je persoonlijke caloriebehoefte
-              berekening en afval advies.
+          {/* Progress Bar */}
+          {currentStep <= totalSteps && (
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-gray-300">Voortgang</span>
+                <span className="text-sm text-gray-300">
+                  Stap {currentStep} van {totalSteps}
+                </span>
+              </div>
+              <Progress value={progressPercentage} className="h-2" />
             </div>
           )}
-        </section>
-      </main>
+
+          {/* Step Content */}
+          <Card className="bg-white/95 backdrop-blur-sm shadow-2xl">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl text-[#1e1839]">{getStepTitle(currentStep)}</CardTitle>
+              {currentStep <= totalSteps && (
+                <CardDescription className="text-gray-600">
+                  Vul de onderstaande gegevens in om jouw persoonlijke caloriebehoefte te berekenen
+                </CardDescription>
+              )}
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              {/* Step 1: Welcome */}
+              {currentStep === 1 && (
+                <div className="text-center space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="flex flex-col items-center p-6 bg-[#1e1839]/5 rounded-lg">
+                      <Zap className="w-12 h-12 text-[#1e1839] mb-3" />
+                      <h3 className="font-semibold text-[#1e1839] mb-2">Nauwkeurig</h3>
+                      <p className="text-sm text-gray-600 text-center">Gebaseerd op wetenschappelijke formules</p>
+                    </div>
+                    <div className="flex flex-col items-center p-6 bg-[#1e1839]/5 rounded-lg">
+                      <Heart className="w-12 h-12 text-[#1e1839] mb-3" />
+                      <h3 className="font-semibold text-[#1e1839] mb-2">Persoonlijk</h3>
+                      <p className="text-sm text-gray-600 text-center">Aangepast aan jouw unieke situatie</p>
+                    </div>
+                    <div className="flex flex-col items-center p-6 bg-[#1e1839]/5 rounded-lg">
+                      <Award className="w-12 h-12 text-[#1e1839] mb-3" />
+                      <h3 className="font-semibold text-[#1e1839] mb-2">Gratis</h3>
+                      <p className="text-sm text-gray-600 text-center">Geen kosten, geen verplichtingen</p>
+                    </div>
+                  </div>
+                  <p className="text-gray-600">
+                    Deze calculator duurt ongeveer 3 minuten om in te vullen en geeft je een compleet overzicht van jouw
+                    calorie- en macronutriëntenbehoefte.
+                  </p>
+                </div>
+              )}
+
+              {/* Step 2: Personal Info */}
+              {currentStep === 2 && (
+                <div className="space-y-6">
+                  <div className="flex items-center mb-4">
+                    <User className="w-6 h-6 text-[#1e1839] mr-2" />
+                    <h3 className="text-lg font-semibold text-[#1e1839]">Persoonlijke gegevens</h3>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-base font-medium text-[#1e1839] mb-3 block">Wat is jouw geslacht?</Label>
+                      <RadioGroup
+                        value={formData.gender}
+                        onValueChange={(value) => updateFormData("gender", value)}
+                        className="grid grid-cols-2 gap-4"
+                      >
+                        <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50">
+                          <RadioGroupItem value="male" id="male" />
+                          <Label htmlFor="male" className="cursor-pointer">
+                            Man
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50">
+                          <RadioGroupItem value="female" id="female" />
+                          <Label htmlFor="female" className="cursor-pointer">
+                            Vrouw
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="age" className="text-base font-medium text-[#1e1839]">
+                        Wat is jouw leeftijd?
+                      </Label>
+                      <Input
+                        id="age"
+                        type="number"
+                        placeholder="Bijvoorbeeld: 30"
+                        value={formData.age}
+                        onChange={(e) => updateFormData("age", e.target.value)}
+                        className="mt-2"
+                        min="16"
+                        max="100"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Body Measurements */}
+              {currentStep === 3 && (
+                <div className="space-y-6">
+                  <div className="flex items-center mb-4">
+                    <Scale className="w-6 h-6 text-[#1e1839] mr-2" />
+                    <h3 className="text-lg font-semibold text-[#1e1839]">Lichaamsgegevens</h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="weight" className="text-base font-medium text-[#1e1839]">
+                        Wat is jouw gewicht? (kg)
+                      </Label>
+                      <Input
+                        id="weight"
+                        type="number"
+                        placeholder="Bijvoorbeeld: 70"
+                        value={formData.weight}
+                        onChange={(e) => updateFormData("weight", e.target.value)}
+                        className="mt-2"
+                        min="30"
+                        max="300"
+                        step="0.1"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="height" className="text-base font-medium text-[#1e1839]">
+                        Wat is jouw lengte? (cm)
+                      </Label>
+                      <Input
+                        id="height"
+                        type="number"
+                        placeholder="Bijvoorbeeld: 175"
+                        value={formData.height}
+                        onChange={(e) => updateFormData("height", e.target.value)}
+                        className="mt-2"
+                        min="120"
+                        max="250"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 4: Activity Level */}
+              {currentStep === 4 && (
+                <div className="space-y-6">
+                  <div className="flex items-center mb-4">
+                    <Activity className="w-6 h-6 text-[#1e1839] mr-2" />
+                    <h3 className="text-lg font-semibold text-[#1e1839]">Activiteitsniveau</h3>
+                  </div>
+
+                  <div>
+                    <Label className="text-base font-medium text-[#1e1839] mb-3 block">
+                      Hoe actief ben je gemiddeld?
+                    </Label>
+                    <RadioGroup
+                      value={formData.activityLevel}
+                      onValueChange={(value) => updateFormData("activityLevel", value)}
+                      className="space-y-3"
+                    >
+                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                        <RadioGroupItem value="sedentary" id="sedentary" className="mt-1" />
+                        <div className="flex-1">
+                          <Label htmlFor="sedentary" className="cursor-pointer font-medium">
+                            Zittend werk (weinig tot geen sport)
+                          </Label>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Kantoorwerk, weinig beweging, geen regelmatige sport
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                        <RadioGroupItem value="light" id="light" className="mt-1" />
+                        <div className="flex-1">
+                          <Label htmlFor="light" className="cursor-pointer font-medium">
+                            Licht actief (1-3 dagen sport per week)
+                          </Label>
+                          <p className="text-sm text-gray-600 mt-1">Lichte sport of wandelen, af en toe actief</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                        <RadioGroupItem value="moderate" id="moderate" className="mt-1" />
+                        <div className="flex-1">
+                          <Label htmlFor="moderate" className="cursor-pointer font-medium">
+                            Matig actief (3-5 dagen sport per week)
+                          </Label>
+                          <p className="text-sm text-gray-600 mt-1">Regelmatige sport, actieve levensstijl</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                        <RadioGroupItem value="active" id="active" className="mt-1" />
+                        <div className="flex-1">
+                          <Label htmlFor="active" className="cursor-pointer font-medium">
+                            Zeer actief (6-7 dagen sport per week)
+                          </Label>
+                          <p className="text-sm text-gray-600 mt-1">Dagelijks sport, intensieve training</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                        <RadioGroupItem value="very_active" id="very_active" className="mt-1" />
+                        <div className="flex-1">
+                          <Label htmlFor="very_active" className="cursor-pointer font-medium">
+                            Extreem actief (2x per dag sport of fysiek werk)
+                          </Label>
+                          <p className="text-sm text-gray-600 mt-1">Professionele atleet, fysiek zwaar werk</p>
+                        </div>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 5: Goal */}
+              {currentStep === 5 && (
+                <div className="space-y-6">
+                  <div className="flex items-center mb-4">
+                    <Target className="w-6 h-6 text-[#1e1839] mr-2" />
+                    <h3 className="text-lg font-semibold text-[#1e1839]">Jouw doel</h3>
+                  </div>
+
+                  <div>
+                    <Label className="text-base font-medium text-[#1e1839] mb-3 block">Wat wil je bereiken?</Label>
+                    <RadioGroup
+                      value={formData.goal}
+                      onValueChange={(value) => updateFormData("goal", value)}
+                      className="space-y-3"
+                    >
+                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                        <RadioGroupItem value="lose_weight" id="lose_weight" className="mt-1" />
+                        <div className="flex-1">
+                          <Label htmlFor="lose_weight" className="cursor-pointer font-medium">
+                            Gewicht verliezen
+                          </Label>
+                          <p className="text-sm text-gray-600 mt-1">Vet verbranden en slanker worden</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                        <RadioGroupItem value="maintain_weight" id="maintain_weight" className="mt-1" />
+                        <div className="flex-1">
+                          <Label htmlFor="maintain_weight" className="cursor-pointer font-medium">
+                            Gewicht behouden
+                          </Label>
+                          <p className="text-sm text-gray-600 mt-1">Huidige gewicht en vorm behouden</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                        <RadioGroupItem value="gain_weight" id="gain_weight" className="mt-1" />
+                        <div className="flex-1">
+                          <Label htmlFor="gain_weight" className="cursor-pointer font-medium">
+                            Gewicht aankomen
+                          </Label>
+                          <p className="text-sm text-gray-600 mt-1">Spiermassa opbouwen en sterker worden</p>
+                        </div>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 6: Contact Info */}
+              {currentStep === 6 && (
+                <div className="space-y-6">
+                  <div className="flex items-center mb-4">
+                    <Mail className="w-6 h-6 text-[#1e1839] mr-2" />
+                    <h3 className="text-lg font-semibold text-[#1e1839]">Contactgegevens</h3>
+                  </div>
+
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <p className="text-sm text-blue-800">
+                      <strong>Waarom vragen we dit?</strong> We sturen je jouw persoonlijke resultaten toe en kunnen je
+                      helpen met het bereiken van jouw doelen.
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="name" className="text-base font-medium text-[#1e1839]">
+                        Jouw naam *
+                      </Label>
+                      <Input
+                        id="name"
+                        type="text"
+                        placeholder="Voor- en achternaam"
+                        value={formData.name}
+                        onChange={(e) => updateFormData("name", e.target.value)}
+                        className="mt-2"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="email" className="text-base font-medium text-[#1e1839]">
+                        E-mailadres *
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="jouw@email.nl"
+                        value={formData.email}
+                        onChange={(e) => updateFormData("email", e.target.value)}
+                        className="mt-2"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="phone" className="text-base font-medium text-[#1e1839]">
+                        Telefoonnummer (optioneel)
+                      </Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="06 12 34 56 78"
+                        value={formData.phone}
+                        onChange={(e) => updateFormData("phone", e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 7: Confirmation */}
+              {currentStep === 7 && (
+                <div className="space-y-6">
+                  <div className="flex items-center mb-4">
+                    <CheckCircle className="w-6 h-6 text-[#1e1839] mr-2" />
+                    <h3 className="text-lg font-semibold text-[#1e1839]">Bevestiging</h3>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                    <h4 className="font-semibold text-[#1e1839] mb-3">Controleer jouw gegevens:</h4>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium">Geslacht:</span> {formData.gender === "male" ? "Man" : "Vrouw"}
+                      </div>
+                      <div>
+                        <span className="font-medium">Leeftijd:</span> {formData.age} jaar
+                      </div>
+                      <div>
+                        <span className="font-medium">Gewicht:</span> {formData.weight} kg
+                      </div>
+                      <div>
+                        <span className="font-medium">Lengte:</span> {formData.height} cm
+                      </div>
+                      <div className="md:col-span-2">
+                        <span className="font-medium">Activiteitsniveau:</span>{" "}
+                        {formData.activityLevel === "sedentary" && "Zittend werk"}
+                        {formData.activityLevel === "light" && "Licht actief"}
+                        {formData.activityLevel === "moderate" && "Matig actief"}
+                        {formData.activityLevel === "active" && "Zeer actief"}
+                        {formData.activityLevel === "very_active" && "Extreem actief"}
+                      </div>
+                      <div className="md:col-span-2">
+                        <span className="font-medium">Doel:</span>{" "}
+                        {formData.goal === "lose_weight" && "Gewicht verliezen"}
+                        {formData.goal === "maintain_weight" && "Gewicht behouden"}
+                        {formData.goal === "gain_weight" && "Gewicht aankomen"}
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div>
+                      <span className="font-medium">Naam:</span> {formData.name}
+                    </div>
+                    <div>
+                      <span className="font-medium">E-mail:</span> {formData.email}
+                    </div>
+                    {formData.phone && (
+                      <div>
+                        <span className="font-medium">Telefoon:</span> {formData.phone}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <p className="text-sm text-green-800">
+                      Door op "Bereken mijn caloriebehoefte" te klikken, ga je akkoord met het ontvangen van jouw
+                      persoonlijke resultaten en eventuele follow-up communicatie van Evotion Coaching.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Results */}
+              {currentStep > totalSteps && result && (
+                <div className="space-y-8">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center mb-4">
+                      <TrendingUp className="w-12 h-12 text-green-600 mr-3" />
+                      <h2 className="text-3xl font-bold text-[#1e1839]">Jouw Persoonlijke Resultaten</h2>
+                    </div>
+                    <p className="text-gray-600 mb-6">
+                      Gebaseerd op jouw gegevens hebben we jouw calorie- en macronutriëntenbehoefte berekend
+                    </p>
+                  </div>
+
+                  {/* Main Results */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                      <CardHeader className="text-center">
+                        <CardTitle className="text-blue-800">Basaal Metabolisme</CardTitle>
+                        <CardDescription>Calorieën in rust</CardDescription>
+                      </CardHeader>
+                      <CardContent className="text-center">
+                        <div className="text-3xl font-bold text-blue-800 mb-2">{result.bmr}</div>
+                        <div className="text-sm text-blue-600">calorieën per dag</div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                      <CardHeader className="text-center">
+                        <CardTitle className="text-green-800">Totaal Verbruik</CardTitle>
+                        <CardDescription>Met jouw activiteit</CardDescription>
+                      </CardHeader>
+                      <CardContent className="text-center">
+                        <div className="text-3xl font-bold text-green-800 mb-2">{result.tdee}</div>
+                        <div className="text-sm text-green-600">calorieën per dag</div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+                      <CardHeader className="text-center">
+                        <CardTitle className="text-purple-800">Jouw Doel</CardTitle>
+                        <CardDescription>Aanbevolen inname</CardDescription>
+                      </CardHeader>
+                      <CardContent className="text-center">
+                        <div className="text-3xl font-bold text-purple-800 mb-2">{result.goalCalories}</div>
+                        <div className="text-sm text-purple-600">calorieën per dag</div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Macronutrients */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-[#1e1839]">Aanbevolen Macronutriënten</CardTitle>
+                      <CardDescription>
+                        Verdeling van eiwitten, koolhydraten en vetten voor optimale resultaten
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="text-center p-4 bg-red-50 rounded-lg">
+                          <div className="text-2xl font-bold text-red-600 mb-2">{result.protein}g</div>
+                          <div className="text-sm font-medium text-red-800">Eiwitten</div>
+                          <div className="text-xs text-red-600 mt-1">30% van calorieën</div>
+                        </div>
+
+                        <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                          <div className="text-2xl font-bold text-yellow-600 mb-2">{result.carbs}g</div>
+                          <div className="text-sm font-medium text-yellow-800">Koolhydraten</div>
+                          <div className="text-xs text-yellow-600 mt-1">40% van calorieën</div>
+                        </div>
+
+                        <div className="text-center p-4 bg-orange-50 rounded-lg">
+                          <div className="text-2xl font-bold text-orange-600 mb-2">{result.fat}g</div>
+                          <div className="text-sm font-medium text-orange-800">Vetten</div>
+                          <div className="text-xs text-orange-600 mt-1">30% van calorieën</div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Next Steps */}
+                  <Card className="bg-gradient-to-r from-[#1e1839] to-[#2a2054] text-white">
+                    <CardHeader>
+                      <CardTitle className="text-white">Wat nu?</CardTitle>
+                      <CardDescription className="text-gray-300">
+                        Hulp nodig bij het bereiken van jouw doelen?
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-gray-300">
+                        Deze resultaten zijn een geweldige start, maar iedereen is uniek. Voor de beste resultaten raden
+                        we persoonlijke begeleiding aan.
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Button asChild className="bg-[#bad4e1] hover:bg-[#bad4e1]/90 text-[#1e1839]">
+                          <a href="/contact">
+                            <Phone className="w-4 h-4 mr-2" />
+                            Gratis Consult Boeken
+                          </a>
+                        </Button>
+
+                        <Button
+                          asChild
+                          variant="outline"
+                          className="border-white text-white hover:bg-white hover:text-[#1e1839] bg-transparent"
+                        >
+                          <a href="/online-coaching">
+                            Bekijk Online Coaching
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </a>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {isSubmitted && (
+                    <div className="text-center">
+                      <Badge variant="default" className="bg-green-600">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Resultaten verzonden naar {formData.email}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Navigation Buttons */}
+              {currentStep <= totalSteps && (
+                <div className="flex justify-between pt-6">
+                  <Button
+                    variant="outline"
+                    onClick={prevStep}
+                    disabled={currentStep === 1}
+                    className="text-[#1e1839] border-[#1e1839] bg-transparent"
+                  >
+                    Vorige
+                  </Button>
+
+                  {currentStep < totalSteps ? (
+                    <Button
+                      onClick={nextStep}
+                      disabled={!canProceed()}
+                      className="bg-[#1e1839] hover:bg-[#1e1839]/90 text-white"
+                    >
+                      Volgende
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={!canProceed() || isSubmitting}
+                      className="bg-[#bad4e1] hover:bg-[#bad4e1]/90 text-[#1e1839]"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-[#1e1839] border-t-transparent" />
+                          Berekenen...
+                        </>
+                      ) : (
+                        <>
+                          <Calculator className="w-4 h-4 mr-2" />
+                          Bereken Mijn Caloriebehoefte
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       <Footer />
     </div>
