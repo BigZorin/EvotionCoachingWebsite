@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { submitCaloriebehoefte } from "@/app/actions/caloriebehoefte"
-import { trackEvent } from "@/utils/cookie-utils"
+import { trackEvent, logCalculatorAction, logContactSubmission } from "@/utils/cookie-utils"
 import {
   Calculator,
   User,
@@ -27,6 +27,7 @@ import {
   Award,
   Mail,
   Phone,
+  RotateCcw,
 } from "lucide-react"
 
 interface FormData {
@@ -75,8 +76,11 @@ export default function CaloriebehoefteClientPage() {
   useEffect(() => {
     if (typeof window === "undefined") return
 
+    // Log calculator started only if not already completed
+    const saved = localStorage.getItem("calorie-calculator-progress")
+    let shouldLogStart = true
+
     try {
-      const saved = localStorage.getItem("calorie-calculator-progress")
       if (saved) {
         const parsed = JSON.parse(saved)
         if (parsed && typeof parsed === "object") {
@@ -86,16 +90,27 @@ export default function CaloriebehoefteClientPage() {
           if (parsed.data && typeof parsed.data === "object") {
             setFormData({ ...initialFormData, ...parsed.data })
           }
+          if (parsed.result && typeof parsed.result === "object") {
+            setResult(parsed.result)
+          }
+          if (parsed.isSubmitted === true) {
+            setIsSubmitted(true)
+            shouldLogStart = false // Don't log start if already completed
+          }
         }
       }
     } catch (error) {
       console.error("Error loading saved progress:", error)
-      // Clear corrupted data
       try {
         localStorage.removeItem("calorie-calculator-progress")
       } catch (e) {
         console.error("Error clearing corrupted data:", e)
       }
+    }
+
+    // Only log calculator started if not already completed
+    if (shouldLogStart) {
+      logCalculatorAction("started")
     }
   }, [])
 
@@ -108,13 +123,16 @@ export default function CaloriebehoefteClientPage() {
         const dataToSave = {
           step: currentStep,
           data: formData,
+          result: result,
+          isSubmitted: isSubmitted,
+          timestamp: new Date().toISOString(),
         }
         localStorage.setItem("calorie-calculator-progress", JSON.stringify(dataToSave))
       } catch (error) {
         console.error("Error saving progress:", error)
       }
     }
-  }, [currentStep, formData])
+  }, [currentStep, formData, result, isSubmitted])
 
   const updateFormData = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -134,6 +152,22 @@ export default function CaloriebehoefteClientPage() {
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep((prev) => prev - 1)
+    }
+  }
+
+  const resetCalculator = () => {
+    setCurrentStep(1)
+    setFormData(initialFormData)
+    setResult(null)
+    setIsSubmitting(false)
+    setIsSubmitted(false)
+
+    try {
+      localStorage.removeItem("calorie-calculator-progress")
+      // Log calculator restart
+      logCalculatorAction("started")
+    } catch (error) {
+      console.error("Error resetting calculator:", error)
     }
   }
 
@@ -192,6 +226,17 @@ export default function CaloriebehoefteClientPage() {
       const calculatedResult = calculateCalories()
       setResult(calculatedResult)
 
+      // Log calculator completion
+      logCalculatorAction("completed", {
+        age: formData.age,
+        gender: formData.gender,
+        weight: formData.weight,
+        height: formData.height,
+        activityLevel: formData.activityLevel,
+        goal: formData.goal,
+        result: calculatedResult,
+      })
+
       // Submit to server action
       const formDataObj = new FormData()
 
@@ -209,6 +254,14 @@ export default function CaloriebehoefteClientPage() {
       const result = await submitCaloriebehoefte(formDataObj)
 
       if (result && result.success) {
+        // Log contact submission
+        logContactSubmission("calculator", {
+          email: formData.email,
+          name: formData.name,
+          phone: formData.phone,
+          result: calculatedResult,
+        })
+
         // Track completion
         try {
           trackEvent("calculator_completed", {
@@ -223,13 +276,6 @@ export default function CaloriebehoefteClientPage() {
 
         setIsSubmitted(true)
         setCurrentStep(totalSteps + 1) // Move to results step
-
-        // Clear saved progress
-        try {
-          localStorage.removeItem("calorie-calculator-progress")
-        } catch (error) {
-          console.error("Error clearing progress:", error)
-        }
       } else {
         console.error("Submission failed:", result?.error || "Unknown error")
       }
@@ -812,6 +858,18 @@ export default function CaloriebehoefteClientPage() {
                       </div>
                     </CardContent>
                   </Card>
+
+                  {/* Reset Calculator Button */}
+                  <div className="text-center">
+                    <Button
+                      onClick={resetCalculator}
+                      variant="outline"
+                      className="text-[#1e1839] border-[#1e1839] bg-transparent hover:bg-[#1e1839] hover:text-white"
+                    >
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Nieuwe Berekening Maken
+                    </Button>
+                  </div>
 
                   {isSubmitted && (
                     <div className="text-center">

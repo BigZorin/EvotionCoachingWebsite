@@ -174,3 +174,77 @@ declare global {
     dataLayer: any[]
   }
 }
+
+export function logCalculatorAction(action: "started" | "completed", data?: any): void {
+  if (typeof window === "undefined") return
+
+  try {
+    const logs = JSON.parse(localStorage.getItem("evotion-calculator-logs") || "[]")
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      action,
+      data,
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+    }
+
+    logs.push(logEntry)
+
+    // Keep only last 200 entries
+    if (logs.length > 200) {
+      logs.splice(0, logs.length - 200)
+    }
+
+    localStorage.setItem("evotion-calculator-logs", JSON.stringify(logs))
+  } catch (error) {
+    console.error("Error logging calculator action:", error)
+  }
+}
+
+export function logContactSubmission(type: "contact" | "calculator", data?: any): void {
+  if (typeof window === "undefined") return
+
+  try {
+    const logs = JSON.parse(localStorage.getItem("evotion-contact-logs") || "[]")
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      type,
+      data,
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+    }
+
+    logs.push(logEntry)
+
+    // Keep only last 200 entries
+    if (logs.length > 200) {
+      logs.splice(0, logs.length - 200)
+    }
+
+    localStorage.setItem("evotion-contact-logs", JSON.stringify(logs))
+  } catch (error) {
+    console.error("Error logging contact submission:", error)
+  }
+}
+
+export function getCalculatorLogs(): any[] {
+  if (typeof window === "undefined") return []
+
+  try {
+    return JSON.parse(localStorage.getItem("evotion-calculator-logs") || "[]")
+  } catch (error) {
+    console.error("Error getting calculator logs:", error)
+    return []
+  }
+}
+
+export function getContactLogs(): any[] {
+  if (typeof window === "undefined") return []
+
+  try {
+    return JSON.parse(localStorage.getItem("evotion-contact-logs") || "[]")
+  } catch (error) {
+    console.error("Error getting contact logs:", error)
+    return []
+  }
+}
