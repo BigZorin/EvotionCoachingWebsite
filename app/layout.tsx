@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import CookieConsent from "@/components/cookie-consent"
+import Script from "next/script"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -136,6 +137,17 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://evotion-coaching.nl" />
       </head>
       <body className={inter.className}>
+        {/* Google Analytics */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-MCL41XYPGM" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-MCL41XYPGM');
+          `}
+        </Script>
+
         {children}
         <CookieConsent />
       </body>
