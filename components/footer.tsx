@@ -121,10 +121,16 @@ export function Footer() {
 
             {/* Mobile version - vertical layout with more spacing */}
             <div className="flex flex-col space-y-4 md:hidden">
-              <Link href="#" className="text-gray-400 hover:text-secondary transition-colors text-center py-2">
+              <Link
+                href="/privacybeleid"
+                className="text-gray-400 hover:text-secondary transition-colors text-center py-2"
+              >
                 Privacybeleid
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-secondary transition-colors text-center py-2">
+              <Link
+                href="/algemene-voorwaarden"
+                className="text-gray-400 hover:text-secondary transition-colors text-center py-2"
+              >
                 Algemene Voorwaarden
               </Link>
               <Link href="#" className="text-gray-400 hover:text-secondary transition-colors text-center py-2">
@@ -134,10 +140,10 @@ export function Footer() {
 
             {/* Desktop version - horizontal layout */}
             <div className="hidden md:flex space-x-6 text-sm">
-              <Link href="#" className="text-gray-400 hover:text-secondary transition-colors">
+              <Link href="/privacybeleid" className="text-gray-400 hover:text-secondary transition-colors">
                 Privacybeleid
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-secondary transition-colors">
+              <Link href="/algemene-voorwaarden" className="text-gray-400 hover:text-secondary transition-colors">
                 Algemene Voorwaarden
               </Link>
               <Link href="#" className="text-gray-400 hover:text-secondary transition-colors">
