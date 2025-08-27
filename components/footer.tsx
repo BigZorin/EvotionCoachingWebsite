@@ -7,14 +7,14 @@ import CookieSettingsButton from "./cookie-settings-button"
 
 export function Footer() {
   return (
-    <footer className="bg-[#1e1839] text-white">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <footer className="bg-black text-white">
+      <div className="container mx-auto px-4 py-8 lg:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {/* Logo en Beschrijving */}
-          <div className="space-y-4">
+          <div className="space-y-3 lg:space-y-4">
             <Link href="/" className="inline-block">
               <Image
-                src="/images/evotion-logo.png"
+                src="/images/evotion-logo-white.png"
                 alt="Evotion Coaching Logo"
                 width={150}
                 height={60}
@@ -25,9 +25,9 @@ export function Footer() {
               Jouw partner in gezonde gewichtsbeheersing en duurzame levensstijlverandering. Samen bereiken we jouw
               doelen.
             </p>
-            <div className="flex space-x-4">
+            <div className="flex space-x-3">
               <a
-                href="https://instagram.com/evotion.coaching"
+                href="https://instagram.com/evotion_coaching"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
@@ -35,7 +35,7 @@ export function Footer() {
                 <Instagram className="w-5 h-5" />
               </a>
               <a
-                href="https://facebook.com/evotioncoaching"
+                href="https://www.facebook.com/profile.php?id=61565513770164"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
@@ -43,7 +43,7 @@ export function Footer() {
                 <Facebook className="w-5 h-5" />
               </a>
               <a
-                href="https://linkedin.com/company/evotion-coaching"
+                href="https://www.linkedin.com/in/langenberg-martin/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
@@ -131,7 +131,7 @@ export function Footer() {
           {/* Contact */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact</h3>
-            <ul className="space-y-3">
+            <ul className="space-y-2 lg:space-y-3">
               <li className="flex items-center space-x-3">
                 <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
                 <a href="tel:+31612345678" className="text-gray-300 hover:text-white transition-colors text-sm">
@@ -150,7 +150,7 @@ export function Footer() {
               <li className="flex items-start space-x-3">
                 <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                 <span className="text-gray-300 text-sm">
-                  Amsterdam
+                  Friesland
                   <br />
                   Nederland
                 </span>
@@ -159,7 +159,7 @@ export function Footer() {
             <div className="mt-4">
               <Link
                 href="/contact"
-                className="inline-block bg-[#bad4e1] text-[#1e1839] px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#9bc4d4] transition-colors"
+                className="inline-block bg-[#bad4e1] text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#9bc4d4] transition-colors"
               >
                 Neem Contact Op
               </Link>
@@ -169,10 +169,10 @@ export function Footer() {
 
         {/* Bottom Section */}
         <div className="border-t border-gray-700 mt-8 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6 text-sm text-gray-400">
+          <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0">
+            <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-6 text-sm text-gray-400">
               <p>&copy; 2024 Evotion Coaching. Alle rechten voorbehouden.</p>
-              <div className="flex space-x-4">
+              <div className="flex flex-wrap gap-4">
                 <Link href="/privacybeleid" className="hover:text-white transition-colors">
                   Privacybeleid
                 </Link>

@@ -334,22 +334,24 @@ export default function CaloriebehoefteClientPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#1e1839] via-[#2a2054] to-[#1e1839]">
       <Header />
 
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-6 sm:py-12">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <Calculator className="w-12 h-12 text-[#bad4e1] mr-3" />
-              <h1 className="text-4xl font-bold text-white">Gratis Caloriebehoefte Calculator</h1>
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row items-center justify-center mb-4">
+              <Calculator className="w-10 h-10 sm:w-12 sm:h-12 text-[#bad4e1] mb-2 sm:mb-0 sm:mr-3" />
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white text-center">
+                Gratis Caloriebehoefte Calculator
+              </h1>
             </div>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto px-2">
               Ontdek precies hoeveel calorieën jij nodig hebt om jouw doelen te bereiken
             </p>
           </div>
 
           {/* Progress Bar */}
           {currentStep <= totalSteps && (
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm text-gray-300">Voortgang</span>
                 <span className="text-sm text-gray-300">
@@ -361,35 +363,37 @@ export default function CaloriebehoefteClientPage() {
           )}
 
           {/* Step Content */}
-          <Card className="bg-white/95 backdrop-blur-sm shadow-2xl">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl text-[#1e1839]">{getStepTitle(currentStep)}</CardTitle>
+          <Card className="bg-white/95 backdrop-blur-sm shadow-2xl mx-2 sm:mx-0">
+            <CardHeader className="text-center px-4 sm:px-6">
+              <CardTitle className="text-xl sm:text-2xl text-[#1e1839]">{getStepTitle(currentStep)}</CardTitle>
               {currentStep <= totalSteps && (
-                <CardDescription className="text-gray-600">
+                <CardDescription className="text-sm sm:text-base text-gray-600">
                   Vul de onderstaande gegevens in om jouw persoonlijke caloriebehoefte te berekenen
                 </CardDescription>
               )}
             </CardHeader>
 
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
               {/* Step 1: Welcome */}
               {currentStep === 1 && (
                 <div className="text-center space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="flex flex-col items-center p-6 bg-[#1e1839]/5 rounded-lg">
-                      <Zap className="w-12 h-12 text-[#1e1839] mb-3" />
-                      <h3 className="font-semibold text-[#1e1839] mb-2">Nauwkeurig</h3>
-                      <p className="text-sm text-gray-600 text-center">Gebaseerd op wetenschappelijke formules</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                    <div className="flex flex-col items-center p-3 sm:p-6 bg-[#1e1839]/5 rounded-lg">
+                      <Zap className="w-10 h-10 sm:w-12 sm:h-12 text-[#1e1839] mb-2 sm:mb-3" />
+                      <h3 className="font-semibold text-[#1e1839] mb-1 sm:mb-2 text-center">Nauwkeurig</h3>
+                      <p className="text-xs sm:text-sm text-gray-600 text-center">
+                        Gebaseerd op wetenschappelijke formules
+                      </p>
                     </div>
-                    <div className="flex flex-col items-center p-6 bg-[#1e1839]/5 rounded-lg">
-                      <Heart className="w-12 h-12 text-[#1e1839] mb-3" />
-                      <h3 className="font-semibold text-[#1e1839] mb-2">Persoonlijk</h3>
-                      <p className="text-sm text-gray-600 text-center">Aangepast aan jouw unieke situatie</p>
+                    <div className="flex flex-col items-center p-3 sm:p-6 bg-[#1e1839]/5 rounded-lg">
+                      <Heart className="w-10 h-10 sm:w-12 sm:h-12 text-[#1e1839] mb-2 sm:mb-3" />
+                      <h3 className="font-semibold text-[#1e1839] mb-1 sm:mb-2 text-center">Persoonlijk</h3>
+                      <p className="text-xs sm:text-sm text-gray-600 text-center">Aangepast aan jouw unieke situatie</p>
                     </div>
-                    <div className="flex flex-col items-center p-6 bg-[#1e1839]/5 rounded-lg">
-                      <Award className="w-12 h-12 text-[#1e1839] mb-3" />
-                      <h3 className="font-semibold text-[#1e1839] mb-2">Gratis</h3>
-                      <p className="text-sm text-gray-600 text-center">Geen kosten, geen verplichtingen</p>
+                    <div className="flex flex-col items-center p-3 sm:p-6 bg-[#1e1839]/5 rounded-lg">
+                      <Award className="w-10 h-10 sm:w-12 sm:h-12 text-[#1e1839] mb-2 sm:mb-3" />
+                      <h3 className="font-semibold text-[#1e1839] mb-1 sm:mb-2 text-center">Gratis</h3>
+                      <p className="text-xs sm:text-sm text-gray-600 text-center">Geen kosten, geen verplichtingen</p>
                     </div>
                   </div>
                   <p className="text-gray-600">
@@ -415,13 +419,13 @@ export default function CaloriebehoefteClientPage() {
                         onValueChange={(value) => updateFormData("gender", value)}
                         className="grid grid-cols-2 gap-4"
                       >
-                        <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50">
+                        <div className="flex items-center space-x-2 p-3 sm:p-4 border rounded-lg hover:bg-gray-50">
                           <RadioGroupItem value="male" id="male" />
                           <Label htmlFor="male" className="cursor-pointer">
                             Man
                           </Label>
                         </div>
-                        <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50">
+                        <div className="flex items-center space-x-2 p-3 sm:p-4 border rounded-lg hover:bg-gray-50">
                           <RadioGroupItem value="female" id="female" />
                           <Label htmlFor="female" className="cursor-pointer">
                             Vrouw
@@ -440,7 +444,7 @@ export default function CaloriebehoefteClientPage() {
                         placeholder="Bijvoorbeeld: 30"
                         value={formData.age}
                         onChange={(e) => updateFormData("age", e.target.value)}
-                        className="mt-2"
+                        className="mt-2 h-12 text-base"
                         min="16"
                         max="100"
                       />
@@ -457,7 +461,7 @@ export default function CaloriebehoefteClientPage() {
                     <h3 className="text-lg font-semibold text-[#1e1839]">Lichaamsgegevens</h3>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                       <Label htmlFor="weight" className="text-base font-medium text-[#1e1839]">
                         Wat is jouw gewicht? (kg)
@@ -468,7 +472,7 @@ export default function CaloriebehoefteClientPage() {
                         placeholder="Bijvoorbeeld: 70"
                         value={formData.weight}
                         onChange={(e) => updateFormData("weight", e.target.value)}
-                        className="mt-2"
+                        className="mt-2 h-12 text-base"
                         min="30"
                         max="300"
                         step="0.1"
@@ -485,7 +489,7 @@ export default function CaloriebehoefteClientPage() {
                         placeholder="Bijvoorbeeld: 175"
                         value={formData.height}
                         onChange={(e) => updateFormData("height", e.target.value)}
-                        className="mt-2"
+                        className="mt-2 h-12 text-base"
                         min="120"
                         max="250"
                       />
@@ -511,7 +515,7 @@ export default function CaloriebehoefteClientPage() {
                       onValueChange={(value) => updateFormData("activityLevel", value)}
                       className="space-y-3"
                     >
-                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-start space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-gray-50">
                         <RadioGroupItem value="sedentary" id="sedentary" className="mt-1" />
                         <div className="flex-1">
                           <Label htmlFor="sedentary" className="cursor-pointer font-medium">
@@ -523,7 +527,7 @@ export default function CaloriebehoefteClientPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-start space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-gray-50">
                         <RadioGroupItem value="light" id="light" className="mt-1" />
                         <div className="flex-1">
                           <Label htmlFor="light" className="cursor-pointer font-medium">
@@ -533,7 +537,7 @@ export default function CaloriebehoefteClientPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-start space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-gray-50">
                         <RadioGroupItem value="moderate" id="moderate" className="mt-1" />
                         <div className="flex-1">
                           <Label htmlFor="moderate" className="cursor-pointer font-medium">
@@ -543,7 +547,7 @@ export default function CaloriebehoefteClientPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-start space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-gray-50">
                         <RadioGroupItem value="active" id="active" className="mt-1" />
                         <div className="flex-1">
                           <Label htmlFor="active" className="cursor-pointer font-medium">
@@ -553,7 +557,7 @@ export default function CaloriebehoefteClientPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-start space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-gray-50">
                         <RadioGroupItem value="very_active" id="very_active" className="mt-1" />
                         <div className="flex-1">
                           <Label htmlFor="very_active" className="cursor-pointer font-medium">
@@ -582,7 +586,7 @@ export default function CaloriebehoefteClientPage() {
                       onValueChange={(value) => updateFormData("goal", value)}
                       className="space-y-3"
                     >
-                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-start space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-gray-50">
                         <RadioGroupItem value="lose_weight" id="lose_weight" className="mt-1" />
                         <div className="flex-1">
                           <Label htmlFor="lose_weight" className="cursor-pointer font-medium">
@@ -592,7 +596,7 @@ export default function CaloriebehoefteClientPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-start space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-gray-50">
                         <RadioGroupItem value="maintain_weight" id="maintain_weight" className="mt-1" />
                         <div className="flex-1">
                           <Label htmlFor="maintain_weight" className="cursor-pointer font-medium">
@@ -602,7 +606,7 @@ export default function CaloriebehoefteClientPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-start space-x-3 p-3 sm:p-4 border rounded-lg hover:bg-gray-50">
                         <RadioGroupItem value="gain_weight" id="gain_weight" className="mt-1" />
                         <div className="flex-1">
                           <Label htmlFor="gain_weight" className="cursor-pointer font-medium">
@@ -642,7 +646,7 @@ export default function CaloriebehoefteClientPage() {
                         placeholder="Voor- en achternaam"
                         value={formData.name}
                         onChange={(e) => updateFormData("name", e.target.value)}
-                        className="mt-2"
+                        className="mt-2 h-12 text-base"
                         required
                       />
                     </div>
@@ -657,7 +661,7 @@ export default function CaloriebehoefteClientPage() {
                         placeholder="jouw@email.nl"
                         value={formData.email}
                         onChange={(e) => updateFormData("email", e.target.value)}
-                        className="mt-2"
+                        className="mt-2 h-12 text-base"
                         required
                       />
                     </div>
@@ -672,7 +676,7 @@ export default function CaloriebehoefteClientPage() {
                         placeholder="06 12 34 56 78"
                         value={formData.phone}
                         onChange={(e) => updateFormData("phone", e.target.value)}
-                        className="mt-2"
+                        className="mt-2 h-12 text-base"
                       />
                     </div>
                   </div>
@@ -690,7 +694,7 @@ export default function CaloriebehoefteClientPage() {
                   <div className="bg-gray-50 rounded-lg p-6 space-y-4">
                     <h4 className="font-semibold text-[#1e1839] mb-3">Controleer jouw gegevens:</h4>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-sm">
                       <div>
                         <span className="font-medium">Geslacht:</span> {formData.gender === "male" ? "Man" : "Vrouw"}
                       </div>
@@ -757,7 +761,7 @@ export default function CaloriebehoefteClientPage() {
                   </div>
 
                   {/* Main Results */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                     <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
                       <CardHeader className="text-center">
                         <CardTitle className="text-blue-800">Basaal Metabolisme</CardTitle>
@@ -801,7 +805,7 @@ export default function CaloriebehoefteClientPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                         <div className="text-center p-4 bg-red-50 rounded-lg">
                           <div className="text-2xl font-bold text-red-600 mb-2">{result.protein}g</div>
                           <div className="text-sm font-medium text-red-800">Eiwitten</div>
@@ -837,8 +841,8 @@ export default function CaloriebehoefteClientPage() {
                         we persoonlijke begeleiding aan.
                       </p>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Button asChild className="bg-[#bad4e1] hover:bg-[#bad4e1]/90 text-[#1e1839]">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <Button asChild className="bg-[#bad4e1] hover:bg-[#bad4e1]/90 text-[#1e1839] h-12">
                           <a href="/contact">
                             <Phone className="w-4 h-4 mr-2" />
                             Gratis Consult Boeken
@@ -848,10 +852,11 @@ export default function CaloriebehoefteClientPage() {
                         <Button
                           asChild
                           variant="outline"
-                          className="border-white text-white hover:bg-white hover:text-[#1e1839] bg-transparent"
+                          className="border-white text-white hover:bg-white hover:text-[#1e1839] bg-transparent h-12"
                         >
                           <a href="/online-coaching">
-                            Bekijk Online Coaching
+                            <span className="hidden sm:inline">Bekijk Online Coaching</span>
+                            <span className="sm:hidden">Online Coaching</span>
                             <ArrowRight className="w-4 h-4 ml-2" />
                           </a>
                         </Button>
@@ -884,12 +889,12 @@ export default function CaloriebehoefteClientPage() {
 
               {/* Navigation Buttons */}
               {currentStep <= totalSteps && (
-                <div className="flex justify-between pt-6">
+                <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 pt-4 sm:pt-6">
                   <Button
                     variant="outline"
                     onClick={prevStep}
                     disabled={currentStep === 1}
-                    className="text-[#1e1839] border-[#1e1839] bg-transparent"
+                    className="text-[#1e1839] border-[#1e1839] bg-transparent h-12 text-base order-2 sm:order-1"
                   >
                     Vorige
                   </Button>
@@ -898,7 +903,7 @@ export default function CaloriebehoefteClientPage() {
                     <Button
                       onClick={nextStep}
                       disabled={!canProceed()}
-                      className="bg-[#1e1839] hover:bg-[#1e1839]/90 text-white"
+                      className="bg-[#1e1839] hover:bg-[#1e1839]/90 text-white h-12 text-base order-1 sm:order-2"
                     >
                       Volgende
                       <ArrowRight className="w-4 h-4 ml-2" />
@@ -907,7 +912,7 @@ export default function CaloriebehoefteClientPage() {
                     <Button
                       onClick={handleSubmit}
                       disabled={!canProceed() || isSubmitting}
-                      className="bg-[#bad4e1] hover:bg-[#bad4e1]/90 text-[#1e1839]"
+                      className="bg-[#bad4e1] hover:bg-[#bad4e1]/90 text-[#1e1839] h-12 text-base order-1 sm:order-2"
                     >
                       {isSubmitting ? (
                         <>
@@ -917,7 +922,8 @@ export default function CaloriebehoefteClientPage() {
                       ) : (
                         <>
                           <Calculator className="w-4 h-4 mr-2" />
-                          Bereken Mijn Caloriebehoefte
+                          <span className="hidden sm:inline">Bereken Mijn Caloriebehoefte</span>
+                          <span className="sm:hidden">Bereken</span>
                         </>
                       )}
                     </Button>
