@@ -2,8 +2,19 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Instagram, Globe, Calculator, Calendar, Mail, Phone, Linkedin } from "lucide-react"
 import Image from "next/image"
+import type { Metadata } from "next"
 
-export default function MartinBioPage() {
+export const metadata: Metadata = {
+  title: "Martin - Evotion Coaching",
+  description: "Jouw persoonlijke fitness & voedingscoach. Samen werken we aan jouw gezondheid, energie en doelen.",
+  openGraph: {
+    title: "Martin - Evotion Coaching",
+    description: "Jouw persoonlijke fitness & voedingscoach",
+    type: "profile",
+  },
+}
+
+export default function MartinSocialsPage() {
   const links = [
     {
       title: "Evotion Coaching Website",
@@ -60,10 +71,11 @@ export default function MartinBioPage() {
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="mb-6 relative h-32 w-32 overflow-hidden rounded-full bg-gradient-to-br from-primary to-accent">
             <Image
-              src="/images/design-mode/Kopie%20van%20EVOTION%20-%20V.C%20Kopie2%20%281080%20x%201080%20px%29.png"
+              src="/images/martin-langenberg.png"
               alt="Martin - Evotion Coaching"
               fill
               className="object-cover"
+              priority
             />
           </div>
 
@@ -147,7 +159,7 @@ export default function MartinBioPage() {
         {/* Footer */}
         <footer className="mt-12 text-center">
           <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Evotion Coaching</p>
-          <p className="mt-2 text-xs text-muted-foreground">It is time to bring your evolution in motion. </p>
+          <p className="mt-2 text-xs text-muted-foreground">It is time to bring your evolution in motion.</p>
         </footer>
       </div>
     </div>

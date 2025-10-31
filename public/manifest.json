@@ -1,0 +1,29 @@
+{
+  "name": "Evotion Coaching",
+  "short_name": "Evotion",
+  "description": "Transformeer je lichaam met professionele coaching en begeleiding van Evotion Coaching",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e1839",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/images/evotion-favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/images/evotion-favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["health", "fitness", "lifestyle"],
+  "lang": "nl",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false
+}
