@@ -269,21 +269,11 @@ export function Header() {
           {/* Desktop CTA Buttons */}
           <div className="hidden lg:flex items-center space-x-3">
             <Button
-              variant="ghost"
               size="sm"
-              className="text-gray-700 hover:text-primary hover:bg-primary/10 border border-gray-200 hover:border-primary/30 px-4 py-2 rounded-lg transition-all duration-200"
+              className="bg-primary text-white hover:bg-primary/90 shadow-sm hover:shadow-md px-4 py-2 rounded-lg transition-all duration-200"
               asChild
             >
-              <a href="https://klanten.evotion-coaching.nl" target="_blank" rel="noopener noreferrer">
-                <Users className="h-4 w-4 mr-2" />
-                <span className="font-medium">Mijn Account</span>
-              </a>
-            </Button>
-            <Button
-              className="bg-primary hover:bg-primary/90 text-white px-6 py-2 font-semibold text-sm rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
-              asChild
-            >
-              <Link href="/contact">Gratis Consult</Link>
+              <Link href="/contact">Start je transformatie</Link>
             </Button>
           </div>
 
@@ -558,29 +548,10 @@ export function Header() {
               </nav>
 
               {/* Mobile CTA Buttons */}
-              <div className="p-4 space-y-3 border-t border-gray-100 bg-white">
-                <Button
-                  variant="ghost"
-                  className="w-full text-gray-700 hover:text-primary hover:bg-primary/10 border border-gray-200 hover:border-primary/30 py-3 text-sm font-medium justify-start transition-all duration-200"
-                  asChild
-                >
-                  <a
-                    href="https://klanten.evotion-coaching.nl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center w-full"
-                  >
-                    <Users className="h-4 w-4 mr-3" />
-                    Mijn Account
-                  </a>
-                </Button>
-                <Button
-                  className="w-full bg-primary hover:bg-primary/90 text-white py-3 text-sm font-semibold border border-primary hover:border-primary/80 transition-all duration-200"
-                  asChild
-                >
+              <div className="flex flex-col space-y-2 p-4 border-t border-gray-200">
+                <Button size="sm" className="w-full bg-primary text-white hover:bg-primary/90" asChild>
                   <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}>
-                    Gratis Consult
+                    Start je transformatie
                   </Link>
                 </Button>
               </div>

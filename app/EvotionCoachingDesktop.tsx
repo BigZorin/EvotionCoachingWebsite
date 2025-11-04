@@ -21,9 +21,6 @@ import {
   Mail,
   Calendar,
   Shield,
-  Clock,
-  Flame,
-  User,
 } from "lucide-react"
 import Image from "next/image"
 import { Header } from "@/components/header"
@@ -160,7 +157,7 @@ export default function EvotionCoachingDesktop() {
       <Header />
 
       {/* HERO */}
-      <section className="relative py-32 min-h-screen flex items-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center overflow-hidden bg-gray-900">
         {/* Video + overlays */}
         <div className="absolute inset-0 z-0">
           <div className="relative w-full h-full">
@@ -173,22 +170,7 @@ export default function EvotionCoachingDesktop() {
               title="Evotion Coaching introductievideo"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-black/70"></div>
-
-            {/* Animated gradient veil */}
-            <div
-              className="absolute inset-0"
-              style={{
-                background: `linear-gradient(45deg, 
-                rgba(30, 24, 57, 0.95) 0%, 
-                rgba(30, 24, 57, 0.8) 25%,
-                rgba(0, 0, 0, 0.7) 50%,
-                rgba(30, 24, 57, 0.8) 75%,
-                rgba(30, 24, 57, 0.95) 100%)`,
-                backgroundSize: "400% 400%",
-                animation: "gradientShift 15s ease infinite",
-              }}
-            />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#1e1839]/80 via-[#1e1839]/70 to-[#1e1839]/80"></div>
           </div>
         </div>
 
@@ -198,99 +180,57 @@ export default function EvotionCoachingDesktop() {
           className="container mx-auto px-6 relative z-10"
           style={{ transform: `translateY(${heroParallax.offset}px)` }}
         >
-          <div className="max-w-6xl mx-auto text-center space-y-10">
-            <div className="space-y-8">
-              {/* Social proof */}
-              <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
-                <Badge className="bg-white/15 text-white hover:bg-white/25 backdrop-blur-sm text-base px-6 py-3 transform hover:scale-105 transition-all duration-300 animate-fade-in-up ev-glow">
-                  <Award className="w-4 h-4 mr-2 text-white" />
-                  Gecertificeerde Personal Trainers
-                </Badge>
-                <Badge
-                  className="bg-white/15 text-white hover:bg-white/25 backdrop-blur-sm text-base px-6 py-3 transform hover:scale-105 transition-all duration-300 animate-fade-in-up ev-glow"
-                  style={{ animationDelay: "0.2s" }}
-                >
-                  <Shield className="w-4 h-4 mr-2 text-white" />
-                  100% Geld Terug Garantie
-                </Badge>
-              </div>
-
-              {/* Heading */}
-              <h1 className="text-7xl xl:text-8xl font-extrabold text-white leading-tight tracking-tight animate-fade-in-up">
-                <span className="inline-block drop-shadow-[0_4px_24px_rgba(186,212,225,0.35)]">
-                  {isLoaded ? typewriterText : "EVOTION COACHING"}
-                  {!isComplete && <span className="animate-pulse">|</span>}
-                </span>
+          <div className="max-w-5xl mx-auto text-center space-y-12">
+            {/* Main heading - larger, bolder, more modern */}
+            <div className="space-y-6">
+              <h1
+                className="text-6xl md:text-7xl xl:text-8xl font-black text-white leading-[1.1] tracking-tight animate-fade-in-up"
+                style={{ animationDelay: "0.2s" }}
+              >
+                <span className="block">Jouw droomlichaam</span>
+                <span className="block text-white/90">binnen handbereik</span>
               </h1>
 
-              {/* Subheading */}
-              <h2
-                className="text-4xl xl:text-5xl font-semibold text-white leading-tight mb-4 animate-fade-in-up"
-                style={{ animationDelay: "0.5s" }}
+              {/* Subheading - cleaner, more direct */}
+              <p
+                className="text-xl md:text-2xl xl:text-3xl text-gray-300 leading-relaxed max-w-3xl mx-auto font-light animate-fade-in-up"
+                style={{ animationDelay: "0.4s" }}
               >
-                <span className="bg-gradient-to-r from-white via-white to-white bg-clip-text text-transparent animate-pulse">
-                  Jouw droomlichaam binnen handbereik.
-                </span>
-              </h2>
-
-              {/* Description */}
-              <div
-                className="text-2xl xl:text-3xl text-gray-200 leading-relaxed max-w-4xl mx-auto animate-fade-in-up space-y-6"
-                style={{ animationDelay: "1s" }}
-              >
-                <p className="mb-6">Zonder je favoriete eten, sociale leven of vrijheid op te geven!</p>
-                <p className="font-medium bg-gradient-to-r from-white to-white bg-clip-text text-transparent">
-                  We helpen jou je droomlichaam te bereiken én te behouden – snel, effectief, en zonder opofferingen.
-                </p>
-              </div>
-
-              {/* Value props */}
-              <div className="flex flex-wrap items-center justify-center gap-8 mt-10 pt-6">
-                <div
-                  className="flex items-center gap-3 text-white font-semibold bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full text-lg transform hover:scale-105 transition-all duration-300 animate-fade-in-left border border-white/20 hover:border-white/40 ev-glow"
-                  style={{ animationDelay: "1.2s" }}
-                >
-                  <Clock className="w-6 h-6 text-white" />
-                  <span>Zie resultaten binnen 4 weken</span>
-                </div>
-                <div
-                  className="flex items-center gap-3 text-white font-semibold bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full text-lg transform hover:scale-105 transition-all duration-300 animate-fade-in-right border border-white/20 hover:border-white/40 ev-glow"
-                  style={{ animationDelay: "1.4s" }}
-                >
-                  <Flame className="w-6 h-6 text-white" />
-                  <span>Bewezen methode voor blijvend resultaat</span>
-                </div>
-              </div>
+                Zonder je favoriete eten, sociale leven of vrijheid op te geven
+              </p>
             </div>
 
-            {/* CTAs */}
-            <div className="flex flex-wrap gap-6 justify-center animate-fade-in-up" style={{ animationDelay: "1.6s" }}>
+            {/* CTAs - more modern, cleaner */}
+            <div
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up"
+              style={{ animationDelay: "0.6s" }}
+            >
               <Button
                 size="lg"
-                className="ev-shine bg-white text-evotion-primary hover:bg-gray-100 px-12 py-7 text-2xl font-semibold shadow-2xl transform hover:scale-105 transition-all duration-300 group relative overflow-hidden rounded-xl"
+                className="bg-white text-gray-900 hover:bg-gray-100 px-10 py-6 text-lg font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 group rounded-xl"
               >
-                <span className="relative z-10 flex items-center gap-3">
+                <span className="flex items-center gap-2.5">
                   Start Jouw Transformatie
-                  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </span>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="ev-shine border-2 border-white/70 text-white hover:bg-white hover:text-evotion-primary px-12 py-7 text-2xl font-semibold bg-transparent transform hover:scale-105 transition-all duration-300 group relative overflow-hidden backdrop-blur-sm rounded-xl"
+                className="border-2 border-white/30 text-white hover:bg-white hover:text-gray-900 px-10 py-6 text-lg font-semibold bg-transparent backdrop-blur-sm transform hover:scale-105 transition-all duration-300 rounded-xl"
+                asChild
               >
-                <span className="relative z-10 flex items-center gap-3">
-                  Gratis Consult
-                  <Sparkles className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
-                </span>
+                <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
+                  <span className="flex items-center gap-2.5">
+                    Gratis Consult
+                    <Calendar className="w-5 h-5" />
+                  </span>
+                </Link>
               </Button>
             </div>
 
-            {/* Stats */}
-            <div
-              ref={statsRef}
-              className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 pt-16 md:pt-20 max-w-5xl mx-auto"
-            >
+            {/* Stats - cleaner, more modern */}
+            <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-16 max-w-4xl mx-auto">
               {[
                 { k: "100+", v: "Tevreden Klanten" },
                 { k: "5.0", v: "Google Rating" },
@@ -299,33 +239,22 @@ export default function EvotionCoachingDesktop() {
               ].map((s, i) => (
                 <div
                   key={s.v}
-                  className={`text-center transform hover:scale-110 transition-all duration-700 ${
+                  className={`text-center transform hover:scale-105 transition-all duration-500 ${
                     statsVisible ? "animate-fade-in-up opacity-100" : "opacity-0"
                   }`}
-                  style={{ animationDelay: `${2 + i * 0.2}s` }}
+                  style={{ animationDelay: `${0.8 + i * 0.1}s` }}
                 >
-                  <div className="text-5xl md:text-6xl font-extrabold text-white mb-2 drop-shadow-[0_6px_24px_rgba(0,0,0,0.35)]">
-                    {s.k}
-                  </div>
-                  <div className="text-lg md:text-xl text-gray-200">{s.v}</div>
+                  <div className="text-4xl md:text-5xl font-bold text-white mb-2">{s.k}</div>
+                  <div className="text-sm md:text-base text-gray-400 font-medium">{s.v}</div>
                   {s.v === "Google Rating" && (
-                    <div className="flex justify-center mt-2">
+                    <div className="flex justify-center mt-2 gap-0.5">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
                       ))}
                     </div>
                   )}
                 </div>
               ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Scroll hint */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce">
-          <div className="group cursor-pointer">
-            <div className="w-8 h-12 border-2 border-white/50 rounded-full flex justify-center group-hover:border-white transition-colors duration-300">
-              <div className="w-1.5 h-3 bg-white/50 rounded-full mt-2 animate-pulse group-hover:bg-white transition-colors duration-300"></div>
             </div>
           </div>
         </div>
@@ -507,11 +436,14 @@ export default function EvotionCoachingDesktop() {
               <Button
                 size="lg"
                 className="ev-shine bg-gradient-to-r from-evotion-primary to-evotion-primary hover:opacity-95 text-white px-12 py-6 text-xl font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 group"
+                asChild
               >
-                <span className="flex items-center gap-3">
-                  Gratis Kennismakingsgesprek
-                  <Calendar className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300 text-white" />
-                </span>
+                <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
+                  <span className="flex items-center gap-3">
+                    Gratis Kennismakingsgesprek
+                    <Calendar className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300 text-white" />
+                  </span>
+                </Link>
               </Button>
             </div>
           </div>
@@ -519,63 +451,55 @@ export default function EvotionCoachingDesktop() {
       </section>
 
       {/* PERSONAL TRAINING */}
-      <section className="py-28 bg-gradient-to-br from-gray-900 via-evotion-primary to-evotion-primary relative overflow-hidden">
-        {/* subtle rays */}
-        <div
-          className="absolute inset-0 opacity-[0.06] pointer-events-none"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 20% 10%, white 2px, transparent 0), radial-gradient(circle at 80% 60%, white 2px, transparent 0)",
-            backgroundSize: "60px 60px, 60px 60px",
-          }}
-        />
+      <section className="py-28 bg-evotion-primary relative overflow-hidden">
+        {/* Removed subtle rays */}
         <div className="container mx-auto px-6 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-20 items-center max-w-7xl mx-auto">
-            <div className="space-y-10">
-              <div className="space-y-8">
-                <Badge className="bg-white/20 text-white border border-white/30 text-lg px-6 py-3 backdrop-blur-sm shadow-lg">
-                  <User className="w-5 h-5 mr-2 text-white" />
+          <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
+            <div className="space-y-8">
+              <div className="space-y-6">
+                <Badge className="bg-white/20 text-white border-0 text-base px-5 py-2 backdrop-blur-sm">
+                  <Dumbbell className="w-4 h-4 mr-2 text-white" />
                   Personal Training
                 </Badge>
-                <h2 className="text-5xl md:text-6xl font-black text-white leading-tight">
+                <h2 className="text-4xl md:text-5xl font-black text-white leading-tight">
                   Persoonlijke Training met Professionele Begeleiding
                 </h2>
-                <p className="text-2xl text-gray-200 leading-relaxed">
+                <p className="text-xl text-white/90 leading-relaxed">
                   Ervaar de kracht van persoonlijke begeleiding met onze gecertificeerde personal trainers. Met
                   volledige aandacht en op maat gemaakte trainingen bereik je sneller en veiliger je doelen.
                 </p>
               </div>
 
-              <div className="grid gap-6">
+              <div className="space-y-4">
                 {[
                   { icon: Dumbbell, title: "Persoonlijke Training Sessies", desc: "Volledige aandacht van je trainer" },
                   { icon: Target, title: "Aangepaste Oefeningen", desc: "Perfect afgestemd op jouw doelen" },
                   { icon: Calendar, title: "Flexibele Planning", desc: "Plan sessies wanneer het jou past" },
-                ].map((f, idx) => (
+                ].map((f) => (
                   <div
                     key={f.title}
-                    className="flex items-center gap-6 bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 group"
+                    className="flex items-center gap-5 bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/10 hover:bg-white/15 transition-all duration-300"
                   >
-                    <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                      <f.icon className="w-8 h-8 text-evotion-primary" />
+                    <div className="w-14 h-14 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                      <f.icon className="w-7 h-7 text-evotion-primary" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-white mb-1">{f.title}</h3>
-                      <p className="text-lg text-gray-300">{f.desc}</p>
+                      <h3 className="text-lg font-bold text-white mb-1">{f.title}</h3>
+                      <p className="text-base text-white/80">{f.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="pt-2">
+              <div className="pt-4">
                 <Link href="/personal-training">
                   <Button
                     size="lg"
-                    className="ev-shine bg-white text-evotion-primary hover:bg-gray-100 px-12 py-6 text-xl font-semibold shadow-2xl transform hover:scale-105 transition-all duration-300 group"
+                    className="bg-white text-evotion-primary hover:bg-gray-100 px-10 py-6 text-lg font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 group rounded-xl"
                   >
-                    <span className="flex items-center gap-3">
+                    <span className="flex items-center gap-2.5">
                       Meer over Personal Training
-                      <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                     </span>
                   </Button>
                 </Link>
@@ -584,39 +508,25 @@ export default function EvotionCoachingDesktop() {
 
             {/* Image */}
             <div className="relative">
-              <div className="relative mx-auto w-full h-[500px] rounded-3xl overflow-hidden shadow-2xl ev-photo-frame">
+              <div className="relative mx-auto w-full h-[500px] rounded-2xl overflow-hidden shadow-2xl">
                 <Image
                   src="/images/personal-training-session.jpeg"
                   alt="Personal Training Begeleiding"
                   fill
                   sizes="(min-width: 1024px) 50vw, 100vw"
-                  className="object-cover will-change-transform transition-transform duration-700 hover:scale-105"
+                  className="object-cover transition-transform duration-700 hover:scale-105"
                   priority={false}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
               </div>
-
-              {/* Floating icons */}
-              <div className="absolute -top-8 -left-8 w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-xl animate-float">
-                <Award className="w-10 h-10 text-evotion-primary" />
-              </div>
-              <div className="absolute -bottom-8 -right-8 w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-xl animate-float-delayed">
-                <Star className="w-10 h-10 text-evotion-primary" />
-              </div>
+              {/* Removed floating icons */}
             </div>
           </div>
         </div>
       </section>
 
       {/* APP */}
-      <section className="py-28 bg-gradient-to-br from-white via-gray-50/30 to-white relative">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage: "radial-gradient(circle at 2px 2px, #bad4e1 1px, transparent 0)",
-            backgroundSize: "40px 40px",
-          }}
-        />
+      <section className="py-28 bg-white relative">
         <div className="container mx-auto px-6 relative z-10">
           <div className="grid lg:grid-cols-2 gap-20 items-center max-w-7xl mx-auto">
             {/* Content */}
@@ -641,11 +551,8 @@ export default function EvotionCoachingDesktop() {
                   { icon: Sparkles, t: "Voedingsadvies op Maat", d: "Plannen passend bij jouw smaak" },
                   { icon: MessageCircle, t: "Directe Coach Communicatie", d: "Chat direct met je coach" },
                 ].map((f) => (
-                  <div
-                    key={f.t}
-                    className="flex items-center gap-6 bg-gray-50 rounded-2xl p-6 border border-gray-200 hover:bg-gray-100 transition-all duration-300 group"
-                  >
-                    <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <div key={f.t} className="flex items-center gap-6 bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                    <div className="w-16 h-16 bg-evotion-primary rounded-xl flex items-center justify-center shadow-lg">
                       <f.icon className="w-8 h-8 text-white" />
                     </div>
                     <div>
@@ -671,25 +578,17 @@ export default function EvotionCoachingDesktop() {
 
             {/* Mockup */}
             <div className="relative">
-              <div className="relative mx-auto w-96 h-[720px] transform hover:scale-105 transition-all duration-500 group">
-                <div className="absolute -inset-[2px] rounded-[3.1rem] bg-gradient-to-br from-[#1e1839] via-[#bad4e1] to-[#1e1839] blur-[10px] opacity-40 group-hover:opacity-70 transition-opacity" />
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black rounded-[3rem] shadow-2xl border-8 border-gray-700 group-hover:shadow-3xl transition-shadow duration-500"></div>
-                <div className="absolute inset-4 bg-white rounded-[2.5rem] overflow-hidden ev-photo-frame flex items-center justify-center">
+              <div className="relative mx-auto w-96 h-[720px] transform hover:scale-105 transition-all duration-500">
+                <div className="absolute inset-0 bg-gray-900 rounded-[3rem] shadow-2xl border-8 border-gray-800"></div>
+                <div className="absolute inset-4 bg-white rounded-[2.5rem] overflow-hidden flex items-center justify-center">
                   <Image
                     src="/images/evotion-logo-mockup-desktop.png"
                     alt="Evotion Logo Mockup"
                     fill
                     sizes="(min-width: 1024px) 24rem, 90vw"
-                    className="object-contain group-hover:scale-110 transition-transform duration-700 p-8"
+                    className="object-contain p-8"
                   />
                 </div>
-              </div>
-
-              <div className="absolute -top-8 -left-8 w-20 h-20 bg-evotion-primary rounded-2xl flex items-center justify-center shadow-xl animate-float">
-                <Star className="w-10 h-10 text-white" />
-              </div>
-              <div className="absolute -bottom-8 -right-8 w-20 h-20 bg-evotion-primary rounded-2xl flex items-center justify-center shadow-xl animate-float-delayed">
-                <CheckCircle className="w-10 h-10 text-white" />
               </div>
             </div>
           </div>
@@ -876,11 +775,14 @@ export default function EvotionCoachingDesktop() {
               <Button
                 size="lg"
                 className="ev-shine bg-gradient-to-r from-evotion-primary to-evotion-primary hover:opacity-95 text-white px-12 py-6 text-xl font-semibold shadow-xl transform hover:scale-105 transition-all duration-300 group"
+                asChild
               >
-                <span className="flex items-center gap-3">
-                  Start Jouw Transformatie
-                  <Sparkles className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300 text-white" />
-                </span>
+                <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
+                  <span className="flex items-center gap-3">
+                    Start Jouw Transformatie
+                    <Sparkles className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300 text-white" />
+                  </span>
+                </Link>
               </Button>
             </div>
           </div>

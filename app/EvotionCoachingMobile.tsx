@@ -21,9 +21,6 @@ import {
   MessageCircle,
   Mail,
   Calendar,
-  Shield,
-  Clock,
-  Flame,
   Heart,
   Smartphone,
   BarChart3,
@@ -216,7 +213,7 @@ export default function EvotionCoachingMobile() {
       <Header />
 
       {/* HERO */}
-      <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/90">
+      <section className="relative min-h-screen flex items-center overflow-hidden bg-gray-900">
         <div className="absolute inset-0 z-0">
           <iframe
             src="https://www.youtube.com/embed/SpTe8MThxVc?autoplay=1&mute=1&loop=1&playlist=SpTe8MThxVc&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1"
@@ -227,65 +224,58 @@ export default function EvotionCoachingMobile() {
             title="Evotion Coaching introductievideo"
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-primary/80"></div>
-          {/* Decorative orbs */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1e1839]/80 via-[#1e1839]/70 to-[#1e1839]/80"></div>
         </div>
 
         <div className="container mx-auto px-4 relative z-10 py-20">
-          <div className="text-center space-y-6">
-            <div className="flex flex-col items-center gap-3 mb-8">
-              <Badge className="bg-white/20 text-white backdrop-blur-sm px-4 py-2 text-sm">
-                <Award className="w-4 h-4 mr-2" />
-                Gecertificeerde Trainers
-              </Badge>
-              <Badge className="bg-white/20 text-white backdrop-blur-sm px-4 py-2 text-sm">
-                <Shield className="w-4 h-4 mr-2" />
-                100% Geld Terug Garantie
-              </Badge>
+          <div className="text-center space-y-8">
+            {/* Main heading - larger, bolder */}
+            <div className="space-y-4">
+              <h1 className="text-4xl sm:text-5xl font-black text-white leading-[1.1] tracking-tight">
+                <span className="block">Jouw droomlichaam</span>
+                <span className="block text-white/90">binnen handbereik</span>
+              </h1>
+
+              {/* Subheading - cleaner */}
+              <p className="text-base sm:text-lg text-gray-300 leading-relaxed max-w-sm mx-auto font-light">
+                Zonder je favoriete eten, sociale leven of vrijheid op te geven
+              </p>
             </div>
 
-            <h1 className="text-4xl font-extrabold text-white leading-tight">EVOTION COACHING</h1>
-            <h2 className="text-2xl font-semibold text-white/90 leading-tight">Jouw droomlichaam binnen handbereik</h2>
-            <p className="text-lg text-white/80 leading-relaxed max-w-sm mx-auto">
-              Zonder je favoriete eten, sociale leven of vrijheid op te geven!
-            </p>
-
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-center gap-3 text-white bg-white/10 backdrop-blur-sm px-4 py-3 rounded-full text-sm ev-glow">
-                <Clock className="w-4 h-4" />
-                <span>Zie resultaten binnen 4 weken</span>
-              </div>
-              <div className="flex items-center justify-center gap-3 text-white bg-white/10 backdrop-blur-sm px-4 py-3 rounded-full text-sm ev-glow">
-                <Flame className="w-4 h-4" />
-                <span>Bewezen methode voor blijvend resultaat</span>
-              </div>
-            </div>
-
-            <div className="space-y-4 pt-6">
+            {/* CTAs - more modern */}
+            <div className="space-y-3 pt-4">
               <Button
                 size="lg"
-                className="ev-shine w-full bg-white text-primary hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-xl"
+                className="w-full bg-white text-gray-900 hover:bg-gray-100 px-8 py-6 text-base font-semibold shadow-xl rounded-xl"
               >
-                Start Jouw Transformatie
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <span className="flex items-center justify-center gap-2">
+                  Start Jouw Transformatie
+                  <ArrowRight className="w-4 h-4" />
+                </span>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="ev-shine w-full border-2 border-white text-white hover:bg-white hover:text-primary px-8 py-4 text-lg font-semibold bg-transparent backdrop-blur-sm"
+                className="w-full border-2 border-white/30 text-white hover:bg-white hover:text-gray-900 px-8 py-6 text-base font-semibold bg-transparent backdrop-blur-sm rounded-xl"
+                asChild
               >
-                Gratis Consult
-                <Sparkles className="w-5 h-5 ml-2" />
+                <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
+                  <span className="flex items-center justify-center gap-2">
+                    Gratis Consult
+                    <Calendar className="w-4 h-4" />
+                  </span>
+                </Link>
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-6 pt-10 max-w-xs mx-auto">
+            {/* Stats - cleaner, more compact */}
+            <div className="grid grid-cols-2 gap-6 pt-8 max-w-xs mx-auto">
               {stats.map((s) => (
                 <div key={s.label} className="text-center">
-                  <div className="text-3xl font-extrabold text-white mb-1">{s.number}</div>
-                  <div className="text-sm text-white/80">{s.label}</div>
+                  <div className="text-3xl font-bold text-white mb-1">{s.number}</div>
+                  <div className="text-xs text-gray-400 font-medium">{s.label}</div>
                   {s.label === "Google Rating" && (
-                    <div className="flex justify-center mt-1">
+                    <div className="flex justify-center mt-1.5 gap-0.5">
                       {[...Array(5)].map((_, i) => (
                         <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
                       ))}
@@ -294,12 +284,6 @@ export default function EvotionCoachingMobile() {
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 animate-bounce">
-          <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
-            <div className="w-1 h-2 bg-white/50 rounded-full mt-2 animate-pulse"></div>
           </div>
         </div>
       </section>
@@ -382,9 +366,11 @@ export default function EvotionCoachingMobile() {
                 <p className="text-gray-600 mb-6 text-sm leading-relaxed">
                   Boek een gratis kennismakingsgesprek en ontdek samen met ons wat bij jou past.
                 </p>
-                <Button size="lg" className="ev-shine w-full bg-primary hover:bg-primary/90 text-white">
-                  <Calendar className="w-5 h-5 mr-2" />
-                  Gratis Kennismakingsgesprek
+                <Button size="lg" className="ev-shine w-full bg-primary hover:bg-primary/90 text-white" asChild>
+                  <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
+                    <Calendar className="w-5 h-5 mr-2" />
+                    Gratis Kennismakingsgesprek
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
@@ -393,7 +379,7 @@ export default function EvotionCoachingMobile() {
       </section>
 
       {/* APP */}
-      <section className="py-16 bg-gray-50 relative">
+      <section className="py-16 bg-white relative">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <Badge className="bg-primary/10 text-primary mb-4">
@@ -409,7 +395,7 @@ export default function EvotionCoachingMobile() {
           </div>
 
           <div className="relative mb-12">
-            <div className="relative mx-auto w-64 h-[480px] ev-photo-frame rounded-[2rem] overflow-hidden">
+            <div className="relative mx-auto w-64 h-[480px] rounded-[2rem] overflow-hidden shadow-2xl border-4 border-gray-800">
               <Image
                 src="/images/evotion-app-login.jpg"
                 alt="Evotion App Interface"
@@ -418,17 +404,11 @@ export default function EvotionCoachingMobile() {
                 className="object-cover"
               />
             </div>
-            <div className="absolute -top-4 -left-4 w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-xl animate-float">
-              <Star className="w-6 h-6 text-white" />
-            </div>
-            <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-xl animate-float-delayed">
-              <CheckCircle className="w-6 h-6 text-white" />
-            </div>
           </div>
 
           <div className="space-y-4">
             {appFeatures.map((feature) => (
-              <Card key={feature.title} className="border-gray-200 hover:border-primary/50 transition-colors">
+              <Card key={feature.title} className="border-gray-200">
                 <CardContent className="p-4">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -454,22 +434,20 @@ export default function EvotionCoachingMobile() {
       </section>
 
       {/* PERSONAL TRAINING */}
-      <section className="py-16 bg-gradient-to-br from-primary via-primary to-primary/90 text-white relative overflow-hidden">
+      <section className="py-16 bg-evotion-primary text-white relative overflow-hidden">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge className="bg-white/20 text-white mb-4">
+          <div className="text-center mb-10">
+            <Badge className="bg-white/20 text-white border-0 mb-4">
               <Dumbbell className="w-4 h-4 mr-2" />
               Personal Training
             </Badge>
-            <h2 className="text-3xl font-extrabold mb-3">
-              Persoonlijke Training met <span className="text-secondary">Professionele Begeleiding</span>
-            </h2>
+            <h2 className="text-3xl font-extrabold mb-3">Persoonlijke Training met Professionele Begeleiding</h2>
             <p className="text-white/90 leading-relaxed">
               Ervaar de kracht van persoonlijke begeleiding met onze gecertificeerde personal trainers.
             </p>
           </div>
 
-          <div className="relative mb-12 ev-photo-frame rounded-2xl overflow-hidden">
+          <div className="relative mb-10 rounded-2xl overflow-hidden">
             <div className="relative mx-auto w-full h-64">
               <Image
                 src="/images/personal-training-session.jpeg"
@@ -479,27 +457,20 @@ export default function EvotionCoachingMobile() {
                 className="object-cover"
               />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-
-            <div className="absolute -top-4 -left-4 w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-xl animate-float">
-              <Award className="w-6 h-6 text-primary" />
-            </div>
-            <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-xl animate-float-delayed">
-              <Star className="w-6 h-6 text-primary" />
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
           </div>
 
-          <div className="space-y-4 mb-8">
+          <div className="space-y-3 mb-8">
             {[
               { icon: Dumbbell, t: "Persoonlijke Training Sessies", d: "Volledige aandacht van je trainer" },
               { icon: Target, t: "Aangepaste Oefeningen", d: "Afgestemd op jouw niveau en doelen" },
               { icon: Calendar, t: "Flexibele Planning", d: "Plan sessies op tijden die bij jou passen" },
             ].map((f) => (
-              <Card key={f.t} className="bg-white/10 backdrop-blur-sm border-white/20">
+              <Card key={f.t} className="bg-white/10 backdrop-blur-sm border-white/10">
                 <CardContent className="p-4">
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                      <f.icon className="w-5 h-5 text-primary" />
+                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                      <f.icon className="w-5 h-5 text-evotion-primary" />
                     </div>
                     <div>
                       <h3 className="font-bold text-white mb-1">{f.t}</h3>
@@ -513,9 +484,11 @@ export default function EvotionCoachingMobile() {
 
           <div className="text-center">
             <Link href="/personal-training">
-              <Button size="lg" className="ev-shine w-full bg-white text-primary hover:bg-gray-100">
-                <ArrowRight className="w-5 h-5 mr-2" />
-                Meer over Personal Training
+              <Button size="lg" className="w-full bg-white text-evotion-primary hover:bg-gray-100 rounded-xl">
+                <span className="flex items-center justify-center gap-2">
+                  Meer over Personal Training
+                  <ArrowRight className="w-5 h-5" />
+                </span>
               </Button>
             </Link>
           </div>
