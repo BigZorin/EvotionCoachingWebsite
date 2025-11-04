@@ -54,11 +54,50 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://evotion-coaching.nl/evotion",
   },
+  authors: [{ name: "Evotion Coaching" }],
+  creator: "Evotion Coaching",
+  publisher: "Evotion Coaching",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 }
 
 export default function EvotionBrandPage() {
   return (
     <>
+      <Script
+        id="schema-breadcrumb"
+        type="application/ld+json"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Home",
+                item: "https://evotion-coaching.nl",
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "Over Evotion",
+                item: "https://evotion-coaching.nl/evotion",
+              },
+            ],
+          }),
+        }}
+      />
       <Script
         id="schema-brand"
         type="application/ld+json"
@@ -103,7 +142,7 @@ export default function EvotionBrandPage() {
             aggregateRating: {
               "@type": "AggregateRating",
               ratingValue: "4.9",
-              reviewCount: "500+",
+              reviewCount: "500",
               bestRating: "5",
               worstRating: "1",
             },
@@ -129,6 +168,59 @@ export default function EvotionBrandPage() {
               numberOfEmployees: "10-50",
               industry: "Health & Fitness",
             },
+          }),
+        }}
+      />
+      <Script
+        id="schema-faq"
+        type="application/ld+json"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "Wat is Evotion?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Evotion is een toonaangevende fitness en coaching brand in Nederland die ontstond uit de combinatie van Evolution en Motion. Wij helpen mensen hun droomlichaam te bereiken door middel van bewezen coaching methodes, een unieke app en persoonlijke begeleiding.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Wat maakt Evotion uniek?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Evotion combineert persoonlijke coaching met geavanceerde technologie via onze unieke Evotion app. We bieden 24/7 toegang tot je coach, AI-gestuurde voedingsadvies, gepersonaliseerde trainingsschema's en een exclusieve community. Onze bewezen methode heeft al meer dan 500 mensen geholpen met hun transformatie.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Waar is Evotion gevestigd?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Evotion biedt personal training in Sneek, Friesland en online coaching door heel Nederland. We zijn specialist in fitness coaching in Friesland en bieden zowel fysieke als online begeleiding.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Welke services biedt Evotion aan?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Evotion biedt drie hoofdservices: Personal Training in Sneek met 1-op-1 begeleiding, Online Coaching met 24/7 app toegang, en het intensieve 12 Weken Vetverlies Programma dat beide combineert voor maximale resultaten.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Wat zijn de resultaten van Evotion coaching?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Evotion heeft meer dan 2000 transformaties begeleid met een gemiddelde review van 4.9/5 sterren. 95% van onze klanten bereikt succesvol vetverlies. Voorbeelden zijn Martin met -10.7kg in 11 weken, Salim met -8.1kg in 26 weken, en Wouter met -2.1kg body recomp.",
+                },
+              },
+            ],
           }),
         }}
       />

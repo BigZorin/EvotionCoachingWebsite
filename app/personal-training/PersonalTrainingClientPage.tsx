@@ -3,6 +3,7 @@
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { sendContactEmail } from "@/app/actions/contact"
@@ -11,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { MapPin, Users, Smartphone } from "lucide-react"
 import {
   Dumbbell,
   Star,
@@ -26,6 +28,7 @@ import {
   Zap,
   TrendingUp,
   Trophy,
+  ChevronDown,
 } from "lucide-react"
 
 function useAnimatedCounter(target: number, duration = 1400, startWhenVisible = true) {
@@ -95,6 +98,7 @@ export default function PersonalTrainingClientPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [isSeoExpanded, setIsSeoExpanded] = useState(false)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -408,46 +412,150 @@ export default function PersonalTrainingClientPage() {
         </div>
       </section>
 
-      {/* Local SEO Section */}
-      <section className="py-16 lg:py-24 bg-gray-50">
+      {/* Local SEO Section - Now Collapsible */}
+      <section className="py-8 lg:py-12 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            <Badge className="bg-gray-100 text-gray-700 border-gray-200">
-              <Target className="w-4 h-4 mr-2" />
-              Personal Training Sneek
-            </Badge>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900">
-              Jouw <span className="text-gray-700">Persoonlijke Trainer</span> in Sneek
-            </h2>
-            <div className="grid md:grid-cols-2 gap-8 text-left">
-              <div className="space-y-4">
-                <h3 className="text-2xl font-bold text-gray-900">Vetverlies Sneek</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Wil je afvallen in Sneek? Onze persoonlijke trainers zijn gespecialiseerd in vetverlies en helpen je
-                  op een gezonde manier je ideale gewicht te bereiken. Met een op maat gemaakt voedings- en
-                  trainingsplan zie je snel resultaat.
-                </p>
+          <div className="max-w-6xl mx-auto">
+            <button
+              onClick={() => setIsSeoExpanded(!isSeoExpanded)}
+              className="w-full flex items-center justify-between p-6 bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-colors group"
+              aria-expanded={isSeoExpanded}
+              aria-controls="seo-content"
+            >
+              <div className="flex items-center gap-3">
+                <Target className="w-5 h-5 text-evotion-primary" />
+                <span className="text-lg font-semibold text-gray-900">Personal Training in Sneek en Omgeving</span>
               </div>
-              <div className="space-y-4">
-                <h3 className="text-2xl font-bold text-gray-900">Spieropbouw Friesland</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Spieren opbouwen in Friesland? Onze ervaren personal trainers in Sneek helpen je met krachttraining en
-                  spieropbouw. Van beginner tot gevorderd - we passen de training aan jouw niveau aan.
-                </p>
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-2xl font-bold text-gray-900">Fitness Coaching Sneek</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Zoek je een fitness coach in Sneek? Onze gecertificeerde trainers bieden complete begeleiding voor al
-                  je fitnessdoelen. Van conditie verbeteren tot kracht opbouwen - wij helpen je verder.
-                </p>
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-2xl font-bold text-gray-900">Personal Trainer Friesland</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Als ervaren personal trainers in Friesland kennen we de lokale gemeenschap. We bieden flexibele
-                  trainingstijden en locaties die perfect aansluiten bij jouw agenda en voorkeuren.
-                </p>
+              <ChevronDown
+                className={`w-5 h-5 text-gray-500 transition-transform duration-300 ${
+                  isSeoExpanded ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            <div
+              id="seo-content"
+              className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                isSeoExpanded ? "max-h-[3000px] opacity-100 mt-6" : "max-h-0 opacity-0"
+              }`}
+            >
+              <div className="space-y-12">
+                {/* Header */}
+                <div className="text-center space-y-4">
+                  <Badge className="bg-evotion-primary/10 text-evotion-primary border-evotion-primary/20">
+                    <Target className="w-4 h-4 mr-2" />
+                    Personal Training Sneek & Friesland
+                  </Badge>
+                  <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">
+                    Jouw Personal Trainer in Sneek en Omgeving
+                  </h2>
+                  <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                    Evotion biedt professionele personal training in Sneek en heel Friesland. Of je nu wilt afvallen,
+                    spiermassa wilt opbouwen, of gewoon fitter wilt worden - wij begeleiden je naar jouw doelen met
+                    persoonlijke aandacht en bewezen methodes.
+                  </p>
+                </div>
+
+                {/* Locations Grid */}
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Locaties waar wij actief zijn</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[
+                      { name: "Personal Training Sneek", desc: "Centrum en omgeving" },
+                      { name: "Personal Training Leeuwarden", desc: "Hoofdstad van Friesland" },
+                      { name: "Personal Training IJlst", desc: "Historische Friese stad" },
+                      { name: "Personal Training Bolsward", desc: "Zuidwest Friesland" },
+                      { name: "Personal Training Workum", desc: "Aan het IJsselmeer" },
+                      { name: "Personal Training Heerenveen", desc: "Centraal Friesland" },
+                    ].map((location) => (
+                      <Card
+                        key={location.name}
+                        className="border-gray-200 hover:border-evotion-primary/50 hover:shadow-md transition-all duration-300 bg-white"
+                      >
+                        <CardContent className="p-5">
+                          <div className="flex items-start gap-3">
+                            <MapPin className="w-5 h-5 text-evotion-primary flex-shrink-0 mt-0.5" />
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-1">{location.name}</h4>
+                              <p className="text-sm text-gray-600">{location.desc}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Services Grid */}
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                    Onze Personal Training Specialisaties
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                      {
+                        icon: Target,
+                        title: "Afvallen & Vetverlies",
+                        desc: "Effectieve begeleiding voor duurzaam gewichtsverlies en een gezonder lichaam",
+                      },
+                      {
+                        icon: Dumbbell,
+                        title: "Spieropbouw & Kracht",
+                        desc: "Gestructureerde trainingen voor meer spiermassa en functionele kracht",
+                      },
+                      {
+                        icon: Heart,
+                        title: "Fitness & Conditie",
+                        desc: "Verbeter je algehele fitheid en uithoudingsvermogen met persoonlijke coaching",
+                      },
+                      {
+                        icon: Users,
+                        title: "Groepstraining",
+                        desc: "Train samen met anderen in kleine groepen voor extra motivatie",
+                      },
+                      {
+                        icon: Smartphone,
+                        title: "Online Coaching",
+                        desc: "Flexibele begeleiding op afstand met onze eigen coaching app",
+                      },
+                      {
+                        icon: Calendar,
+                        title: "Voedingsadvies",
+                        desc: "Persoonlijk voedingsplan afgestemd op jouw doelen en levensstijl",
+                      },
+                    ].map((service) => (
+                      <Card
+                        key={service.title}
+                        className="border-gray-200 hover:border-evotion-primary/50 hover:shadow-md transition-all duration-300 bg-white"
+                      >
+                        <CardContent className="p-6">
+                          <div className="flex items-start gap-4">
+                            <div className="p-3 bg-evotion-primary/10 rounded-lg">
+                              <service.icon className="w-6 h-6 text-evotion-primary" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 mb-2">{service.title}</h4>
+                              <p className="text-sm text-gray-600 leading-relaxed">{service.desc}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+
+                {/* SEO-rich bottom text */}
+                <div className="bg-white rounded-xl p-8 border border-gray-200">
+                  <p className="text-gray-700 leading-relaxed text-center">
+                    Als <strong>personal trainer in Sneek</strong> en omliggende gemeenten bieden wij professionele{" "}
+                    <strong>personal training</strong> aan voor iedereen die serieus aan de slag wil met hun gezondheid
+                    en fitheid. Of je nu op zoek bent naar een <strong>personal trainer Sneek</strong>,{" "}
+                    <strong>fitness coach Friesland</strong>, of <strong>online coaching</strong> - bij Evotion krijg je
+                    persoonlijke begeleiding die werkt. Onze ervaren trainers helpen je met <strong>afvallen</strong>,{" "}
+                    <strong>spieropbouw</strong>, en het bereiken van jouw <strong>fitness doelen</strong> in Sneek,
+                    Leeuwarden, IJlst, Bolsward, Workum, Heerenveen en heel Friesland.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -530,9 +638,12 @@ export default function PersonalTrainingClientPage() {
               size="lg"
               variant="outline"
               className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
+              asChild
             >
-              <MessageCircle className="w-5 h-5 mr-2" />
-              Gratis Adviesgesprek
+              <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="w-5 h-5 mr-2" />
+                Gratis Adviesgesprek
+              </Link>
             </Button>
           </div>
         </div>
