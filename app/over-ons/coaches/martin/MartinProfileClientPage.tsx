@@ -113,7 +113,7 @@ export default function MartinProfileClientPage() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      <section className="pt-20 md:pt-24 pb-3 px-4">
+      <section className="pt-20 pb-3 px-4 md:pt-3">
         <div className="max-w-6xl mx-auto">
           <Link
             href="/over-ons/coaches"
@@ -125,11 +125,7 @@ export default function MartinProfileClientPage() {
         </div>
       </section>
 
-      <section className="pb-12 md:pb-16 px-4 bg-gradient-to-b from-gray-50/50 to-transparent">
-        <div className="max-w-6xl mx-auto">
-          <div className="inline-flex items-center">{/* Existing code remains unchanged */}</div>
-        </div>
-      </section>
+      
 
       <section className="pb-12 md:pb-16 px-4 bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] relative overflow-hidden">
         {/* Subtle pattern overlay */}

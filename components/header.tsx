@@ -270,7 +270,7 @@ export function Header() {
           <div className="hidden lg:flex items-center space-x-3">
             <Button
               size="sm"
-              className="bg-primary text-white hover:bg-primary/90 shadow-sm hover:shadow-md px-4 py-2 rounded-lg transition-all duration-200"
+              className="text-white hover:bg-primary/90 shadow-sm hover:shadow-md px-4 py-2 rounded-lg transition-all duration-200 bg-[rgba(30,24,57,1)]"
               asChild
             >
               <Link href="/contact">Start je transformatie</Link>
