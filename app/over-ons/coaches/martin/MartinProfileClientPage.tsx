@@ -113,16 +113,21 @@ export default function MartinProfileClientPage() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      {/* Back Navigation */}
-      <section className="pt-20 md:pt-24 pb-4 md:pb-8 px-4">
+      <section className="pt-20 md:pt-24 pb-3 px-4">
         <div className="max-w-6xl mx-auto">
           <Link
             href="/over-ons/coaches"
-            className="inline-flex items-center text-[#1e1839] hover:text-[#1e1839]/70 transition-colors group text-sm md:text-base"
+            className="inline-flex items-center px-3 py-1.5 rounded-lg text-[#1e1839] hover:bg-gray-100 transition-all duration-300 group text-sm font-medium"
           >
-            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
             Terug naar Coaches
           </Link>
+        </div>
+      </section>
+
+      <section className="pb-12 md:pb-16 px-4 bg-gradient-to-b from-gray-50/50 to-transparent">
+        <div className="max-w-6xl mx-auto">
+          <div className="inline-flex items-center">{/* Existing code remains unchanged */}</div>
         </div>
       </section>
 
