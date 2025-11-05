@@ -113,7 +113,7 @@ export default function MartinProfileClientPage() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      <section className="pt-20 pb-3 px-4 md:pt-3">
+      <section className="pb-3 px-4 md:pt-3 pt-3">
         <div className="max-w-6xl mx-auto">
           <Link
             href="/over-ons/coaches"

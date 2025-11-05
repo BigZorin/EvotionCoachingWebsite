@@ -43,7 +43,7 @@ export default function ZorinProfileClientPage() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      <section className="pt-20 pb-3 px-4 bg-gradient-to-b from-gray-50/50 to-transparent md:pt-3">
+      <section className="pb-3 px-4 bg-gradient-to-b from-gray-50/50 to-transparent md:pt-3 pt-3">
         <div className="max-w-6xl mx-auto">
           <div className="inline-flex items-center">
             <Link
