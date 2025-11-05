@@ -78,23 +78,23 @@ export default function ZorinProfileClientPage() {
                   6x Nederlands Kampioen Powerlifting
                 </Badge>
                 <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">Zorin Wijnands</h1>
-                <div className="text-xl md:text-2xl font-semibold mb-6 text-white/90">BigZorin Coaching</div>
-                <p className="text-lg md:text-xl mb-8 leading-relaxed text-white/90">
+                <div className="text-lg md:text-2xl font-semibold mb-6 text-white/90">BigZorin Coaching</div>
+                <p className="text-base md:text-xl mb-8 leading-relaxed text-white/90">
                   Van 6x Nederlands Kampioen tot jouw persoonlijke coach. Met jarenlange ervaring op het hoogste niveau
                   help ik jou je doelen te bereiken, of je nu wilt afvallen, sterker worden, of powerlifting wilt leren.
                 </p>
 
                 <div className="grid grid-cols-3 gap-4 mb-8">
                   <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                    <div className="text-3xl font-bold mb-1">260kg</div>
+                    <div className="text-2xl md:text-3xl font-bold mb-1">260kg</div>
                     <div className="text-sm text-white/80">Squat PR</div>
                   </div>
                   <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                    <div className="text-3xl font-bold mb-1">193kg</div>
+                    <div className="text-2xl md:text-3xl font-bold mb-1">193kg</div>
                     <div className="text-sm text-white/80">Bench PR</div>
                   </div>
                   <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                    <div className="text-3xl font-bold mb-1">340kg</div>
+                    <div className="text-2xl md:text-3xl font-bold mb-1">340kg</div>
                     <div className="text-sm text-white/80">Deadlift PR</div>
                   </div>
                 </div>
@@ -156,7 +156,7 @@ export default function ZorinProfileClientPage() {
                 Mijn Transformatie
               </Badge>
               <h2 className="text-3xl md:text-5xl font-bold text-[#1e1839] mb-4">Van 64kg naar 134kg</h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
                 Een verhaal van passie, discipline en het najagen van dromen.
               </p>
             </div>
@@ -172,7 +172,7 @@ export default function ZorinProfileClientPage() {
                   />
                 </div>
                 <div className="p-6 text-center">
-                  <div className="text-3xl font-bold text-[#1e1839] mb-2">70kg</div>
+                  <div className="text-2xl md:text-3xl font-bold text-[#1e1839] mb-2">70kg</div>
                   <p className="text-gray-600">Begin van de reis</p>
                 </div>
               </div>
@@ -187,7 +187,7 @@ export default function ZorinProfileClientPage() {
                   />
                 </div>
                 <div className="p-6 text-center">
-                  <div className="text-3xl font-bold text-[#1e1839] mb-2">118kg</div>
+                  <div className="text-2xl md:text-3xl font-bold text-[#1e1839] mb-2">118kg</div>
                   <p className="text-gray-600">Na 1.5 jaar intensieve groei</p>
                 </div>
               </div>
@@ -195,7 +195,7 @@ export default function ZorinProfileClientPage() {
 
             <div className="ev-gradient-border bg-white/90 backdrop-blur border-transparent rounded-2xl p-10 md:p-14 hover:shadow-2xl transition-all duration-500">
               <h3 className="text-2xl md:text-3xl font-bold text-[#1e1839] mb-6">Het Verhaal</h3>
-              <div className="space-y-6 text-lg text-gray-700 leading-loose">
+              <div className="space-y-6 text-base md:text-lg text-gray-700 leading-loose">
                 <p>
                   Mijn transformatie begon op 64kg - extreem mager en zonder enige spiermassa. Wat volgde was een
                   periode van intense focus en wat ik alleen kan omschrijven als een obsessie om te groeien en sterker
@@ -209,7 +209,7 @@ export default function ZorinProfileClientPage() {
 
               <div className="mt-8 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-8 text-white">
                 <Quote className="w-10 h-10 text-white/30 mb-4" />
-                <blockquote className="text-xl italic leading-relaxed font-medium">
+                <blockquote className="text-lg md:text-xl italic leading-relaxed font-medium">
                   "Deze transformatie was meer dan alleen fysiek - het vormde mijn begrip van wat het menselijk lichaam
                   kan bereiken met de juiste aanpak, discipline en mindset."
                 </blockquote>
@@ -227,7 +227,7 @@ export default function ZorinProfileClientPage() {
           >
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-5xl font-bold text-[#1e1839] mb-4">De Beginjaren</h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
                 Van hobby naar passie, gecoacht door de besten
               </p>
             </div>
@@ -235,7 +235,7 @@ export default function ZorinProfileClientPage() {
             <div className="grid md:grid-cols-2 gap-8">
               <div className="ev-gradient-border bg-white/90 backdrop-blur border-transparent rounded-2xl p-8 hover:shadow-2xl transition-all duration-500">
                 <h3 className="text-2xl font-bold text-[#1e1839] mb-4">Van Hobby naar Passie</h3>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-base md:text-lg text-gray-700 leading-relaxed">
                   Wat begon als een hobby groeide al snel uit tot een passie. Powerlifting gaat niet alleen over kracht,
                   maar over techniek, strategie en mentale voorbereiding. Deze holistische benadering werd de basis van
                   mijn succes.
@@ -264,7 +264,7 @@ export default function ZorinProfileClientPage() {
                     <Medal className="w-8 h-8 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">306kg Wereld Record Attempt</h3>
+                    <h3 className="text-xl md:text-3xl font-bold text-white mb-2">306kg Wereld Record Attempt</h3>
                     <div className="flex items-center gap-2 text-white/90">
                       <Badge className="bg-white/20 text-white border-white/30">EK 2019</Badge>
                       <span className="text-sm font-medium">Litouwen, Kaunas</span>
@@ -274,7 +274,7 @@ export default function ZorinProfileClientPage() {
               </div>
 
               <div className="p-8 md:p-10 bg-white">
-                <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6">
+                <p className="text-base md:text-xl text-gray-700 leading-relaxed mb-6">
                   Op het EK 2019 deed ik een <span className="font-bold text-[#1e1839]">306kg deadlift poging</span>{" "}
                   voor de 1e plaats en een wereld record. Door een technische fout werd de lift afgekeurd - een harde
                   les in powerlifting.
@@ -282,7 +282,7 @@ export default function ZorinProfileClientPage() {
 
                 <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-l-4 border-[#1e1839]">
                   <Quote className="w-8 h-8 text-[#1e1839]/20 mb-3" />
-                  <blockquote className="text-xl md:text-2xl font-bold text-[#1e1839] mb-2 italic">
+                  <blockquote className="text-lg md:text-2xl font-bold text-[#1e1839] mb-2 italic">
                     "Nooit te vroeg juichen"
                   </blockquote>
                   <p className="text-gray-600 font-medium">Dit werd mijn motto na deze ervaring.</p>
@@ -305,7 +305,7 @@ export default function ZorinProfileClientPage() {
                 Prestaties
               </Badge>
               <h2 className="text-3xl md:text-5xl font-bold text-[#1e1839] mb-4">Mijn Reis: 2017 - 2024</h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-6">
+              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-6">
                 Een tijdlijn van mijlpalen en prestaties
               </p>
               <a
@@ -387,7 +387,7 @@ export default function ZorinProfileClientPage() {
 
                     {/* Content card */}
                     <div
-                      className={`flex-1 ev-gradient-border bg-white/90 backdrop-blur border-transparent rounded-xl p-6 hover:shadow-xl transition-all duration-300 ${
+                      className={`flex-1 ev-gradient-border bg-white/90 backdrop-blur border-transparent rounded-2xl p-6 hover:shadow-xl transition-all duration-300 ${
                         item.special ? "ring-2 ring-[#1e1839]" : ""
                       }`}
                     >
@@ -453,8 +453,8 @@ export default function ZorinProfileClientPage() {
                   <div className="w-20 h-20 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-xl">
                     <record.icon className="w-10 h-10 text-white" />
                   </div>
-                  <div className="text-5xl font-bold text-[#1e1839] mb-3">{record.weight}</div>
-                  <div className="text-2xl font-semibold text-gray-700 mb-2">{record.lift}</div>
+                  <div className="text-4xl md:text-5xl font-bold text-[#1e1839] mb-3">{record.weight}</div>
+                  <div className="text-xl md:text-2xl font-semibold text-gray-700 mb-2">{record.lift}</div>
                   <Badge className="bg-[#1e1839]/10 text-[#1e1839]">{record.level}</Badge>
                 </div>
               ))}
@@ -478,8 +478,8 @@ export default function ZorinProfileClientPage() {
             className={`animate-on-scroll ${ctaAnimation.isVisible ? "animate-visible" : ""}`}
           >
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-12 md:p-16 text-white shadow-2xl">
-              <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">Klaar om te Beginnen?</h2>
-              <p className="text-xl md:text-2xl mb-10 leading-relaxed text-white/90 max-w-3xl mx-auto">
+              <h2 className="text-2xl md:text-5xl font-bold mb-6 leading-tight">Klaar om te Beginnen?</h2>
+              <p className="text-base md:text-2xl mb-10 leading-relaxed text-white/90 max-w-3xl mx-auto">
                 Laat mijn ervaring en expertise jou helpen je doelen te bereiken. Of je nu wilt afvallen, sterker
                 worden, of powerlifting wilt leren - ik sta klaar om je te begeleiden.
               </p>

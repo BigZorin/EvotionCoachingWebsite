@@ -273,7 +273,9 @@ export function Header() {
               className="text-white hover:bg-primary/90 shadow-sm hover:shadow-md px-4 py-2 rounded-lg transition-all duration-200 bg-[rgba(30,24,57,1)]"
               asChild
             >
-              <Link href="/contact">Start je transformatie</Link>
+              <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
+                Gratis Kennismakingsgesprek
+              </Link>
             </Button>
           </div>
 
@@ -547,11 +549,15 @@ export function Header() {
                 </div>
               </nav>
 
-              {/* Mobile CTA Buttons */}
-              <div className="flex flex-col space-y-2 p-4 border-t border-gray-200">
-                <Button size="sm" className="w-full bg-primary text-white hover:bg-primary/90" asChild>
-                  <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}>
-                    Start je transformatie
+              {/* Mobile CTA Button */}
+              <div className="lg:hidden mt-4 pt-4 border-t border-gray-200">
+                <Button
+                  size="sm"
+                  className="w-full text-white hover:bg-primary/90 shadow-sm hover:shadow-md px-4 py-2 rounded-lg transition-all duration-200 bg-[rgba(30,24,57,1)]"
+                  asChild
+                >
+                  <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
+                    Gratis Kennismakingsgesprek
                   </Link>
                 </Button>
               </div>

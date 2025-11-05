@@ -84,11 +84,11 @@ export default function CoachesClientPage() {
               <Users className="w-3 h-3 mr-2" />
               ONZE COACHES
             </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-3xl md:text-6xl font-bold text-white mb-6 leading-tight">
               Ontmoet de Experts
               <span className="block text-white/80 mt-2">Achter Jouw Succes</span>
             </h1>
-            <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
               Twee ervaren coaches met unieke specialisaties, één gemeenschappelijk doel: jou helpen de beste versie van
               jezelf te worden.
             </p>
@@ -100,19 +100,19 @@ export default function CoachesClientPage() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="text-4xl font-bold text-[#1e1839] mb-2">25+</div>
+              <div className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-2">25+</div>
               <div className="text-sm text-gray-600">Jaar Ervaring</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-[#1e1839] mb-2">6x</div>
+              <div className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-2">6x</div>
               <div className="text-sm text-gray-600">NL Kampioen</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-[#1e1839] mb-2">500+</div>
+              <div className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-2">500+</div>
               <div className="text-sm text-gray-600">Tevreden Klanten</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-[#1e1839] mb-2">100%</div>
+              <div className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-2">100%</div>
               <div className="text-sm text-gray-600">Gecertificeerd</div>
             </div>
           </div>
@@ -136,7 +136,7 @@ export default function CoachesClientPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#1e1839]/80 via-transparent to-transparent" />
                     <div className="absolute bottom-6 left-6 text-white">
-                      <h2 className="text-3xl font-bold mb-2">Martin Langenberg</h2>
+                      <h2 className="text-2xl md:text-3xl font-bold mb-2">Martin Langenberg</h2>
                       <p className="text-white/90">Personal Trainer & Coach</p>
                     </div>
                   </div>
@@ -217,7 +217,7 @@ export default function CoachesClientPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#1e1839]/80 via-transparent to-transparent" />
                     <div className="absolute bottom-6 left-6 text-white">
-                      <h2 className="text-3xl font-bold mb-2">Zorin Wijnands</h2>
+                      <h2 className="text-2xl md:text-3xl font-bold mb-2">Zorin Wijnands</h2>
                       <p className="text-white/90">6x Nederlands Kampioen</p>
                     </div>
                   </div>
@@ -303,8 +303,8 @@ export default function CoachesClientPage() {
               <Star className="w-3 h-3 mr-2" />
               WAAROM EVOTION
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Waarom Kiezen voor Evotion Coaches?</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">Waarom Kiezen voor Evotion Coaches?</h2>
+            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
               Twee verschillende specialisaties, één gemeenschappelijke missie: jouw succes.
             </p>
           </div>
@@ -319,7 +319,7 @@ export default function CoachesClientPage() {
                   <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#1e1839] transition-colors">
                     Bewezen Expertise
                   </h3>
-                  <p className="text-gray-600 leading-loose text-lg">
+                  <p className="text-base md:text-lg text-gray-600 leading-loose">
                     Gecertificeerd door toonaangevende instituten en jarenlange praktijkervaring op het hoogste niveau.
                   </p>
                 </CardContent>
@@ -335,7 +335,7 @@ export default function CoachesClientPage() {
                   <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#1e1839] transition-colors">
                     Persoonlijke Aanpak
                   </h3>
-                  <p className="text-gray-600 leading-loose text-lg">
+                  <p className="text-base md:text-lg text-gray-600 leading-loose">
                     Geen standaardoplossingen. Elke coaching is op maat gemaakt voor jouw unieke situatie en doelen.
                   </p>
                 </CardContent>
@@ -351,7 +351,7 @@ export default function CoachesClientPage() {
                   <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#1e1839] transition-colors">
                     Duurzame Resultaten
                   </h3>
-                  <p className="text-gray-600 leading-loose text-lg">
+                  <p className="text-base md:text-lg text-gray-600 leading-loose">
                     Focus op lange termijn transformatie. We maken je sterker én onafhankelijker, niet afhankelijk van
                     coaching.
                   </p>
@@ -365,8 +365,8 @@ export default function CoachesClientPage() {
       {/* CTA Section */}
       <section className="py-16 px-4 bg-[rgba(30,24,57,1)]">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">Klaar om te Beginnen?</h2>
-          <p className="text-xl text-gray-300 mb-8 leading-relaxed">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Klaar om te Beginnen?</h2>
+          <p className="text-lg md:text-xl text-gray-300 mb-8 leading-relaxed">
             Plan een gratis kennismakingsgesprek en ontdek welke coach en aanpak het beste bij jou past.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

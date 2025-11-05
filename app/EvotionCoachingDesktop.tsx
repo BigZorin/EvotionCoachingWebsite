@@ -184,7 +184,7 @@ export default function EvotionCoachingDesktop() {
             {/* Main heading - larger, bolder, more modern */}
             <div className="space-y-6">
               <h1
-                className="text-6xl md:text-7xl xl:text-8xl font-black text-white leading-[1.1] tracking-tight animate-fade-in-up"
+                className="text-5xl md:text-7xl xl:text-8xl font-black text-white leading-[1.1] tracking-tight animate-fade-in-up"
                 style={{ animationDelay: "0.2s" }}
               >
                 <span className="block">Jouw droomlichaam</span>
@@ -193,7 +193,7 @@ export default function EvotionCoachingDesktop() {
 
               {/* Subheading - cleaner, more direct */}
               <p
-                className="text-xl md:text-2xl xl:text-3xl text-gray-300 leading-relaxed max-w-3xl mx-auto font-light animate-fade-in-up"
+                className="text-lg md:text-2xl xl:text-3xl text-gray-300 leading-relaxed max-w-3xl mx-auto font-light animate-fade-in-up"
                 style={{ animationDelay: "0.4s" }}
               >
                 Zonder je favoriete eten, sociale leven of vrijheid op te geven
@@ -244,7 +244,7 @@ export default function EvotionCoachingDesktop() {
                   }`}
                   style={{ animationDelay: `${0.8 + i * 0.1}s` }}
                 >
-                  <div className="text-4xl md:text-5xl font-bold text-white mb-2">{s.k}</div>
+                  <div className="text-3xl md:text-5xl font-bold text-white mb-2">{s.k}</div>
                   <div className="text-sm md:text-base text-gray-400 font-medium">{s.v}</div>
                   {s.v === "Google Rating" && (
                     <div className="flex justify-center mt-2 gap-0.5">
@@ -281,10 +281,10 @@ export default function EvotionCoachingDesktop() {
               <Target className="w-5 h-5 mr-2 text-evotion-primary" />
               Onze Diensten
             </Badge>
-            <h2 className="text-5xl md:text-6xl font-black text-gray-900 leading-tight">
+            <h2 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight">
               Kies Jouw <span className="text-evotion-primary">Transformatie</span>
             </h2>
-            <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Elke reis is uniek. Daarom bieden we verschillende programma's aan die perfect aansluiten bij jouw doelen,
               levensstijl en budget.
             </p>
@@ -461,10 +461,10 @@ export default function EvotionCoachingDesktop() {
                   <Dumbbell className="w-4 h-4 mr-2 text-white" />
                   Personal Training
                 </Badge>
-                <h2 className="text-4xl md:text-5xl font-black text-white leading-tight">
+                <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
                   Persoonlijke Training met Professionele Begeleiding
                 </h2>
-                <p className="text-xl text-white/90 leading-relaxed">
+                <p className="text-lg md:text-xl text-white/90 leading-relaxed">
                   Ervaar de kracht van persoonlijke begeleiding met onze gecertificeerde personal trainers. Met
                   volledige aandacht en op maat gemaakte trainingen bereik je sneller en veiliger je doelen.
                 </p>
@@ -536,10 +536,10 @@ export default function EvotionCoachingDesktop() {
                   <Zap className="w-5 h-5 mr-2 text-evotion-primary" />
                   Evotion App
                 </Badge>
-                <h2 className="text-5xl md:text-6xl font-black text-gray-900 leading-tight">
+                <h2 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight">
                   Jouw Persoonlijke <span className="text-evotion-primary">Fitness Coach</span> in je Zak
                 </h2>
-                <p className="text-2xl text-gray-600 leading-relaxed">
+                <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
                   Onze geavanceerde app biedt alles wat je nodig hebt voor jouw transformatie. Van gepersonaliseerde
                   trainingen tot voedingsadvies en directe communicatie met je coach.
                 </p>
@@ -603,10 +603,10 @@ export default function EvotionCoachingDesktop() {
               <TrendingUp className="w-5 h-5 mr-2 text-evotion-primary" />
               Echte Resultaten
             </Badge>
-            <h2 className="text-5xl md:text-6xl font-black text-gray-900 leading-tight">
+            <h2 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight">
               Ongelooflijke <span className="text-evotion-primary">Transformaties</span>
             </h2>
-            <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Zie hoe onze klanten hun droomlichaam hebben bereikt en hun leven hebben getransformeerd met onze bewezen
               methodes.
             </p>
@@ -633,10 +633,10 @@ export default function EvotionCoachingDesktop() {
                     </div>
                   </div>
                   <div className="p-8 lg:p-12 flex flex-col justify-center space-y-6">
-                    <h3 className="text-4xl font-bold text-gray-900 group-hover:text-evotion-primary transition-colors duration-300">
+                    <h3 className="text-3xl md:text-4xl font-bold text-gray-900 group-hover:text-evotion-primary transition-colors duration-300">
                       Martin's Transformatie
                     </h3>
-                    <div className="space-y-4 text-xl text-gray-600 leading-relaxed">
+                    <div className="space-y-4 text-lg md:text-xl text-gray-600 leading-relaxed">
                       <p className="italic">
                         "Als eigenaar van Evotion Coaching is het belangrijk om het goede voorbeeld te geven – en dat
                         heb ik meer dan bewezen."
@@ -669,10 +669,10 @@ export default function EvotionCoachingDesktop() {
               <CardContent className="p-0">
                 <div className="grid lg:grid-cols-2 gap-0">
                   <div className="p-8 lg:p-12 flex flex-col justify-center space-y-6 lg:order-1">
-                    <h3 className="text-4xl font-bold text-gray-900 group-hover:text-evotion-primary transition-colors duration-300">
+                    <h3 className="text-3xl md:text-4xl font-bold text-gray-900 group-hover:text-evotion-primary transition-colors duration-300">
                       Salim's Transformatie
                     </h3>
-                    <div className="space-y-4 text-xl text-gray-600 leading-relaxed">
+                    <div className="space-y-4 text-lg md:text-xl text-gray-600 leading-relaxed">
                       <p className="italic">
                         "Een indrukwekkende transformatie waarbij ik maar liefst 8,1 kg ben afgevallen en veel heb
                         geleerd over duurzame leefstijlveranderingen."
@@ -730,10 +730,10 @@ export default function EvotionCoachingDesktop() {
                     </div>
                   </div>
                   <div className="p-8 lg:p-12 flex flex-col justify-center space-y-6">
-                    <h3 className="text-4xl font-bold text-gray-900 group-hover:text-evotion-primary transition-colors duration-300">
+                    <h3 className="text-3xl md:text-4xl font-bold text-gray-900 group-hover:text-evotion-primary transition-colors duration-300">
                       Wouter's Transformatie
                     </h3>
-                    <div className="space-y-4 text-xl text-gray-600 leading-relaxed">
+                    <div className="space-y-4 text-lg md:text-xl text-gray-600 leading-relaxed">
                       <p className="italic">
                         "In 8 weken ging ik van 69,6 kg naar 67,5 kg, waarbij ik een indrukwekkende body recomposition
                         doormaakte. Minder vet, meer definitie en een sterker, fitter lichaam!"
@@ -808,7 +808,7 @@ export default function EvotionCoachingDesktop() {
               <Star className="w-5 h-5 mr-2 text-white" />
               Google Reviews
             </Badge>
-            <h2 className="text-5xl md:text-6xl font-black text-white leading-tight">
+            <h2 className="text-4xl md:text-6xl font-black text-white leading-tight">
               Wat Onze Klanten <span className="text-evotion-secondary">Zeggen</span>
             </h2>
             <div className="flex items-center justify-center gap-4">
@@ -881,10 +881,10 @@ export default function EvotionCoachingDesktop() {
               <MessageCircle className="w-5 h-5 mr-2 text-evotion-primary" />
               Contact
             </Badge>
-            <h2 className="text-5xl md:text-6xl font-black text-gray-900 leading-tight">
+            <h2 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight">
               Klaar om te <span className="text-evotion-primary">Beginnen</span>?
             </h2>
-            <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Neem contact met ons op voor een gratis kennismakingsgesprek. We bespreken jouw doelen en maken een plan
               op maat.
             </p>
@@ -893,8 +893,8 @@ export default function EvotionCoachingDesktop() {
           <div className="grid lg:grid-cols-2 gap-20 max-w-7xl mx-auto">
             <div className="space-y-10">
               <div className="space-y-8">
-                <h3 className="text-4xl font-bold text-gray-900">Neem Direct Contact Op</h3>
-                <p className="text-xl text-gray-600 leading-relaxed">
+                <h3 className="text-3xl md:text-4xl font-bold text-gray-900">Neem Direct Contact Op</h3>
+                <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
                   We staan klaar om al je vragen te beantwoorden en je te helpen bij het kiezen van het juiste
                   programma.
                 </p>

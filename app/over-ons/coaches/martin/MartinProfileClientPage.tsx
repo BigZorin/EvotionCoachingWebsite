@@ -125,8 +125,6 @@ export default function MartinProfileClientPage() {
         </div>
       </section>
 
-      
-
       <section className="pb-12 md:pb-16 px-4 bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] relative overflow-hidden">
         {/* Subtle pattern overlay */}
         <div
@@ -157,7 +155,7 @@ export default function MartinProfileClientPage() {
                 <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
                   Martin Langenberg
                 </h1>
-                <p className="text-lg md:text-xl text-white/90 mb-8 md:mb-10 leading-relaxed">
+                <p className="text-base md:text-xl text-white/90 mb-8 md:mb-10 leading-relaxed">
                   Personal trainer en coach die drukke professionals helpt om fit en gezond te blijven — met een aanpak
                   die écht past bij jouw leven.
                 </p>
@@ -167,19 +165,19 @@ export default function MartinProfileClientPage() {
                     <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0">
                       <Clock className="w-5 h-5 text-white" />
                     </div>
-                    <span className="text-base md:text-lg text-white/90">25+ jaar ervaring in krachttraining</span>
+                    <span className="text-sm md:text-lg text-white/90">25+ jaar ervaring in krachttraining</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0">
                       <GraduationCap className="w-5 h-5 text-white" />
                     </div>
-                    <span className="text-base md:text-lg text-white/90">Gecertificeerd via N1 Education</span>
+                    <span className="text-sm md:text-lg text-white/90">Gecertificeerd via N1 Education</span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0">
                       <Heart className="w-5 h-5 text-white" />
                     </div>
-                    <span className="text-base md:text-lg text-white/90">
+                    <span className="text-sm md:text-lg text-white/90">
                       Specialist voor drukke ouders en ondernemers
                     </span>
                   </div>
@@ -244,7 +242,7 @@ export default function MartinProfileClientPage() {
                 <Target className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-[#1e1839] mb-4">Ervaring die Telt</h3>
-              <p className="text-gray-700 leading-loose">
+              <p className="text-base md:text-lg text-gray-700 leading-loose">
                 Met 25+ jaar ervaring in krachttraining weet Martin precies wat werkt. Als ondernemer en vader van drie
                 begrijpt hij de uitdagingen van een druk leven en hoe je toch fit kunt blijven.
               </p>
@@ -255,7 +253,7 @@ export default function MartinProfileClientPage() {
                 <Award className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-[#1e1839] mb-4">Wetenschappelijk Onderbouwd</h3>
-              <p className="text-gray-700 leading-loose">
+              <p className="text-base md:text-lg text-gray-700 leading-loose">
                 Gecertificeerd via N1 Education, de gouden standaard in evidence-based training. Martin combineert
                 jarenlange praktijkervaring met de nieuwste wetenschappelijke inzichten.
               </p>
@@ -265,7 +263,7 @@ export default function MartinProfileClientPage() {
           {/* Enhanced quote card */}
           <div className="bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] rounded-2xl p-10 md:p-14 shadow-2xl border border-white/10">
             <Quote className="w-12 h-12 text-white/40 mx-auto mb-6" />
-            <blockquote className="text-xl md:text-2xl italic mb-6 leading-relaxed text-center text-white font-medium">
+            <blockquote className="text-lg md:text-2xl italic mb-6 leading-relaxed text-center text-white font-medium">
               "Ik train je voor het leven, niet alleen voor de gym. Echte transformatie gebeurt wanneer gezonde
               gewoontes zo natuurlijk worden als ademhalen."
             </blockquote>
@@ -292,7 +290,7 @@ export default function MartinProfileClientPage() {
               Certificeringen & Opleiding
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-6">Expertise & Kennis</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
               Martin blijft zichzelf continu ontwikkelen met de beste opleidingen in de industrie, zodat jij profiteert
               van de nieuwste inzichten.
             </p>
@@ -336,7 +334,7 @@ export default function MartinProfileClientPage() {
               Werkwijze
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-6">Martin's Aanpak</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
               Een bewezen methode die flexibel is, wetenschappelijk onderbouwd, en afgestemd op jouw unieke situatie.
             </p>
           </div>
@@ -377,14 +375,14 @@ export default function MartinProfileClientPage() {
                   <step.icon className="w-8 h-8 text-[#1e1839] mx-auto" />
                 </div>
                 <h3 className="text-xl font-bold text-[#1e1839] mb-4">{step.title}</h3>
-                <p className="text-gray-700 leading-loose">{step.description}</p>
+                <p className="text-sm md:text-base text-gray-700 leading-relaxed">{step.description}</p>
               </div>
             ))}
           </div>
 
           {/* Enhanced expectations card */}
           <div className="ev-gradient-border bg-gradient-to-br from-white to-[#1e1839]/5 backdrop-blur border-transparent rounded-2xl p-10 md:p-14 shadow-xl">
-            <h3 className="text-2xl md:text-3xl font-bold text-[#1e1839] mb-8 text-center">Wat je kunt verwachten</h3>
+            <h3 className="text-xl md:text-3xl font-bold text-[#1e1839] mb-8 text-center">Wat je kunt verwachten</h3>
             <div className="grid md:grid-cols-2 gap-6">
               {[
                 "Persoonlijk trainingsplan dat past bij jouw schema en doelen",
@@ -399,7 +397,7 @@ export default function MartinProfileClientPage() {
                   <div className="w-6 h-6 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-md">
                     <CheckCircle className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-gray-700 leading-relaxed">{item}</span>
+                  <span className="text-sm md:text-base text-gray-700 leading-relaxed">{item}</span>
                 </div>
               ))}
             </div>
@@ -419,8 +417,8 @@ export default function MartinProfileClientPage() {
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-10 md:p-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 md:mb-6">Klaar om te Beginnen?</h2>
-            <p className="text-lg md:text-xl text-white/90 mb-8 md:mb-10 leading-relaxed max-w-2xl mx-auto">
+            <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 md:mb-6">Klaar om te Beginnen?</h2>
+            <p className="text-base md:text-xl text-white/90 mb-8 md:mb-10 leading-relaxed max-w-2xl mx-auto">
               Ontdek hoe Martin's persoonlijke aanpak jou kan helpen om duurzame resultaten te boeken, zelfs met een
               druk schema. Plan een gratis kennismakingsgesprek in.
             </p>
