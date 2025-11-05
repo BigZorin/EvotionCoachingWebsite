@@ -165,10 +165,10 @@ export function ResultatenClientPage() {
                 <Award className="w-4 h-4 mr-2" />
                 Bewezen Resultaten
               </Badge>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight">
                 Echte <span className="text-evotion-primary">Transformaties</span>
               </h1>
-              <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-600 leading-relaxed">
+              <p className="max-w-3xl mx-auto text-base md:text-xl text-gray-600 leading-relaxed">
                 Ontdek hoe onze cliënten hun doelen hebben bereikt en hun leven hebben getransformeerd met persoonlijke
                 begeleiding en bewezen methodes.
               </p>
@@ -180,28 +180,28 @@ export function ResultatenClientPage() {
                 <div className="w-16 h-16 bg-evotion-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Users className="w-8 h-8 text-evotion-primary" />
                 </div>
-                <div className="text-2xl md:text-3xl font-bold text-gray-900">200+</div>
+                <div className="text-xl md:text-3xl font-bold text-gray-900">200+</div>
                 <div className="text-sm text-gray-600">Tevreden Cliënten</div>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-evotion-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
                   <TrendingUp className="w-8 h-8 text-evotion-primary" />
                 </div>
-                <div className="text-2xl md:text-3xl font-bold text-gray-900">95%</div>
+                <div className="text-xl md:text-3xl font-bold text-gray-900">95%</div>
                 <div className="text-sm text-gray-600">Succesvol</div>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-evotion-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Award className="w-8 h-8 text-evotion-primary" />
                 </div>
-                <div className="text-2xl md:text-3xl font-bold text-gray-900">21kg</div>
+                <div className="text-xl md:text-3xl font-bold text-gray-900">21kg</div>
                 <div className="text-sm text-gray-600">Totaal Verlies</div>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-evotion-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Star className="w-8 h-8 text-evotion-primary" />
                 </div>
-                <div className="text-2xl md:text-3xl font-bold text-gray-900">4.9</div>
+                <div className="text-xl md:text-3xl font-bold text-gray-900">4.9</div>
                 <div className="text-sm text-gray-600">Gemiddelde Score</div>
               </div>
             </div>
@@ -258,7 +258,7 @@ export function ResultatenClientPage() {
                     {/* Header */}
                     <div className="space-y-4">
                       <div>
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 leading-tight">
+                        <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-3 leading-tight">
                           {transformation.name}'s
                           <br />
                           <span className="text-evotion-primary">Transformatie</span>
@@ -286,13 +286,13 @@ export function ResultatenClientPage() {
 
                       {/* Story - Compact */}
                       <div className="bg-gray-50 rounded-xl p-5">
-                        <p className="text-base text-gray-700 leading-relaxed">{transformation.fullStory}</p>
+                        <p className="text-sm md:text-base text-gray-700 leading-relaxed">{transformation.fullStory}</p>
                       </div>
                     </div>
 
                     {/* Achievements - Compact */}
                     <div className="space-y-4">
-                      <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                      <h3 className="text-lg md:text-xl font-bold text-gray-900 flex items-center gap-2">
                         <div className="w-6 h-6 bg-evotion-primary/10 rounded-full flex items-center justify-center">
                           <Award className="w-3 h-3 text-evotion-primary" />
                         </div>
@@ -320,7 +320,7 @@ export function ResultatenClientPage() {
                         <span className="text-xl font-bold text-evotion-primary">"</span>
                       </div>
                       <div className="bg-gradient-to-br from-evotion-primary/5 to-evotion-primary/10 border-l-4 border-evotion-primary rounded-xl p-6 ml-2">
-                        <blockquote className="text-lg font-medium text-gray-800 italic leading-relaxed mb-3">
+                        <blockquote className="text-base md:text-lg font-medium text-gray-800 italic leading-relaxed mb-3">
                           {transformation.quote}
                         </blockquote>
                         <div className="flex items-center gap-3">
@@ -345,10 +345,10 @@ export function ResultatenClientPage() {
         <section className="py-16 md:py-20 bg-gradient-to-br from-evotion-primary to-evotion-primary/90">
           <div className="container px-4 md:px-6 max-w-4xl mx-auto text-center">
             <div className="space-y-6">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
                 Jouw Transformatie Begint Nu
               </h2>
-              <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
                 Sluit je aan bij onze succesvolle cliënten en start jouw eigen transformatiereis. Persoonlijke
                 begeleiding, bewezen resultaten.
               </p>
@@ -381,10 +381,10 @@ export function ResultatenClientPage() {
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Contact
               </Badge>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
                 Klaar om te <span className="text-evotion-primary">Beginnen</span>?
               </h2>
-              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-base md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
                 Neem contact met ons op voor een gratis kennismakingsgesprek. We bespreken jouw doelen en maken een plan
                 op maat.
               </p>
@@ -394,8 +394,8 @@ export function ResultatenClientPage() {
               {/* Contact Options */}
               <div className="space-y-8">
                 <div className="space-y-6">
-                  <h3 className="text-2xl md:text-3xl font-bold text-gray-900">Neem Direct Contact Op</h3>
-                  <p className="text-lg text-gray-600 leading-relaxed">
+                  <h3 className="text-xl md:text-3xl font-bold text-gray-900">Neem Direct Contact Op</h3>
+                  <p className="text-base md:text-lg text-gray-600 leading-relaxed">
                     We staan klaar om al je vragen te beantwoorden en je te helpen bij het kiezen van het juiste
                     programma.
                   </p>

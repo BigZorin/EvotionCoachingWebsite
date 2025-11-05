@@ -136,12 +136,12 @@ export default function EvotionAppClientPage() {
                     Exclusief voor coaching klanten
                   </Badge>
 
-                  <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                  <h1 className="text-3xl lg:text-6xl font-bold text-gray-900 leading-tight">
                     De Evotion
                     <span className="text-primary block">Coaching App</span>
                   </h1>
 
-                  <p className="text-xl text-gray-600 leading-relaxed max-w-xl">
+                  <p className="text-lg lg:text-xl text-gray-600 leading-relaxed max-w-xl">
                     Jouw personal trainer altijd binnen handbereik. Persoonlijke workouts, voedingsadvies,
                     voortgangstracking en directe coaching — alles in één krachtige app.
                   </p>
@@ -246,10 +246,10 @@ export default function EvotionAppClientPage() {
                   <Lock className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">
                     App toegang inbegrepen bij alle coaching programma's
                   </h3>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-sm md:text-base text-gray-600 mb-6">
                     Krijg direct toegang tot de Evotion App wanneer je start met een van onze coaching programma's.
                   </p>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -272,8 +272,8 @@ export default function EvotionAppClientPage() {
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6">
             <motion.div className="text-center mb-16" {...fadeIn()}>
-              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">Alles wat je nodig hebt voor succes</h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <h2 className="text-3xl lg:text-5xl font-bold text-gray-900 mb-6">Alles wat je nodig hebt voor succes</h2>
+              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
                 De Evotion App combineert alle essentiële tools voor jouw fitness journey in één intuïtieve interface.
               </p>
             </motion.div>
@@ -357,7 +357,7 @@ export default function EvotionAppClientPage() {
                   <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
                     <stat.icon className="w-6 h-6 text-primary" />
                   </div>
-                  <div className="text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
+                  <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
                   <div className="text-gray-600 font-medium">{stat.label}</div>
                 </motion.div>
               ))}
@@ -369,8 +369,8 @@ export default function EvotionAppClientPage() {
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6">
             <motion.div className="text-center mb-12" {...fadeIn()}>
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Bekijk de app in actie</h2>
-              <p className="text-lg text-gray-600">
+              <h2 className="text-2xl lg:text-4xl font-bold text-gray-900 mb-4">Bekijk de app in actie</h2>
+              <p className="text-base md:text-lg text-gray-600">
                 Een overzicht van alle belangrijke functies en schermen in de Evotion App.
               </p>
             </motion.div>
@@ -406,8 +406,8 @@ export default function EvotionAppClientPage() {
 
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 relative">
             <motion.div className="text-center max-w-4xl mx-auto" {...fadeIn()}>
-              <h2 className="text-4xl lg:text-6xl font-bold mb-6">Start vandaag met de Evotion App</h2>
-              <p className="text-xl text-white/90 mb-10 leading-relaxed">
+              <h2 className="text-3xl lg:text-6xl font-bold mb-6">Start vandaag met de Evotion App</h2>
+              <p className="text-lg md:text-xl text-white/90 mb-10 leading-relaxed">
                 Kies een coaching programma en krijg direct toegang tot alle premium functies. Jouw transformatie begint
                 nu.
               </p>

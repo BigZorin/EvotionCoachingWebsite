@@ -185,12 +185,12 @@ export default function TwaalfWekenVetverliesClientPage() {
               Transformeer Je Lichaam in 12 Weken
             </Badge>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
               12-Weken Vetverlies
               <span className="block text-secondary">Programma</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto">
+            <p className="text-base md:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto">
               Een compleet programma ontworpen om je te helpen vet te verliezen, spiermassa op te bouwen en je
               gezondheid te verbeteren in slechts 12 weken.
             </p>
@@ -213,15 +213,15 @@ export default function TwaalfWekenVetverliesClientPage() {
 
             <div className="grid grid-cols-3 gap-4 pt-8 max-w-2xl mx-auto">
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-white mb-1">12</div>
+                <div className="text-xl md:text-3xl font-bold text-white mb-1">12</div>
                 <div className="text-xs md:text-sm text-white/80">Weken</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-white mb-1">100%</div>
+                <div className="text-xl md:text-3xl font-bold text-white mb-1">100%</div>
                 <div className="text-xs md:text-sm text-white/80">Online</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-white mb-1">95%</div>
+                <div className="text-xl md:text-3xl font-bold text-white mb-1">95%</div>
                 <div className="text-xs md:text-sm text-white/80">Succesratio</div>
               </div>
             </div>
@@ -234,10 +234,10 @@ export default function TwaalfWekenVetverliesClientPage() {
         <div className="container mx-auto px-4 lg:px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <Badge className="bg-primary/10 text-primary mb-4">Voordelen</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6">
               Wat Je Krijgt Met Het <span className="text-primary">12-Weken Programma</span>
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-base md:text-lg text-gray-600">
               Ons programma biedt alles wat je nodig hebt om je vetverliesdoelen te bereiken en je gezondheid te
               verbeteren.
             </p>

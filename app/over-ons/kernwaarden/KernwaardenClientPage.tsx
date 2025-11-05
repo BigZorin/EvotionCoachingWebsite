@@ -115,13 +115,15 @@ export function KernwaardenClientPage() {
               <Sparkles className="w-4 h-4" />
               Onze Kern. Jouw Groei.
             </div>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">Kernwaarden</h1>
-            <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed mb-8">
+            <h1 className="text-3xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">Kernwaarden</h1>
+            <p className="text-base md:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed mb-8">
               Deze waarden vormen de basis van onze coaching filosofie en bepalen hoe we jou begeleiden in jouw
               transformatie naar een sterker, vrijer en gezonder leven.
             </p>
             <div className="inline-block bg-white/10 backdrop-blur-sm px-6 py-3 rounded-xl border border-white/20">
-              <p className="text-white font-semibold text-lg italic">"It is time to bring your evolution in motion"</p>
+              <p className="text-white font-semibold text-base md:text-lg italic">
+                "It is time to bring your evolution in motion"
+              </p>
             </div>
           </div>
         </div>
@@ -163,17 +165,17 @@ export function KernwaardenClientPage() {
                 {/* Content side */}
                 <div className="w-full md:w-2/3 space-y-6">
                   <div>
-                    <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 group-hover:text-[#1e1839] transition-colors duration-300">
+                    <h3 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4 group-hover:text-[#1e1839] transition-colors duration-300">
                       {value.title}
                     </h3>
-                    <p className="text-lg md:text-xl text-gray-700 leading-relaxed">{value.description}</p>
+                    <p className="text-base md:text-xl text-gray-700 leading-relaxed">{value.description}</p>
                   </div>
 
                   {/* Quote with gradient accent */}
                   <div
                     className={`bg-gradient-to-r ${value.bgGradient} rounded-2xl p-6 border-l-4 border-gradient-to-b ${value.gradient}`}
                   >
-                    <p className="text-gray-900 font-semibold text-lg italic flex items-start gap-3">
+                    <p className="text-gray-900 font-semibold text-lg md:text-2xl italic flex items-start gap-3">
                       <Star
                         className={`w-5 h-5 flex-shrink-0 mt-1 bg-gradient-to-br ${value.gradient} bg-clip-text text-transparent`}
                         fill="currentColor"
@@ -191,27 +193,27 @@ export function KernwaardenClientPage() {
       <section className="py-20 md:py-28 bg-gradient-to-br from-gray-50 to-white">
         <div className="container mx-auto px-4 lg:px-6 max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Waarden in Actie</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">Waarden in Actie</h2>
+            <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
               Deze waarden zijn niet alleen woorden, maar vormen de basis van alles wat we doen
             </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="group text-center bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <div className="text-5xl font-bold text-white mb-3">7</div>
+              <div className="text-4xl md:text-5xl font-bold text-white mb-3">7</div>
               <div className="text-sm text-white/90 font-medium">Kernwaarden</div>
             </div>
             <div className="group text-center bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <div className="text-5xl font-bold text-white mb-3">100%</div>
+              <div className="text-4xl md:text-5xl font-bold text-white mb-3">100%</div>
               <div className="text-sm text-white/90 font-medium">Transparantie</div>
             </div>
             <div className="group text-center bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <div className="text-5xl font-bold text-white mb-3">∞</div>
+              <div className="text-4xl md:text-5xl font-bold text-white mb-3">∞</div>
               <div className="text-sm text-white/90 font-medium">Groei Mogelijkheden</div>
             </div>
             <div className="group text-center bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <div className="text-5xl font-bold text-white mb-3">1</div>
+              <div className="text-4xl md:text-5xl font-bold text-white mb-3">1</div>
               <div className="text-sm text-white/90 font-medium">Jouw Unieke Pad</div>
             </div>
           </div>
@@ -234,10 +236,10 @@ export function KernwaardenClientPage() {
             className={`text-center animate-on-scroll ${ctaAnimation.isVisible ? "animate-visible" : ""}`}
           >
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-10 md:p-16">
-              <h3 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
+              <h3 className="text-2xl md:text-4xl font-bold text-white mb-6 leading-tight">
                 Ervaar onze kernwaarden in actie
               </h3>
-              <p className="text-lg md:text-xl text-white/90 mb-10 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-base md:text-xl text-white/90 mb-10 max-w-3xl mx-auto leading-relaxed">
                 Ontdek hoe onze waarden jouw transformatie kunnen ondersteunen. Laten we samen werken aan een sterker,
                 vrijer en gezonder leven.
               </p>

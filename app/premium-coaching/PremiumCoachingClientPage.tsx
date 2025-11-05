@@ -180,7 +180,7 @@ export default function PremiumCoachingClientPage() {
     {
       question: "Kan ik mijn Premium Coaching pakket aanpassen aan mijn behoeften?",
       answer:
-        "Absoluut! Onze Premium Coaching pakketten zijn flexibel en kunnen worden aangepast aan jouw specifieke behoeften. Als je bijvoorbeeld meer of minder personal training sessies wilt, of specifieke aandacht nodig hebt voor bepaalde aspecten van je training of voeding, kunnen we je pakket daarop afstemmen. Tijdens je intake bespreken we je wensen en stellen we een programma samen dat perfect bij jou past. We evalueren regelmatig of je pakket nog steeds optimaal is voor je doelen en passen het indien nodig aan.",
+        "Absoluut! Onze Premium Coaching pakketten zijn flexibel en kunnen worden aangepast aan jouw specifieke behoeften. Als je bijvoorbeeld meer of minder personal training sessies wilt, of specifieke aandacht nodig hebt voor bepaalde aspecten van je training of voeding, kunnen we dit ook bespreken. Tijdens je intake bespreken we je wensen en stellen we een programma samen dat perfect bij jou past. We evalueren regelmatig of je pakket nog steeds optimaal is voor je doelen en passen het indien nodig aan.",
     },
     {
       question: "Waar vinden de personal training sessies plaats?",
@@ -218,12 +218,12 @@ export default function PremiumCoachingClientPage() {
               Onze Meest Exclusieve Coaching Ervaring
             </Badge>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
               Premium Coaching
               <span className="block text-secondary">Het Beste Van Beide Werelden</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto">
+            <p className="text-base md:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto">
               Combineer het beste van Personal Training en Online Coaching voor maximale resultaten. Persoonlijke
               begeleiding, continue ondersteuning en een volledig op maat gemaakt programma.
             </p>
@@ -246,15 +246,15 @@ export default function PremiumCoachingClientPage() {
 
             <div className="grid grid-cols-3 gap-4 pt-8 max-w-2xl mx-auto">
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-white mb-1">2-in-1</div>
+                <div className="text-xl md:text-3xl font-bold text-white mb-1">2-in-1</div>
                 <div className="text-xs md:text-sm text-white/80">PT + Online Coaching</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-white mb-1">24/7</div>
+                <div className="text-xl md:text-3xl font-bold text-white mb-1">24/7</div>
                 <div className="text-xs md:text-sm text-white/80">Coach Support</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-white mb-1">100%</div>
+                <div className="text-xl md:text-3xl font-bold text-white mb-1">100%</div>
                 <div className="text-xs md:text-sm text-white/80">Resultaatgericht</div>
               </div>
             </div>
@@ -267,10 +267,10 @@ export default function PremiumCoachingClientPage() {
         <div className="container mx-auto px-4 lg:px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <Badge className="bg-primary/10 text-primary mb-4">Voordelen</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6">
               Waarom Kiezen Voor <span className="text-primary">Premium Coaching?</span>
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-base md:text-lg text-gray-600">
               Premium Coaching combineert het beste van Personal Training en Online Coaching voor een complete,
               allesomvattende fitness ervaring.
             </p>

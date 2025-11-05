@@ -232,10 +232,10 @@ export default function PersonalTrainingClientPage() {
                   <Dumbbell className="w-4 h-4 mr-2" />
                   Personal Training
                 </Badge>
-                <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                <h1 className="text-3xl lg:text-6xl font-bold text-gray-900 leading-tight">
                   Personal Training Sneek - <span className="text-gray-700">Jouw Persoonlijke Trainer</span>
                 </h1>
-                <p className="text-lg lg:text-xl text-gray-600 leading-relaxed">
+                <p className="text-base lg:text-xl text-gray-600 leading-relaxed">
                   Op zoek naar een persoonlijke trainer in Sneek of omgeving? Ervaar de kracht van 1-op-1 begeleiding
                   met onze gecertificeerde personal trainers. Bereik je doelen voor vetverlies, spieropbouw en fitness
                   sneller, veiliger en effectiever dan ooit tevoren.
@@ -259,31 +259,31 @@ export default function PersonalTrainingClientPage() {
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-8">
                 <div className="text-center">
-                  <div ref={stat1.ref} className="text-2xl lg:text-3xl font-bold mb-1 text-gray-900 tabular-nums">
+                  <div ref={stat1.ref} className="text-xl lg:text-3xl font-bold mb-1 text-gray-900 tabular-nums">
                     {stat1.value}
-                    <span className="align-top text-lg">%</span>
+                    <span className="align-top text-base lg:text-lg">%</span>
                   </div>
-                  <div className="text-sm text-gray-600">Persoonlijke Aandacht</div>
+                  <div className="text-xs md:text-sm text-gray-600">Persoonlijke Aandacht</div>
                 </div>
                 <div className="text-center">
-                  <div ref={stat2.ref} className="text-2xl lg:text-3xl font-bold mb-1 text-gray-900">
+                  <div ref={stat2.ref} className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">
                     €{stat2.value}
                   </div>
-                  <div className="text-sm text-gray-600">Vanaf per Sessie</div>
+                  <div className="text-xs md:text-sm text-gray-600">Vanaf per Sessie</div>
                 </div>
                 <div className="text-center">
-                  <div ref={stat3.ref} className="text-2xl lg:text-3xl font-bold mb-1 text-gray-900">
+                  <div ref={stat3.ref} className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">
                     {stat3.value}
-                    <span className="align-top text-lg">+</span>
+                    <span className="align-top text-base lg:text-lg">+</span>
                   </div>
-                  <div className="text-sm text-gray-600">Jaar Ervaring</div>
+                  <div className="text-xs md:text-sm text-gray-600">Jaar Ervaring</div>
                 </div>
                 <div className="text-center">
-                  <div ref={stat4.ref} className="text-2xl lg:text-3xl font-bold mb-1 text-gray-900">
+                  <div ref={stat4.ref} className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">
                     {stat4.value}
-                    <span className="align-top text-lg">%</span>
+                    <span className="align-top text-base lg:text-lg">%</span>
                   </div>
-                  <div className="text-sm text-gray-600">Tevredenheid</div>
+                  <div className="text-xs md:text-sm text-gray-600">Tevredenheid</div>
                 </div>
               </div>
             </div>
@@ -325,10 +325,10 @@ export default function PersonalTrainingClientPage() {
               <Target className="w-4 h-4 mr-2" />
               Voordelen
             </Badge>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-6">
               Waarom Kiezen voor een <span className="text-gray-700">Persoonlijke Trainer in Sneek</span>?
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Personal training in Sneek biedt unieke voordelen die je niet krijgt bij groepslessen of zelfstandig
               trainen. Onze persoonlijke trainers in Friesland zorgen voor maximale resultaten.
             </p>

@@ -264,12 +264,12 @@ export default function OnlineCoachingClientPage() {
               #1 Online Coaching Nederland
             </Badge>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
               Online Coaching Nederland
               <span className="block text-secondary">Voor Maximale Flexibiliteit</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto">
+            <p className="text-base md:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto">
               De beste online personal training en coaching van Nederland. Professionele online begeleiding voor
               vetverlies, spieropbouw en een gezondere levensstijl. Waar en wanneer het jou uitkomt.
             </p>
@@ -292,15 +292,15 @@ export default function OnlineCoachingClientPage() {
 
             <div className="grid grid-cols-3 gap-4 pt-8 max-w-2xl mx-auto">
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-white mb-1">24/7</div>
+                <div className="text-xl md:text-3xl font-bold text-white mb-1">24/7</div>
                 <div className="text-xs md:text-sm text-white/80">Online toegang</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-white mb-1">500+</div>
+                <div className="text-xl md:text-3xl font-bold text-white mb-1">500+</div>
                 <div className="text-xs md:text-sm text-white/80">Online klanten</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-white mb-1">95%</div>
+                <div className="text-xl md:text-3xl font-bold text-white mb-1">95%</div>
                 <div className="text-xs md:text-sm text-white/80">Online succesratio</div>
               </div>
             </div>
@@ -313,10 +313,10 @@ export default function OnlineCoachingClientPage() {
         <div className="container mx-auto px-4 lg:px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <Badge className="bg-primary/10 text-primary mb-4">Online Diensten</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6">
               Online Coaching <span className="text-primary">Voor Elke Doelstelling</span>
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-base md:text-lg text-gray-600">
               Of je nu online wilt afvallen, spieren wilt opbouwen, of gewoon fitter wilt worden - onze online coaches
               begeleiden je naar succes.
             </p>
@@ -344,25 +344,27 @@ export default function OnlineCoachingClientPage() {
           {/* Online Success Stats */}
           <div className="bg-white rounded-2xl p-8 shadow-lg">
             <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Waarom Kiezen Voor Online Coaching?</h3>
-              <p className="text-gray-600">Bewezen resultaten met online begeleiding door heel Nederland</p>
+              <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Waarom Kiezen Voor Online Coaching?</h3>
+              <p className="text-sm md:text-base text-gray-600">
+                Bewezen resultaten met online begeleiding door heel Nederland
+              </p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">8-15kg</div>
-                <div className="text-sm text-gray-600">Gemiddeld online vetverlies</div>
+                <div className="text-2xl md:text-3xl font-bold text-primary mb-2">8-15kg</div>
+                <div className="text-xs md:text-sm text-gray-600">Gemiddeld online vetverlies</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">3-8kg</div>
-                <div className="text-sm text-gray-600">Online spieropbouw</div>
+                <div className="text-2xl md:text-3xl font-bold text-primary mb-2">3-8kg</div>
+                <div className="text-xs md:text-sm text-gray-600">Online spieropbouw</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">12 weken</div>
-                <div className="text-sm text-gray-600">Zichtbare online resultaten</div>
+                <div className="text-2xl md:text-3xl font-bold text-primary mb-2">12 weken</div>
+                <div className="text-xs md:text-sm text-gray-600">Zichtbare online resultaten</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2">500+</div>
-                <div className="text-sm text-gray-600">Tevreden online klanten</div>
+                <div className="text-2xl md:text-3xl font-bold text-primary mb-2">500+</div>
+                <div className="text-xs md:text-sm text-gray-600">Tevreden online klanten</div>
               </div>
             </div>
           </div>
@@ -372,7 +374,7 @@ export default function OnlineCoachingClientPage() {
       {/* Features Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4 lg:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="text-center max-w-4xl mx-auto mb-16">
             <Badge className="bg-primary/10 text-primary mb-4">Voordelen</Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
               Waarom Evotion <span className="text-primary">Online Coaching?</span>
@@ -510,7 +512,7 @@ export default function OnlineCoachingClientPage() {
       {/* Online Coaching Process */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4 lg:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="text-center max-w-4xl mx-auto mb-16">
             <Badge className="bg-primary/10 text-primary mb-4">
               <TrendingUp className="w-4 h-4 mr-2" />
               Online Coaching Process
