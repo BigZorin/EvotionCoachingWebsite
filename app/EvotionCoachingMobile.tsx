@@ -217,7 +217,7 @@ export default function EvotionCoachingMobile() {
         <div className="absolute inset-0 z-0">
           <iframe
             src="https://www.youtube.com/embed/SpTe8MThxVc?autoplay=1&mute=1&loop=1&playlist=SpTe8MThxVc&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1"
-            className="absolute inset-0 w-full h-full object-cover scale-150"
+            className="absolute inset-0 w-full h-full object-cover scale-[3.5]"
             allow="autoplay; encrypted-media"
             allowFullScreen
             style={{ pointerEvents: "none" }}

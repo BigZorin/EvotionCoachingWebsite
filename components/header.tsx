@@ -139,7 +139,7 @@ export function Header() {
               {/* OverOns Dropdown */}
               <div className="relative group">
                 <button className="text-gray-700 hover:text-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-primary/5 flex items-center gap-1">
-                  OverOns
+                  Over Ons
                   <ChevronDown className="w-4 h-4 group-hover:rotate-180 transition-transform duration-200" />
                 </button>
 
