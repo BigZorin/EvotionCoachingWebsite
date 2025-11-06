@@ -567,11 +567,12 @@ export default function EvotionCoachingDesktop() {
                 <Button
                   size="lg"
                   className="ev-shine bg-gradient-to-r from-evotion-primary to-evotion-primary hover:opacity-95 text-white px-12 py-6 text-xl font-semibold shadow-2xl transform hover:scale-105 transition-all duration-300 group"
+                  asChild
                 >
-                  <span className="flex items-center gap-3">
-                    Download de App
-                    <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
-                  </span>
+                  <Link href="/over-ons/evotion-app">
+                    Download de Evotion App
+                    <ArrowRight className="ml-3 group-hover:translate-x-2 transition-transform" />
+                  </Link>
                 </Button>
               </div>
             </div>

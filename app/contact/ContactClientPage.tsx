@@ -106,7 +106,7 @@ export default function ContactClientPage() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#1e1839] to-[#2d1b69] text-white mb-6 shadow-lg">
               <Sparkles className="w-4 h-4" />
-              <span className="text-sm font-semibold">24/7 Bereikbaar</span>
+              <span className="text-sm font-semibold">CONTACT</span>
               <Sparkles className="w-4 h-4" />
             </div>
 
