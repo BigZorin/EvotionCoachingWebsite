@@ -2,6 +2,7 @@
 
 import { Resend } from "resend"
 import { trackServerEvent } from "@/app/actions/analytics"
+import { saveLeadToRedis } from "@/app/actions/leads"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -84,6 +85,22 @@ export async function submitCaloriebehoefte(formData: FormData) {
         source: "calorie_calculator",
       },
       timestamp: new Date().toISOString(),
+    })
+
+    await saveLeadToRedis({
+      email: data.email,
+      name: data.name,
+      phone: data.phone,
+      source: "calorie_calculator",
+      createdAt: new Date().toISOString(),
+      data: {
+        age: data.age,
+        gender: data.gender,
+        goal: data.goal,
+        weight: data.weight,
+        height: data.height,
+        activityLevel: data.activityLevel,
+      },
     })
 
     // Email naar Evotion team

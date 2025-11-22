@@ -2,6 +2,7 @@
 
 import { Resend } from "resend"
 import { trackServerEvent } from "./analytics"
+import { saveLeadToRedis } from "./leads"
 
 interface ContactFormData {
   name: string
@@ -99,6 +100,18 @@ export async function sendContactEmail(formData: ContactFormData) {
       timestamp: new Date().toISOString(),
       path: "/contact",
     }).catch((err) => console.error("Failed to track contact submission:", err))
+
+    await saveLeadToRedis({
+      email: formData.email,
+      name: formData.name,
+      phone: formData.phone,
+      source: "contact_form",
+      createdAt: new Date().toISOString(),
+      data: {
+        subject: formData.subject,
+        messageSnippet: formData.message.substring(0, 100) + (formData.message.length > 100 ? "..." : ""),
+      },
+    })
 
     // Send confirmation email to customer
     await resend.emails.send({
