@@ -13,6 +13,7 @@ export type AnalyticsEvent = {
   timestamp: string
   userAgent?: string
   path?: string
+  visitorId?: string // Added visitorId field
 }
 
 export async function trackServerEvent(event: AnalyticsEvent) {
@@ -21,6 +22,10 @@ export async function trackServerEvent(event: AnalyticsEvent) {
 
     // 1. Increment daily counter for this event type
     await redis.incr(`analytics:daily:${date}:${event.type}`)
+
+    if (event.visitorId) {
+      await redis.sadd(`analytics:daily:${date}:visitors`, event.visitorId)
+    }
 
     if (event.type === "page_view" && event.path) {
       await redis.zincrby(`analytics:pages:${date}`, 1, event.path)
@@ -52,7 +57,7 @@ export async function getDashboardData() {
     // Fetch counts
     const [dailyVisitors, dailyCalculatorStarts, dailyCalculatorCompletions, dailyLeads, dailyContactSubmissions] =
       await Promise.all([
-        redis.get(`analytics:daily:${today}:page_view`),
+        redis.scard(`analytics:daily:${today}:visitors`), // Use SCARD for unique visitors
         redis.get(`analytics:daily:${today}:calculator_started`),
         redis.get(`analytics:daily:${today}:calculator_completed`),
         redis.get(`analytics:daily:${today}:lead_generated`),

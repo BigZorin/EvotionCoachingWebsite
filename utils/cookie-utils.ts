@@ -62,6 +62,22 @@ export function hasPreferencesConsent(): boolean {
 
 import { trackServerEvent } from "@/app/actions/analytics"
 
+export function getVisitorId(): string {
+  if (typeof window === "undefined") return "unknown"
+
+  try {
+    let visitorId = localStorage.getItem("evotion-visitor-id")
+    if (!visitorId) {
+      visitorId = crypto.randomUUID()
+      localStorage.setItem("evotion-visitor-id", visitorId)
+    }
+    return visitorId
+  } catch (error) {
+    console.error("Error getting visitor ID:", error)
+    return "unknown"
+  }
+}
+
 export function logCookieAction(action: string, preferences?: CookiePreferences): void {
   if (typeof window === "undefined") return
 
@@ -73,6 +89,7 @@ export function logCookieAction(action: string, preferences?: CookiePreferences)
       preferences: preferences || getCookieConsent(),
       userAgent: navigator.userAgent,
       url: window.location.href,
+      visitorId: getVisitorId(),
     }
 
     logs.push(logEntry)
@@ -90,6 +107,7 @@ export function logCookieAction(action: string, preferences?: CookiePreferences)
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
       path: window.location.pathname,
+      visitorId: getVisitorId(), // Pass visitorId
     }).catch((err) => console.error("Failed to track cookie action:", err))
   } catch (error) {
     console.error("Error logging cookie action:", error)
@@ -161,6 +179,7 @@ export function trackPageView(path: string): void {
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
       path: path,
+      visitorId: getVisitorId(), // Pass visitorId for unique tracking
     }).catch((err) => console.error("Failed to track page view:", err))
   }
 }
@@ -176,6 +195,7 @@ export function logCalculatorAction(action: "started" | "completed", data?: any)
       data,
       userAgent: navigator.userAgent,
       url: window.location.href,
+      visitorId: getVisitorId(),
     }
 
     logs.push(logEntry)
@@ -193,6 +213,7 @@ export function logCalculatorAction(action: "started" | "completed", data?: any)
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
       path: window.location.pathname,
+      visitorId: getVisitorId(), // Pass visitorId
     }).catch((err) => console.error("Failed to track calculator action:", err))
   } catch (error) {
     console.error("Error logging calculator action:", error)
@@ -210,6 +231,7 @@ export function logContactSubmission(type: "contact" | "calculator", data?: any)
       data,
       userAgent: navigator.userAgent,
       url: window.location.href,
+      visitorId: getVisitorId(),
     }
 
     logs.push(logEntry)
@@ -229,6 +251,7 @@ export function logContactSubmission(type: "contact" | "calculator", data?: any)
         timestamp: new Date().toISOString(),
         userAgent: navigator.userAgent,
         path: window.location.pathname,
+        visitorId: getVisitorId(), // Pass visitorId
       }).catch((err) => console.error("Failed to track contact submission:", err))
     }
   } catch (error) {
