@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import CookieConsent from "@/components/cookie-consent"
 import Script from "next/script"
+import { AnalyticsTracker } from "@/components/analytics-tracker"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -88,6 +89,7 @@ export default function RootLayout({
           `}
         </Script>
 
+        <AnalyticsTracker />
         {children}
         <CookieConsent />
       </body>

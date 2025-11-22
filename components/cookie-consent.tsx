@@ -5,20 +5,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { X, Settings, Shield, BarChart3, Target } from "lucide-react"
-
-interface CookiePreferences {
-  necessary: boolean
-  analytics: boolean
-  marketing: boolean
-  preferences: boolean
-}
-
-const defaultPreferences: CookiePreferences = {
-  necessary: true, // Always true, cannot be disabled
-  analytics: false,
-  marketing: false,
-  preferences: false,
-}
+import {
+  type CookiePreferences,
+  defaultPreferences,
+  getCookieConsent,
+  setCookieConsent,
+  initializeGoogleAnalytics,
+  logCookieAction,
+} from "@/utils/cookie-utils"
 
 export default function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false)
@@ -28,77 +22,19 @@ export default function CookieConsent() {
 
   useEffect(() => {
     // Check if user has already consented
-    const consent = localStorage.getItem("evotion-cookie-consent")
-    if (consent) {
-      try {
-        const consentData = JSON.parse(consent)
-        setHasConsented(true)
-        setPreferences(consentData.preferences || defaultPreferences)
+    const savedPreferences = getCookieConsent()
+    if (savedPreferences) {
+      setHasConsented(true)
+      setPreferences(savedPreferences)
 
-        // Initialize analytics if consented
-        if (consentData.preferences?.analytics) {
-          initializeAnalytics()
-        }
-      } catch (error) {
-        console.error("Error parsing cookie consent:", error)
-        // Clear corrupted data
-        localStorage.removeItem("evotion-cookie-consent")
-        setShowBanner(true)
+      // Initialize analytics if consented
+      if (savedPreferences.analytics) {
+        initializeGoogleAnalytics()
       }
     } else {
       setShowBanner(true)
     }
   }, [])
-
-  const initializeAnalytics = () => {
-    // Initialize Google Analytics
-    if (typeof window !== "undefined" && !window.gtag) {
-      const script = document.createElement("script")
-      script.async = true
-      script.src = "https://www.googletagmanager.com/gtag/js?id=G-MCL41XYPGM"
-      document.head.appendChild(script)
-
-      const script2 = document.createElement("script")
-      script2.innerHTML = `
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-MCL41XYPGM', {
-          page_title: document.title,
-          page_location: window.location.href
-        });
-      `
-      document.head.appendChild(script2)
-
-      // Set global gtag function
-      window.gtag = () => {
-        window.dataLayer.push(arguments)
-      }
-    }
-  }
-
-  const logCookieConsent = (action: string, preferences: CookiePreferences) => {
-    try {
-      const logs = JSON.parse(localStorage.getItem("evotion-cookie-logs") || "[]")
-      const logEntry = {
-        timestamp: new Date().toISOString(),
-        action,
-        preferences,
-        userAgent: navigator.userAgent,
-        url: window.location.href,
-      }
-      logs.push(logEntry)
-
-      // Keep only last 100 entries
-      if (logs.length > 100) {
-        logs.splice(0, logs.length - 100)
-      }
-
-      localStorage.setItem("evotion-cookie-logs", JSON.stringify(logs))
-    } catch (error) {
-      console.error("Error logging cookie consent:", error)
-    }
-  }
 
   const handleAcceptAll = () => {
     const allAccepted: CookiePreferences = {
@@ -109,9 +45,9 @@ export default function CookieConsent() {
     }
 
     setPreferences(allAccepted)
-    saveConsent(allAccepted)
-    initializeAnalytics()
-    logCookieConsent("accept_all", allAccepted)
+    setCookieConsent(allAccepted)
+    initializeGoogleAnalytics()
+    logCookieAction("accept_all", allAccepted)
     setShowBanner(false)
     setShowSettings(false)
     setHasConsented(true)
@@ -126,38 +62,24 @@ export default function CookieConsent() {
     }
 
     setPreferences(onlyNecessary)
-    saveConsent(onlyNecessary)
-    logCookieConsent("reject_all", onlyNecessary)
+    setCookieConsent(onlyNecessary)
+    logCookieAction("reject_all", onlyNecessary)
     setShowBanner(false)
     setShowSettings(false)
     setHasConsented(true)
   }
 
   const handleSavePreferences = () => {
-    saveConsent(preferences)
+    setCookieConsent(preferences)
 
     if (preferences.analytics) {
-      initializeAnalytics()
+      initializeGoogleAnalytics()
     }
 
-    logCookieConsent("save_preferences", preferences)
+    logCookieAction("save_preferences", preferences)
     setShowBanner(false)
     setShowSettings(false)
     setHasConsented(true)
-  }
-
-  const saveConsent = (prefs: CookiePreferences) => {
-    const consentData = {
-      timestamp: new Date().toISOString(),
-      preferences: prefs,
-      version: "1.0",
-    }
-
-    try {
-      localStorage.setItem("evotion-cookie-consent", JSON.stringify(consentData))
-    } catch (error) {
-      console.error("Error saving cookie consent:", error)
-    }
   }
 
   const handlePreferenceChange = (key: keyof CookiePreferences, value: boolean) => {

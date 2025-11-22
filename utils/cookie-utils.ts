@@ -60,6 +60,8 @@ export function hasPreferencesConsent(): boolean {
   return consent?.preferences || false
 }
 
+import { trackServerEvent } from "@/app/actions/analytics"
+
 export function logCookieAction(action: string, preferences?: CookiePreferences): void {
   if (typeof window === "undefined") return
 
@@ -81,29 +83,16 @@ export function logCookieAction(action: string, preferences?: CookiePreferences)
     }
 
     localStorage.setItem("evotion-cookie-logs", JSON.stringify(logs))
+
+    trackServerEvent({
+      type: "cookie_consent_update",
+      data: { action, preferences },
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      path: window.location.pathname,
+    }).catch((err) => console.error("Failed to track cookie action:", err))
   } catch (error) {
     console.error("Error logging cookie action:", error)
-  }
-}
-
-export function getCookieLogs(): any[] {
-  if (typeof window === "undefined") return []
-
-  try {
-    return JSON.parse(localStorage.getItem("evotion-cookie-logs") || "[]")
-  } catch (error) {
-    console.error("Error getting cookie logs:", error)
-    return []
-  }
-}
-
-export function clearCookieLogs(): void {
-  if (typeof window === "undefined") return
-
-  try {
-    localStorage.removeItem("evotion-cookie-logs")
-  } catch (error) {
-    console.error("Error clearing cookie logs:", error)
   }
 }
 
@@ -165,13 +154,14 @@ export function trackPageView(path: string): void {
   } catch (error) {
     console.error("Error tracking page view:", error)
   }
-}
 
-// Extend Window interface for TypeScript
-declare global {
-  interface Window {
-    gtag: (...args: any[]) => void
-    dataLayer: any[]
+  if (hasAnalyticsConsent()) {
+    trackServerEvent({
+      type: "page_view",
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      path: path,
+    }).catch((err) => console.error("Failed to track page view:", err))
   }
 }
 
@@ -196,6 +186,14 @@ export function logCalculatorAction(action: "started" | "completed", data?: any)
     }
 
     localStorage.setItem("evotion-calculator-logs", JSON.stringify(logs))
+
+    trackServerEvent({
+      type: `calculator_${action}`,
+      data,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      path: window.location.pathname,
+    }).catch((err) => console.error("Failed to track calculator action:", err))
   } catch (error) {
     console.error("Error logging calculator action:", error)
   }
@@ -222,6 +220,17 @@ export function logContactSubmission(type: "contact" | "calculator", data?: any)
     }
 
     localStorage.setItem("evotion-contact-logs", JSON.stringify(logs))
+
+    // Track on server only if it's a generic contact form
+    if (type === "contact") {
+      trackServerEvent({
+        type: "contact_submission_client_log",
+        data,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        path: window.location.pathname,
+      }).catch((err) => console.error("Failed to track contact submission:", err))
+    }
   } catch (error) {
     console.error("Error logging contact submission:", error)
   }
@@ -246,5 +255,34 @@ export function getContactLogs(): any[] {
   } catch (error) {
     console.error("Error getting contact logs:", error)
     return []
+  }
+}
+
+export function getCookieLogs(): any[] {
+  if (typeof window === "undefined") return []
+
+  try {
+    return JSON.parse(localStorage.getItem("evotion-cookie-logs") || "[]")
+  } catch (error) {
+    console.error("Error getting cookie logs:", error)
+    return []
+  }
+}
+
+export function clearCookieLogs(): void {
+  if (typeof window === "undefined") return
+
+  try {
+    localStorage.removeItem("evotion-cookie-logs")
+  } catch (error) {
+    console.error("Error clearing cookie logs:", error)
+  }
+}
+
+// Extend Window interface for TypeScript
+declare global {
+  interface Window {
+    gtag: (...args: any[]) => void
+    dataLayer: any[]
   }
 }

@@ -1,6 +1,7 @@
 "use server"
 
 import { Resend } from "resend"
+import { trackServerEvent } from "./analytics"
 
 interface ContactFormData {
   name: string
@@ -88,6 +89,16 @@ export async function sendContactEmail(formData: ContactFormData) {
         </html>
       `,
     })
+
+    await trackServerEvent({
+      type: "contact_submission",
+      data: {
+        name: formData.name,
+        subject: formData.subject,
+      },
+      timestamp: new Date().toISOString(),
+      path: "/contact",
+    }).catch((err) => console.error("Failed to track contact submission:", err))
 
     // Send confirmation email to customer
     await resend.emails.send({

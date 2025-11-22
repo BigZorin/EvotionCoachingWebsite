@@ -4,22 +4,22 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getCookieLogs, getCalculatorLogs, getContactLogs, clearCookieLogs } from "@/utils/cookie-utils"
+import { getDashboardData } from "@/app/actions/analytics"
 import {
-  Users,
   Activity,
   TrendingUp,
   Mail,
   Download,
   Trash2,
   RefreshCw,
-  Calendar,
   Globe,
-  CheckCircle,
   Clock,
+  Server,
+  AlertCircle,
 } from "lucide-react"
 
 interface AnalyticsData {
@@ -43,22 +43,34 @@ interface AnalyticsData {
   }
 }
 
+interface ServerDashboardData {
+  stats: {
+    visitors: number
+    calculatorStarts: number
+    calculatorCompletions: number
+    leads: number
+    contactSubmissions: number
+  }
+  topPages: Array<{ url: string; visits: number }>
+  recentActivity: Array<any>
+}
+
 export default function AdminDashboardClient() {
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
+  const [serverData, setServerData] = useState<ServerDashboardData | null>(null)
+  const [localAnalytics, setLocalAnalytics] = useState<AnalyticsData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<string>("")
 
-  const calculateRealAnalytics = (): AnalyticsData => {
+  const calculateLocalAnalytics = (): AnalyticsData => {
     const cookieLogs = getCookieLogs()
     const calculatorLogs = getCalculatorLogs()
     const contactLogs = getContactLogs()
 
-    // Calculate unique visitors based on userAgent + date combination
     const uniqueVisitors = new Set()
     const pageVisits: Record<string, number> = {}
     const recentActivity: Array<{ timestamp: string; action: string; url: string }> = []
 
-    // Process cookie logs
+    // ... existing calculation logic ...
     cookieLogs.forEach((log) => {
       const date = new Date(log.timestamp).toDateString()
       const visitorId = `${log.userAgent}-${date}`
@@ -76,7 +88,6 @@ export default function AdminDashboardClient() {
       })
     })
 
-    // Process calculator logs
     calculatorLogs.forEach((log) => {
       const date = new Date(log.timestamp).toDateString()
       const visitorId = `${log.userAgent}-${date}`
@@ -94,7 +105,6 @@ export default function AdminDashboardClient() {
       })
     })
 
-    // Process contact logs
     contactLogs.forEach((log) => {
       const date = new Date(log.timestamp).toDateString()
       const visitorId = `${log.userAgent}-${date}`
@@ -112,13 +122,11 @@ export default function AdminDashboardClient() {
       })
     })
 
-    // Calculate statistics
     const cookieAcceptance = cookieLogs.filter((log) => log.action === "accept_all").length
     const calculatorStarts = calculatorLogs.filter((log) => log.action === "started").length
     const calculatorCompletions = calculatorLogs.filter((log) => log.action === "completed").length
     const contactSubmissions = contactLogs.length
 
-    // Calculate consent breakdown
     const consentBreakdown = {
       analytics: cookieLogs.filter((log) => log.preferences?.analytics).length,
       marketing: cookieLogs.filter((log) => log.preferences?.marketing).length,
@@ -126,16 +134,13 @@ export default function AdminDashboardClient() {
       necessary: cookieLogs.filter((log) => log.preferences?.necessary).length,
     }
 
-    // Top pages
     const topPages = Object.entries(pageVisits)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 5)
       .map(([url, visits]) => ({ url, visits }))
 
-    // Sort recent activity by timestamp (most recent first)
     recentActivity.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
 
-    // Calculate date range
     const allTimestamps = [
       ...cookieLogs.map((log) => log.timestamp),
       ...calculatorLogs.map((log) => log.timestamp),
@@ -161,11 +166,15 @@ export default function AdminDashboardClient() {
     }
   }
 
-  const loadAnalytics = () => {
+  const loadAnalytics = async () => {
     setIsLoading(true)
     try {
-      const data = calculateRealAnalytics()
-      setAnalytics(data)
+      const localData = calculateLocalAnalytics()
+      setLocalAnalytics(localData)
+
+      const sData = await getDashboardData()
+      setServerData(sData)
+
       setLastUpdated(new Date().toLocaleString("nl-NL"))
     } catch (error) {
       console.error("Error loading analytics:", error)
@@ -179,10 +188,11 @@ export default function AdminDashboardClient() {
   }, [])
 
   const exportData = () => {
-    if (!analytics) return
+    if (!localAnalytics) return
 
     const exportData = {
-      summary: analytics,
+      serverData,
+      localSummary: localAnalytics,
       cookieLogs: getCookieLogs(),
       calculatorLogs: getCalculatorLogs(),
       contactLogs: getContactLogs(),
@@ -200,14 +210,14 @@ export default function AdminDashboardClient() {
     URL.revokeObjectURL(url)
   }
 
-  const clearAllData = () => {
-    if (confirm("Weet je zeker dat je alle analytics data wilt verwijderen? Dit kan niet ongedaan gemaakt worden.")) {
+  const clearLocalData = () => {
+    if (confirm("Weet je zeker dat je alle lokale analytics data wilt verwijderen?")) {
       try {
         clearCookieLogs()
         localStorage.removeItem("evotion-calculator-logs")
         localStorage.removeItem("evotion-contact-logs")
         loadAnalytics()
-        alert("Alle data is succesvol verwijderd.")
+        alert("Lokale data is succesvol verwijderd.")
       } catch (error) {
         console.error("Error clearing data:", error)
         alert("Er is een fout opgetreden bij het verwijderen van de data.")
@@ -219,28 +229,10 @@ export default function AdminDashboardClient() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#1e1839] via-[#2a2054] to-[#1e1839]">
         <Header />
-        <div className="container mx-auto px-4 py-12">
-          <div className="flex items-center justify-center">
-            <div className="text-white text-xl">Analytics laden...</div>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    )
-  }
-
-  if (!analytics) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#1e1839] via-[#2a2054] to-[#1e1839]">
-        <Header />
-        <div className="container mx-auto px-4 py-12">
-          <div className="text-center text-white">
-            <h1 className="text-2xl font-bold mb-4">Geen data beschikbaar</h1>
-            <p className="mb-4">Er zijn nog geen analytics gegevens verzameld.</p>
-            <Button onClick={loadAnalytics} className="bg-[#bad4e1] hover:bg-[#bad4e1]/90 text-[#1e1839]">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Opnieuw laden
-            </Button>
+        <div className="container mx-auto px-4 py-12 flex items-center justify-center">
+          <div className="text-white text-xl flex items-center gap-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+            Analytics laden...
           </div>
         </div>
         <Footer />
@@ -254,277 +246,298 @@ export default function AdminDashboardClient() {
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-white mb-4">Admin Dashboard</h1>
-            <p className="text-xl text-gray-300 mb-6">Evotion Coaching Analytics & Statistieken</p>
-
-            <div className="flex flex-wrap justify-center gap-4 mb-6">
-              <Badge variant="secondary" className="bg-white/10 text-white">
-                <Calendar className="w-4 h-4 mr-2" />
-                {getCookieLogs().length + getCalculatorLogs().length + getContactLogs().length} logs totaal
-              </Badge>
-              <Badge variant="secondary" className="bg-white/10 text-white">
-                <Clock className="w-4 h-4 mr-2" />
-                Laatste update: {lastUpdated}
-              </Badge>
-              {analytics.dateRange.first && (
-                <Badge variant="secondary" className="bg-white/10 text-white">
-                  <Globe className="w-4 h-4 mr-2" />
-                  Data vanaf: {new Date(analytics.dateRange.first).toLocaleDateString("nl-NL")}
-                </Badge>
-              )}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
+              <p className="text-lg text-gray-300">Evotion Coaching Analytics & Statistieken</p>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-4">
-              <Button onClick={loadAnalytics} className="bg-[#bad4e1] hover:bg-[#bad4e1]/90 text-[#1e1839]">
+            <div className="flex gap-2">
+              <Button onClick={loadAnalytics} size="sm" className="bg-[#bad4e1] hover:bg-[#bad4e1]/90 text-[#1e1839]">
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Vernieuwen
               </Button>
               <Button
                 onClick={exportData}
+                size="sm"
                 variant="outline"
                 className="border-white text-white hover:bg-white hover:text-[#1e1839] bg-transparent"
               >
                 <Download className="w-4 h-4 mr-2" />
-                Exporteren
-              </Button>
-              <Button
-                onClick={clearAllData}
-                variant="outline"
-                className="border-red-400 text-red-400 hover:bg-red-400 hover:text-white bg-transparent"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Data Wissen
+                Export
               </Button>
             </div>
           </div>
 
-          {/* Key Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-white">Unieke Bezoekers</CardTitle>
-                <Users className="h-4 w-4 text-[#bad4e1]" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">{analytics.totalVisitors}</div>
-                <p className="text-xs text-gray-300">Gebaseerd op userAgent + datum</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-white">Cookie Acceptatie</CardTitle>
-                <CheckCircle className="h-4 w-4 text-green-400" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">{analytics.cookieAcceptance}</div>
-                <p className="text-xs text-gray-300">Volledige acceptaties</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-white">Calculator Conversie</CardTitle>
-                <TrendingUp className="h-4 w-4 text-[#bad4e1]" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">{analytics.conversionRate}%</div>
-                <p className="text-xs text-gray-300">
-                  {analytics.calculatorCompletions}/{analytics.calculatorStarts} voltooid
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-white">Contact Submissions</CardTitle>
-                <Mail className="h-4 w-4 text-green-400" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">{analytics.contactSubmissions}</div>
-                <p className="text-xs text-gray-300">Leads gegenereerd</p>
-              </CardContent>
-            </Card>
+          <div className="flex flex-wrap gap-3 mb-8">
+            <Badge variant="secondary" className="bg-white/10 text-white hover:bg-white/20">
+              <Clock className="w-4 h-4 mr-2" />
+              Laatste update: {lastUpdated}
+            </Badge>
+            <Badge
+              variant="secondary"
+              className={`bg-white/10 text-white hover:bg-white/20 ${serverData ? "border-green-400/50" : "border-red-400/50"}`}
+            >
+              <Server className="w-4 h-4 mr-2" />
+              Server Status: {serverData ? "Online" : "Offline"}
+            </Badge>
           </div>
 
-          {/* Detailed Analytics */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Cookie Consent Breakdown */}
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white">Cookie Consent Breakdown</CardTitle>
-                <CardDescription className="text-gray-300">Aantal gebruikers per consent type</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-white">Analytics Cookies</span>
-                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-300">
-                    {analytics.consentBreakdown.analytics}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-white">Marketing Cookies</span>
-                  <Badge variant="secondary" className="bg-orange-500/20 text-orange-300">
-                    {analytics.consentBreakdown.marketing}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-white">Preference Cookies</span>
-                  <Badge variant="secondary" className="bg-purple-500/20 text-purple-300">
-                    {analytics.consentBreakdown.preferences}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-white">Necessary Cookies</span>
-                  <Badge variant="secondary" className="bg-green-500/20 text-green-300">
-                    {analytics.consentBreakdown.necessary}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
+          <Tabs defaultValue="server" className="space-y-8">
+            <TabsList className="bg-white/10 border border-white/10 text-gray-300">
+              <TabsTrigger
+                value="server"
+                className="data-[state=active]:bg-[#bad4e1] data-[state=active]:text-[#1e1839]"
+              >
+                <Globe className="w-4 h-4 mr-2" />
+                Live Overzicht
+              </TabsTrigger>
+              <TabsTrigger
+                value="local"
+                className="data-[state=active]:bg-[#bad4e1] data-[state=active]:text-[#1e1839]"
+              >
+                <Clock className="w-4 h-4 mr-2" />
+                Lokale Debug Logs
+              </TabsTrigger>
+            </TabsList>
 
-            {/* Top Pages */}
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white">Top Pagina's</CardTitle>
-                <CardDescription className="text-gray-300">Meest bezochte pagina's</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {analytics.topPages.length > 0 ? (
-                  analytics.topPages.map((page, index) => (
-                    <div key={index} className="flex justify-between items-center">
-                      <span className="text-white text-sm truncate">{page.url}</span>
-                      <Badge variant="secondary" className="bg-[#bad4e1]/20 text-[#bad4e1]">
-                        {page.visits}
-                      </Badge>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-400 text-sm">Geen pagina data beschikbaar</p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+            <TabsContent value="server" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {serverData ? (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                    <Card className="bg-blue-900/20 backdrop-blur-sm border-blue-500/30 hover:bg-blue-900/30 transition-colors">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-blue-200">Unieke Bezoekers</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold text-white">{serverData.stats.visitors}</div>
+                        <p className="text-xs text-blue-300 mt-1 flex items-center">
+                          <TrendingUp className="w-3 h-3 mr-1" />
+                          Vandaag
+                        </p>
+                      </CardContent>
+                    </Card>
 
-          {/* Recent Activity */}
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white">Recente Activiteit</CardTitle>
-              <CardDescription className="text-gray-300">Laatste gebruikersacties op de website</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {analytics.recentActivity.length > 0 ? (
-                  analytics.recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <Activity className="h-4 w-4 text-[#bad4e1]" />
-                        <div>
-                          <p className="text-white text-sm font-medium">{activity.action}</p>
-                          <p className="text-gray-400 text-xs">{activity.url}</p>
-                        </div>
-                      </div>
-                      <span className="text-gray-400 text-xs">
-                        {new Date(activity.timestamp).toLocaleString("nl-NL")}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-400 text-center py-8">Geen recente activiteit</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                    <Card className="bg-purple-900/20 backdrop-blur-sm border-purple-500/30 hover:bg-purple-900/30 transition-colors">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-purple-200">Calculator Starts</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold text-white">{serverData.stats.calculatorStarts}</div>
+                        <p className="text-xs text-purple-300 mt-1">Potentiële leads</p>
+                      </CardContent>
+                    </Card>
 
-          {/* Calculator Performance */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white">Calculator Performance</CardTitle>
-                <CardDescription className="text-gray-300">
-                  Statistieken van de caloriebehoefte calculator
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-white">Gestart</span>
-                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-300">
-                    {analytics.calculatorStarts}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-white">Voltooid</span>
-                  <Badge variant="secondary" className="bg-green-500/20 text-green-300">
-                    {analytics.calculatorCompletions}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-white">Conversie Rate</span>
-                  <Badge variant="secondary" className="bg-[#bad4e1]/20 text-[#bad4e1]">
-                    {analytics.conversionRate}%
-                  </Badge>
-                </div>
-                <Separator className="bg-white/20" />
-                <div className="flex justify-between items-center">
-                  <span className="text-white">Afgebroken</span>
-                  <Badge variant="secondary" className="bg-red-500/20 text-red-300">
-                    {analytics.calculatorStarts - analytics.calculatorCompletions}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
+                    <Card className="bg-green-900/20 backdrop-blur-sm border-green-500/30 hover:bg-green-900/30 transition-colors">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-green-200">Calculator Voltooid</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold text-white">{serverData.stats.calculatorCompletions}</div>
+                        <p className="text-xs text-green-300 mt-1">
+                          {serverData.stats.calculatorStarts > 0
+                            ? Math.round(
+                                (serverData.stats.calculatorCompletions / serverData.stats.calculatorStarts) * 100,
+                              )
+                            : 0}
+                          % Conversie
+                        </p>
+                      </CardContent>
+                    </Card>
 
-            {/* System Info */}
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white">Systeem Informatie</CardTitle>
-                <CardDescription className="text-gray-300">Data opslag en systeem status</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-white">Cookie Logs</span>
-                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-300">
-                    {getCookieLogs().length}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-white">Calculator Logs</span>
-                  <Badge variant="secondary" className="bg-green-500/20 text-green-300">
-                    {getCalculatorLogs().length}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-white">Contact Logs</span>
-                  <Badge variant="secondary" className="bg-orange-500/20 text-orange-300">
-                    {getContactLogs().length}
-                  </Badge>
-                </div>
-                <Separator className="bg-white/20" />
-                <div className="flex justify-between items-center">
-                  <span className="text-white">Data Range</span>
-                  <div className="text-right">
-                    {analytics.dateRange.first ? (
-                      <>
-                        <div className="text-xs text-gray-400">
-                          {new Date(analytics.dateRange.first).toLocaleDateString("nl-NL")}
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          tot{" "}
-                          {analytics.dateRange.last
-                            ? new Date(analytics.dateRange.last).toLocaleDateString("nl-NL")
-                            : "nu"}
-                        </div>
-                      </>
-                    ) : (
-                      <span className="text-xs text-gray-400">Geen data</span>
-                    )}
+                    <Card className="bg-orange-900/20 backdrop-blur-sm border-orange-500/30 hover:bg-orange-900/30 transition-colors">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-orange-200">Nieuwe Leads</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold text-white">{serverData.stats.leads}</div>
+                        <p className="text-xs text-orange-300 mt-1">Hoog potentieel</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-pink-900/20 backdrop-blur-sm border-pink-500/30 hover:bg-pink-900/30 transition-colors">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-pink-200">Contact Berichten</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold text-white">{serverData.stats.contactSubmissions}</div>
+                        <p className="text-xs text-pink-300 mt-1">Direct contact</p>
+                      </CardContent>
+                    </Card>
                   </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <Card className="bg-white/5 backdrop-blur-sm border-white/10">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Globe className="w-5 h-5" />
+                          Populaire Pagina's
+                        </CardTitle>
+                        <CardDescription className="text-gray-400">Meest bezochte pagina's vandaag</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {serverData.topPages.length > 0 ? (
+                            serverData.topPages.map((page, index) => (
+                              <div key={index} className="flex items-center justify-between group">
+                                <div className="flex items-center gap-3 overflow-hidden">
+                                  <span className="text-gray-500 font-mono text-sm w-6">{index + 1}.</span>
+                                  <span className="text-gray-200 truncate group-hover:text-white transition-colors">
+                                    {page.url}
+                                  </span>
+                                </div>
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-[#bad4e1]/10 text-[#bad4e1] border border-[#bad4e1]/20"
+                                >
+                                  {page.visits}
+                                </Badge>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-8 text-gray-500 flex flex-col items-center">
+                              <Activity className="w-8 h-8 mb-2 opacity-50" />
+                              <p>Nog geen data beschikbaar voor vandaag</p>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/5 backdrop-blur-sm border-white/10">
+                      <CardHeader>
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Activity className="w-5 h-5" />
+                          Recente Activiteit
+                        </CardTitle>
+                        <CardDescription className="text-gray-400">Real-time gebruikersacties</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                          {serverData.recentActivity.length > 0 ? (
+                            serverData.recentActivity.map((activity, index) => (
+                              <div
+                                key={index}
+                                className="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/5"
+                              >
+                                <div className="mt-1">
+                                  {activity.type.includes("page_view") ? (
+                                    <Globe className="w-4 h-4 text-blue-400" />
+                                  ) : activity.type.includes("calculator") ? (
+                                    <TrendingUp className="w-4 h-4 text-green-400" />
+                                  ) : (
+                                    <Mail className="w-4 h-4 text-orange-400" />
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-white truncate">
+                                    {activity.type.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                                  </p>
+                                  <p className="text-xs text-gray-400 truncate">
+                                    {activity.path || activity.url || "Onbekende pagina"}
+                                  </p>
+                                </div>
+                                <span className="text-xs text-gray-500 whitespace-nowrap">
+                                  {new Date(activity.timestamp).toLocaleTimeString("nl-NL", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </span>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-8 text-gray-500">
+                              <p>Geen recente activiteit</p>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                  <AlertCircle className="w-12 h-12 mb-4 text-red-400/50" />
+                  <h3 className="text-xl font-semibold text-white mb-2">Server Verbinding Mislukt</h3>
+                  <p className="max-w-md text-center mb-6">
+                    Kon geen verbinding maken met de analytics database. Controleer je internetverbinding of probeer het
+                    later opnieuw.
+                  </p>
+                  <Button
+                    onClick={loadAnalytics}
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10 bg-transparent"
+                  >
+                    Opnieuw Proberen
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="local" className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <Card className="bg-orange-900/10 border-orange-500/20 mb-6">
+                <CardContent className="p-4 flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-orange-400 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-orange-200">Lokale Debug Modus</h4>
+                    <p className="text-sm text-orange-200/70">
+                      Deze data is alleen zichtbaar voor jou en toont de logs die in jouw browser zijn opgeslagen. Dit
+                      is handig om te testen of tracking werkt.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card className="bg-white/5 border-white/10">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-gray-400">Jouw Sessies</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-white">{localAnalytics?.totalVisitors || 0}</div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white/5 border-white/10">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-gray-400">Jouw Events</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-white">
+                      {getCookieLogs().length + getCalculatorLogs().length + getContactLogs().length}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white/5 border-white/10">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-gray-400">Calculator Acties</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-white">{localAnalytics?.calculatorStarts || 0}</div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white/5 border-white/10">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-gray-400">Cookie Logs</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-white">{getCookieLogs().length}</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="flex justify-end">
+                <Button
+                  onClick={clearLocalData}
+                  variant="destructive"
+                  size="sm"
+                  className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/50"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Lokale Logs Wissen
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 

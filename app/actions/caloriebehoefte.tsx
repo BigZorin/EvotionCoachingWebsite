@@ -1,6 +1,7 @@
 "use server"
 
 import { Resend } from "resend"
+import { trackServerEvent } from "@/app/actions/analytics"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -73,6 +74,17 @@ export async function submitCaloriebehoefte(formData: FormData) {
       carbs,
       fat,
     }
+
+    await trackServerEvent({
+      type: "lead_generated",
+      data: {
+        name: data.name,
+        email: data.email,
+        goal: data.goal,
+        source: "calorie_calculator",
+      },
+      timestamp: new Date().toISOString(),
+    })
 
     // Email naar Evotion team
     const teamEmailResult = await resend.emails.send({
@@ -199,7 +211,7 @@ export async function submitCaloriebehoefte(formData: FormData) {
                   </div>
                 </div>
               </div>
-              
+
               <!-- Recommendation -->
               <div style="background-color: #111827; padding: 25px; border-radius: 8px; text-align: center;">
                 <h3 style="color: #ffffff; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">Aanbevolen Coaching</h3>
