@@ -204,10 +204,14 @@ export default function CaloriebehoefteClientPage() {
       goalCalories = tdee + 300 // 300 calorie surplus
     }
 
-    // Macronutrient distribution (40% carbs, 30% protein, 30% fat)
-    const protein = (goalCalories * 0.3) / 4 // 4 calories per gram
-    const carbs = (goalCalories * 0.4) / 4 // 4 calories per gram
-    const fat = (goalCalories * 0.3) / 9 // 9 calories per gram
+    const protein = weight * 1.8
+    const fat = weight * 1
+
+    // Calculate remaining calories for carbs (Protein = 4 cal/g, Fat = 9 cal/g)
+    const proteinCalories = protein * 4
+    const fatCalories = fat * 9
+    const remainingCalories = Math.max(0, goalCalories - proteinCalories - fatCalories)
+    const carbs = remainingCalories / 4 // Carbs = 4 cal/g
 
     return {
       bmr: Math.round(bmr),
@@ -809,19 +813,19 @@ export default function CaloriebehoefteClientPage() {
                         <div className="text-center p-4 bg-red-50 rounded-lg">
                           <div className="text-2xl font-bold text-red-600 mb-2">{result.protein}g</div>
                           <div className="text-sm font-medium text-red-800">Eiwitten</div>
-                          <div className="text-xs text-red-600 mt-1">30% van calorieën</div>
+                          <div className="text-xs text-red-600 mt-1">1.8g/kg van jouw gewicht</div>
                         </div>
 
                         <div className="text-center p-4 bg-yellow-50 rounded-lg">
                           <div className="text-2xl font-bold text-yellow-600 mb-2">{result.carbs}g</div>
                           <div className="text-sm font-medium text-yellow-800">Koolhydraten</div>
-                          <div className="text-xs text-yellow-600 mt-1">40% van calorieën</div>
+                          <div className="text-xs text-yellow-600 mt-1">Resterende calorieën</div>
                         </div>
 
                         <div className="text-center p-4 bg-orange-50 rounded-lg">
                           <div className="text-2xl font-bold text-orange-600 mb-2">{result.fat}g</div>
                           <div className="text-sm font-medium text-orange-800">Vetten</div>
-                          <div className="text-xs text-orange-600 mt-1">30% van calorieën</div>
+                          <div className="text-xs text-orange-600 mt-1">1g/kg van jouw gewicht</div>
                         </div>
                       </div>
                     </CardContent>
@@ -843,7 +847,11 @@ export default function CaloriebehoefteClientPage() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <Button asChild className="bg-[#bad4e1] hover:bg-[#bad4e1]/90 text-[#1e1839] h-12">
-                          <a href="/contact">
+                          <a
+                            href="https://calendly.com/evotion/evotion-coaching"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             <Phone className="w-4 h-4 mr-2" />
                             Gratis Consult Boeken
                           </a>

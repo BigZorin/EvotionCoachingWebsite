@@ -47,10 +47,14 @@ export async function submitCaloriebehoefte(formData: FormData) {
     const tdee = Number(formData.get("tdee"))
     const goalCalories = Number(formData.get("goalCalories"))
 
-    // Calculate macronutrients
-    const protein = (goalCalories * 0.3) / 4 // 30% protein, 4 cal/g
-    const carbs = (goalCalories * 0.4) / 4 // 40% carbs, 4 cal/g
-    const fat = (goalCalories * 0.3) / 9 // 30% fat, 9 cal/g
+    const protein = weight * 1.8
+    const fat = weight * 1
+
+    // Calculate remaining calories for carbs
+    const proteinCalories = protein * 4
+    const fatCalories = fat * 9
+    const remainingCalories = Math.max(0, goalCalories - proteinCalories - fatCalories)
+    const carbs = remainingCalories / 4
 
     const data = {
       name,
@@ -82,18 +86,30 @@ export async function submitCaloriebehoefte(formData: FormData) {
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Nieuwe Lead - Evotion Coaching</title>
+          <style>
+            body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f9fafb; line-height: 1.6; }
+            .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; width: 100%; }
+            .header { background-color: #111827; padding: 30px; text-align: center; }
+            .content { padding: 30px; }
+            .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+            @media only screen and (max-width: 480px) {
+              .grid-2, .grid-3 { grid-template-columns: 1fr !important; }
+              .content { padding: 20px !important; }
+            }
+          </style>
         </head>
-        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f9fafb; line-height: 1.6;">
-          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <body>
+          <div class="container">
             
             <!-- Header -->
-            <div style="background-color: #111827; padding: 30px; text-align: center;">
+            <div class="header">
               <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">🚨 NIEUWE LEAD</h1>
               <p style="color: #d1d5db; margin: 8px 0 0 0; font-size: 16px;">Caloriebehoefte Calculator</p>
             </div>
             
             <!-- Content -->
-            <div style="padding: 30px;">
+            <div class="content">
               
               <!-- Contact Info -->
               <div style="margin-bottom: 30px;">
@@ -183,7 +199,7 @@ export async function submitCaloriebehoefte(formData: FormData) {
                   </div>
                 </div>
               </div>
-
+              
               <!-- Recommendation -->
               <div style="background-color: #111827; padding: 25px; border-radius: 8px; text-align: center;">
                 <h3 style="color: #ffffff; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">Aanbevolen Coaching</h3>
@@ -196,7 +212,6 @@ export async function submitCaloriebehoefte(formData: FormData) {
                         : "Geschikt voor ons Online Coaching Programma!"
                   }
                 </p>
-                <p style="color: #ffffff; margin: 0; font-size: 14px; font-weight: 500; background-color: rgba(255,255,255,0.1); padding: 10px; border-radius: 4px;">⚡ Neem binnen 24 uur contact op voor beste conversie!</p>
               </div>
               
             </div>
@@ -204,7 +219,7 @@ export async function submitCaloriebehoefte(formData: FormData) {
             <!-- Footer -->
             <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
               <p style="color: #6b7280; margin: 0; font-size: 14px;">
-                © 2024 Evotion Coaching - info@evotion-coaching.nl
+                © 2025 Evotion Coaching - info@evotion-coaching.nl
               </p>
             </div>
             
@@ -226,18 +241,29 @@ export async function submitCaloriebehoefte(formData: FormData) {
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Je Caloriebehoefte Resultaten - Evotion Coaching</title>
+          <style>
+            body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f9fafb; line-height: 1.6; }
+            .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; width: 100%; }
+            .header { background-color: #111827; padding: 30px; text-align: center; }
+            .content { padding: 30px; }
+            .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+            @media only screen and (max-width: 480px) {
+              .grid-3 { grid-template-columns: 1fr !important; }
+              .content { padding: 20px !important; }
+            }
+          </style>
         </head>
-        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f9fafb; line-height: 1.6;">
-          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <body>
+          <div class="container">
             
             <!-- Header -->
-            <div style="background-color: #111827; padding: 30px; text-align: center;">
+            <div class="header">
               <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">🎉 Je Resultaten zijn Klaar!</h1>
               <p style="color: #d1d5db; margin: 8px 0 0 0; font-size: 16px;">Persoonlijke Caloriebehoefte</p>
             </div>
             
             <!-- Content -->
-            <div style="padding: 30px;">
+            <div class="content">
               
               <!-- Welcome -->
               <div style="margin-bottom: 30px;">
@@ -378,7 +404,7 @@ export async function submitCaloriebehoefte(formData: FormData) {
             <!-- Footer -->
             <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
               <p style="color: #6b7280; margin: 0; font-size: 14px;">
-                © 2024 Evotion Coaching - Jouw partner in gezondheid en fitness
+                © 2025 Evotion Coaching - Jouw partner in gezondheid en fitness
               </p>
             </div>
             
@@ -426,18 +452,30 @@ export async function sendCaloriebehoefteEmail(data: CaloriebehoefteData) {
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Nieuwe Lead - Evotion Coaching</title>
+          <style>
+            body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f9fafb; line-height: 1.6; }
+            .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; width: 100%; }
+            .header { background-color: #111827; padding: 30px; text-align: center; }
+            .content { padding: 30px; }
+            .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+            @media only screen and (max-width: 480px) {
+              .grid-2, .grid-3 { grid-template-columns: 1fr !important; }
+              .content { padding: 20px !important; }
+            }
+          </style>
         </head>
-        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f9fafb; line-height: 1.6;">
-          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <body>
+          <div class="container">
             
             <!-- Header -->
-            <div style="background-color: #111827; padding: 30px; text-align: center;">
+            <div class="header">
               <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">🚨 NIEUWE LEAD</h1>
               <p style="color: #d1d5db; margin: 8px 0 0 0; font-size: 16px;">Caloriebehoefte Calculator</p>
             </div>
             
             <!-- Content -->
-            <div style="padding: 30px;">
+            <div class="content">
               
               <!-- Contact Info -->
               <div style="margin-bottom: 30px;">
@@ -540,7 +578,6 @@ export async function sendCaloriebehoefteEmail(data: CaloriebehoefteData) {
                         : "Geschikt voor ons Online Coaching Programma!"
                   }
                 </p>
-                <p style="color: #ffffff; margin: 0; font-size: 14px; font-weight: 500; background-color: rgba(255,255,255,0.1); padding: 10px; border-radius: 4px;">⚡ Neem binnen 24 uur contact op voor beste conversie!</p>
               </div>
               
             </div>
@@ -548,7 +585,7 @@ export async function sendCaloriebehoefteEmail(data: CaloriebehoefteData) {
             <!-- Footer -->
             <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
               <p style="color: #6b7280; margin: 0; font-size: 14px;">
-                © 2024 Evotion Coaching - info@evotion-coaching.nl
+                © 2025 Evotion Coaching - info@evotion-coaching.nl
               </p>
             </div>
             
@@ -570,18 +607,29 @@ export async function sendCaloriebehoefteEmail(data: CaloriebehoefteData) {
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Je Caloriebehoefte Resultaten - Evotion Coaching</title>
+          <style>
+            body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f9fafb; line-height: 1.6; }
+            .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; width: 100%; }
+            .header { background-color: #111827; padding: 30px; text-align: center; }
+            .content { padding: 30px; }
+            .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+            @media only screen and (max-width: 480px) {
+              .grid-3 { grid-template-columns: 1fr !important; }
+              .content { padding: 20px !important; }
+            }
+          </style>
         </head>
-        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f9fafb; line-height: 1.6;">
-          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <body>
+          <div class="container">
             
             <!-- Header -->
-            <div style="background-color: #111827; padding: 30px; text-align: center;">
+            <div class="header">
               <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">🎉 Je Resultaten zijn Klaar!</h1>
               <p style="color: #d1d5db; margin: 8px 0 0 0; font-size: 16px;">Persoonlijke Caloriebehoefte</p>
             </div>
             
             <!-- Content -->
-            <div style="padding: 30px;">
+            <div class="content">
               
               <!-- Welcome -->
               <div style="margin-bottom: 30px;">
@@ -722,7 +770,7 @@ export async function sendCaloriebehoefteEmail(data: CaloriebehoefteData) {
             <!-- Footer -->
             <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
               <p style="color: #6b7280; margin: 0; font-size: 14px;">
-                © 2024 Evotion Coaching - Jouw partner in gezondheid en fitness
+                © 2025 Evotion Coaching - Jouw partner in gezondheid en fitness
               </p>
             </div>
             
