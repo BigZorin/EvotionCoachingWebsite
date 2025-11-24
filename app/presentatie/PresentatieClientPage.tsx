@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import { Star } from "lucide-react"
 import {
   ChevronLeft,
   ChevronRight,
@@ -23,9 +24,87 @@ import {
   Users,
   Repeat,
   Settings,
+  Brain,
+  HandHeart,
+  Lightbulb,
+  MessageSquare,
+  UserCheck,
+  Activity,
 } from "lucide-react"
 
-const slides = [
+interface Slide {
+  id: number
+  title: string
+  subtitle?: string
+  type: string
+  phases?: {
+    name: string
+    duration: string
+    icon: any
+  }[]
+  modularExplanation?: {
+    title: string
+    subtitle: string
+    points: {
+      icon: any
+      title: string
+      description: string
+    }[]
+    vision: string
+  }
+  transformations?: {
+    name: string
+    image: string
+  }[]
+  rating?: number
+  totalReviews?: number
+  reviews?: {
+    name: string
+    date: string
+    rating: number
+    text: string
+  }[]
+  benefits?: {
+    icon: any
+    title: string
+    description: string
+    features: string[]
+  }[]
+  duration?: string
+  content?: {
+    goal?: string
+    highlights?: string[]
+    result?: string
+    title?: string
+    points?: {
+      icon: any
+      title: string
+      description: string
+    }[]
+    goals?: {
+      title: string
+      description: string
+      details: string[]
+    }[]
+  }
+  vision?: {
+    title: string
+    text: string
+    tagline: string
+  }
+  mission?: {
+    title: string
+    text: string
+    goals: string[]
+  }
+  coreValues?: {
+    icon: any
+    title: string
+    description: string
+  }[]
+}
+
+const slides: Slide[] = [
   {
     id: 0,
     title: "Welkom bij Evotion Coaching",
@@ -34,6 +113,59 @@ const slides = [
   },
   {
     id: 1,
+    title: "Onze Visie, Missie & Kernwaarden",
+    subtitle: "De Basis van Onze Coaching Filosofie",
+    type: "values",
+    vision: {
+      title: "Visie",
+      text: "Duurzame transformatie ontstaat niet door iedereen in hetzelfde keurslijf te persen, maar door een programma te creëren dat zich aanpast aan jouw persoonlijke situatie, tempo en ambities.",
+      tagline: "It is time to bring your evolution in motion",
+    },
+    mission: {
+      title: "Missie",
+      text: "We begeleiden mensen naar meetbare resultaten op het gebied van fysieke gezondheid, mentale veerkracht en persoonlijke groei met een gestructureerde aanpak.",
+      goals: ["Fysieke Transformatie", "Mentale Veerkracht", "Duurzame Gewoonten", "Zelfstandigheid"],
+    },
+    coreValues: [
+      {
+        icon: Brain,
+        title: "Bewustzijn & Zelfinzicht",
+        description: "Zelfkennis is de sleutel tot transformatie",
+      },
+      {
+        icon: Target,
+        title: "Verantwoordelijkheid",
+        description: "Jij bent de architect van je eigen succes",
+      },
+      {
+        icon: HandHeart,
+        title: "Dienstbaarheid",
+        description: "Echte kracht ligt in het helpen van anderen",
+      },
+      {
+        icon: Lightbulb,
+        title: "Continue Ontwikkeling",
+        description: "Stilstand is achteruitgang",
+      },
+      {
+        icon: MessageSquare,
+        title: "Transparantie",
+        description: "Eerlijkheid bouwt bruggen",
+      },
+      {
+        icon: UserCheck,
+        title: "Empathie & Respect",
+        description: "Diversiteit is onze kracht",
+      },
+      {
+        icon: Activity,
+        title: "Gezondheid & Welzijn",
+        description: "Balans in lichaam, geest en emotie",
+      },
+    ],
+  },
+  {
+    id: 2,
     title: "Ons Modulair Coachingprogramma",
     subtitle: "5 Flexibele Fases naar Jouw Doel",
     type: "overview",
@@ -41,7 +173,7 @@ const slides = [
       { name: "A: Onboarding", duration: "±1 week", icon: Play },
       { name: "B: Herstel", duration: "4-8 weken", icon: Heart },
       { name: "C: Voorbereiding", duration: "2-4 weken", icon: Target },
-      { name: "D: Doelfase", duration: "8-12 weken", icon: Zap },
+      { name: "D: Doelfase", duration: "8-12 weken (kan cyclisch herhaald worden)", icon: Zap },
       { name: "E: Optimalisatie", duration: "4-8 weken", icon: TrendingUp },
     ],
     modularExplanation: {
@@ -72,7 +204,101 @@ const slides = [
     },
   },
   {
-    id: 2,
+    id: 3,
+    title: "Bewezen Transformaties",
+    subtitle: "Echte Resultaten van Onze Klanten",
+    type: "transformations",
+    transformations: [
+      {
+        name: "Martin",
+        image: "/images/martin-20achtergrond-20transformatie.png",
+      },
+      {
+        name: "Kim",
+        image: "/images/kim-20achtergrond-20transformatie.png",
+      },
+      {
+        name: "Salim",
+        image: "/images/salim-20achtergrond-20transformatie.png",
+      },
+      {
+        name: "Wouter",
+        image: "/images/wouter-20achtergrond-20transformatie.png",
+      },
+    ],
+  },
+  {
+    id: 4,
+    title: "Wat Onze Klanten Zeggen",
+    subtitle: "Google Reviews - Gemiddeld 5,0 Sterren",
+    type: "reviews",
+    rating: 5.0,
+    totalReviews: 7,
+    reviews: [
+      {
+        name: "Ingrid Eekhof",
+        date: "8 maanden geleden",
+        rating: 5,
+        text: "Ik sport nu 7 maanden onder begeleiding van Martin. Wat mij betreft weet Martin heel goed de balans te bewaren tussen een nuchtere professionele benadering en persoonlijke betrokkenheid. De wekelijkse feedback motiveert mij iedere keer weer om door te gaan. De Evotion App is gebruiksvriendelijk en overzichtelijk. Je voedings- en trainingschema kan je 'loggen' om zo een goed inzicht te krijgen in je resultaten en groei. En stuur je een trainingsfilmpje door met een vraag? Je hoeft nooit lang te wachten, vrijwel direct wordt deze door Martin beantwoord. Martin, bedankt.",
+      },
+      {
+        name: "Marcel MPW",
+        date: "3 maanden geleden",
+        rating: 5,
+        text: "Martin is een uitstekende coach. Hij doet en zegt wat hij belooft. Hij geeft ook oprechte feedback. Dat vind ik fijn. Hij zegt dingen als: je betaalt me niet om je vriend te zijn, ik ben je coach, en we gaan doelen bereiken.",
+      },
+      {
+        name: "Kim Altena",
+        date: "8 maanden geleden",
+        rating: 5,
+        text: "Dit is echt een prachtig cadeau om jezelf te geven als je je helemaal down voelt en je afvraagt wat je nog meer kan helpen om gezonder te leven wat betreft je voeding en beweging. Ik dacht dat ik het goed en verstandig deed, maar dat leverde geen resultaten op.",
+      },
+      {
+        name: "Wouter Baerveldt",
+        date: "8 maanden geleden",
+        rating: 5,
+        text: "Ik heb een zeer positieve ervaring met Martin's post-natale training! Hij heeft uitgebreide kennis van sport, voeding en mindset, en hij communiceert dit op een toegankelijke maar toch rechtstreekse manier. Ik heb al geweldige resultaten behaald onder zijn begeleiding!",
+      },
+      {
+        name: "Hessel Van Der Molen",
+        date: "8 maanden geleden",
+        rating: 5,
+        text: "Ik ben heel blij met Martin Langenberg als personal coach...hoewel ik hem soms zou kunnen wurgen (LOL). Hij is streng...en zegt het zoals het is.",
+      },
+      {
+        name: "Casper Lenten",
+        date: "8 maanden geleden",
+        rating: 5,
+        text: "Professioneel advies en uitstekende resultaten. Zeer aan te bevelen als je een verschil wilt maken in je levensstijl en gezondheid.",
+      },
+      {
+        name: "Salim Mardine",
+        date: "8 maanden geleden",
+        rating: 5,
+        text: "Anders 💪🏼🫡",
+      },
+      {
+        name: "App Gebruiker",
+        date: "Recent",
+        rating: 5,
+        text: "Eyy Martin ik wil jou bedanken voor de kennis die je mij hebt gegeven. ik had van mezelf nooit verwacht dat dit zo veel zou helpen om dingen daadwerkelijk te doen. Door jou is mijn knop omgegaan. daar zal ik jou voor altijd dankbaar voor zijn",
+      },
+      {
+        name: "App Gebruiker",
+        date: "Recent",
+        rating: 5,
+        text: "Hoi Martin, super bedankt weer voor je feedback. Ik vind je een hartstikke fijne coach. To the point, altijd betrokken, nuchter. Je manier van benadering wat betreft de kracht loyaliteit werkt bij mij heel goed. Ik vertrouw het proces wat je aanbiedt en merk dat ik mijn best hiervoor wil doen. Dank je wel.",
+      },
+      {
+        name: "App Gebruiker",
+        date: "Recent",
+        rating: 5,
+        text: "Thanks voor de feedback! Fijne manier ook zo via Loom. Ik zie de aangepaste trainingen, leuk! Zin om daarmee van start te gaan deze week 💪",
+      },
+    ],
+  },
+  {
+    id: 5,
     title: "Wat Je Krijgt Tijdens het Traject",
     subtitle: "Volledige Ondersteuning voor Jouw Transformatie",
     type: "benefits",
@@ -96,7 +322,7 @@ const slides = [
           "Toegang tot onze complete kennisbank met lessen over training, voeding, mindset en meer. Bouw zelfkennis op.",
         features: [
           "Gestructureerde lessen per onderwerp",
-          "Video-tutorials en handleidingen",
+          "Handleidingen en interactieve tools",
           "Wetenschappelijk onderbouwde informatie",
           "Op je eigen tempo leren",
         ],
@@ -152,7 +378,7 @@ const slides = [
     ],
   },
   {
-    id: 3,
+    id: 6,
     title: "Fase A: Onboarding",
     duration: "±1 week",
     icon: Play,
@@ -164,14 +390,14 @@ const slides = [
         "Op maat gemaakt trainings- en voedingsschema",
         "Toegang tot de Evotion Coaching App",
         "Toegang tot e-learning portal en klanten support",
-        "Beginmetingen: gewicht, omvang, conditietest",
+        "Beginmetingen: gewicht, omvang en foto's",
         "Duidelijk plan van aanpak voor de komende maanden",
       ],
       result: "Je weet precies wat te doen en hoe je vooruitgang wordt bijgehouden",
     },
   },
   {
-    id: 4,
+    id: 7,
     title: "Fase B: Herstel / Restoration",
     duration: "4-8 weken",
     icon: Heart,
@@ -190,7 +416,7 @@ const slides = [
     },
   },
   {
-    id: 5,
+    id: 8,
     title: "Fase C: Voorbereiding",
     duration: "2-4 weken",
     icon: Target,
@@ -209,7 +435,7 @@ const slides = [
     },
   },
   {
-    id: 6,
+    id: 9,
     title: "Fase D: Doelfase",
     duration: "8-12 weken (kan cyclisch herhaald worden)",
     icon: Zap,
@@ -262,7 +488,7 @@ const slides = [
     ],
   },
   {
-    id: 7,
+    id: 10,
     title: "Fase E: Optimalisatie",
     duration: "4-8 weken",
     icon: TrendingUp,
@@ -281,7 +507,7 @@ const slides = [
     },
   },
   {
-    id: 8,
+    id: 11,
     title: "Flexibel & Cyclisch Programma",
     type: "flexibility",
     content: {
@@ -306,12 +532,12 @@ const slides = [
     },
   },
   {
-    id: 9,
+    id: 12,
     title: "Jouw Transformatie Begint Nu",
     type: "cta",
     content: {
       title: "Klaar om te Starten?",
-      subtitle: "Plan een gratis kennismakingsgesprek en ontdek wat Evotion Coaching voor jou kan betekenen",
+      subtitle: "Ontdek wat Evotion Coaching voor jou kan betekenen",
       benefits: [
         "Persoonlijke intake en doelanalyse",
         "Op maat gemaakt plan voor jouw situatie",
@@ -385,8 +611,25 @@ export default function PresentatieClientPage() {
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden min-h-[70vh]">
           {/* Intro Slide */}
           {slide.type === "intro" && (
-            <div className="h-full min-h-[70vh] flex flex-col items-center justify-center p-12 bg-gradient-to-br from-[#1e1839] via-[#2a2050] to-[#1e1839] text-white">
-              <div className="max-w-4xl text-center space-y-8">
+            <div className="relative h-full min-h-[70vh] flex flex-col items-center justify-center overflow-hidden">
+              {/* Video Background */}
+              <div className="absolute inset-0 z-0">
+                <div className="relative w-full h-full">
+                  <iframe
+                    src="https://www.youtube.com/embed/SpTe8MThxVc?autoplay=1&mute=1&loop=1&playlist=SpTe8MThxVc&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1"
+                    className="absolute inset-0 w-full h-full object-cover scale-150"
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen
+                    style={{ pointerEvents: "none" }}
+                    title="Evotion Coaching introductievideo"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-[#1e1839]/80 via-[#1e1839]/70 to-[#1e1839]/80"></div>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="relative z-10 max-w-4xl text-center space-y-8 p-12 text-white">
                 <div className="inline-block px-6 py-2 bg-white/10 rounded-full text-sm font-medium backdrop-blur-sm">
                   Evotion Coaching Programma
                 </div>
@@ -401,6 +644,88 @@ export default function PresentatieClientPage() {
                     Start Presentatie
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Values Slide - Vision, Mission, Core Values */}
+          {slide.type === "values" && (
+            <div className="relative h-full overflow-y-auto">
+              {/* Hero Visie Section */}
+              <div className="relative bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] text-white py-12 px-6 md:px-10">
+                <div className="max-w-5xl mx-auto text-center space-y-6">
+                  <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 mb-2">
+                    <Target className="w-5 h-5" />
+                    <span className="text-sm font-semibold uppercase tracking-wider">Onze Visie</span>
+                  </div>
+                  <h2 className="text-3xl md:text-5xl font-bold text-balance leading-tight">{slide.vision.text}</h2>
+                  <div className="pt-4">
+                    <p className="text-xl md:text-2xl font-light italic text-white/90 text-balance">
+                      &ldquo;{slide.vision.tagline}&rdquo;
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mission Section */}
+              <div className="bg-white px-6 md:px-10 py-10">
+                <div className="max-w-5xl mx-auto">
+                  <div className="text-center mb-8">
+                    <div className="inline-flex items-center gap-2 bg-[#1e1839]/5 px-4 py-2 rounded-full border border-[#1e1839]/10 mb-3">
+                      <Heart className="w-5 h-5 text-[#1e1839]" />
+                      <span className="text-sm font-semibold uppercase tracking-wider text-[#1e1839]">Onze Missie</span>
+                    </div>
+                    <p className="text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto leading-relaxed text-balance">
+                      {slide.mission.text}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                    {slide.mission.goals.map((goal: string, idx: number) => (
+                      <div
+                        key={idx}
+                        className="relative bg-gradient-to-br from-slate-50 to-white border-2 border-[#1e1839]/10 rounded-2xl p-6 text-center hover:border-[#1e1839]/30 hover:shadow-lg transition-all duration-300 group"
+                      >
+                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-xl flex items-center justify-center text-white text-lg font-bold shadow-lg group-hover:scale-110 transition-transform">
+                          {idx + 1}
+                        </div>
+                        <p className="text-sm md:text-base font-bold text-slate-900 mt-3 leading-tight text-balance">
+                          {goal}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Core Values Section */}
+              <div className="bg-gradient-to-b from-slate-50 to-slate-100 px-6 md:px-10 py-10">
+                <div className="max-w-6xl mx-auto">
+                  <div className="text-center mb-8">
+                    <h3 className="text-2xl md:text-4xl font-bold text-slate-900 mb-2">Onze 7 Kernwaarden</h3>
+                    <p className="text-slate-600 text-base md:text-lg">De fundamenten van onze coaching aanpak</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    {slide.coreValues.map((value: any, idx: number) => {
+                      const Icon = value.icon
+                      return (
+                        <div
+                          key={idx}
+                          className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl border border-slate-200/50 hover:border-[#1e1839]/20 transition-all duration-300 group"
+                        >
+                          <div className="w-14 h-14 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform">
+                            <Icon className="w-7 h-7 text-white" />
+                          </div>
+                          <h4 className="text-base md:text-lg font-bold text-slate-900 mb-2 leading-tight">
+                            {value.title}
+                          </h4>
+                          <p className="text-xs md:text-sm text-slate-600 leading-relaxed">{value.description}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
@@ -450,13 +775,13 @@ export default function PresentatieClientPage() {
                     return (
                       <div
                         key={idx}
-                        className="bg-white border-2 border-slate-200 rounded-2xl p-6 space-y-4 hover:border-[#1e1839] transition-all duration-300 hover:shadow-lg"
+                        className="bg-white border-2 border-slate-200 rounded-2xl p-8 space-y-4 hover:border-[#1e1839] transition-all duration-300 hover:shadow-lg"
                       >
                         <div className="w-12 h-12 bg-[#1e1839] rounded-xl flex items-center justify-center">
                           <Icon className="w-6 h-6 text-white" />
                         </div>
                         <h4 className="text-lg font-bold text-slate-900">{point.title}</h4>
-                        <p className="text-slate-600 text-sm leading-relaxed">{point.description}</p>
+                        <p className="text-slate-600 leading-relaxed">{point.description}</p>
                       </div>
                     )
                   })}
@@ -465,6 +790,78 @@ export default function PresentatieClientPage() {
                 <div className="bg-gradient-to-br from-[#1e1839] to-[#2a2050] rounded-2xl p-8 text-white">
                   <p className="text-lg leading-relaxed text-center">{slide.modularExplanation?.vision}</p>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Transformations Slide */}
+          {slide.type === "transformations" && (
+            <div className="min-h-[70vh] p-12 bg-gradient-to-br from-slate-50 to-white">
+              <div className="max-w-6xl mx-auto space-y-12">
+                {/* Header */}
+                <div className="text-center space-y-4">
+                  <h2 className="text-5xl font-bold text-slate-900">{slide.title}</h2>
+                  <p className="text-xl text-slate-600">{slide.subtitle}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {slide.transformations?.map((transformation: any, index: number) => (
+                    <div key={index}>
+                      <img
+                        src={transformation.image || "/placeholder.svg"}
+                        alt={`Transformatie ${index + 1}`}
+                        className="w-full h-auto object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Bottom text */}
+                <div className="text-center pt-8">
+                  <p className="text-lg text-slate-700 text-balance max-w-3xl mx-auto">
+                    Deze transformaties zijn bereikt met ons modulaire programma. Iedereen had een uniek traject,
+                    afgestemd op hun persoonlijke situatie en doelen. Jouw transformatie kan de volgende zijn.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Reviews Slide */}
+          {slide.type === "reviews" && (
+            <div className="space-y-8 pb-2">
+              <div className="text-center space-y-4">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-8 h-8 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <span className="text-3xl font-bold text-foreground">{slide.rating.toFixed(1)}</span>
+                </div>
+                <p className="text-lg text-muted-foreground">Gebaseerd op Google Reviews</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[650px] overflow-y-auto pr-2 px-4">
+                {slide.reviews.map((review, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-card border border-border rounded-xl p-6 space-y-3 hover:shadow-lg transition-shadow"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="font-semibold text-foreground">{review.name}</h4>
+                        <p className="text-sm text-muted-foreground">{review.date}</p>
+                      </div>
+                      <div className="flex gap-0.5">
+                        {[...Array(review.rating)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-sm text-foreground leading-relaxed">{review.text}</p>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -508,38 +905,21 @@ export default function PresentatieClientPage() {
               </div>
 
               {/* App Mockup Preview */}
-              <div className="mt-12 bg-gradient-to-br from-[#1e1839] to-[#2a2050] rounded-2xl p-8 text-white">
+              <div className="mt-12 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-8 text-white">
                 <div className="text-center mb-8">
                   <h3 className="text-2xl font-bold mb-2">Bekijk de Evotion Coaching App</h3>
                   <p className="text-slate-200">Al deze tools en meer in één krachtige app</p>
                 </div>
-                <div className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-                  {[
-                    {
-                      src: "/images/app-screenshots/evotion-dashboard.jpg",
-                      alt: "Dashboard",
-                    },
-                    {
-                      src: "/images/app-screenshots/evotion-workout.jpg",
-                      alt: "Workouts",
-                    },
-                    {
-                      src: "/images/app-screenshots/evotion-voeding.jpg",
-                      alt: "Voeding",
-                    },
-                  ].map((screen, screenIdx) => (
-                    <div key={screenIdx} className="rounded-xl overflow-hidden border-2 border-white/20">
-                      <div className="relative w-full aspect-[9/19]">
-                        <Image
-                          src={screen.src || `/placeholder.svg?height=400&width=190&query=app%20${screen.alt}`}
-                          alt={screen.alt}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                        />
-                      </div>
-                    </div>
-                  ))}
+                <div className="flex justify-center">
+                  <div className="relative w-full max-w-sm">
+                    <Image
+                      src="/images/evotion-20app-20mock-up.png"
+                      alt="Evotion Coaching App"
+                      width={400}
+                      height={800}
+                      className="w-full h-auto"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -650,36 +1030,37 @@ export default function PresentatieClientPage() {
 
           {/* CTA Slide */}
           {slide.type === "cta" && (
-            <div className="h-full min-h-[70vh] flex flex-col items-center justify-center p-12 bg-gradient-to-br from-[#1e1839] via-[#2a2050] to-[#1e1839] text-white">
-              <div className="max-w-4xl text-center space-y-10">
-                <div>
-                  <h2 className="text-5xl md:text-6xl font-bold mb-4 text-balance">{slide.content?.title}</h2>
-                  <p className="text-xl md:text-2xl text-slate-200 text-balance">{slide.content?.subtitle}</p>
-                </div>
+            <div className="h-full min-h-[70vh] relative overflow-hidden">
+              {/* Background Image */}
+              <div className="absolute inset-0">
+                <img
+                  src="/images/salimpresentatie.png"
+                  alt="Fitness transformation"
+                  className="w-full h-full object-cover"
+                />
+                {/* Purple overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[#1e1839]/95 via-[#2a2050]/90 to-[#1e1839]/95" />
+              </div>
 
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 text-left">
-                  <h3 className="text-2xl font-bold mb-6 text-center">Wat je krijgt:</h3>
-                  <ul className="space-y-4">
-                    {slide.content?.benefits.map((benefit, idx) => (
-                      <li key={idx} className="flex items-start gap-3">
-                        <CheckCircle2 className="w-6 h-6 text-white shrink-0 mt-0.5" />
-                        <span className="text-lg">{benefit}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              {/* Content */}
+              <div className="relative z-10 h-full flex flex-col items-center justify-center p-12 text-white">
+                <div className="max-w-4xl text-center space-y-10">
+                  <div>
+                    <h2 className="text-5xl md:text-6xl font-bold mb-4 text-balance">{slide.content?.title}</h2>
+                    <p className="text-xl md:text-2xl text-slate-200 text-balance">{slide.content?.subtitle}</p>
+                  </div>
 
-                <div className="pt-6">
-                  <Button
-                    size="lg"
-                    asChild
-                    className="bg-white text-[#1e1839] hover:bg-slate-100 px-10 py-7 text-xl rounded-xl shadow-2xl hover:scale-105 transition-transform"
-                  >
-                    <a href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
-                      Plan Gratis Kennismakingsgesprek
-                      <ArrowRight className="w-6 h-6 ml-2" />
-                    </a>
-                  </Button>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 text-left">
+                    <h3 className="text-2xl font-bold mb-6 text-center">Wat je krijgt:</h3>
+                    <ul className="space-y-4">
+                      {slide.content?.benefits.map((benefit, idx) => (
+                        <li key={idx} className="flex items-start gap-3">
+                          <CheckCircle2 className="w-6 h-6 text-white shrink-0 mt-0.5" />
+                          <span className="text-lg">{benefit}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
