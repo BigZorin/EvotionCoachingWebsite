@@ -227,28 +227,28 @@ export default function PersonalTrainingClientPage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="py-16 lg:py-24 bg-white">
+      <section className="py-12 lg:py-24 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="space-y-6">
-                <Badge className="bg-gray-100 text-gray-700 border-gray-200">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div className="space-y-6 lg:space-y-8 text-center lg:text-left">
+              <div className="space-y-4 lg:space-y-6">
+                <Badge className="bg-gray-100 text-gray-700 border-gray-200 inline-flex">
                   <Dumbbell className="w-4 h-4 mr-2" />
                   Personal Training
                 </Badge>
                 <h1 className="text-3xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                  Personal Training <span className="text-gray-700">1-op-1 Begeleiding</span>
+                  Personal Training <span className="block lg:inline text-gray-700">1-op-1 Begeleiding</span>
                 </h1>
-                <p className="text-base lg:text-xl text-gray-600 leading-relaxed">
+                <p className="text-base lg:text-xl text-gray-600 leading-relaxed max-w-lg mx-auto lg:mx-0">
                   Ervaar de kracht van 1-op-1 begeleiding met onze gecertificeerde personal trainers. Bereik je doelen
                   voor vetverlies, spieropbouw en fitness sneller, veiliger en effectiever dan ooit tevoren.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center lg:justify-start">
                 <Button
                   size="lg"
-                  className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 text-lg font-semibold"
+                  className="bg-gray-900 hover:bg-gray-800 text-white px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
                   asChild
                 >
                   <a
@@ -256,7 +256,7 @@ export default function PersonalTrainingClientPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <MessageCircle className="w-5 h-5 mr-2" />
+                    <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
                     Stuur een Bericht
                   </a>
                 </Button>
@@ -267,29 +267,29 @@ export default function PersonalTrainingClientPage() {
                   asChild
                 >
                   <a href="tel:0064365571">
-                    <Phone className="w-5 h-5 mr-2" />
+                    <Phone className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
                     Bel Direct
                   </a>
                 </Button>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 lg:gap-6 pt-6 lg:pt-8">
+              <div className="grid grid-cols-3 gap-4 lg:gap-6 pt-4 lg:pt-8">
                 <div className="text-center">
                   <div className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">100%</div>
-                  <div className="text-xs md:text-sm text-gray-600">Persoonlijk</div>
+                  <div className="text-xs lg:text-sm text-gray-600">Persoonlijk</div>
                 </div>
                 <div className="text-center">
                   <div className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">1-op-1</div>
-                  <div className="text-xs md:text-sm text-gray-600">Begeleiding</div>
+                  <div className="text-xs lg:text-sm text-gray-600">Begeleiding</div>
                 </div>
                 <div className="text-center">
                   <div className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">5.0</div>
-                  <div className="text-xs md:text-sm text-gray-600">Google Score</div>
+                  <div className="text-xs lg:text-sm text-gray-600">Google Score</div>
                 </div>
               </div>
             </div>
 
-            <div className="relative">
+            <div className="relative hidden lg:block">
               <div className="relative w-full h-[480px] lg:h-[520px] rounded-2xl overflow-hidden border border-gray-200">
                 <Image
                   src="/images/personal-training-session.jpeg"
@@ -319,31 +319,30 @@ export default function PersonalTrainingClientPage() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-16 lg:py-24 bg-gray-50">
+      <section className="py-12 lg:py-24 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-6">
+          <div className="text-center mb-8 lg:mb-16">
+            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-4 lg:mb-6 inline-flex">
               <Target className="w-4 h-4 mr-2" />
               Voordelen
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Waarom Kiezen voor <span className="text-gray-700">Personal Training</span>?
-            </h2>
-            <p className="text-base md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Personal training biedt unieke voordelen die je niet krijgt bij groepslessen of zelfstandig trainen. Onze
-              personal trainers zorgen voor maximale resultaten.
+            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">Waarom Personal Training?</h2>
+            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
+              Ontdek de voordelen van persoonlijke begeleiding en waarom het de snelste weg is naar jouw doelen.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-8">
             {benefits.map((benefit, index) => (
               <Card key={index} className="border border-gray-200 hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto">
-                    <benefit.icon className="w-8 h-8 text-gray-700" />
+                <CardContent className="p-4 lg:p-8 text-center space-y-2 lg:space-y-4">
+                  <div className="w-10 h-10 lg:w-16 lg:h-16 bg-gray-100 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto">
+                    <benefit.icon className="w-5 h-5 lg:w-8 lg:h-8 text-gray-700" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">{benefit.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{benefit.description}</p>
+                  <h3 className="text-sm lg:text-xl font-bold text-gray-900">{benefit.title}</h3>
+                  <p className="text-xs lg:text-base text-gray-600 leading-relaxed hidden sm:block">
+                    {benefit.description}
+                  </p>
                 </CardContent>
               </Card>
             ))}
@@ -351,61 +350,53 @@ export default function PersonalTrainingClientPage() {
         </div>
       </section>
 
-      {/* Process Section */}
-      <section className="py-16 lg:py-24 bg-white">
+      {/* How it Works */}
+      <section className="py-12 lg:py-24 bg-white">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-6">
+          <div className="text-center mb-8 lg:mb-16">
+            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-4 lg:mb-6 inline-flex">
               <TrendingUp className="w-4 h-4 mr-2" />
-              Proces
+              Hoe Werkt Het
             </Badge>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Hoe werkt <span className="text-gray-700">Personal Training</span>?
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Van eerste kennismaking tot het bereiken van je doelen - zo ziet jouw reis met een personal trainer eruit.
-            </p>
+            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">Jouw Traject in 4 Stappen</h2>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-8">
             {[
               {
                 step: "01",
-                title: "Intake & Doelen",
-                description:
-                  "We bespreken jouw doelen, ervaring en eventuele beperkingen tijdens een uitgebreide intake.",
+                title: "Intake",
+                description: "Gratis kennismakingsgesprek om je doelen en situatie te bespreken.",
               },
               {
                 step: "02",
                 title: "Plan op Maat",
-                description:
-                  "Op basis van de intake maken we een volledig gepersonaliseerd trainings- en voedingsplan.",
+                description: "Persoonlijk trainings- en voedingsplan afgestemd op jouw doelen.",
               },
               {
                 step: "03",
-                title: "Training Sessies",
-                description: "Tijdens elke sessie krijg je 100% aandacht en begeleiding van je personal trainer.",
+                title: "Training",
+                description: "1-op-1 sessies met je personal trainer voor optimale resultaten.",
               },
               {
                 step: "04",
-                title: "Resultaten & Groei",
-                description: "We monitoren je voortgang en passen het plan aan voor continue groei en resultaten.",
+                title: "Resultaat",
+                description: "Regelmatige metingen en aanpassingen voor blijvend succes.",
               },
             ].map((item, index) => (
               <Card
                 key={index}
                 className="relative text-center border border-gray-200 hover:border-gray-300 transition-colors"
               >
-                <CardContent className="p-6 space-y-4">
-                  <div className="w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center mx-auto text-white">
-                    <span className="text-xl font-bold">{item.step}</span>
+                <CardContent className="p-4 lg:p-6 space-y-2 lg:space-y-4">
+                  <div className="w-10 h-10 lg:w-16 lg:h-16 bg-gray-900 rounded-full flex items-center justify-center mx-auto text-white">
+                    <span className="text-sm lg:text-xl font-bold">{item.step}</span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">{item.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{item.description}</p>
+                  <h3 className="text-sm lg:text-xl font-bold text-gray-900">{item.title}</h3>
+                  <p className="text-xs lg:text-base text-gray-600 leading-relaxed hidden sm:block">
+                    {item.description}
+                  </p>
                 </CardContent>
-                {index < 3 && (
-                  <div className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-12 h-[2px] bg-gray-200" />
-                )}
               </Card>
             ))}
           </div>
@@ -562,23 +553,21 @@ export default function PersonalTrainingClientPage() {
         </div>
       </section>
 
-      {/* Packages Section - Updated with WhatsApp CTAs */}
-      <section className="py-16 lg:py-24 bg-gray-50">
+      {/* Packages Section */}
+      <section className="py-12 lg:py-24 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-6">
+          <div className="text-center mb-8 lg:mb-16">
+            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-4 lg:mb-6 inline-flex">
               <Dumbbell className="w-4 h-4 mr-2" />
               Pakketten
             </Badge>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Kies het <span className="text-gray-700">Pakket</span> dat bij je Past
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Van een kennismaking tot een complete transformatie - we hebben voor iedereen het juiste pakket.
+            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">Kies Jouw Pakket</h2>
+            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
+              Flexibele opties voor elk niveau en elke doelstelling. Neem contact op voor meer informatie.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-3 gap-4 lg:gap-8 max-w-6xl mx-auto">
             {packages.map((pkg, index) => (
               <div key={index} className="relative">
                 <Card
@@ -596,7 +585,7 @@ export default function PersonalTrainingClientPage() {
                   )}
 
                   <CardContent className="p-6 lg:p-8 space-y-5 lg:space-y-6">
-                    <div className="text-center space-y-3">
+                    <div className="text-center space-y-4">
                       <h3 className="text-xl lg:text-2xl font-bold text-gray-900">{pkg.title}</h3>
                       <div className="space-y-1">
                         <div className="text-2xl lg:text-3xl font-bold text-gray-900">Op Aanvraag</div>
@@ -660,6 +649,43 @@ export default function PersonalTrainingClientPage() {
         </div>
       </section>
 
+      {/* CTA Section */}
+      <section className="py-12 lg:py-24 bg-gray-900 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-2xl lg:text-5xl font-bold mb-3 lg:mb-6">Klaar om te Beginnen?</h2>
+          <p className="text-sm lg:text-xl text-gray-300 max-w-2xl mx-auto mb-6 lg:mb-8 px-2">
+            Neem vandaag nog contact op en zet de eerste stap naar een fitter, gezonder en sterker lichaam.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center px-4">
+            <Button
+              size="lg"
+              className="bg-white text-gray-900 hover:bg-gray-100 px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
+              asChild
+            >
+              <a
+                href="https://wa.me/31064365571?text=Hoi!%20Ik%20wil%20graag%20starten%20met%20Personal%20Training."
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+                Start via WhatsApp
+              </a>
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-2 border-white text-white hover:bg-white/10 bg-transparent"
+              asChild
+            >
+              <a href="tel:0064365571">
+                <Phone className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+                Bel 06 43 65 571
+              </a>
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Contact Section - Updated with Zorin's WhatsApp */}
       <section className="py-16 lg:py-24 bg-white">
         <div className="container mx-auto px-4">
@@ -673,7 +699,7 @@ export default function PersonalTrainingClientPage() {
                 <h2 className="text-4xl font-bold text-gray-900">
                   Klaar om te <span className="text-gray-700">Starten</span>?
                 </h2>
-                <p className="text-xl text-gray-600 leading-relaxed">
+                <p className="text-sm lg:text-xl text-gray-600 leading-relaxed">
                   Neem contact met ons op en ontdek hoe personal training jouw leven kan veranderen. Stuur direct een
                   bericht via WhatsApp voor een snelle reactie.
                 </p>

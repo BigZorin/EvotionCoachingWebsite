@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   Dumbbell,
-  Users,
   Menu,
   ChevronDown,
   X,
@@ -86,20 +85,6 @@ export function Header() {
                         <div>
                           <div className="font-semibold">Personal Training</div>
                           <div className="text-xs text-gray-500">1-op-1 begeleiding</div>
-                        </div>
-                      </div>
-                    </Link>
-                    <Link
-                      href="/duo-training"
-                      className={`block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium ${
-                        isActive("/duo-training") ? "bg-primary/5" : ""
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Users className="w-4 h-4 text-primary" />
-                        <div>
-                          <div className="font-semibold">Duo Training</div>
-                          <div className="text-xs text-gray-500">Train samen met een partner</div>
                         </div>
                       </div>
                     </Link>
@@ -364,21 +349,6 @@ export function Header() {
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-sm">Personal Training</div>
                           <div className="text-xs text-gray-500 truncate">1-op-1 begeleiding</div>
-                        </div>
-                      </Link>
-                      <Link
-                        href="/duo-training"
-                        className={`flex items-center gap-3 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
-                          isActive("/duo-training") ? "bg-primary/10 text-primary" : ""
-                        }`}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <Users className="w-4 h-4 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-sm">Duo Training</div>
-                          <div className="text-xs text-gray-500 truncate">Train samen met een partner</div>
                         </div>
                       </Link>
                       <Link

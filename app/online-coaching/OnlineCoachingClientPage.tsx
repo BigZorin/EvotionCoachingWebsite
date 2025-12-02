@@ -10,7 +10,6 @@ import {
   ChevronUp,
   Smartphone,
   User,
-  Trophy,
   Zap,
   BarChart,
   TrendingUp,
@@ -21,12 +20,17 @@ import {
   Play,
   Heart,
   Settings,
-  Repeat,
   GraduationCap,
   Video,
-  Users,
+  Puzzle,
+  Layers,
+  Calendar,
+  Dumbbell,
+  Apple,
+  LineChart,
+  RotateCcw,
+  Clock,
 } from "lucide-react"
-import Image from "next/image"
 import { useState } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -76,34 +80,49 @@ export default function OnlineCoachingClientPage() {
 
   const phases = [
     {
-      name: "A: Onboarding",
+      phase: "1",
+      title: "A: Onboarding",
       duration: "±1 week",
       icon: <Play className="w-5 h-5" />,
       description: "Intake, kennismaking en opzetten van je volledige programma",
+      features: ["Volledige doorloop van het 5-fasen programma", "Toegang tot de Evotion Coaching App"],
+      highlight: false,
     },
     {
-      name: "B: Herstel",
+      phase: "2",
+      title: "B: Herstel",
       duration: "4-8 weken",
       icon: <Heart className="w-5 h-5" />,
       description: "Metabolisme herstellen en gezonde gewoontes opbouwen",
+      features: ["Toegang tot e-learning portal (12weken.evotion-coaching.nl)", "Toegang tot klanten support portal"],
+      highlight: false,
     },
     {
-      name: "C: Voorbereiding",
+      phase: "3",
+      title: "C: Voorbereiding",
       duration: "2-4 weken",
       icon: <Target className="w-5 h-5" />,
       description: "Mentaal en fysiek klaarstomen voor de intensieve doelfase",
+      features: ["Wekelijkse persoonlijke check-ins", "Op maat gemaakt trainings- en voedingsplan"],
+      highlight: false,
     },
     {
-      name: "D: Doelfase",
+      phase: "4",
+      title: "D: Doelfase",
       duration: "8-12 weken",
       icon: <Zap className="w-5 h-5" />,
       description: "Intensief werken aan jouw specifieke doel (kan cyclisch herhaald)",
+      features: ["Voortgangsanalyses met foto's en metingen", "Onbeperkte coach support via app"],
+      highlight: true,
     },
     {
-      name: "E: Optimalisatie",
+      phase: "5",
+      title: "E: Optimalisatie",
       duration: "4-8 weken",
       icon: <TrendingUp className="w-5 h-5" />,
       description: "Resultaten verankeren en onderhoudsplan ontwikkelen",
+      features: ["Meerdere doelfases mogelijk (cyclisch)", "Extra tijd voor duurzame gewoontevorming"],
+      highlight: false,
     },
   ]
 
@@ -199,168 +218,177 @@ export default function OnlineCoachingClientPage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative py-16 md:py-28 lg:py-32 bg-gradient-to-br from-primary to-primary/80 overflow-hidden">
+      <section className="relative py-12 lg:py-32 bg-gradient-to-br from-primary to-primary/80 overflow-hidden">
         <div className="absolute inset-0 bg-[url('/placeholder.svg?height=1080&width=1920')] bg-cover bg-center opacity-10"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/80 to-primary/70"></div>
 
         <div className="container mx-auto px-4 lg:px-6 relative z-10">
-          <div className="max-w-4xl mx-auto text-center space-y-4 md:space-y-8">
-            <Badge className="bg-secondary/20 text-white hover:bg-secondary/30 backdrop-blur-sm text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2">
-              <MapPin className="w-3 h-3 md:w-4 md:h-4 mr-1.5 md:mr-2" />
+          <div className="max-w-4xl mx-auto text-center space-y-4 lg:space-y-8">
+            <Badge className="bg-secondary/20 text-white hover:bg-secondary/30 backdrop-blur-sm text-xs lg:text-sm px-3 lg:px-4 py-1.5 lg:py-2 inline-flex">
+              <MapPin className="w-3 h-3 lg:w-4 lg:h-4 mr-1.5 lg:mr-2" />
               Modulair Coachingprogramma
             </Badge>
 
-            <h1 className="text-2xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+            <h1 className="text-3xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
               Online Coaching
               <span className="block text-secondary">Op Jouw Tempo</span>
             </h1>
 
-            <p className="text-sm md:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto px-2">
+            <p className="text-base lg:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto px-2">
               Een persoonlijk 5-fasen programma dat zich aanpast aan jouw lichaam, doelen en tempo. Geen standaard
               schema's, maar maatwerk voor duurzame resultaten.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center pt-2 md:pt-4 px-4">
+            <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center pt-2 lg:pt-4 px-4">
               <Button
                 size="lg"
                 onClick={handleEmail}
-                className="bg-white text-primary hover:bg-gray-100 px-6 md:px-8 py-5 md:py-6 text-base md:text-lg font-semibold shadow-xl w-full sm:w-auto"
+                className="bg-white text-primary hover:bg-gray-100 px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold shadow-xl w-full sm:w-auto"
               >
-                <Mail className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+                <Mail className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
                 Stuur een E-mail
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 onClick={() => handleWhatsApp("online coaching traject")}
-                className="border-2 border-white text-white hover:bg-white hover:text-primary px-6 md:px-8 py-5 md:py-6 text-base md:text-lg font-semibold bg-transparent w-full sm:w-auto"
+                className="border-2 border-white text-white hover:bg-white hover:text-primary px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold bg-transparent w-full sm:w-auto"
               >
-                <MessageCircle className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+                <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
                 WhatsApp Bericht
               </Button>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 md:gap-4 pt-6 md:pt-8 max-w-2xl mx-auto">
+            <div className="grid grid-cols-3 gap-4 lg:gap-6 pt-4 lg:pt-8 max-w-2xl mx-auto">
               <div className="text-center">
-                <div className="text-lg md:text-3xl font-bold text-white mb-0.5 md:mb-1">5</div>
-                <div className="text-[10px] md:text-sm text-white/80">Flexibele Fases</div>
+                <div className="text-xl lg:text-3xl font-bold text-white mb-1">5</div>
+                <div className="text-xs lg:text-sm text-white/80">Flexibele Fases</div>
               </div>
               <div className="text-center">
-                <div className="text-lg md:text-3xl font-bold text-white mb-0.5 md:mb-1">100%</div>
-                <div className="text-[10px] md:text-sm text-white/80">Op Maat Gemaakt</div>
+                <div className="text-xl lg:text-3xl font-bold text-white mb-1">100%</div>
+                <div className="text-xs lg:text-sm text-white/80">Op Maat Gemaakt</div>
               </div>
               <div className="text-center">
-                <div className="text-lg md:text-3xl font-bold text-white mb-0.5 md:mb-1">6-12</div>
-                <div className="text-[10px] md:text-sm text-white/80">Maanden Traject</div>
+                <div className="text-xl lg:text-3xl font-bold text-white mb-1">6-12</div>
+                <div className="text-xs lg:text-sm text-white/80">Maanden Traject</div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Modular Program Section */}
-      <section className="py-12 md:py-20 bg-gray-50">
+      {/* Waarom Modulair Section */}
+      <section className="py-12 lg:py-24 bg-white">
         <div className="container mx-auto px-4 lg:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-10 md:mb-16">
-            <Badge className="bg-primary/10 text-primary mb-3 md:mb-4 text-xs md:text-sm">
-              Het Modulaire Programma
+          <div className="text-center mb-8 lg:mb-16">
+            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-4 lg:mb-6 inline-flex">
+              <Puzzle className="w-4 h-4 mr-2" />
+              Onze Aanpak
             </Badge>
-            <h2 className="text-xl md:text-4xl font-bold text-gray-900 mb-4 md:mb-6">
-              5 Fases naar <span className="text-primary">Jouw Doel</span>
+            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">
+              Waarom een Modulair Programma?
             </h2>
-            <p className="text-sm md:text-lg text-gray-600 px-2">
-              Geen standaard kalender, maar een programma dat zich aanpast aan jouw unieke reis. Elke fase duurt precies
-              zo lang als jij nodig hebt.
+            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
+              Geen standaard schema's of one-size-fits-all aanpak. Jouw lichaam is uniek en verdient een programma dat
+              zich aanpast.
             </p>
           </div>
 
-          {/* Why Modular */}
-          <div className="max-w-4xl mx-auto mb-10 md:mb-16">
-            <div className="bg-white rounded-2xl p-5 md:p-8 shadow-lg">
-              <h3 className="text-lg md:text-2xl font-bold text-gray-900 mb-4 md:mb-6 text-center">Waarom Modulair?</h3>
-              <div className="grid md:grid-cols-3 gap-4 md:gap-6">
-                <div className="text-center p-3 md:p-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                    <Users className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-8">
+            {[
+              {
+                icon: Puzzle,
+                title: "Flexibel",
+                description: "Elke fase wordt aangepast aan jouw voortgang en feedback",
+              },
+              {
+                icon: Target,
+                title: "Doelgericht",
+                description: "Specifieke doelen per fase voor meetbare resultaten",
+              },
+              {
+                icon: TrendingUp,
+                title: "Progressief",
+                description: "Geleidelijke opbouw voor duurzame transformatie",
+              },
+              {
+                icon: RotateCcw,
+                title: "Veilig",
+                description: "Wetenschappelijk onderbouwde methodes",
+              },
+            ].map((item, index) => (
+              <Card
+                key={index}
+                className="border border-gray-200 hover:shadow-lg transition-all duration-300 text-center"
+              >
+                <CardContent className="p-4 lg:p-8 space-y-2 lg:space-y-4">
+                  <div className="w-10 h-10 lg:w-16 lg:h-16 bg-primary/10 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto">
+                    <item.icon className="w-5 h-5 lg:w-8 lg:h-8 text-primary" />
                   </div>
-                  <h4 className="font-bold text-gray-900 mb-1 md:mb-2 text-sm md:text-base">Iedereen is Uniek</h4>
-                  <p className="text-gray-600 text-xs md:text-sm">
-                    Jouw lichaam, doelen en uitgangsituatie zijn anders. Een standaard programma werkt daarom niet.
+                  <h3 className="text-sm lg:text-xl font-bold text-gray-900">{item.title}</h3>
+                  <p className="text-xs lg:text-base text-gray-600 leading-relaxed hidden sm:block">
+                    {item.description}
                   </p>
-                </div>
-                <div className="text-center p-3 md:p-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                    <Settings className="w-5 h-5 md:w-6 md:h-6 text-primary" />
-                  </div>
-                  <h4 className="font-bold text-gray-900 mb-1 md:mb-2 text-sm md:text-base">Aanpasbaar aan Jou</h4>
-                  <p className="text-gray-600 text-xs md:text-sm">
-                    Het programma past zich aan jou aan, niet andersom. Geen haast, geen druk.
-                  </p>
-                </div>
-                <div className="text-center p-3 md:p-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                    <Repeat className="w-5 h-5 md:w-6 md:h-6 text-primary" />
-                  </div>
-                  <h4 className="font-bold text-gray-900 mb-1 md:mb-2 text-sm md:text-base">Cyclisch & Flexibel</h4>
-                  <p className="text-gray-600 text-xs md:text-sm">
-                    Bereik een doel, consolideer het, en start aan een nieuw doel binnen je traject.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Phases */}
-          <div className="max-w-4xl mx-auto">
-            <div className="space-y-3 md:space-y-4">
-              {phases.map((phase, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-xl p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow flex items-start gap-3 md:gap-4"
-                >
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0 text-white">
-                    {phase.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 md:gap-2 mb-1 md:mb-2">
-                      <h3 className="font-bold text-gray-900 text-sm md:text-lg">{phase.name}</h3>
-                      <Badge className="bg-primary/10 text-primary w-fit text-[10px] md:text-xs">
-                        {phase.duration}
-                      </Badge>
-                    </div>
-                    <p className="text-gray-600 text-xs md:text-sm">{phase.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-12 md:py-20 bg-white">
+      {/* 5 Fases Section */}
+      <section className="py-12 lg:py-24 bg-gray-50">
         <div className="container mx-auto px-4 lg:px-6">
-          <div className="text-center max-w-4xl mx-auto mb-10 md:mb-16">
-            <Badge className="bg-primary/10 text-primary mb-3 md:mb-4 text-xs md:text-sm">Wat Je Krijgt</Badge>
-            <h2 className="text-xl md:text-4xl font-bold text-gray-900 mb-4 md:mb-6">
-              Alles voor Jouw <span className="text-primary">Succes</span>
-            </h2>
-            <p className="text-sm md:text-lg text-gray-600 px-2">
-              Volledige ondersteuning met de beste tools, persoonlijke begeleiding en educatie voor duurzame resultaten.
+          <div className="text-center mb-8 lg:mb-16">
+            <Badge className="bg-primary/10 text-primary border-primary/20 mb-4 lg:mb-6 inline-flex">
+              <Layers className="w-4 h-4 mr-2" />
+              Het Programma
+            </Badge>
+            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">De 5 Fases van Jouw Reis</h2>
+            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
+              Een gestructureerd maar flexibel programma dat jou stap voor stap naar je doelen begeleidt.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="hover:shadow-lg transition-all duration-300 overflow-hidden border-gray-200">
-                <CardContent className="p-4 md:p-6">
-                  <div className="flex items-start gap-3 md:gap-4">
-                    <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      {feature.icon}
+          <div className="space-y-4 lg:space-y-6 max-w-4xl mx-auto">
+            {phases.map((phase, index) => (
+              <Card
+                key={index}
+                className={`border-2 transition-all duration-300 hover:shadow-lg ${
+                  phase.highlight ? "border-primary bg-primary/5" : "border-gray-200"
+                }`}
+              >
+                <CardContent className="p-4 lg:p-8">
+                  <div className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6">
+                    <div
+                      className={`w-12 h-12 lg:w-16 lg:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center flex-shrink-0 mx-auto lg:mx-0 ${
+                        phase.highlight ? "bg-primary text-white" : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      <span className="text-lg lg:text-2xl font-bold">{phase.phase}</span>
                     </div>
-                    <div className="space-y-1 md:space-y-2">
-                      <h3 className="font-bold text-base md:text-xl text-gray-900">{feature.title}</h3>
-                      <p className="text-gray-600 text-xs md:text-sm leading-relaxed">{feature.description}</p>
+                    <div className="flex-1 text-center lg:text-left">
+                      <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3 mb-2 lg:mb-3 justify-center lg:justify-start">
+                        <h3 className="text-lg lg:text-2xl font-bold text-gray-900">{phase.title}</h3>
+                        <Badge
+                          variant="outline"
+                          className={phase.highlight ? "border-primary text-primary" : "text-gray-500"}
+                        >
+                          <Clock className="w-3 h-3 mr-1" />
+                          {phase.duration}
+                        </Badge>
+                      </div>
+                      <p className="text-sm lg:text-base text-gray-600 mb-3 lg:mb-4 leading-relaxed">
+                        {phase.description}
+                      </p>
+                      <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
+                        {phase.features.map((feature, idx) => (
+                          <Badge key={idx} variant="secondary" className="bg-gray-100 text-gray-700 text-xs lg:text-sm">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            {feature}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -370,152 +398,70 @@ export default function OnlineCoachingClientPage() {
         </div>
       </section>
 
-      {/* App Showcase Section */}
-      <section className="py-12 md:py-20 bg-gray-50">
+      {/* Trajecten Section */}
+      <section className="py-12 lg:py-24 bg-white">
         <div className="container mx-auto px-4 lg:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center">
-            <div className="order-2 lg:order-1">
-              <Badge className="bg-primary/10 text-primary mb-3 md:mb-4 text-xs md:text-sm">De Evotion App</Badge>
-              <h2 className="text-xl md:text-4xl font-bold text-gray-900 mb-4 md:mb-6">
-                Jouw Coach <span className="text-primary">Altijd Bij De Hand</span>
-              </h2>
-              <p className="text-sm md:text-lg text-gray-600 mb-6 md:mb-8">
-                De app is het centrale punt van je coaching ervaring. Al je schema's, communicatie en voortgang op één
-                plek.
-              </p>
-
-              <div className="space-y-4 md:space-y-6">
-                <div className="flex items-start gap-3 md:gap-4">
-                  <div className="w-8 h-8 md:w-10 md:h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-sm md:text-lg text-gray-900 mb-0.5 md:mb-1">
-                      Trainingsschema's & Video's
-                    </h3>
-                    <p className="text-gray-600 text-xs md:text-sm">
-                      Gepersonaliseerde schema's met video-instructies voor elke oefening.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 md:gap-4">
-                  <div className="w-8 h-8 md:w-10 md:h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-sm md:text-lg text-gray-900 mb-0.5 md:mb-1">Voortgangsmonitoring</h3>
-                    <p className="text-gray-600 text-xs md:text-sm">
-                      Houd je voortgang bij met foto's, metingen en grafieken.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 md:gap-4">
-                  <div className="w-8 h-8 md:w-10 md:h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-sm md:text-lg text-gray-900 mb-0.5 md:mb-1">Directe Communicatie</h3>
-                    <p className="text-gray-600 text-xs md:text-sm">
-                      Stel vragen en ontvang feedback van je coach via de ingebouwde chat.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="order-1 lg:order-2 flex justify-center">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-[60px] blur-xl"></div>
-                <div className="relative w-[200px] h-[400px] md:w-[280px] md:h-[560px] bg-gradient-to-br from-primary via-primary to-primary/90 rounded-[30px] md:rounded-[40px] p-2 md:p-3 shadow-2xl">
-                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 md:w-24 h-4 md:h-6 bg-primary rounded-b-xl"></div>
-                  <div className="w-full h-full bg-white rounded-[24px] md:rounded-[32px] overflow-hidden">
-                    <Image
-                      src="/images/evotion-app-login.jpg"
-                      alt="Evotion Coaching App"
-                      width={280}
-                      height={560}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Packages Section */}
-      <section className="py-12 md:py-24 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-10 md:mb-16">
-            <Badge className="bg-primary/10 text-primary mb-4 md:mb-6 text-xs md:text-sm">
-              <Trophy className="w-3 h-3 md:w-4 md:h-4 mr-1.5 md:mr-2" />
+          <div className="text-center mb-8 lg:mb-16">
+            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-4 lg:mb-6 inline-flex">
+              <Calendar className="w-4 h-4 mr-2" />
               Trajecten
             </Badge>
-            <h2 className="text-2xl md:text-5xl font-bold text-gray-900 mb-4 md:mb-6">
-              Kies Jouw <span className="text-primary">Traject</span>
-            </h2>
-            <p className="text-sm md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
-              Twee opties voor jouw transformatie. Beide trajecten bieden volledige toegang tot het modulaire programma.
+            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">Kies Jouw Traject</h2>
+            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
+              Twee opties voor verschillende doelen en situaties. Beide trajecten omvatten het volledige 5-fasen
+              programma.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-4 lg:gap-8 max-w-4xl mx-auto">
             {packages.map((pkg, index) => (
               <Card
                 key={index}
                 className={`relative border-2 transition-all duration-300 hover:shadow-2xl ${
-                  pkg.popular ? "border-primary shadow-xl md:scale-105" : "border-gray-200 hover:border-primary/50"
+                  pkg.popular ? "border-primary shadow-xl lg:scale-105" : "border-gray-200 hover:border-primary/50"
                 }`}
               >
                 {pkg.popular && (
-                  <div className="absolute -top-3 md:-top-4 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-primary text-white px-3 md:px-4 py-1 md:py-2 text-xs md:text-sm">
-                      <Award className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                      AANBEVOLEN
-                    </Badge>
-                  </div>
+                  <div className="absolute -top-3 lg:-top-4 left-1/2 transform -translate-x-1/2 w-16 md:w-24 h-4 md:h-6 bg-primary rounded-b-xl"></div>
                 )}
 
-                <CardContent className="p-5 md:p-8 space-y-4 md:space-y-6">
-                  <div className="text-center space-y-2 md:space-y-4 pt-2 md:pt-0">
-                    <h3 className="text-xl md:text-2xl font-bold text-gray-900">{pkg.title}</h3>
-                    <div className="space-y-1 md:space-y-2">
-                      <div className="text-2xl md:text-3xl font-bold text-primary">Op Aanvraag</div>
-                      <div className="text-sm md:text-lg font-medium text-gray-700">{pkg.duration}</div>
-                      <div className="text-xs md:text-sm font-medium text-primary">{pkg.note}</div>
+                <CardContent className="p-5 lg:p-8 space-y-4 lg:space-y-6">
+                  <div className="text-center space-y-2 lg:space-y-4 pt-2 lg:pt-0">
+                    <h3 className="text-xl lg:text-2xl font-bold text-gray-900">{pkg.title}</h3>
+                    <div className="space-y-1 lg:space-y-2">
+                      <div className="text-2xl lg:text-3xl font-bold text-primary">Op Aanvraag</div>
+                      <div className="text-sm lg:text-lg font-medium text-gray-700">{pkg.duration}</div>
+                      <div className="text-xs lg:text-sm font-medium text-primary">{pkg.note}</div>
                     </div>
                   </div>
 
-                  <div className="space-y-2 md:space-y-3">
+                  <div className="space-y-2 lg:space-y-3">
                     {pkg.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-start gap-2 md:gap-3">
-                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-xs md:text-sm">{feature}</span>
+                      <div key={idx} className="flex items-start gap-2 lg:gap-3">
+                        <CheckCircle className="w-4 h-4 lg:w-5 lg:h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-700 text-xs lg:text-sm">{feature}</span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="space-y-2 md:space-y-3 pt-2 md:pt-4">
+                  <div className="space-y-2 lg:space-y-3 pt-2 lg:pt-4">
                     <Button
                       onClick={handleEmail}
-                      className={`w-full py-2.5 md:py-3 text-sm md:text-lg font-semibold ${
+                      className={`w-full py-2.5 lg:py-3 text-sm lg:text-lg font-semibold ${
                         pkg.popular
                           ? "bg-primary hover:bg-primary/90 text-white"
                           : "bg-gray-900 hover:bg-gray-800 text-white"
                       }`}
                     >
-                      <Mail className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+                      <Mail className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
                       Stuur E-mail
                     </Button>
                     <Button
                       variant="outline"
                       onClick={() => handleWhatsApp(pkg.title)}
-                      className="w-full py-2.5 md:py-3 text-sm md:text-lg font-semibold border-2"
+                      className="w-full py-2.5 lg:py-3 text-sm lg:text-lg font-semibold border-2"
                     >
-                      <MessageCircle className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+                      <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
                       WhatsApp
                     </Button>
                   </div>
@@ -526,15 +472,52 @@ export default function OnlineCoachingClientPage() {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-12 md:py-20 bg-gray-50">
+      {/* Wat Je Krijgt Section */}
+      <section className="py-12 lg:py-24 bg-gray-50">
         <div className="container mx-auto px-4 lg:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-10 md:mb-16">
-            <Badge className="bg-primary/10 text-primary mb-3 md:mb-4 text-xs md:text-sm">FAQ</Badge>
-            <h2 className="text-xl md:text-4xl font-bold text-gray-900 mb-4 md:mb-6">
+          <div className="text-center mb-8 lg:mb-16">
+            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-4 lg:mb-6 inline-flex">
+              <Award className="w-4 h-4 mr-2" />
+              Wat Je Krijgt
+            </Badge>
+            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">Alles voor Jouw Succes</h2>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-6 max-w-5xl mx-auto">
+            {[
+              { icon: Dumbbell, title: "Trainingsschema's", desc: "100% op maat gemaakt" },
+              { icon: Apple, title: "Voedingsplan", desc: "Flexibel & praktisch" },
+              { icon: MessageCircle, title: "WhatsApp Support", desc: "Directe communicatie" },
+              { icon: Video, title: "Loom Videos", desc: "Persoonlijke uitleg" },
+              { icon: LineChart, title: "Voortgang Tracking", desc: "Wekelijkse metingen" },
+              { icon: RotateCcw, title: "Aanpassingen", desc: "Wanneer nodig" },
+            ].map((item, index) => (
+              <Card key={index} className="border border-gray-200 text-center">
+                <CardContent className="p-4 lg:p-6 space-y-2 lg:space-y-3">
+                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto">
+                    <item.icon className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
+                  </div>
+                  <h3 className="text-sm lg:text-lg font-bold text-gray-900">{item.title}</h3>
+                  <p className="text-xs lg:text-sm text-gray-600">{item.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-12 lg:py-20 bg-gray-50">
+        <div className="container mx-auto px-4 lg:px-6">
+          <div className="text-center max-w-3xl mx-auto mb-10 lg:mb-16">
+            <Badge className="bg-primary/10 text-primary border-primary/20 mb-4 lg:mb-6 inline-flex">
+              <Layers className="w-4 h-4 mr-2" />
+              FAQ
+            </Badge>
+            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-4 lg:mb-6">
               Veelgestelde <span className="text-primary">Vragen</span>
             </h2>
-            <p className="text-sm md:text-lg text-gray-600 px-2">
+            <p className="text-sm lg:text-xl text-gray-600 px-2">
               Heb je vragen over online coaching of het modulaire programma? Hieronder vind je antwoorden op de meest
               gestelde vragen.
             </p>
@@ -553,15 +536,15 @@ export default function OnlineCoachingClientPage() {
                     onClick={() => toggleFaq(index)}
                     className="flex items-center justify-between w-full text-left gap-3"
                   >
-                    <h3 className="font-bold text-sm md:text-lg text-gray-900">{faq.question}</h3>
+                    <h3 className="font-bold text-sm lg:text-lg text-gray-900">{faq.question}</h3>
                     {expandedFaq === index ? (
-                      <ChevronUp className="w-4 h-4 md:w-5 md:h-5 text-primary flex-shrink-0" />
+                      <ChevronUp className="w-4 h-4 lg:w-5 lg:h-5 text-primary flex-shrink-0" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 md:w-5 md:h-5 text-primary flex-shrink-0" />
+                      <ChevronDown className="w-4 h-4 lg:w-5 lg:h-5 text-primary flex-shrink-0" />
                     )}
                   </button>
                   {expandedFaq === index && (
-                    <div className="mt-3 md:mt-4 text-gray-600 border-t pt-3 md:pt-4 text-xs md:text-sm leading-relaxed">
+                    <div className="mt-3 md:mt-4 text-gray-600 border-t pt-3 md:pt-4 text-xs lg:text-sm leading-relaxed">
                       {faq.answer}
                     </div>
                   )}
@@ -571,21 +554,21 @@ export default function OnlineCoachingClientPage() {
           </div>
 
           <div className="text-center mt-8 md:mt-12">
-            <p className="text-gray-500 mb-4 md:mb-6 text-xs md:text-base">
+            <p className="text-gray-500 mb-4 md:mb-6 text-xs lg:text-base">
               Heb je een andere vraag die hier niet beantwoord wordt?
             </p>
             <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-              <Button onClick={handleEmail} className="bg-primary hover:bg-primary/90 text-sm md:text-base">
+              <Button onClick={handleEmail} className="bg-primary hover:bg-primary/90 text-sm lg:text-base">
                 <Mail className="w-4 h-4 mr-2" />
                 E-mail Je Vraag
               </Button>
               <Button
                 variant="outline"
                 onClick={() => handleWhatsApp("online coaching")}
-                className="border-2 text-sm md:text-base"
+                className="border-2 text-sm lg:text-base"
               >
                 <MessageCircle className="w-4 h-4 mr-2" />
-                WhatsApp
+                Stuur WhatsApp Bericht
               </Button>
             </div>
           </div>
@@ -593,35 +576,30 @@ export default function OnlineCoachingClientPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 md:py-20 bg-primary">
-        <div className="container mx-auto px-4 lg:px-6">
-          <div className="max-w-4xl mx-auto text-center space-y-6 md:space-y-8">
-            <h2 className="text-xl md:text-4xl font-bold text-white mb-4 md:mb-6">
-              Klaar Om Te <span className="text-secondary">Starten?</span>
-            </h2>
-            <p className="text-sm md:text-xl text-white/90 leading-relaxed px-2">
-              Neem contact op voor een vrijblijvend gesprek. We bespreken je doelen en kijken samen welk traject het
-              beste bij jou past.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center pt-2 md:pt-4">
-              <Button
-                size="lg"
-                onClick={handleEmail}
-                className="bg-white text-primary hover:bg-gray-100 px-6 md:px-8 py-5 md:py-6 text-base md:text-lg font-semibold shadow-xl w-full sm:w-auto"
-              >
-                <Mail className="w-4 h-4 md:w-5 md:h-5 mr-2" />
-                info@evotion-coaching.nl
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => handleWhatsApp("online coaching")}
-                className="border-2 border-white text-white hover:bg-white hover:text-primary px-6 md:px-8 py-5 md:py-6 text-base md:text-lg font-semibold bg-transparent w-full sm:w-auto"
-              >
-                <MessageCircle className="w-4 h-4 md:w-5 md:h-5 mr-2" />
-                Stuur WhatsApp Bericht
-              </Button>
-            </div>
+      <section className="py-12 lg:py-24 bg-primary text-white">
+        <div className="container mx-auto px-4 lg:px-6 text-center">
+          <h2 className="text-2xl lg:text-5xl font-bold mb-3 lg:mb-6">Klaar voor Jouw Transformatie?</h2>
+          <p className="text-sm lg:text-xl text-white/90 max-w-2xl mx-auto mb-6 lg:mb-8 px-2">
+            Start vandaag met een programma dat écht bij jou past. Neem contact op voor een vrijblijvend gesprek.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center px-4">
+            <Button
+              size="lg"
+              onClick={handleEmail}
+              className="bg-white text-primary hover:bg-gray-100 px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold"
+            >
+              <Mail className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+              Stuur een E-mail
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => handleWhatsApp("online coaching")}
+              className="border-2 border-white text-white hover:bg-white hover:text-primary px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold bg-transparent"
+            >
+              <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+              WhatsApp Bericht
+            </Button>
           </div>
         </div>
       </section>
