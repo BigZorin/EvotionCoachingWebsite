@@ -2,13 +2,22 @@ import type { Metadata } from "next"
 import OnlineCoachingClientPage from "./OnlineCoachingClientPage"
 
 export const metadata: Metadata = {
-  title: "Online Coaching - Evotion Coaching",
+  title: "Online Coaching - Modulair 5-Fasen Programma | Evotion Coaching",
   description:
-    "Ervaar flexibele en persoonlijke online coaching bij Evotion Coaching. Bereik je fitnessdoelen met onze app, trainingsschema's en voedingsadvies.",
+    "Online coaching met een persoonlijk 5-fasen programma dat zich aanpast aan jouw tempo. 6 of 12 maanden traject met app, e-learning en wekelijkse check-ins.",
+  keywords: [
+    "online coaching",
+    "online personal trainer",
+    "fitness coaching online",
+    "modulair coachingprogramma",
+    "online begeleiding",
+    "vetverlies coaching",
+    "spieropbouw online",
+  ],
   openGraph: {
-    title: "Online Coaching - Evotion Coaching",
+    title: "Online Coaching - Modulair 5-Fasen Programma | Evotion Coaching",
     description:
-      "Ervaar flexibele en persoonlijke online coaching bij Evotion Coaching. Bereik je fitnessdoelen met onze app, trainingsschema's en voedingsadvies.",
+      "Online coaching met een persoonlijk 5-fasen programma dat zich aanpast aan jouw tempo. 6 of 12 maanden traject met app, e-learning en wekelijkse check-ins.",
     url: "https://evotion-coaching.nl/online-coaching",
     siteName: "Evotion Coaching",
     images: [
