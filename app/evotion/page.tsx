@@ -3,33 +3,29 @@ import EvotionBrandClientPage from "./EvotionBrandClientPage"
 import Script from "next/script"
 
 export const metadata: Metadata = {
-  title: "Evotion - De Toonaangevende Fitness & Coaching Brand in Nederland",
+  title: "Evotion - Fitness & Coaching Brand uit Sneek | Personal Training & Online Coaching",
   description:
-    "🏆 Evotion - Dé fitness en coaching brand van Nederland. Ontdek waarom duizenden mensen kiezen voor Evotion coaching, training en begeleiding. ✅ Bewezen methodes ✅ Ervaren coaches ✅ Unieke app ✅ Resultaat gegarandeerd.",
+    "Evotion - Dé fitness en coaching brand uit Sneek, Friesland. Personal Training, Duo Training en Online Coaching met de unieke Evotion app en het modulaire 5-fasen programma. Evolution + Motion = Evotion.",
   keywords: [
     "evotion",
     "evotion coaching",
     "evotion fitness",
-    "evotion brand",
-    "evotion nederland",
-    "evotion coaching methode",
+    "evotion sneek",
+    "evotion friesland",
     "evotion app",
     "evotion training",
-    "evotion resultaten",
-    "evotion coaches",
-    "evotion filosofie",
-    "fitness brand friesland",
-    "coaching merk",
-    "evotion community",
-    "evotion lifestyle",
-    "evotion transformatie",
+    "evotion personal training",
+    "evotion online coaching",
+    "evotion duo training",
+    "fitness brand sneek",
+    "coaching sneek",
     "personal training sneek",
     "fitness coach friesland",
   ],
   openGraph: {
-    title: "Evotion - De Toonaangevende Fitness & Coaching Brand in Nederland",
+    title: "Evotion - Fitness & Coaching Brand uit Sneek",
     description:
-      "🏆 Ontdek Evotion - Dé fitness en coaching brand van Nederland. Bewezen methodes, ervaren coaches en unieke app voor jouw transformatie.",
+      "Ontdek Evotion - Dé fitness en coaching brand uit Sneek. Personal Training, Duo Training en Online Coaching met de unieke Evotion app.",
     url: "https://evotion-coaching.nl/evotion",
     siteName: "Evotion Coaching",
     images: [
@@ -37,7 +33,7 @@ export const metadata: Metadata = {
         url: "https://evotion-coaching.nl/images/evotion-logo.png",
         width: 1200,
         height: 630,
-        alt: "Evotion - De Toonaangevende Fitness & Coaching Brand",
+        alt: "Evotion - Fitness & Coaching Brand",
         type: "image/png",
       },
     ],
@@ -47,8 +43,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     site: "@evotioncoaching",
-    title: "Evotion - De Toonaangevende Fitness & Coaching Brand",
-    description: "🏆 Ontdek waarom duizenden mensen kiezen voor Evotion coaching en training.",
+    title: "Evotion - Fitness & Coaching Brand uit Sneek",
+    description: "Ontdek Evotion - Personal Training, Duo Training en Online Coaching met de unieke Evotion app.",
     images: ["https://evotion-coaching.nl/images/evotion-logo.png"],
   },
   alternates: {
@@ -115,7 +111,7 @@ export default function EvotionBrandPage() {
               width: 1200,
               height: 630,
             },
-            description: "Toonaangevende fitness en coaching brand in Nederland",
+            description: "Fitness en coaching brand uit Sneek, Friesland",
             foundingDate: "2020",
             founder: [
               {
@@ -126,7 +122,7 @@ export default function EvotionBrandPage() {
               {
                 "@type": "Person",
                 name: "Zorin Wijnands",
-                jobTitle: "Co-founder & Powerlifting Coach",
+                jobTitle: "Co-founder & Personal Trainer",
               },
             ],
             parentOrganization: {
@@ -141,8 +137,8 @@ export default function EvotionBrandPage() {
             ],
             aggregateRating: {
               "@type": "AggregateRating",
-              ratingValue: "4.9",
-              reviewCount: "500",
+              ratingValue: "5.0",
+              reviewCount: "10",
               bestRating: "5",
               worstRating: "1",
             },
@@ -158,14 +154,13 @@ export default function EvotionBrandPage() {
             "@context": "https://schema.org",
             "@type": "AboutPage",
             name: "Over Evotion - De Fitness & Coaching Brand",
-            description: "Alles over Evotion - van ontstaan tot toonaangevende fitness brand in Nederland",
+            description: "Alles over Evotion - fitness en coaching brand uit Sneek, Friesland",
             url: "https://evotion-coaching.nl/evotion",
             mainEntity: {
               "@type": "Organization",
               name: "Evotion",
-              description: "Toonaangevende fitness en coaching brand in Nederland",
+              description: "Fitness en coaching brand uit Sneek, Friesland",
               foundingDate: "2020",
-              numberOfEmployees: "10-50",
               industry: "Health & Fitness",
             },
           }),
@@ -185,7 +180,7 @@ export default function EvotionBrandPage() {
                 name: "Wat is Evotion?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Evotion is een toonaangevende fitness en coaching brand in Nederland die ontstond uit de combinatie van Evolution en Motion. Wij helpen mensen hun droomlichaam te bereiken door middel van bewezen coaching methodes, een unieke app en persoonlijke begeleiding.",
+                  text: "Evotion is een fitness en coaching brand uit Sneek, Friesland. De naam ontstond uit de combinatie van Evolution en Motion. Wij helpen mensen hun fitnessdoelen te bereiken door middel van persoonlijke coaching, een unieke app en het modulaire 5-fasen programma.",
                 },
               },
               {
@@ -193,7 +188,7 @@ export default function EvotionBrandPage() {
                 name: "Wat maakt Evotion uniek?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Evotion combineert persoonlijke coaching met geavanceerde technologie via onze unieke Evotion app. We bieden 24/7 toegang tot je coach, AI-gestuurde voedingsadvies, gepersonaliseerde trainingsschema's en een exclusieve community. Onze bewezen methode heeft al meer dan 500 mensen geholpen met hun transformatie.",
+                  text: "Evotion combineert persoonlijke coaching met een eigen app. We bieden directe toegang tot je coach, gepersonaliseerde trainingsschema's, voedingsbegeleiding en een exclusieve community. Ons modulaire programma met 5 fases zorgt voor duurzame resultaten.",
                 },
               },
               {
@@ -201,7 +196,7 @@ export default function EvotionBrandPage() {
                 name: "Waar is Evotion gevestigd?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Evotion biedt personal training in Sneek, Friesland en online coaching door heel Nederland. We zijn specialist in fitness coaching in Friesland en bieden zowel fysieke als online begeleiding.",
+                  text: "Evotion biedt Personal Training en Duo Training in Sneek, Friesland. Daarnaast bieden we Online Coaching aan door heel Nederland via de Evotion app.",
                 },
               },
               {
@@ -209,15 +204,15 @@ export default function EvotionBrandPage() {
                 name: "Welke services biedt Evotion aan?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Evotion biedt drie hoofdservices: Personal Training in Sneek met 1-op-1 begeleiding, Online Coaching met 24/7 app toegang, en het intensieve 12 Weken Vetverlies Programma dat beide combineert voor maximale resultaten.",
+                  text: "Evotion biedt drie hoofdservices: Personal Training met 1-op-1 begeleiding in Sneek, Duo Training om samen met een partner te trainen, en Online Coaching met trajecten van 6 of 12 maanden inclusief volledige app toegang.",
                 },
               },
               {
                 "@type": "Question",
-                name: "Wat zijn de resultaten van Evotion coaching?",
+                name: "Hoe werkt het modulaire programma?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Evotion heeft meer dan 2000 transformaties begeleid met een gemiddelde review van 4.9/5 sterren. 95% van onze klanten bereikt succesvol vetverlies. Voorbeelden zijn Martin met -10.7kg in 11 weken, Salim met -8.1kg in 26 weken, en Wouter met -2.1kg body recomp.",
+                  text: "Ons programma bestaat uit 5 fases: Fundament (gewoontes en mindset), Voeding (macro's en maaltijdplanning), Training (gepersonaliseerde schema's), Optimalisatie (verfijning en aanpassing) en Lifestyle (duurzame integratie). Elke fase bouwt voort op de vorige.",
                 },
               },
             ],
