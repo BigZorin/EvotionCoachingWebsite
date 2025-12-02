@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {
   Dumbbell,
-  Users,
   TrendingUp,
   Star,
   CheckCircle,
@@ -21,9 +20,9 @@ import {
   MessageCircle,
   Mail,
   Calendar,
-  Heart,
   Smartphone,
   BarChart3,
+  UserPlus,
 } from "lucide-react"
 import Image from "next/image"
 import { Header } from "@/components/header"
@@ -73,40 +72,31 @@ export default function EvotionCoachingMobile() {
 
   const services = [
     {
-      icon: Heart,
-      title: "Premium Coaching",
-      subtitle: "Het beste van beide werelden",
-      description: "Combinatie van Personal Training en Online Coaching voor maximale resultaten.",
-      features: ["1-op-1 begeleiding", "24/7 coach support", "Evotion App toegang", "Wekelijkse check-ins"],
-      popular: true,
-      href: "/premium-coaching",
-    },
-    {
-      icon: Users,
-      title: "Online Coaching",
-      subtitle: "Flexibele coaching via app",
-      description: "Professionele begeleiding waar en wanneer het jou uitkomt via onze geavanceerde app.",
-      features: ["Gepersonaliseerde schema's", "Coach communicatie", "Voortgang tracking", "Flexibele planning"],
-      popular: false,
-      href: "/online-coaching",
-    },
-    {
       icon: Dumbbell,
       title: "Personal Training",
       subtitle: "Persoonlijke 1-op-1 begeleiding",
       description: "Directe begeleiding van gecertificeerde trainers voor snelle en veilige resultaten.",
       features: ["Volledige aandacht", "Aangepaste oefeningen", "Directe feedback", "Motivatie & support"],
-      popular: false,
+      popular: true,
       href: "/personal-training",
     },
     {
-      icon: TrendingUp,
-      title: "12-Weken Vetverlies",
-      subtitle: "Intensief transformatie programma",
-      description: "Gestructureerd 12-weken programma met gegarandeerde resultaten of geld terug.",
-      features: ["Gegarandeerde resultaten", "Wekelijkse metingen", "Complete begeleiding", "Geld-terug-garantie"],
+      icon: UserPlus,
+      title: "Duo Training",
+      subtitle: "Train samen, bereik meer",
+      description: "Train samen met een partner, vriend of familielid en motiveer elkaar.",
+      features: ["Train met partner/vriend", "Gedeelde motivatie", "Voordeliger per persoon", "Professioneel begeleid"],
       popular: false,
-      href: "/12-weken-vetverlies",
+      href: "/duo-training",
+    },
+    {
+      icon: TrendingUp,
+      title: "Online Coaching",
+      subtitle: "Flexibele coaching via app",
+      description: "Modulair 5-fasen programma met persoonlijke begeleiding via onze app.",
+      features: ["Trainingsschema op maat", "Voedingsschema", "Wekelijkse check-ins", "24/7 app toegang"],
+      popular: true,
+      href: "/online-coaching",
     },
   ]
 
@@ -152,16 +142,20 @@ export default function EvotionCoachingMobile() {
     {
       icon: MessageCircle,
       title: "Directe Coach Communicatie",
-      description: "Chat rechtstreeks met je coach voor vragen en motivatie",
+      description: "Chat direct met je coach via de app",
     },
-    { icon: BarChart3, title: "Voortgang Tracking", description: "Volg je progressie met gedetailleerde statistieken" },
+    {
+      icon: BarChart3,
+      title: "Voortgang Tracking",
+      description: "Volg je resultaten en vier je successen",
+    },
   ]
 
   // Auto-rotate testimonials
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
-    }, 4000)
+    }, 5000)
     return () => clearInterval(interval)
   }, [testimonials.length])
 
@@ -176,17 +170,6 @@ export default function EvotionCoachingMobile() {
     setSubmitMessage(null)
 
     try {
-      // Check if API key is available
-      if (!process.env.RESEND_API_KEY) {
-        console.error("RESEND_API_KEY is not set")
-        setSubmitMessage({
-          type: "error",
-          text: "Email service is niet beschikbaar. Bel ons direct op 06 10 93 50 77.",
-        })
-        return
-      }
-
-      // Initialize Resend with API key
       const result = await sendContactEmail({
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
@@ -197,7 +180,14 @@ export default function EvotionCoachingMobile() {
 
       if (result.success) {
         setSubmitMessage({ type: "success", text: result.message || "Bericht verzonden!" })
-        setFormData({ firstName: "", lastName: "", email: "", phone: "", goal: "", message: "" })
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          goal: "",
+          message: "",
+        })
       } else {
         setSubmitMessage({ type: "error", text: result.error || "Er ging iets mis." })
       }
@@ -213,42 +203,40 @@ export default function EvotionCoachingMobile() {
       <Header />
 
       {/* HERO */}
-      <section className="relative min-h-screen flex items-center overflow-hidden bg-gray-900">
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gray-900 pt-16">
+        {/* Video Background */}
         <div className="absolute inset-0 z-0">
-          <iframe
-            src="https://www.youtube.com/embed/SpTe8MThxVc?autoplay=1&mute=1&loop=1&playlist=SpTe8MThxVc&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1"
-            className="absolute inset-0 w-full h-full object-cover scale-[3.5]"
-            allow="autoplay; encrypted-media"
-            allowFullScreen
-            style={{ pointerEvents: "none" }}
-            title="Evotion Coaching introductievideo"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#1e1839]/80 via-[#1e1839]/70 to-[#1e1839]/80"></div>
+          <div className="relative w-full h-full">
+            <iframe
+              src="https://www.youtube.com/embed/SpTe8MThxVc?autoplay=1&mute=1&loop=1&playlist=SpTe8MThxVc&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1"
+              className="absolute inset-0 w-full h-full object-cover scale-150"
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+              style={{ pointerEvents: "none" }}
+              title="Evotion Coaching Video"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#1e1839]/85 via-[#1e1839]/75 to-[#1e1839]/85"></div>
+          </div>
         </div>
 
-        <div className="container mx-auto px-4 relative z-10 py-20">
-          <div className="text-center space-y-8">
-            {/* Main heading - larger, bolder */}
+        {/* Content */}
+        <div className="container mx-auto px-4 relative z-10 py-12">
+          <div className="max-w-lg mx-auto text-center space-y-8">
             <div className="space-y-4">
-              <h1 className="text-4xl sm:text-5xl font-black text-white leading-[1.1] tracking-tight">
-                <span className="block">Jouw droomlichaam</span>
-                <span className="block text-white/90">binnen handbereik</span>
-              </h1>
-
-              {/* Subheading - cleaner */}
-              <p className="text-base sm:text-lg text-gray-300 leading-relaxed max-w-sm mx-auto font-light">
+              <h1 className="text-3xl font-black text-white leading-tight">Jouw droomlichaam binnen handbereik</h1>
+              <p className="text-base text-gray-300 leading-relaxed">
                 Zonder je favoriete eten, sociale leven of vrijheid op te geven
               </p>
             </div>
 
-            {/* CTAs - more modern */}
-            <div className="space-y-3 pt-4">
+            {/* CTAs */}
+            <div className="flex flex-col gap-3">
               <Button
                 size="lg"
-                className="w-full bg-white text-gray-900 hover:bg-gray-100 px-8 py-6 text-base font-semibold shadow-xl rounded-xl"
+                className="bg-white text-gray-900 hover:bg-gray-100 py-4 text-base font-semibold shadow-xl w-full"
               >
-                <span className="flex items-center justify-center gap-2">
+                <span className="flex items-center gap-2">
                   Start Jouw Transformatie
                   <ArrowRight className="w-4 h-4" />
                 </span>
@@ -256,11 +244,11 @@ export default function EvotionCoachingMobile() {
               <Button
                 size="lg"
                 variant="outline"
-                className="w-full border-2 border-white/30 text-white hover:bg-white hover:text-gray-900 px-8 py-6 text-base font-semibold bg-transparent backdrop-blur-sm rounded-xl"
+                className="border-2 border-white/30 text-white hover:bg-white hover:text-gray-900 py-4 text-base font-semibold bg-transparent w-full"
                 asChild
               >
                 <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
-                  <span className="flex items-center justify-center gap-2">
+                  <span className="flex items-center gap-2">
                     Gratis Consult
                     <Calendar className="w-4 h-4" />
                   </span>
@@ -268,14 +256,14 @@ export default function EvotionCoachingMobile() {
               </Button>
             </div>
 
-            {/* Stats - cleaner, more compact */}
-            <div className="grid grid-cols-2 gap-6 pt-8 max-w-xs mx-auto">
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-4 pt-8">
               {stats.map((s) => (
-                <div key={s.label} className="text-center">
-                  <div className="text-3xl font-bold text-white mb-1">{s.number}</div>
-                  <div className="text-xs text-gray-400 font-medium">{s.label}</div>
+                <div key={s.label} className="text-center p-3 bg-white/5 rounded-xl backdrop-blur-sm">
+                  <div className="text-2xl font-bold text-white">{s.number}</div>
+                  <div className="text-xs text-gray-400">{s.label}</div>
                   {s.label === "Google Rating" && (
-                    <div className="flex justify-center mt-1.5 gap-0.5">
+                    <div className="flex justify-center mt-1 gap-0.5">
                       {[...Array(5)].map((_, i) => (
                         <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
                       ))}
@@ -288,15 +276,8 @@ export default function EvotionCoachingMobile() {
         </div>
       </section>
 
-      {/* DIENSTEN */}
-      <section id="diensten" className="py-16 bg-white relative">
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.04]"
-          style={{
-            backgroundImage: "radial-gradient(circle at 1px 1px, #1e1839 1px, transparent 0)",
-            backgroundSize: "26px 26px",
-          }}
-        />
+      {/* SERVICES */}
+      <section className="py-16 bg-gray-50 relative">
         <div className="container mx-auto px-4 relative">
           <div className="text-center mb-12">
             <Badge className="bg-primary/10 text-primary mb-4">
@@ -378,261 +359,217 @@ export default function EvotionCoachingMobile() {
         </div>
       </section>
 
-      {/* APP */}
-      <section className="py-16 bg-white relative">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge className="bg-primary/10 text-primary mb-4">
-              <Smartphone className="w-4 h-4 mr-2" />
-              Evotion App
-            </Badge>
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-3">
-              Jouw Coach <span className="text-primary">In Je Zak</span>
-            </h2>
-            <p className="text-gray-600 leading-relaxed">
-              Onze geavanceerde app biedt alles wat je nodig hebt voor jouw transformatie.
-            </p>
-          </div>
-
-          <div className="relative mb-12">
-            <div className="relative mx-auto w-64 h-[480px] rounded-[2rem] overflow-hidden shadow-2xl border-4 border-gray-800">
-              <Image
-                src="/images/evotion-app-login.jpg"
-                alt="Evotion App Interface"
-                fill
-                sizes="(max-width: 768px) 80vw, 320px"
-                className="object-cover"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {appFeatures.map((feature) => (
-              <Card key={feature.title} className="border-gray-200">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <feature.icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 mb-1">{feature.title}</h3>
-                      <p className="text-sm text-gray-600">{feature.description}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center mt-8">
-            <Button size="lg" className="ev-shine w-full bg-primary hover:bg-primary/90 text-white">
-              <Smartphone className="w-5 h-5 mr-2" />
-              Download de App
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* PERSONAL TRAINING */}
-      <section className="py-16 bg-evotion-primary text-white relative overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-10">
-            <Badge className="bg-white/20 text-white border-0 mb-4">
+      {/* PERSONAL TRAINING HIGHLIGHT */}
+      <section className="py-16 bg-primary relative overflow-hidden">
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="space-y-6">
+            <Badge className="bg-white/20 text-white border-0">
               <Dumbbell className="w-4 h-4 mr-2" />
               Personal Training
             </Badge>
-            <h2 className="text-3xl font-extrabold mb-3">Persoonlijke Training met Professionele Begeleiding</h2>
+            <h2 className="text-2xl font-black text-white leading-tight">
+              Persoonlijke Begeleiding voor Maximale Resultaten
+            </h2>
             <p className="text-white/90 leading-relaxed">
-              Ervaar de kracht van persoonlijke begeleiding met onze gecertificeerde personal trainers.
+              Ervaar de kracht van persoonlijke begeleiding met onze gecertificeerde trainers.
             </p>
-          </div>
 
-          <div className="relative mb-10 rounded-2xl overflow-hidden">
-            <div className="relative mx-auto w-full h-64">
-              <Image
-                src="/images/personal-training-session.jpeg"
-                alt="Personal Training Begeleiding"
-                fill
-                sizes="100vw"
-                className="object-cover"
-              />
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-          </div>
-
-          <div className="space-y-3 mb-8">
-            {[
-              { icon: Dumbbell, t: "Persoonlijke Training Sessies", d: "Volledige aandacht van je trainer" },
-              { icon: Target, t: "Aangepaste Oefeningen", d: "Afgestemd op jouw niveau en doelen" },
-              { icon: Calendar, t: "Flexibele Planning", d: "Plan sessies op tijden die bij jou passen" },
-            ].map((f) => (
-              <Card key={f.t} className="bg-white/10 backdrop-blur-sm border-white/10">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
-                      <f.icon className="w-5 h-5 text-evotion-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-white mb-1">{f.t}</h3>
-                      <p className="text-sm text-white/80">{f.d}</p>
-                    </div>
+            <div className="space-y-3">
+              {[
+                { icon: Dumbbell, title: "1-op-1 Training Sessies" },
+                { icon: Target, title: "Aangepaste Oefeningen" },
+                { icon: Calendar, title: "Flexibele Planning" },
+              ].map((f) => (
+                <div key={f.title} className="flex items-center gap-4 bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                  <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                    <f.icon className="w-5 h-5 text-primary" />
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  <span className="text-white font-medium">{f.title}</span>
+                </div>
+              ))}
+            </div>
 
-          <div className="text-center">
             <Link href="/personal-training">
-              <Button size="lg" className="w-full bg-white text-evotion-primary hover:bg-gray-100 rounded-xl">
-                <span className="flex items-center justify-center gap-2">
-                  Meer over Personal Training
-                  <ArrowRight className="w-5 h-5" />
-                </span>
+              <Button size="lg" className="w-full bg-white text-primary hover:bg-gray-100 font-semibold">
+                Meer over Personal Training
+                <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* TRANSFORMATIES */}
+      {/* APP */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             <Badge className="bg-primary/10 text-primary mb-4">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Echte Resultaten
+              <Smartphone className="w-4 h-4 mr-2" />
+              Evotion App
             </Badge>
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-3">
-              Ongelooflijke <span className="text-primary">Transformaties</span>
+            <h2 className="text-2xl font-extrabold text-gray-900 mb-3">
+              Jouw Coach <span className="text-primary">in je Zak</span>
             </h2>
             <p className="text-gray-600 leading-relaxed">
-              Zie hoe onze klanten hun droomlichaam hebben bereikt met onze bewezen methodes.
+              Alles wat je nodig hebt voor jouw transformatie, in één app.
             </p>
           </div>
 
-          <div className="space-y-8">
-            {transformations.map((t) => (
-              <Card key={t.name} className="overflow-hidden ev-gradient-border border-transparent transition-colors">
-                <CardContent className="p-0">
-                  <div className="relative aspect-square">
-                    <Image
-                      src={t.image || "/placeholder.svg"}
-                      alt={`${t.name}'s transformatie`}
-                      fill
-                      sizes="100vw"
-                      className="object-cover"
-                    />
-                    <div className="absolute top-4 left-4">
-                      <Badge className="bg-primary text-white">{t.result}</Badge>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{t.name}'s Transformatie</h3>
-                    <p className="text-gray-600 italic">"{t.quote}"</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Card className="ev-gradient-border border-transparent">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-extrabold text-gray-900 mb-3">
-                  Klaar om jouw eigen <span className="text-primary">succesverhaal</span> te schrijven?
-                </h3>
-                <p className="text-gray-600 mb-6 text-sm leading-relaxed">
-                  Sluit je aan bij honderden tevreden klanten die hun droomlichaam hebben bereikt.
-                </p>
-                <Button size="lg" className="ev-shine w-full bg-primary hover:bg-primary/90 text-white">
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Start Jouw Transformatie
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* REVIEWS */}
-      <section className="py-16 bg-primary text-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge className="bg-white/20 text-white mb-4">
-              <Star className="w-4 h-4 mr-2" />
-              Google Reviews
-            </Badge>
-          </div>
-
-          <div className="relative overflow-hidden testimonials-container">
-            <div
-              className="flex transition-transform duration-300 ease-in-out"
-              style={{ transform: `translateX(-${activeTestimonial * 100}%)` }}
-            >
-              {testimonials.map((t, i) => (
-                <div key={t.name} className="w-full flex-shrink-0 px-2">
-                  <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary font-bold">
-                          {t.initial}
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-white">{t.name}</h3>
-                          <div className="flex">
-                            {[...Array(t.rating)].map((_, i) => (
-                              <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-white/90 italic">"{t.text}"</p>
-                      <div className="flex items-center gap-2 mt-4">
-                        <div className="w-5 h-5 bg-white rounded-sm flex items-center justify-center">
-                          <span className="text-xs font-bold text-blue-600">G</span>
-                        </div>
-                        <span className="text-xs text-white/70">Geverifieerde Google review</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              ))}
+          {/* App Mockup */}
+          <div className="relative mx-auto w-48 h-96 mb-8">
+            <div className="absolute inset-0 bg-gray-900 rounded-[2rem] shadow-xl border-4 border-gray-800"></div>
+            <div className="absolute inset-2 bg-white rounded-[1.5rem] overflow-hidden flex items-center justify-center">
+              <Image
+                src="/images/evotion-logo-mockup-desktop.png"
+                alt="Evotion App"
+                fill
+                className="object-contain p-4"
+              />
             </div>
           </div>
 
-          <div className="flex justify-center gap-2 mt-6 mb-8">
-            {testimonials.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setActiveTestimonial(index)}
-                className={`w-3 h-3 rounded-full transition-colors ${index === activeTestimonial ? "bg-white" : "bg-white/30"}`}
-                aria-label={`Ga naar review ${index + 1}`}
-              />
+          {/* Features */}
+          <div className="space-y-4">
+            {appFeatures.map((f) => (
+              <div key={f.title} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <f.icon className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 mb-1">{f.title}</h3>
+                  <p className="text-sm text-gray-600">{f.description}</p>
+                </div>
+              </div>
             ))}
           </div>
 
-          <div className="text-center">
-            <Button
-              variant="outline"
-              className="ev-shine border-white text-white hover:bg-white hover:text-primary bg-transparent"
-            >
-              Bekijk Alle Reviews
-              <ArrowRight className="w-4 h-4 ml-2" />
+          <div className="mt-8">
+            <Button className="ev-shine w-full bg-primary hover:bg-primary/90 text-white" size="lg" asChild>
+              <Link href="/over-ons/evotion-app">
+                Download de App
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
             </Button>
           </div>
         </div>
       </section>
 
-      {/* CONTACT */}
-      <section id="contact" className="py-16 bg-white">
+      {/* TRANSFORMATIES */}
+      <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+          <div className="text-center mb-10">
+            <Badge className="bg-primary/10 text-primary mb-4">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Echte Resultaten
+            </Badge>
+            <h2 className="text-2xl font-extrabold text-gray-900 mb-3">
+              Ongelooflijke <span className="text-primary">Transformaties</span>
+            </h2>
+            <p className="text-gray-600 leading-relaxed">Zie hoe onze klanten hun droomlichaam hebben bereikt.</p>
+          </div>
+
+          <div className="space-y-6">
+            {transformations.map((t) => (
+              <Card key={t.name} className="overflow-hidden ev-gradient-border border-transparent">
+                <div className="relative aspect-square">
+                  <Image
+                    src={t.image || "/placeholder.svg"}
+                    alt={`${t.name}'s transformatie`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <CardContent className="p-5">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{t.name}'s Transformatie</h3>
+                  <p className="text-primary font-semibold mb-3">{t.result}</p>
+                  <p className="text-gray-600 text-sm italic">"{t.quote}"</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="mt-10">
+            <Button className="ev-shine w-full bg-primary hover:bg-primary/90 text-white" size="lg" asChild>
+              <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
+                <Sparkles className="w-5 h-5 mr-2" />
+                Start Jouw Transformatie
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="py-16 bg-gradient-to-br from-gray-900 via-primary to-primary relative overflow-hidden">
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-10">
+            <Badge className="bg-white/20 text-white border-white/30 mb-4">
+              <Star className="w-4 h-4 mr-2" />
+              Google Reviews
+            </Badge>
+            <h2 className="text-2xl font-extrabold text-white mb-3">
+              Wat Klanten <span className="text-evotion-secondary">Zeggen</span>
+            </h2>
+            <div className="flex items-center justify-center gap-2">
+              <div className="flex">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <span className="text-xl font-bold text-white">5.0</span>
+            </div>
+          </div>
+
+          {/* Testimonial Carousel */}
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary font-bold text-lg">
+                  {testimonials[activeTestimonial].initial}
+                </div>
+                <div>
+                  <h3 className="font-bold text-white">{testimonials[activeTestimonial].name}</h3>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p className="text-white/90 italic leading-relaxed">"{testimonials[activeTestimonial].text}"</p>
+              <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/20">
+                <div className="w-5 h-5 bg-white rounded-sm flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-blue-600">G</span>
+                </div>
+                <span className="text-xs text-gray-300">Geverifieerde Google review</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Dots */}
+          <div className="flex justify-center gap-2 mt-6">
+            {testimonials.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveTestimonial(i)}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  i === activeTestimonial ? "bg-white w-6" : "bg-white/40"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CONTACT */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
             <Badge className="bg-primary/10 text-primary mb-4">
               <MessageCircle className="w-4 h-4 mr-2" />
               Contact
             </Badge>
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-3">
+            <h2 className="text-2xl font-extrabold text-gray-900 mb-3">
               Klaar om te <span className="text-primary">Beginnen</span>?
             </h2>
             <p className="text-gray-600 leading-relaxed">
@@ -640,113 +577,72 @@ export default function EvotionCoachingMobile() {
             </p>
           </div>
 
-          {/* Quick options */}
-          <div className="space-y-4 mb-12">
-            <a href="tel:0610935077" className="block">
-              <Card className="ev-gradient-border border-transparent">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                      <Phone className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900">Bel Direct</h3>
-                      <p className="text-primary font-medium">06 10 93 50 77</p>
-                      <p className="text-sm text-gray-500">Ma-Vr: 9:00-18:00</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </a>
-
-            <a href="https://wa.me/31610935077" target="_blank" rel="noopener noreferrer" className="block">
-              <Card className="ev-gradient-border border-transparent">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                      <MessageCircle className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900">WhatsApp</h3>
-                      <p className="text-primary font-medium">Start Chat</p>
-                      <p className="text-sm text-gray-500">Snelle reactie gegarandeerd</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </a>
-
-            <Card className="ev-gradient-border border-transparent">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                    <Mail className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900">Email</h3>
-                    <p className="text-primary font-medium">info@evotion-coaching.nl</p>
-                    <p className="text-sm text-gray-500">Reactie binnen 24 uur</p>
-                  </div>
+          {/* Quick Contact */}
+          <div className="space-y-4 mb-10">
+            {[
+              {
+                icon: Phone,
+                title: "Bel Ons",
+                value: "+31 6 10935077",
+                href: "tel:+31610935077",
+              },
+              {
+                icon: MessageCircle,
+                title: "WhatsApp",
+                value: "Start een Chat",
+                href: "https://wa.me/31610935077?text=Hoi%20Martin%2C%20ik%20heb%20interesse%20in%20jullie%20coaching%20programma%27s.",
+              },
+              {
+                icon: Mail,
+                title: "Email",
+                value: "info@evotion-coaching.nl",
+                href: "mailto:info@evotion-coaching.nl",
+              },
+            ].map((c) => (
+              <a
+                key={c.title}
+                href={c.href}
+                target={c.title === "WhatsApp" ? "_blank" : undefined}
+                rel={c.title === "WhatsApp" ? "noopener noreferrer" : undefined}
+                className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+              >
+                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+                  <c.icon className="w-6 h-6 text-white" />
                 </div>
-              </CardContent>
-            </Card>
+                <div>
+                  <h4 className="font-bold text-gray-900">{c.title}</h4>
+                  <p className="text-sm text-gray-600">{c.value}</p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-gray-400 ml-auto" />
+              </a>
+            ))}
           </div>
 
-          {/* Form */}
-          <Card className="ev-gradient-border border-transparent shadow-lg">
+          {/* Contact Form */}
+          <Card className="ev-gradient-border border-transparent">
             <CardContent className="p-6">
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-extrabold text-gray-900 mb-2">Stuur ons een Bericht</h3>
-                <p className="text-gray-600 text-sm">
-                  Vul het formulier in en we nemen binnen 24 uur contact met je op.
-                </p>
-              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">Stuur ons een Bericht</h3>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Voornaam *</label>
-                    <Input
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      required
-                      className="text-sm"
-                    />
+                    <Input name="firstName" value={formData.firstName} onChange={handleInputChange} required />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Achternaam *</label>
-                    <Input
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      required
-                      className="text-sm"
-                    />
+                    <Input name="lastName" value={formData.lastName} onChange={handleInputChange} required />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                  <Input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="text-sm"
-                  />
+                  <Input type="email" name="email" value={formData.email} onChange={handleInputChange} required />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Telefoonnummer</label>
-                  <Input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="text-sm"
-                  />
+                  <Input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} />
                 </div>
 
                 <div>
@@ -755,7 +651,7 @@ export default function EvotionCoachingMobile() {
                     name="goal"
                     value={formData.goal}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
                     <option value="">Selecteer je doel</option>
                     <option value="gewichtsverlies">Gewichtsverlies</option>
@@ -773,7 +669,6 @@ export default function EvotionCoachingMobile() {
                     value={formData.message}
                     onChange={handleInputChange}
                     rows={3}
-                    className="resize-none text-sm"
                     placeholder="Vertel ons meer over je doelen..."
                   />
                 </div>
@@ -781,15 +676,15 @@ export default function EvotionCoachingMobile() {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="ev-shine w-full bg-primary hover:bg-primary/90 text-white py-3"
+                  className="ev-shine w-full bg-primary hover:bg-primary/90 text-white"
                 >
                   {isSubmitting ? (
-                    <span className="flex items-center justify-center gap-2">
+                    <span className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                       Versturen...
                     </span>
                   ) : (
-                    <span className="flex items-center justify-center gap-2">
+                    <span className="flex items-center gap-2">
                       Verstuur Bericht
                       <ArrowRight className="w-4 h-4" />
                     </span>

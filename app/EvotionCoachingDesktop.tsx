@@ -20,7 +20,7 @@ import {
   MessageCircle,
   Mail,
   Calendar,
-  Shield,
+  UserPlus,
 } from "lucide-react"
 import Image from "next/image"
 import { Header } from "@/components/header"
@@ -292,7 +292,99 @@ export default function EvotionCoachingDesktop() {
 
           {/* Cards */}
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Premium */}
+            {/* Personal Training */}
+            <Card className="group relative overflow-hidden ev-gradient-border bg-white/80 backdrop-blur border-transparent transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-2">
+              <div className="absolute top-4 right-4 z-10">
+                <Badge className="bg-evotion-primary text-white font-bold px-3 py-1 shadow-lg animate-pulse text-xs">
+                  <Award className="w-3 h-3 mr-1 text-white" />
+                  1-OP-1
+                </Badge>
+              </div>
+              <CardContent className="p-8 space-y-6">
+                <div className="space-y-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xl">
+                    <Dumbbell className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-evotion-primary transition-colors duration-300">
+                      Personal Training
+                    </h3>
+                    <p className="text-lg text-gray-600 leading-relaxed">
+                      Persoonlijke 1-op-1 begeleiding door gecertificeerde trainers voor snelle en veilige resultaten.
+                    </p>
+                  </div>
+                </div>
+                <ul className="space-y-3">
+                  {[
+                    "Volledige persoonlijke aandacht",
+                    "Aangepaste oefeningen",
+                    "Directe feedback & correctie",
+                    "Motivatie & ondersteuning",
+                  ].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-gray-700">
+                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      <span className="text-base">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="pt-2">
+                  <Link href="/personal-training">
+                    <Button className="ev-shine w-full bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white py-3 text-base font-semibold transition-all duration-300 transform group-hover:scale-[1.02]">
+                      Meer Informatie
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Duo Training */}
+            <Card className="group relative overflow-hidden ev-gradient-border bg-white/80 backdrop-blur border-transparent transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-2">
+              <div className="absolute top-4 right-4 z-10">
+                <Badge className="bg-evotion-primary text-white font-bold px-3 py-1 shadow-lg text-xs">
+                  <UserPlus className="w-3 h-3 mr-1 text-white" />
+                  SAMEN
+                </Badge>
+              </div>
+              <CardContent className="p-8 space-y-6">
+                <div className="space-y-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xl">
+                    <Users className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-evotion-primary transition-colors duration-300">
+                      Duo Training
+                    </h3>
+                    <p className="text-lg text-gray-600 leading-relaxed">
+                      Train samen met een partner, vriend of familielid en motiveer elkaar naar jullie doelen.
+                    </p>
+                  </div>
+                </div>
+                <ul className="space-y-3">
+                  {[
+                    "Train met je partner of vriend",
+                    "Gedeelde motivatie & plezier",
+                    "Voordeliger per persoon",
+                    "Professionele begeleiding",
+                  ].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-gray-700">
+                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      <span className="text-base">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="pt-2">
+                  <Link href="/duo-training">
+                    <Button className="ev-shine w-full bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white py-3 text-base font-semibold transition-all duration-300 transform group-hover:scale-[1.02]">
+                      Meer Informatie
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Online Coaching */}
             <Card className="group relative overflow-hidden ev-gradient-border bg-white/80 backdrop-blur border-transparent transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-2">
               <div className="absolute top-4 right-4 z-10">
                 <Badge className="bg-evotion-primary text-white font-bold px-3 py-1 shadow-lg animate-pulse text-xs">
@@ -303,63 +395,23 @@ export default function EvotionCoachingDesktop() {
               <CardContent className="p-8 space-y-6">
                 <div className="space-y-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xl">
-                    <Dumbbell className="w-8 h-8 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-evotion-primary transition-colors duration-300">
-                      Premium Coaching
-                    </h3>
-                    <p className="text-lg text-gray-600 leading-relaxed">
-                      Persoonlijke begeleiding met wekelijkse check-ins, aangepaste trainingsschema's en voedingsadvies.
-                    </p>
-                  </div>
-                </div>
-                <ul className="space-y-3">
-                  {[
-                    "Wekelijkse 1-op-1 sessies",
-                    "Persoonlijk trainingsschema",
-                    "24/7 WhatsApp support",
-                    "Voedingsschema op maat",
-                  ].map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-gray-700">
-                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                      <span className="text-base">{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="pt-2">
-                  <Link href="/premium-coaching">
-                    <Button className="ev-shine w-full bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white py-3 text-base font-semibold transition-all duration-300 transform group-hover:scale-[1.02]">
-                      Meer Informatie
-                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Online */}
-            <Card className="group relative overflow-hidden ev-gradient-border bg-white/80 backdrop-blur border-transparent transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-2">
-              <CardContent className="p-8 space-y-6">
-                <div className="space-y-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xl">
-                    <Users className="w-8 h-8 text-white" />
+                    <TrendingUp className="w-8 h-8 text-white" />
                   </div>
                   <div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-evotion-primary transition-colors duration-300">
                       Online Coaching
                     </h3>
                     <p className="text-lg text-gray-600 leading-relaxed">
-                      Flexibele online begeleiding met toegang tot onze app en maandelijkse check-ins.
+                      Modulair 5-fasen programma met persoonlijke begeleiding via onze app, waar en wanneer jij wilt.
                     </p>
                   </div>
                 </div>
                 <ul className="space-y-3">
                   {[
-                    "Maandelijkse check-ins",
-                    "Toegang tot Evotion App",
-                    "Trainingsschema's",
-                    "Voedingsrichtlijnen",
+                    "Persoonlijk trainingsschema",
+                    "Voedingsschema op maat",
+                    "Wekelijkse check-ins",
+                    "24/7 app toegang",
                   ].map((f) => (
                     <li key={f} className="flex items-center gap-2 text-gray-700">
                       <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
@@ -369,52 +421,6 @@ export default function EvotionCoachingDesktop() {
                 </ul>
                 <div className="pt-2">
                   <Link href="/online-coaching">
-                    <Button className="ev-shine w-full bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white py-3 text-base font-semibold transition-all duration-300 transform group-hover:scale-[1.02]">
-                      Meer Informatie
-                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 12 Weken */}
-            <Card className="group relative overflow-hidden ev-gradient-border bg-white/80 backdrop-blur border-transparent transition-all duration-500 hover:shadow-2xl transform hover:-translate-y-2">
-              <div className="absolute top-4 right-4 z-10">
-                <Badge className="bg-evotion-primary text-white font-bold px-3 py-1 shadow-lg text-xs">
-                  <Shield className="w-3 h-3 mr-1 text-white" />
-                  GARANTIE
-                </Badge>
-              </div>
-              <CardContent className="p-8 space-y-6">
-                <div className="space-y-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xl">
-                    <TrendingUp className="w-8 h-8 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-evotion-primary transition-colors duration-300">
-                      12 Weken Vetverlies
-                    </h3>
-                    <p className="text-lg text-gray-600 leading-relaxed">
-                      Intensief 12-weken programma met gegarandeerde resultaten of geld terug.
-                    </p>
-                  </div>
-                </div>
-                <ul className="space-y-3">
-                  {[
-                    "12 weken intensieve begeleiding",
-                    "Geld-terug-garantie",
-                    "Wekelijkse metingen",
-                    "Complete lifestyle coaching",
-                  ].map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-gray-700">
-                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                      <span className="text-base">{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="pt-2">
-                  <Link href="/12-weken-vetverlies">
                     <Button className="ev-shine w-full bg-gradient-to-r from-evotion-primary to-evotion-primary hover:from-evotion-primary hover:to-evotion-primary text-white py-3 text-base font-semibold transition-all duration-300 transform group-hover:scale-[1.02]">
                       Meer Informatie
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />

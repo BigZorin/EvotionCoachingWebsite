@@ -5,18 +5,17 @@ import Script from "next/script"
 export const metadata: Metadata = {
   title: "Evotion Coaching - Personal Training & Online Coaching Nederland",
   description:
-    "🏆 Bereik jouw droomlichaam met Evotion Coaching! Personal training & online coaching door ervaren coaches Martin & Zorin. ✅ Bewezen resultaten ✅ Persoonlijke begeleiding ✅ App toegang ✅ Voedingsadvies. Start vandaag je transformatie!",
+    "Bereik jouw droomlichaam met Evotion Coaching! Personal training, duo training & online coaching door ervaren coaches Martin & Zorin. Bewezen resultaten, persoonlijke begeleiding, app toegang & voedingsadvies. Start vandaag je transformatie!",
   keywords: [
     "personal training sneek",
+    "personal training friesland",
+    "duo training",
     "online coaching",
-    "vetverlies",
-    "online vetverliezen",
     "fitness coach friesland",
     "evotion coaching",
     "evotion",
     "Martin Langenberg",
     "Zorin Wijnands",
-    "12 weken vetverlies",
     "body transformation",
     "powerlifting coach",
     "afvallen",
@@ -24,11 +23,13 @@ export const metadata: Metadata = {
     "fitness app nederland",
     "voedingsschema afvallen",
     "krachttraining begeleiding",
+    "personal trainer",
+    "online begeleiding fitness",
   ],
   openGraph: {
     title: "Evotion Coaching - Personal Training & Online Coaching Nederland",
     description:
-      "🏆 Bereik jouw droomlichaam met Evotion Coaching! Personal training & online coaching door ervaren coaches Martin & Zorin. Bewezen resultaten en persoonlijke begeleiding.",
+      "Bereik jouw droomlichaam met Evotion Coaching! Personal training, duo training & online coaching door ervaren coaches Martin & Zorin. Bewezen resultaten en persoonlijke begeleiding.",
     url: "https://evotion-coaching.nl",
     siteName: "Evotion Coaching",
     images: [
@@ -47,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@evotioncoaching",
     title: "Evotion Coaching - Personal Training & Online Coaching Nederland",
-    description: "🏆 Bereik jouw droomlichaam met Evotion Coaching! Bewezen resultaten door ervaren coaches.",
+    description: "Bereik jouw droomlichaam met Evotion Coaching! Bewezen resultaten door ervaren coaches.",
     images: ["https://evotion-coaching.nl/images/evotion-logo.png"],
   },
   alternates: {
@@ -74,7 +75,7 @@ export default function EvotionCoaching() {
               width: 1200,
               height: 630,
             },
-            description: "Personal Training & Online Coaching voor jouw droomlichaam",
+            description: "Personal Training, Duo Training & Online Coaching voor jouw droomlichaam",
             foundingDate: "2020",
             address: {
               "@type": "PostalAddress",
@@ -103,7 +104,7 @@ export default function EvotionCoaching() {
             },
             aggregateRating: {
               "@type": "AggregateRating",
-              ratingValue: "4.9",
+              ratingValue: "5.0",
               reviewCount: "127",
               bestRating: "5",
               worstRating: "1",
@@ -172,48 +173,42 @@ export default function EvotionCoaching() {
                   itemOffered: {
                     "@type": "Service",
                     name: "Personal Training",
-                    description: "1-op-1 personal training sessies",
+                    description: "1-op-1 personal training sessies met gecertificeerde trainers",
                     provider: {
                       "@type": "Organization",
                       name: "Evotion Coaching",
                     },
                   },
-                  price: "70.00",
-                  priceCurrency: "EUR",
+                },
+                {
+                  "@type": "Offer",
+                  itemOffered: {
+                    "@type": "Service",
+                    name: "Duo Training",
+                    description: "Train samen met een partner of vriend voor gedeelde motivatie",
+                    provider: {
+                      "@type": "Organization",
+                      name: "Evotion Coaching",
+                    },
+                  },
                 },
                 {
                   "@type": "Offer",
                   itemOffered: {
                     "@type": "Service",
                     name: "Online Coaching",
-                    description: "Persoonlijke online coaching met app begeleiding",
+                    description: "Modulair 5-fasen programma met persoonlijke begeleiding via app",
                     provider: {
                       "@type": "Organization",
                       name: "Evotion Coaching",
                     },
                   },
-                  price: "97.00",
-                  priceCurrency: "EUR",
-                },
-                {
-                  "@type": "Offer",
-                  itemOffered: {
-                    "@type": "Service",
-                    name: "Premium Coaching",
-                    description: "Combinatie van personal training en online coaching",
-                    provider: {
-                      "@type": "Organization",
-                      name: "Evotion Coaching",
-                    },
-                  },
-                  price: "147.00",
-                  priceCurrency: "EUR",
                 },
               ],
             },
             aggregateRating: {
               "@type": "AggregateRating",
-              ratingValue: "4.9",
+              ratingValue: "5.0",
               reviewCount: "127",
             },
           }),
@@ -229,7 +224,7 @@ export default function EvotionCoaching() {
             "@type": "WebSite",
             name: "Evotion Coaching",
             url: "https://evotion-coaching.nl",
-            description: "Personal Training & Online Coaching voor jouw droomlichaam",
+            description: "Personal Training, Duo Training & Online Coaching voor jouw droomlichaam",
             inLanguage: "nl-NL",
             potentialAction: {
               "@type": "SearchAction",
@@ -251,36 +246,30 @@ export default function EvotionCoaching() {
                 {
                   "@type": "ListItem",
                   position: 2,
+                  name: "Duo Training",
+                  url: "https://evotion-coaching.nl/duo-training",
+                },
+                {
+                  "@type": "ListItem",
+                  position: 3,
                   name: "Online Coaching",
                   url: "https://evotion-coaching.nl/online-coaching",
                 },
                 {
                   "@type": "ListItem",
-                  position: 3,
-                  name: "Premium Coaching",
-                  url: "https://evotion-coaching.nl/premium-coaching",
-                },
-                {
-                  "@type": "ListItem",
                   position: 4,
-                  name: "12-Weken Vetverlies",
-                  url: "https://evotion-coaching.nl/12-weken-vetverlies",
-                },
-                {
-                  "@type": "ListItem",
-                  position: 5,
                   name: "Resultaten",
                   url: "https://evotion-coaching.nl/resultaten",
                 },
                 {
                   "@type": "ListItem",
-                  position: 6,
+                  position: 5,
                   name: "Over Ons",
                   url: "https://evotion-coaching.nl/over-ons/coaches",
                 },
                 {
                   "@type": "ListItem",
-                  position: 7,
+                  position: 6,
                   name: "Contact",
                   url: "https://evotion-coaching.nl/contact",
                 },
