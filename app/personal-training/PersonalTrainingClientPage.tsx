@@ -3,7 +3,6 @@
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import Link from "next/link"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { sendContactEmail } from "@/app/actions/contact"
@@ -175,41 +174,46 @@ export default function PersonalTrainingClientPage() {
 
   const packages = [
     {
-      title: "Starter Pakket",
-      sessions: "5 sessies",
-      price: "€400",
-      pricePerSession: "€80 per sessie",
-      features: ["5 personal training sessies", "Intake en doelstelling", "Basis trainingsschema", "Voedingsadvies"],
-      popular: false,
-    },
-    {
-      title: "Intensief Pakket",
-      sessions: "10 sessies",
-      price: "€700",
-      pricePerSession: "€70 per sessie",
+      title: "10 Sessies",
+      sessions: "10 personal training sessies",
       features: [
         "10 personal training sessies",
+        "Intake en doelstelling",
+        "Basis trainingsschema",
+        "Voedingsadvies",
+        "Flexibele planning",
+      ],
+      popular: false,
+      whatsappMessage: "Hoi! Ik heb interesse in het 10 Sessies pakket voor Personal Training.",
+    },
+    {
+      title: "20 Sessies",
+      sessions: "20 personal training sessies",
+      features: [
+        "20 personal training sessies",
         "Uitgebreide intake",
         "Gepersonaliseerd trainingsschema",
         "Voedingsplan op maat",
         "Tussentijdse evaluaties",
+        "WhatsApp support",
       ],
       popular: true,
+      whatsappMessage: "Hoi! Ik heb interesse in het 20 Sessies pakket voor Personal Training.",
     },
     {
-      title: "Transformatie Pakket",
-      sessions: "20 sessies",
-      price: "€1200",
-      pricePerSession: "€60 per sessie",
+      title: "40 Sessies",
+      sessions: "40 personal training sessies",
       features: [
-        "20 personal training sessies",
+        "40 personal training sessies",
         "Complete lifestyle analyse",
         "Volledig trainings- en voedingsplan",
         "Wekelijkse voortgangsmetingen",
         "24/7 WhatsApp support",
         "Gratis herhalingsschema",
+        "Prioriteit bij planning",
       ],
       popular: false,
+      whatsappMessage: "Hoi! Ik heb interesse in het 40 Sessies pakket voor Personal Training.",
     },
   ]
 
@@ -233,57 +237,54 @@ export default function PersonalTrainingClientPage() {
                   Personal Training
                 </Badge>
                 <h1 className="text-3xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                  Personal Training Sneek - <span className="text-gray-700">Jouw Persoonlijke Trainer</span>
+                  Personal Training <span className="text-gray-700">1-op-1 Begeleiding</span>
                 </h1>
                 <p className="text-base lg:text-xl text-gray-600 leading-relaxed">
-                  Op zoek naar een persoonlijke trainer in Sneek of omgeving? Ervaar de kracht van 1-op-1 begeleiding
-                  met onze gecertificeerde personal trainers. Bereik je doelen voor vetverlies, spieropbouw en fitness
-                  sneller, veiliger en effectiever dan ooit tevoren.
+                  Ervaar de kracht van 1-op-1 begeleiding met onze gecertificeerde personal trainers. Bereik je doelen
+                  voor vetverlies, spieropbouw en fitness sneller, veiliger en effectiever dan ooit tevoren.
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 text-lg font-semibold">
-                  <Calendar className="w-5 h-5 mr-2" />
-                  Boek een Proefles
+                <Button
+                  size="lg"
+                  className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 text-lg font-semibold"
+                  asChild
+                >
+                  <a
+                    href="https://wa.me/31064365571?text=Hoi!%20Ik%20heb%20interesse%20in%20Personal%20Training%20en%20wil%20graag%20meer%20informatie."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <MessageCircle className="w-5 h-5 mr-2" />
+                    Stuur een Bericht
+                  </a>
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
                   className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
+                  asChild
                 >
-                  <Phone className="w-5 h-5 mr-2" />
-                  Bel Direct
+                  <a href="tel:0064365571">
+                    <Phone className="w-5 h-5 mr-2" />
+                    Bel Direct
+                  </a>
                 </Button>
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-8">
+              <div className="grid grid-cols-3 gap-4 lg:gap-6 pt-6 lg:pt-8">
                 <div className="text-center">
-                  <div ref={stat1.ref} className="text-xl lg:text-3xl font-bold mb-1 text-gray-900 tabular-nums">
-                    {stat1.value}
-                    <span className="align-top text-base lg:text-lg">%</span>
-                  </div>
-                  <div className="text-xs md:text-sm text-gray-600">Persoonlijke Aandacht</div>
+                  <div className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">100%</div>
+                  <div className="text-xs md:text-sm text-gray-600">Persoonlijk</div>
                 </div>
                 <div className="text-center">
-                  <div ref={stat2.ref} className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">
-                    €{stat2.value}
-                  </div>
-                  <div className="text-xs md:text-sm text-gray-600">Vanaf per Sessie</div>
+                  <div className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">1-op-1</div>
+                  <div className="text-xs md:text-sm text-gray-600">Begeleiding</div>
                 </div>
                 <div className="text-center">
-                  <div ref={stat3.ref} className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">
-                    {stat3.value}
-                    <span className="align-top text-base lg:text-lg">+</span>
-                  </div>
-                  <div className="text-xs md:text-sm text-gray-600">Jaar Ervaring</div>
-                </div>
-                <div className="text-center">
-                  <div ref={stat4.ref} className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">
-                    {stat4.value}
-                    <span className="align-top text-base lg:text-lg">%</span>
-                  </div>
-                  <div className="text-xs md:text-sm text-gray-600">Tevredenheid</div>
+                  <div className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">5.0</div>
+                  <div className="text-xs md:text-sm text-gray-600">Google Score</div>
                 </div>
               </div>
             </div>
@@ -326,11 +327,11 @@ export default function PersonalTrainingClientPage() {
               Voordelen
             </Badge>
             <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Waarom Kiezen voor een <span className="text-gray-700">Persoonlijke Trainer in Sneek</span>?
+              Waarom Kiezen voor <span className="text-gray-700">Personal Training</span>?
             </h2>
             <p className="text-base md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Personal training in Sneek biedt unieke voordelen die je niet krijgt bij groepslessen of zelfstandig
-              trainen. Onze persoonlijke trainers in Friesland zorgen voor maximale resultaten.
+              Personal training biedt unieke voordelen die je niet krijgt bij groepslessen of zelfstandig trainen. Onze
+              personal trainers zorgen voor maximale resultaten.
             </p>
           </div>
 
@@ -359,11 +360,10 @@ export default function PersonalTrainingClientPage() {
               Proces
             </Badge>
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Hoe werkt <span className="text-gray-700">Personal Training in Sneek</span>?
+              Hoe werkt <span className="text-gray-700">Personal Training</span>?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Van eerste kennismaking tot het bereiken van je doelen voor vetverlies of spieropbouw - zo ziet jouw reis
-              met een persoonlijke trainer in Friesland eruit.
+              Van eerste kennismaking tot het bereiken van je doelen - zo ziet jouw reis met een personal trainer eruit.
             </p>
           </div>
 
@@ -562,7 +562,7 @@ export default function PersonalTrainingClientPage() {
         </div>
       </section>
 
-      {/* Packages Section */}
+      {/* Packages Section - Updated with WhatsApp CTAs */}
       <section className="py-16 lg:py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -578,51 +578,58 @@ export default function PersonalTrainingClientPage() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
             {packages.map((pkg, index) => (
               <div key={index} className="relative">
                 <Card
                   className={`relative border transition-all duration-300 hover:shadow-xl ${
-                    pkg.popular ? "border-gray-900 shadow-lg scale-[1.02]" : "border-gray-200 hover:-translate-y-1"
+                    pkg.popular ? "border-gray-900 shadow-lg lg:scale-[1.02]" : "border-gray-200 hover:-translate-y-1"
                   }`}
                 >
                   {pkg.popular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-gray-900 text-white px-4 py-2 shadow-md">
-                        <Star className="w-4 h-4 mr-1" />
+                      <Badge className="bg-gray-900 text-white px-3 lg:px-4 py-1.5 lg:py-2 shadow-md text-xs lg:text-sm">
+                        <Star className="w-3 h-3 lg:w-4 lg:h-4 mr-1" />
                         MEEST POPULAIR
                       </Badge>
                     </div>
                   )}
 
-                  <CardContent className="p-8 space-y-6">
-                    <div className="text-center space-y-4">
-                      <h3 className="text-2xl font-bold text-gray-900">{pkg.title}</h3>
-                      <div className="space-y-2">
-                        <div className="text-4xl font-bold text-gray-900">{pkg.price}</div>
-                        <div className="text-sm text-gray-500">{pkg.pricePerSession}</div>
-                        <div className="text-lg font-medium text-gray-700">{pkg.sessions}</div>
+                  <CardContent className="p-6 lg:p-8 space-y-5 lg:space-y-6">
+                    <div className="text-center space-y-3">
+                      <h3 className="text-xl lg:text-2xl font-bold text-gray-900">{pkg.title}</h3>
+                      <div className="space-y-1">
+                        <div className="text-2xl lg:text-3xl font-bold text-gray-900">Op Aanvraag</div>
+                        <div className="text-sm lg:text-base text-gray-600">{pkg.sessions}</div>
                       </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-2.5 lg:space-y-3">
                       {pkg.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                          <span className="text-gray-700">{feature}</span>
+                        <div key={idx} className="flex items-start gap-2.5 lg:gap-3">
+                          <CheckCircle className="w-4 h-4 lg:w-5 lg:h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm lg:text-base text-gray-700">{feature}</span>
                         </div>
                       ))}
                     </div>
 
                     <Button
-                      className={`w-full py-3 text-lg font-semibold ${
+                      className={`w-full py-2.5 lg:py-3 text-base lg:text-lg font-semibold ${
                         pkg.popular
                           ? "bg-gray-900 hover:bg-gray-800 text-white"
                           : "bg-gray-100 hover:bg-gray-200 text-gray-900"
                       }`}
+                      asChild
                     >
-                      Kies dit Pakket
-                      <ArrowRight className="w-5 h-5 ml-2" />
+                      <a
+                        href={`https://wa.me/31064365571?text=${encodeURIComponent(pkg.whatsappMessage)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
+                        Vraag Informatie
+                        <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5 ml-2" />
+                      </a>
                     </Button>
                   </CardContent>
                 </Card>
@@ -640,16 +647,20 @@ export default function PersonalTrainingClientPage() {
               className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
               asChild
             >
-              <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
+              <a
+                href="https://wa.me/31064365571?text=Hoi!%20Ik%20wil%20graag%20advies%20over%20welk%20Personal%20Training%20pakket%20het%20beste%20bij%20mij%20past."
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <MessageCircle className="w-5 h-5 mr-2" />
-                Gratis Adviesgesprek
-              </Link>
+                Vraag Advies via WhatsApp
+              </a>
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Contact Section */}
+      {/* Contact Section - Updated with Zorin's WhatsApp */}
       <section className="py-16 lg:py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
@@ -660,16 +671,16 @@ export default function PersonalTrainingClientPage() {
                   Contact
                 </Badge>
                 <h2 className="text-4xl font-bold text-gray-900">
-                  Klaar om te <span className="text-gray-700">Starten met Personal Training</span>?
+                  Klaar om te <span className="text-gray-700">Starten</span>?
                 </h2>
                 <p className="text-xl text-gray-600 leading-relaxed">
-                  Neem contact met ons op voor een gratis kennismakingsgesprek met een persoonlijke trainer in Sneek en
-                  ontdek hoe personal training jouw leven kan veranderen.
+                  Neem contact met ons op en ontdek hoe personal training jouw leven kan veranderen. Stuur direct een
+                  bericht via WhatsApp voor een snelle reactie.
                 </p>
               </div>
 
               <div className="space-y-4">
-                <a href="tel:0610935077" className="block">
+                <a href="tel:0064365571" className="block">
                   <Card className="border border-gray-200 hover:border-gray-300 transition-colors cursor-pointer">
                     <CardContent className="p-6">
                       <div className="flex items-center gap-4">
@@ -678,7 +689,7 @@ export default function PersonalTrainingClientPage() {
                         </div>
                         <div>
                           <h3 className="font-bold text-gray-900">Bel Direct</h3>
-                          <p className="text-gray-700 font-medium">06 10 93 50 77</p>
+                          <p className="text-gray-700 font-medium">06 43 65 571</p>
                           <p className="text-sm text-gray-500">Ma-Vr: 9:00-18:00</p>
                         </div>
                       </div>
@@ -686,16 +697,16 @@ export default function PersonalTrainingClientPage() {
                   </Card>
                 </a>
 
-                <a href="https://wa.me/31610935077" target="_blank" rel="noopener noreferrer" className="block">
-                  <Card className="border border-gray-200 hover:border-gray-300 transition-colors cursor-pointer">
+                <a href="https://wa.me/31064365571" target="_blank" rel="noopener noreferrer" className="block">
+                  <Card className="border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors cursor-pointer">
                     <CardContent className="p-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <MessageCircle className="w-6 h-6 text-gray-700" />
+                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                          <MessageCircle className="w-6 h-6 text-green-600" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-gray-900">WhatsApp</h3>
-                          <p className="text-gray-700 font-medium">Start Chat</p>
+                          <h3 className="font-bold text-gray-900">WhatsApp (Aanbevolen)</h3>
+                          <p className="text-green-600 font-medium">Start Chat</p>
                           <p className="text-sm text-gray-500">Snelle reactie gegarandeerd</p>
                         </div>
                       </div>
@@ -705,6 +716,7 @@ export default function PersonalTrainingClientPage() {
               </div>
             </div>
 
+            {/* Contact Form */}
             <div className="border border-gray-200 rounded-2xl">
               <Card className="border-0 rounded-2xl shadow-sm">
                 <CardContent className="p-8">

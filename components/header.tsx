@@ -8,8 +8,6 @@ import { Button } from "@/components/ui/button"
 import {
   Dumbbell,
   Users,
-  Heart,
-  TrendingUp,
   Menu,
   ChevronDown,
   X,
@@ -19,6 +17,7 @@ import {
   BookOpen,
   Calculator,
   Utensils,
+  Monitor,
 } from "lucide-react"
 
 export function Header() {
@@ -91,44 +90,30 @@ export function Header() {
                       </div>
                     </Link>
                     <Link
+                      href="/duo-training"
+                      className={`block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium ${
+                        isActive("/duo-training") ? "bg-primary/5" : ""
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Users className="w-4 h-4 text-primary" />
+                        <div>
+                          <div className="font-semibold">Duo Training</div>
+                          <div className="text-xs text-gray-500">Train samen met een partner</div>
+                        </div>
+                      </div>
+                    </Link>
+                    <Link
                       href="/online-coaching"
                       className={`block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium ${
                         isActive("/online-coaching") ? "bg-primary/5" : ""
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Users className="w-4 h-4 text-primary" />
+                        <Monitor className="w-4 h-4 text-primary" />
                         <div>
-                          <div className="font-semibold">Online Coaching</div>
-                          <div className="text-xs text-gray-500">Flexibele coaching</div>
-                        </div>
-                      </div>
-                    </Link>
-                    <Link
-                      href="/premium-coaching"
-                      className={`block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium ${
-                        isActive("/premium-coaching") ? "bg-primary/5" : ""
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Heart className="w-4 h-4 text-primary" />
-                        <div>
-                          <div className="font-semibold">Premium Coaching</div>
-                          <div className="text-xs text-gray-500">Complete begeleiding</div>
-                        </div>
-                      </div>
-                    </Link>
-                    <Link
-                      href="/12-weken-vetverlies"
-                      className={`block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium ${
-                        isActive("/12-weken-vetverlies") ? "bg-primary/5" : ""
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <TrendingUp className="w-4 h-4 text-primary" />
-                        <div>
-                          <div className="font-semibold">12-Weken Vetverlies</div>
-                          <div className="text-xs text-gray-500">Intensief programma</div>
+                          <div className="font-semibold">Online Begeleiding</div>
+                          <div className="text-xs text-gray-500">Flexibele coaching op afstand</div>
                         </div>
                       </div>
                     </Link>
@@ -382,9 +367,9 @@ export function Header() {
                         </div>
                       </Link>
                       <Link
-                        href="/online-coaching"
+                        href="/duo-training"
                         className={`flex items-center gap-3 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
-                          isActive("/online-coaching") ? "bg-primary/10 text-primary" : ""
+                          isActive("/duo-training") ? "bg-primary/10 text-primary" : ""
                         }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
@@ -392,38 +377,23 @@ export function Header() {
                           <Users className="w-4 h-4 text-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-sm">Online Coaching</div>
-                          <div className="text-xs text-gray-500 truncate">Flexibele coaching</div>
+                          <div className="font-semibold text-sm">Duo Training</div>
+                          <div className="text-xs text-gray-500 truncate">Train samen met een partner</div>
                         </div>
                       </Link>
                       <Link
-                        href="/premium-coaching"
+                        href="/online-coaching"
                         className={`flex items-center gap-3 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
-                          isActive("/premium-coaching") ? "bg-primary/10 text-primary" : ""
+                          isActive("/online-coaching") ? "bg-primary/10 text-primary" : ""
                         }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <Heart className="w-4 h-4 text-primary" />
+                          <Monitor className="w-4 h-4 text-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-sm">Premium Coaching</div>
-                          <div className="text-xs text-gray-500 truncate">Complete begeleiding</div>
-                        </div>
-                      </Link>
-                      <Link
-                        href="/12-weken-vetverlies"
-                        className={`flex items-center gap-3 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
-                          isActive("/12-weken-vetverlies") ? "bg-primary/10 text-primary" : ""
-                        }`}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <TrendingUp className="w-4 h-4 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-sm">12-Weken Vetverlies</div>
-                          <div className="text-xs text-gray-500 truncate">Intensief programma</div>
+                          <div className="font-semibold text-sm">Online Begeleiding</div>
+                          <div className="text-xs text-gray-500 truncate">Flexibele coaching op afstand</div>
                         </div>
                       </Link>
                     </div>

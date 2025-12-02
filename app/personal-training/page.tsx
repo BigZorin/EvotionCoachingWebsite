@@ -3,29 +3,27 @@ import PersonalTrainingClientPage from "./PersonalTrainingClientPage"
 import Script from "next/script"
 
 export const metadata: Metadata = {
-  title: "Personal Training Nederland - 1-op-1 Begeleiding | Evotion Coaching",
+  title: "Personal Training - 1-op-1 Begeleiding | Evotion Coaching",
   description:
-    "🏆 Personal Training bij Evotion Coaching - 1-op-1 begeleiding door ervaren trainers. ✅ Persoonlijke schema's ✅ Voedingsadvies ✅ Bewezen resultaten. €70 per sessie. Boek nu je gratis consult!",
+    "Personal Training bij Evotion Coaching - 1-op-1 begeleiding door ervaren trainers. Persoonlijke schema's, voedingsadvies en bewezen resultaten. Vanaf €60 per sessie. Neem contact op via WhatsApp.",
   keywords: [
-    "personal training sneek",
-    "personal trainer friesland",
-    "fitness coach friesland",
+    "personal training",
+    "personal trainer",
+    "fitness coach",
     "1-op-1 training",
     "fitness begeleiding",
     "krachttraining coach",
     "afvallen personal trainer",
-    "vet verliezen begeleiding",
-    "Martin Langenberg personal trainer",
-    "Zorin Wijnands trainer",
+    "spieropbouw",
     "personal training sessie",
-    "fitness coaching friesland",
-    "body transformation trainer",
+    "fitness coaching",
+    "body transformation",
     "vetverlies coaching",
   ],
   openGraph: {
-    title: "Personal Training Nederland - 1-op-1 Begeleiding | Evotion Coaching",
+    title: "Personal Training - 1-op-1 Begeleiding | Evotion Coaching",
     description:
-      "🏆 Personal Training bij Evotion Coaching - 1-op-1 begeleiding door ervaren trainers. Persoonlijke schema's, voedingsadvies en professionele coaching.",
+      "Personal Training bij Evotion Coaching - 1-op-1 begeleiding door ervaren trainers. Persoonlijke schema's, voedingsadvies en professionele coaching.",
     url: "https://evotion-coaching.nl/personal-training",
     siteName: "Evotion Coaching",
     images: [
@@ -42,8 +40,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Personal Training Nederland - 1-op-1 Begeleiding | Evotion Coaching",
-    description: "🏆 Personal Training bij Evotion Coaching - 1-op-1 begeleiding door ervaren trainers.",
+    title: "Personal Training - 1-op-1 Begeleiding | Evotion Coaching",
+    description: "Personal Training bij Evotion Coaching - 1-op-1 begeleiding door ervaren trainers.",
     images: ["https://evotion-coaching.nl/images/personal-training-session.jpeg"],
   },
   alternates: {
@@ -70,7 +68,7 @@ export default function PersonalTrainingPage() {
               logo: "https://evotion-coaching.nl/images/evotion-logo.png",
               contactPoint: {
                 "@type": "ContactPoint",
-                telephone: "+31-6-10935077",
+                telephone: "+31-6-43-65-571",
                 contactType: "customer service",
               },
             },
@@ -87,32 +85,52 @@ export default function PersonalTrainingPage() {
                 "@type": "Place",
                 address: {
                   "@type": "PostalAddress",
-                  addressRegion: "Friesland",
                   addressCountry: "NL",
                 },
               },
             },
-            offers: {
-              "@type": "Offer",
-              price: "70.00",
-              priceCurrency: "EUR",
-              priceSpecification: {
-                "@type": "UnitPriceSpecification",
-                price: "70.00",
+            offers: [
+              {
+                "@type": "Offer",
+                name: "10 Sessies Pakket",
+                price: "750.00",
                 priceCurrency: "EUR",
-                unitText: "per sessie",
+                priceSpecification: {
+                  "@type": "UnitPriceSpecification",
+                  price: "75.00",
+                  priceCurrency: "EUR",
+                  unitText: "per sessie",
+                },
               },
-              availability: "https://schema.org/InStock",
-              validFrom: "2024-01-01",
-              seller: {
-                "@type": "Organization",
-                name: "Evotion Coaching",
+              {
+                "@type": "Offer",
+                name: "20 Sessies Pakket",
+                price: "1400.00",
+                priceCurrency: "EUR",
+                priceSpecification: {
+                  "@type": "UnitPriceSpecification",
+                  price: "70.00",
+                  priceCurrency: "EUR",
+                  unitText: "per sessie",
+                },
               },
-            },
+              {
+                "@type": "Offer",
+                name: "40 Sessies Pakket",
+                price: "2400.00",
+                priceCurrency: "EUR",
+                priceSpecification: {
+                  "@type": "UnitPriceSpecification",
+                  price: "60.00",
+                  priceCurrency: "EUR",
+                  unitText: "per sessie",
+                },
+              },
+            ],
             aggregateRating: {
               "@type": "AggregateRating",
-              ratingValue: "4.9",
-              reviewCount: "89",
+              ratingValue: "5.0",
+              reviewCount: "15",
             },
             category: "Health & Fitness",
           }),
