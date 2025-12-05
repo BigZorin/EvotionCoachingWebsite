@@ -22,7 +22,6 @@ import {
   Calendar,
   Smartphone,
   BarChart3,
-  UserPlus,
 } from "lucide-react"
 import Image from "next/image"
 import { Header } from "@/components/header"
@@ -79,15 +78,6 @@ export default function EvotionCoachingMobile() {
       features: ["Volledige aandacht", "Aangepaste oefeningen", "Directe feedback", "Motivatie & support"],
       popular: true,
       href: "/personal-training",
-    },
-    {
-      icon: UserPlus,
-      title: "Duo Training",
-      subtitle: "Train samen, bereik meer",
-      description: "Train samen met een partner, vriend of familielid en motiveer elkaar.",
-      features: ["Train met partner/vriend", "Gedeelde motivatie", "Voordeliger per persoon", "Professioneel begeleid"],
-      popular: false,
-      href: "/duo-training",
     },
     {
       icon: TrendingUp,
