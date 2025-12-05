@@ -467,7 +467,7 @@ export default function EvotionCoachingMobile() {
 
           <div className="space-y-6">
             {transformations.map((t) => (
-              <Card key={t.name} className="overflow-hidden ev-gradient-border border-transparent">
+              <Card key={t.name} className="overflow-hidden ev-gradient-border border-transparent py-0">
                 <div className="relative aspect-square">
                   <Image
                     src={t.image || "/placeholder.svg"}
