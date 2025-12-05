@@ -621,7 +621,7 @@ export default function EvotionCoachingDesktop() {
 
           <div className="space-y-12 max-w-7xl mx-auto">
             {/* Martin */}
-            <Card className="group overflow-hidden ev-gradient-border border-transparent transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
+            <Card className="group overflow-hidden border border-gray-200 shadow-lg transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 rounded-2xl py-[-20px] py-[-2px] py-0">
               <CardContent className="p-0">
                 <div className="grid lg:grid-cols-2 gap-0">
                   <div className="relative aspect-square overflow-hidden">
@@ -672,7 +672,7 @@ export default function EvotionCoachingDesktop() {
             </Card>
 
             {/* Salim */}
-            <Card className="group overflow-hidden ev-gradient-border border-transparent transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
+            <Card className="group overflow-hidden border border-gray-200 shadow-lg transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 rounded-2xl py-0">
               <CardContent className="p-0">
                 <div className="grid lg:grid-cols-2 gap-0">
                   <div className="p-8 lg:p-12 flex flex-col justify-center space-y-6 lg:order-1">
@@ -718,7 +718,7 @@ export default function EvotionCoachingDesktop() {
             </Card>
 
             {/* Wouter */}
-            <Card className="group overflow-hidden ev-gradient-border border-transparent transition-all duration-500 hover:shadow-2xl hover:-translate-y-2">
+            <Card className="group overflow-hidden border border-gray-200 shadow-lg transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 rounded-2xl py-[-20px] py-[-2px] py-0">
               <CardContent className="p-0">
                 <div className="grid lg:grid-cols-2 gap-0">
                   <div className="relative aspect-square overflow-hidden">

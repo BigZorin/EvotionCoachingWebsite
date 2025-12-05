@@ -101,23 +101,23 @@ export default function DuoTrainingClientPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <Header />
 
       {/* Hero Section - Mobile Optimized */}
-      <section className="py-12 lg:py-24 bg-white">
+      <section className="py-12 lg:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="space-y-6 lg:space-y-8 text-center lg:text-left">
               <div className="space-y-4 lg:space-y-6">
-                <Badge className="bg-gray-100 text-gray-700 border-gray-200 inline-flex">
+                <Badge className="bg-muted text-muted-foreground border-border inline-flex">
                   <Users className="w-4 h-4 mr-2" />
                   Duo Training
                 </Badge>
-                <h1 className="text-3xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                  Duo Training - <span className="block lg:inline text-gray-700">Samen Sterker</span>
+                <h1 className="text-3xl lg:text-6xl font-bold text-foreground leading-tight">
+                  Duo Training - <span className="block lg:inline text-muted-foreground">Samen Sterker</span>
                 </h1>
-                <p className="text-base lg:text-xl text-gray-600 leading-relaxed max-w-lg mx-auto lg:mx-0">
+                <p className="text-base lg:text-xl text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
                   Train samen met je partner, vriend of familielid. Met duo training deel je niet alleen de kosten, maar
                   ook de motivatie. Twee keer zoveel plezier, twee keer zoveel resultaat.
                 </p>
@@ -126,7 +126,7 @@ export default function DuoTrainingClientPage() {
               <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center lg:justify-start">
                 <Button
                   size="lg"
-                  className="bg-gray-900 hover:bg-gray-800 text-white px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
                   asChild
                 >
                   <a
@@ -141,7 +141,7 @@ export default function DuoTrainingClientPage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
+                  className="border-2 border-border text-muted-foreground hover:bg-muted bg-transparent"
                   asChild
                 >
                   <a href="tel:0064365571">
@@ -153,23 +153,23 @@ export default function DuoTrainingClientPage() {
 
               <div className="grid grid-cols-3 gap-4 lg:gap-6 pt-4 lg:pt-8">
                 <div className="text-center">
-                  <div className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">2x</div>
-                  <div className="text-xs lg:text-sm text-gray-600">Motivatie</div>
+                  <div className="text-xl lg:text-3xl font-bold mb-1 text-foreground">2x</div>
+                  <div className="text-xs lg:text-sm text-muted-foreground">Motivatie</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">50%</div>
-                  <div className="text-xs lg:text-sm text-gray-600">Besparing p.p.</div>
+                  <div className="text-xl lg:text-3xl font-bold mb-1 text-foreground">50%</div>
+                  <div className="text-xs lg:text-sm text-muted-foreground">Besparing p.p.</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">100%</div>
-                  <div className="text-xs lg:text-sm text-gray-600">Persoonlijk</div>
+                  <div className="text-xl lg:text-3xl font-bold mb-1 text-foreground">100%</div>
+                  <div className="text-xs lg:text-sm text-muted-foreground">Persoonlijk</div>
                 </div>
               </div>
             </div>
 
             {/* Image - Hidden on mobile for cleaner look */}
             <div className="relative hidden lg:block">
-              <div className="relative w-full h-[480px] lg:h-[520px] rounded-2xl overflow-hidden border border-gray-200">
+              <div className="relative w-full h-[480px] lg:h-[520px] rounded-2xl overflow-hidden border border-border">
                 <Image
                   src="/two-people-training-together-in-gym-with-personal-.jpg"
                   alt="Duo Training sessie bij Evotion Coaching"
@@ -178,14 +178,14 @@ export default function DuoTrainingClientPage() {
                   sizes="(min-width: 1024px) 50vw, 100vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
-                <div className="absolute top-4 left-4 flex items-center gap-2 rounded-full bg-white/90 backdrop-blur px-3 py-1.5">
+                <div className="absolute top-4 left-4 flex items-center gap-2 rounded-full bg-background/90 backdrop-blur px-3 py-1.5">
                   <Star className="w-4 h-4 text-yellow-500" />
-                  <span className="text-xs font-medium text-gray-900">Populaire Keuze</span>
+                  <span className="text-xs font-medium text-foreground">Populaire Keuze</span>
                 </div>
                 <div className="absolute bottom-4 right-4">
-                  <div className="rounded-xl bg-white/90 backdrop-blur px-4 py-3">
-                    <div className="flex items-center gap-2 text-sm text-gray-900">
-                      <Trophy className="w-4 h-4 text-gray-700" />
+                  <div className="rounded-xl bg-background/90 backdrop-blur px-4 py-3">
+                    <div className="flex items-center gap-2 text-sm text-foreground">
+                      <Trophy className="w-4 h-4 text-muted-foreground" />
                       <span className="font-medium">Samen Trainen</span>
                     </div>
                   </div>
@@ -197,17 +197,17 @@ export default function DuoTrainingClientPage() {
       </section>
 
       {/* Benefits Section - Mobile Optimized */}
-      <section className="py-12 lg:py-24 bg-gray-50">
+      <section className="py-12 lg:py-24 bg-muted">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-4 lg:mb-6 inline-flex">
+            <Badge className="bg-background text-muted-foreground border-border mb-4 lg:mb-6 inline-flex">
               <Target className="w-4 h-4 mr-2" />
               Voordelen
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">
+            <h2 className="text-2xl lg:text-5xl font-bold text-foreground mb-3 lg:mb-6">
               Waarom Kiezen voor Duo Training?
             </h2>
-            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
+            <p className="text-sm lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-2">
               Duo training combineert het beste van twee werelden: persoonlijke begeleiding en de motivatie van samen
               trainen.
             </p>
@@ -215,13 +215,13 @@ export default function DuoTrainingClientPage() {
 
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-8">
             {benefits.map((benefit, index) => (
-              <Card key={index} className="border border-gray-200 hover:shadow-lg transition-all duration-300">
+              <Card key={index} className="border border-border hover:shadow-lg transition-all duration-300 bg-card">
                 <CardContent className="p-4 lg:p-8 text-center space-y-2 lg:space-y-4">
-                  <div className="w-10 h-10 lg:w-16 lg:h-16 bg-gray-100 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto">
-                    <benefit.icon className="w-5 h-5 lg:w-8 lg:h-8 text-gray-700" />
+                  <div className="w-10 h-10 lg:w-16 lg:h-16 bg-muted rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto">
+                    <benefit.icon className="w-5 h-5 lg:w-8 lg:h-8 text-muted-foreground" />
                   </div>
-                  <h3 className="text-sm lg:text-xl font-bold text-gray-900">{benefit.title}</h3>
-                  <p className="text-xs lg:text-base text-gray-600 leading-relaxed hidden sm:block">
+                  <h3 className="text-sm lg:text-xl font-bold text-card-foreground">{benefit.title}</h3>
+                  <p className="text-xs lg:text-base text-muted-foreground leading-relaxed hidden sm:block">
                     {benefit.description}
                   </p>
                 </CardContent>
@@ -232,14 +232,14 @@ export default function DuoTrainingClientPage() {
       </section>
 
       {/* How it Works - Mobile Optimized */}
-      <section className="py-12 lg:py-24 bg-white">
+      <section className="py-12 lg:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-4 lg:mb-6 inline-flex">
+            <Badge className="bg-muted text-muted-foreground border-border mb-4 lg:mb-6 inline-flex">
               <TrendingUp className="w-4 h-4 mr-2" />
               Hoe Werkt Het
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">Starten met Duo Training</h2>
+            <h2 className="text-2xl lg:text-5xl font-bold text-foreground mb-3 lg:mb-6">Starten met Duo Training</h2>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-8">
@@ -267,14 +267,14 @@ export default function DuoTrainingClientPage() {
             ].map((item, index) => (
               <Card
                 key={index}
-                className="relative text-center border border-gray-200 hover:border-gray-300 transition-colors"
+                className="relative text-center border border-border hover:border-primary/50 transition-colors bg-card"
               >
                 <CardContent className="p-4 lg:p-6 space-y-2 lg:space-y-4">
-                  <div className="w-10 h-10 lg:w-16 lg:h-16 bg-gray-900 rounded-full flex items-center justify-center mx-auto text-white">
+                  <div className="w-10 h-10 lg:w-16 lg:h-16 bg-primary rounded-full flex items-center justify-center mx-auto text-primary-foreground">
                     <span className="text-sm lg:text-xl font-bold">{item.step}</span>
                   </div>
-                  <h3 className="text-sm lg:text-xl font-bold text-gray-900">{item.title}</h3>
-                  <p className="text-xs lg:text-base text-gray-600 leading-relaxed hidden sm:block">
+                  <h3 className="text-sm lg:text-xl font-bold text-card-foreground">{item.title}</h3>
+                  <p className="text-xs lg:text-base text-muted-foreground leading-relaxed hidden sm:block">
                     {item.description}
                   </p>
                 </CardContent>
@@ -285,15 +285,15 @@ export default function DuoTrainingClientPage() {
       </section>
 
       {/* Packages Section - Mobile Optimized */}
-      <section className="py-12 lg:py-24 bg-gray-50">
+      <section className="py-12 lg:py-24 bg-muted">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-4 lg:mb-6 inline-flex">
+            <Badge className="bg-background text-muted-foreground border-border mb-4 lg:mb-6 inline-flex">
               <Users className="w-4 h-4 mr-2" />
               Pakketten
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">Duo Training Pakketten</h2>
-            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
+            <h2 className="text-2xl lg:text-5xl font-bold text-foreground mb-3 lg:mb-6">Duo Training Pakketten</h2>
+            <p className="text-sm lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-2">
               Alle pakketten zijn voor 2 personen samen. Neem contact op voor prijzen en mogelijkheden.
             </p>
           </div>
@@ -302,13 +302,13 @@ export default function DuoTrainingClientPage() {
             {packages.map((pkg, index) => (
               <div key={index} className="relative">
                 <Card
-                  className={`relative border transition-all duration-300 hover:shadow-xl ${
-                    pkg.popular ? "border-gray-900 shadow-lg lg:scale-[1.02]" : "border-gray-200 hover:-translate-y-1"
+                  className={`relative border transition-all duration-300 hover:shadow-xl bg-card ${
+                    pkg.popular ? "border-primary shadow-lg lg:scale-[1.02]" : "border-border hover:-translate-y-1"
                   }`}
                 >
                   {pkg.popular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-gray-900 text-white px-3 lg:px-4 py-1.5 lg:py-2 shadow-md text-xs lg:text-sm">
+                      <Badge className="bg-primary text-primary-foreground px-3 lg:px-4 py-1.5 lg:py-2 shadow-md text-xs lg:text-sm">
                         <Star className="w-3 h-3 lg:w-4 lg:h-4 mr-1" />
                         MEEST POPULAIR
                       </Badge>
@@ -317,10 +317,10 @@ export default function DuoTrainingClientPage() {
 
                   <CardContent className="p-6 lg:p-8 space-y-5 lg:space-y-6">
                     <div className="text-center space-y-3">
-                      <h3 className="text-xl lg:text-2xl font-bold text-gray-900">{pkg.title}</h3>
+                      <h3 className="text-xl lg:text-2xl font-bold text-card-foreground">{pkg.title}</h3>
                       <div className="space-y-1">
-                        <div className="text-2xl lg:text-3xl font-bold text-gray-900">Op Aanvraag</div>
-                        <div className="text-sm lg:text-base text-gray-600">{pkg.sessions}</div>
+                        <div className="text-2xl lg:text-3xl font-bold text-card-foreground">Op Aanvraag</div>
+                        <div className="text-sm lg:text-base text-muted-foreground">{pkg.sessions}</div>
                       </div>
                     </div>
 
@@ -328,7 +328,7 @@ export default function DuoTrainingClientPage() {
                       {pkg.features.map((feature, idx) => (
                         <div key={idx} className="flex items-start gap-2.5 lg:gap-3">
                           <CheckCircle className="w-4 h-4 lg:w-5 lg:h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                          <span className="text-sm lg:text-base text-gray-700">{feature}</span>
+                          <span className="text-sm lg:text-base text-muted-foreground">{feature}</span>
                         </div>
                       ))}
                     </div>
@@ -336,8 +336,8 @@ export default function DuoTrainingClientPage() {
                     <Button
                       className={`w-full py-2.5 lg:py-3 text-base lg:text-lg font-semibold ${
                         pkg.popular
-                          ? "bg-gray-900 hover:bg-gray-800 text-white"
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-900"
+                          ? "bg-primary hover:bg-primary/90 text-primary-foreground"
+                          : "bg-muted hover:bg-muted/80 text-foreground"
                       }`}
                       asChild
                     >
@@ -358,13 +358,13 @@ export default function DuoTrainingClientPage() {
           </div>
 
           <div className="text-center mt-8 lg:mt-12">
-            <p className="text-sm lg:text-base text-gray-600 mb-4 lg:mb-6 px-2">
+            <p className="text-sm lg:text-base text-muted-foreground mb-4 lg:mb-6 px-2">
               Nog geen trainingspartner? Neem contact op en we helpen je verder.
             </p>
             <Button
               size="lg"
               variant="outline"
-              className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
+              className="border-2 border-border text-muted-foreground hover:bg-muted bg-transparent"
               asChild
             >
               <a
@@ -381,16 +381,16 @@ export default function DuoTrainingClientPage() {
       </section>
 
       {/* CTA Section - Mobile Optimized */}
-      <section className="py-12 lg:py-24 bg-gray-900 text-white">
+      <section className="py-12 lg:py-24 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-2xl lg:text-5xl font-bold mb-3 lg:mb-6">Klaar om Samen te Starten?</h2>
-          <p className="text-sm lg:text-xl text-gray-300 max-w-2xl mx-auto mb-6 lg:mb-8 px-2">
+          <p className="text-sm lg:text-xl text-primary-foreground/80 max-w-2xl mx-auto mb-6 lg:mb-8 px-2">
             Neem vandaag nog contact op en ontdek hoe duo training jullie kan helpen om samen sterker te worden.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center px-4">
             <Button
               size="lg"
-              className="bg-white text-gray-900 hover:bg-gray-100 px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
+              className="bg-background text-foreground hover:bg-muted px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
               asChild
             >
               <a
@@ -405,7 +405,7 @@ export default function DuoTrainingClientPage() {
             <Button
               size="lg"
               variant="outline"
-              className="border-2 border-white text-white hover:bg-white/10 bg-transparent"
+              className="border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 bg-transparent"
               asChild
             >
               <a href="tel:0064365571">

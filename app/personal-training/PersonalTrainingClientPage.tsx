@@ -1,17 +1,13 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useRef, useState } from "react"
+
 import Image from "next/image"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { sendContactEmail } from "@/app/actions/contact"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { MapPin, Users, Smartphone } from "lucide-react"
 import {
   Dumbbell,
   Star,
@@ -20,20 +16,21 @@ import {
   ArrowRight,
   Phone,
   MessageCircle,
-  Calendar,
-  Shield,
-  Heart,
-  User,
-  Zap,
   TrendingUp,
   Trophy,
-  ChevronDown,
+  Clock,
+  User,
+  Shield,
+  Zap,
+  Heart,
 } from "lucide-react"
+import { useState, useEffect } from "react"
+import { sendContactEmail } from "@/app/actions/contact"
 
 function useAnimatedCounter(target: number, duration = 1400, startWhenVisible = true) {
   const [value, setValue] = useState(0)
-  const ref = useRef<HTMLDivElement | null>(null)
-  const startedRef = useRef(false)
+  const [ref, setRef] = useState<HTMLDivElement | null>(null)
+  const [startedRef, setStartedRef] = useState(false)
 
   useEffect(() => {
     if (!startWhenVisible) {
@@ -52,15 +49,15 @@ function useAnimatedCounter(target: number, duration = 1400, startWhenVisible = 
       return () => cancelAnimationFrame(raf)
     }
 
-    const node = ref.current
+    const node = ref
     if (!node) return
-    if (startedRef.current) return
+    if (startedRef) return
 
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0]
-        if (entry.isIntersecting && !startedRef.current) {
-          startedRef.current = true
+        if (entry.isIntersecting && !startedRef) {
+          setStartedRef(true)
           let start: number | null = null
           let raf: number
           const step = (ts: number) => {
@@ -83,7 +80,7 @@ function useAnimatedCounter(target: number, duration = 1400, startWhenVisible = 
     }
   }, [duration, startWhenVisible, target])
 
-  return { ref, value }
+  return { ref: setRef, value }
 }
 
 export default function PersonalTrainingClientPage() {
@@ -97,7 +94,6 @@ export default function PersonalTrainingClientPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
-  const [isSeoExpanded, setIsSeoExpanded] = useState(false)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -141,8 +137,8 @@ export default function PersonalTrainingClientPage() {
   const benefits = [
     {
       icon: User,
-      title: "Persoonlijke Trainer Sneek",
-      description: "100% focus van je gecertificeerde persoonlijke trainer in Sneek tijdens elke sessie",
+      title: "100% Persoonlijke Aandacht",
+      description: "Volledige focus van je gecertificeerde personal trainer tijdens elke sessie",
     },
     {
       icon: Target,
@@ -156,9 +152,8 @@ export default function PersonalTrainingClientPage() {
     },
     {
       icon: Zap,
-      title: "Sneller Vetverlies & Resultaten",
-      description:
-        "Efficiëntere trainingen voor vetverlies en spieropbouw leiden tot snellere en betere resultaten in Sneek",
+      title: "Snellere Resultaten",
+      description: "Efficiëntere trainingen leiden tot snellere en betere resultaten",
     },
     {
       icon: Heart,
@@ -166,7 +161,7 @@ export default function PersonalTrainingClientPage() {
       description: "Constante motivatie en ondersteuning om je doelen te bereiken",
     },
     {
-      icon: Calendar,
+      icon: Clock,
       title: "Flexibele Planning",
       description: "Plan je sessies op tijden die perfect bij jouw schema passen",
     },
@@ -226,29 +221,30 @@ export default function PersonalTrainingClientPage() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      {/* Hero Section */}
-      <section className="py-12 lg:py-24 bg-white">
-        <div className="container mx-auto px-4">
+      {/* Hero Section - #1e1839 background */}
+      <section className="relative py-16 lg:py-28 bg-[#1e1839] text-white overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1e1839] via-[#1e1839] to-[#2a2252]" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="space-y-6 lg:space-y-8 text-center lg:text-left">
               <div className="space-y-4 lg:space-y-6">
-                <Badge className="bg-gray-100 text-gray-700 border-gray-200 inline-flex">
+                <Badge className="bg-[#bad4e1]/20 text-[#bad4e1] border-[#bad4e1]/30 inline-flex">
                   <Dumbbell className="w-4 h-4 mr-2" />
                   Personal Training
                 </Badge>
-                <h1 className="text-3xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                  Personal Training <span className="block lg:inline text-gray-700">1-op-1 Begeleiding</span>
+                <h1 className="text-3xl lg:text-6xl font-bold text-white leading-tight">
+                  Personal Training <span className="block lg:inline text-[#bad4e1]">1-op-1 Begeleiding</span>
                 </h1>
-                <p className="text-base lg:text-xl text-gray-600 leading-relaxed max-w-lg mx-auto lg:mx-0">
+                <p className="text-base lg:text-xl text-white/80 leading-relaxed max-w-lg mx-auto lg:mx-0">
                   Ervaar de kracht van 1-op-1 begeleiding met onze gecertificeerde personal trainers. Bereik je doelen
-                  voor vetverlies, spieropbouw en fitness sneller, veiliger en effectiever dan ooit tevoren.
+                  sneller, veiliger en effectiever dan ooit tevoren.
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center lg:justify-start">
                 <Button
                   size="lg"
-                  className="bg-gray-900 hover:bg-gray-800 text-white px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
+                  className="bg-[#bad4e1] hover:bg-[#bad4e1]/90 text-[#1e1839] px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
                   asChild
                 >
                   <a
@@ -263,7 +259,7 @@ export default function PersonalTrainingClientPage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
+                  className="border-2 border-white/30 text-white hover:bg-white/10 bg-transparent"
                   asChild
                 >
                   <a href="tel:0064365571">
@@ -275,22 +271,22 @@ export default function PersonalTrainingClientPage() {
 
               <div className="grid grid-cols-3 gap-4 lg:gap-6 pt-4 lg:pt-8">
                 <div className="text-center">
-                  <div className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">100%</div>
-                  <div className="text-xs lg:text-sm text-gray-600">Persoonlijk</div>
+                  <div className="text-xl lg:text-3xl font-bold mb-1 text-white">100%</div>
+                  <div className="text-xs lg:text-sm text-white/60">Persoonlijk</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">1-op-1</div>
-                  <div className="text-xs lg:text-sm text-gray-600">Begeleiding</div>
+                  <div className="text-xl lg:text-3xl font-bold mb-1 text-white">1-op-1</div>
+                  <div className="text-xs lg:text-sm text-white/60">Begeleiding</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xl lg:text-3xl font-bold mb-1 text-gray-900">5.0</div>
-                  <div className="text-xs lg:text-sm text-gray-600">Google Score</div>
+                  <div className="text-xl lg:text-3xl font-bold mb-1 text-[#bad4e1]">5.0</div>
+                  <div className="text-xs lg:text-sm text-white/60">Google Score</div>
                 </div>
               </div>
             </div>
 
             <div className="relative hidden lg:block">
-              <div className="relative w-full h-[480px] lg:h-[520px] rounded-2xl overflow-hidden border border-gray-200">
+              <div className="relative w-full h-[480px] lg:h-[520px] rounded-2xl overflow-hidden border border-white/10">
                 <Image
                   src="/images/personal-training-session.jpeg"
                   alt="Personal Training Sessie bij Evotion Coaching"
@@ -299,15 +295,15 @@ export default function PersonalTrainingClientPage() {
                   sizes="(min-width: 1024px) 50vw, 100vw"
                   priority={false}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1e1839]/40 via-transparent to-transparent" />
                 <div className="absolute top-4 left-4 flex items-center gap-2 rounded-full bg-white/90 backdrop-blur px-3 py-1.5">
                   <Star className="w-4 h-4 text-yellow-500" />
-                  <span className="text-xs font-medium text-gray-900">Top Beoordelingen</span>
+                  <span className="text-xs font-medium text-[#1e1839]">Top Beoordelingen</span>
                 </div>
                 <div className="absolute bottom-4 right-4">
                   <div className="rounded-xl bg-white/90 backdrop-blur px-4 py-3">
-                    <div className="flex items-center gap-2 text-sm text-gray-900">
-                      <Trophy className="w-4 h-4 text-gray-700" />
+                    <div className="flex items-center gap-2 text-sm text-[#1e1839]">
+                      <Trophy className="w-4 h-4 text-[#1e1839]" />
                       <span className="font-medium">1-op-1 Focus</span>
                     </div>
                   </div>
@@ -318,28 +314,33 @@ export default function PersonalTrainingClientPage() {
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="py-12 lg:py-24 bg-gray-50">
+      {/* Benefits Section - White background */}
+      <section className="py-12 lg:py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-4 lg:mb-6 inline-flex">
+            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4 lg:mb-6 inline-flex">
               <Target className="w-4 h-4 mr-2" />
               Voordelen
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">Waarom Personal Training?</h2>
+            <h2 className="text-2xl lg:text-5xl font-bold text-[#1e1839] mb-3 lg:mb-6">
+              Waarom Personal Training bij Evotion?
+            </h2>
             <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
-              Ontdek de voordelen van persoonlijke begeleiding en waarom het de snelste weg is naar jouw doelen.
+              Ontdek wat ons onderscheidt en waarom onze cliënten consistent resultaten behalen.
             </p>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-8">
             {benefits.map((benefit, index) => (
-              <Card key={index} className="border border-gray-200 hover:shadow-lg transition-all duration-300">
+              <Card
+                key={index}
+                className="border border-gray-200 hover:border-[#bad4e1] hover:shadow-lg transition-all duration-300 bg-white"
+              >
                 <CardContent className="p-4 lg:p-8 text-center space-y-2 lg:space-y-4">
-                  <div className="w-10 h-10 lg:w-16 lg:h-16 bg-gray-100 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto">
-                    <benefit.icon className="w-5 h-5 lg:w-8 lg:h-8 text-gray-700" />
+                  <div className="w-10 h-10 lg:w-16 lg:h-16 bg-[#1e1839] rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto">
+                    <benefit.icon className="w-5 h-5 lg:w-8 lg:h-8 text-[#bad4e1]" />
                   </div>
-                  <h3 className="text-sm lg:text-xl font-bold text-gray-900">{benefit.title}</h3>
+                  <h3 className="text-sm lg:text-xl font-bold text-[#1e1839]">{benefit.title}</h3>
                   <p className="text-xs lg:text-base text-gray-600 leading-relaxed hidden sm:block">
                     {benefit.description}
                   </p>
@@ -350,15 +351,15 @@ export default function PersonalTrainingClientPage() {
         </div>
       </section>
 
-      {/* How it Works */}
-      <section className="py-12 lg:py-24 bg-white">
+      {/* How it Works - Light gray background */}
+      <section className="py-12 lg:py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-4 lg:mb-6 inline-flex">
+            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4 lg:mb-6 inline-flex">
               <TrendingUp className="w-4 h-4 mr-2" />
               Hoe Werkt Het
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">Jouw Traject in 4 Stappen</h2>
+            <h2 className="text-2xl lg:text-5xl font-bold text-[#1e1839] mb-3 lg:mb-6">Jouw Traject in 4 Stappen</h2>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-8">
@@ -386,13 +387,13 @@ export default function PersonalTrainingClientPage() {
             ].map((item, index) => (
               <Card
                 key={index}
-                className="relative text-center border border-gray-200 hover:border-gray-300 transition-colors"
+                className="relative text-center border border-gray-200 hover:border-[#bad4e1] transition-colors bg-white"
               >
                 <CardContent className="p-4 lg:p-6 space-y-2 lg:space-y-4">
-                  <div className="w-10 h-10 lg:w-16 lg:h-16 bg-gray-900 rounded-full flex items-center justify-center mx-auto text-white">
-                    <span className="text-sm lg:text-xl font-bold">{item.step}</span>
+                  <div className="w-10 h-10 lg:w-16 lg:h-16 bg-[#1e1839] rounded-full flex items-center justify-center mx-auto">
+                    <span className="text-sm lg:text-xl font-bold text-white">{item.step}</span>
                   </div>
-                  <h3 className="text-sm lg:text-xl font-bold text-gray-900">{item.title}</h3>
+                  <h3 className="text-sm lg:text-xl font-bold text-[#1e1839]">{item.title}</h3>
                   <p className="text-xs lg:text-base text-gray-600 leading-relaxed hidden sm:block">
                     {item.description}
                   </p>
@@ -403,165 +404,15 @@ export default function PersonalTrainingClientPage() {
         </div>
       </section>
 
-      {/* Local SEO Section - Now Collapsible */}
-      <section className="py-8 lg:py-12 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <button
-              onClick={() => setIsSeoExpanded(!isSeoExpanded)}
-              className="w-full flex items-center justify-between p-6 bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-colors group"
-              aria-expanded={isSeoExpanded}
-              aria-controls="seo-content"
-            >
-              <div className="flex items-center gap-3">
-                <Target className="w-5 h-5 text-evotion-primary" />
-                <span className="text-lg font-semibold text-gray-900">Personal Training in Sneek en Omgeving</span>
-              </div>
-              <ChevronDown
-                className={`w-5 h-5 text-gray-500 transition-transform duration-300 ${
-                  isSeoExpanded ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-
-            <div
-              id="seo-content"
-              className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                isSeoExpanded ? "max-h-[3000px] opacity-100 mt-6" : "max-h-0 opacity-0"
-              }`}
-            >
-              <div className="space-y-12">
-                {/* Header */}
-                <div className="text-center space-y-4">
-                  <Badge className="bg-evotion-primary/10 text-evotion-primary border-evotion-primary/20">
-                    <Target className="w-4 h-4 mr-2" />
-                    Personal Training Sneek & Friesland
-                  </Badge>
-                  <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">
-                    Jouw Personal Trainer in Sneek en Omgeving
-                  </h2>
-                  <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                    Evotion biedt professionele personal training in Sneek en heel Friesland. Of je nu wilt afvallen,
-                    spiermassa wilt opbouwen, of gewoon fitter wilt worden - wij begeleiden je naar jouw doelen met
-                    persoonlijke aandacht en bewezen methodes.
-                  </p>
-                </div>
-
-                {/* Locations Grid */}
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Locaties waar wij actief zijn</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[
-                      { name: "Personal Training Sneek", desc: "Centrum en omgeving" },
-                      { name: "Personal Training Leeuwarden", desc: "Hoofdstad van Friesland" },
-                      { name: "Personal Training IJlst", desc: "Historische Friese stad" },
-                      { name: "Personal Training Bolsward", desc: "Zuidwest Friesland" },
-                      { name: "Personal Training Workum", desc: "Aan het IJsselmeer" },
-                      { name: "Personal Training Heerenveen", desc: "Centraal Friesland" },
-                    ].map((location) => (
-                      <Card
-                        key={location.name}
-                        className="border-gray-200 hover:border-evotion-primary/50 hover:shadow-md transition-all duration-300 bg-white"
-                      >
-                        <CardContent className="p-5">
-                          <div className="flex items-start gap-3">
-                            <MapPin className="w-5 h-5 text-evotion-primary flex-shrink-0 mt-0.5" />
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-1">{location.name}</h4>
-                              <p className="text-sm text-gray-600">{location.desc}</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Services Grid */}
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                    Onze Personal Training Specialisaties
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      {
-                        icon: Target,
-                        title: "Afvallen & Vetverlies",
-                        desc: "Effectieve begeleiding voor duurzaam gewichtsverlies en een gezonder lichaam",
-                      },
-                      {
-                        icon: Dumbbell,
-                        title: "Spieropbouw & Kracht",
-                        desc: "Gestructureerde trainingen voor meer spiermassa en functionele kracht",
-                      },
-                      {
-                        icon: Heart,
-                        title: "Fitness & Conditie",
-                        desc: "Verbeter je algehele fitheid en uithoudingsvermogen met persoonlijke coaching",
-                      },
-                      {
-                        icon: Users,
-                        title: "Groepstraining",
-                        desc: "Train samen met anderen in kleine groepen voor extra motivatie",
-                      },
-                      {
-                        icon: Smartphone,
-                        title: "Online Coaching",
-                        desc: "Flexibele begeleiding op afstand met onze eigen coaching app",
-                      },
-                      {
-                        icon: Calendar,
-                        title: "Voedingsadvies",
-                        desc: "Persoonlijk voedingsplan afgestemd op jouw doelen en levensstijl",
-                      },
-                    ].map((service) => (
-                      <Card
-                        key={service.title}
-                        className="border-gray-200 hover:border-evotion-primary/50 hover:shadow-md transition-all duration-300 bg-white"
-                      >
-                        <CardContent className="p-6">
-                          <div className="flex items-start gap-4">
-                            <div className="p-3 bg-evotion-primary/10 rounded-lg">
-                              <service.icon className="w-6 h-6 text-evotion-primary" />
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900 mb-2">{service.title}</h4>
-                              <p className="text-sm text-gray-600 leading-relaxed">{service.desc}</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-
-                {/* SEO-rich bottom text */}
-                <div className="bg-white rounded-xl p-8 border border-gray-200">
-                  <p className="text-gray-700 leading-relaxed text-center">
-                    Als <strong>personal trainer in Sneek</strong> en omliggende gemeenten bieden wij professionele{" "}
-                    <strong>personal training</strong> aan voor iedereen die serieus aan de slag wil met hun gezondheid
-                    en fitheid. Of je nu op zoek bent naar een <strong>personal trainer Sneek</strong>,{" "}
-                    <strong>fitness coach Friesland</strong>, of <strong>online coaching</strong> - bij Evotion krijg je
-                    persoonlijke begeleiding die werkt. Onze ervaren trainers helpen je met <strong>afvallen</strong>,{" "}
-                    <strong>spieropbouw</strong>, en het bereiken van jouw <strong>fitness doelen</strong> in Sneek,
-                    Leeuwarden, IJlst, Bolsward, Workum, Heerenveen en heel Friesland.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Packages Section */}
-      <section className="py-12 lg:py-24 bg-gray-50">
+      {/* Packages Section - White background */}
+      <section className="py-12 lg:py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-4 lg:mb-6 inline-flex">
+            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4 lg:mb-6 inline-flex">
               <Dumbbell className="w-4 h-4 mr-2" />
               Pakketten
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">Kies Jouw Pakket</h2>
+            <h2 className="text-2xl lg:text-5xl font-bold text-[#1e1839] mb-3 lg:mb-6">Kies Jouw Pakket</h2>
             <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
               Flexibele opties voor elk niveau en elke doelstelling. Neem contact op voor meer informatie.
             </p>
@@ -571,13 +422,13 @@ export default function PersonalTrainingClientPage() {
             {packages.map((pkg, index) => (
               <div key={index} className="relative">
                 <Card
-                  className={`relative border transition-all duration-300 hover:shadow-xl ${
-                    pkg.popular ? "border-gray-900 shadow-lg lg:scale-[1.02]" : "border-gray-200 hover:-translate-y-1"
+                  className={`relative border transition-all duration-300 hover:shadow-xl bg-white ${
+                    pkg.popular ? "border-[#bad4e1] shadow-lg lg:scale-[1.02]" : "border-gray-200 hover:-translate-y-1"
                   }`}
                 >
                   {pkg.popular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-gray-900 text-white px-3 lg:px-4 py-1.5 lg:py-2 shadow-md text-xs lg:text-sm">
+                      <Badge className="bg-[#1e1839] text-white px-3 lg:px-4 py-1.5 lg:py-2 shadow-md text-xs lg:text-sm">
                         <Star className="w-3 h-3 lg:w-4 lg:h-4 mr-1" />
                         MEEST POPULAIR
                       </Badge>
@@ -586,9 +437,9 @@ export default function PersonalTrainingClientPage() {
 
                   <CardContent className="p-6 lg:p-8 space-y-5 lg:space-y-6">
                     <div className="text-center space-y-4">
-                      <h3 className="text-xl lg:text-2xl font-bold text-gray-900">{pkg.title}</h3>
+                      <h3 className="text-xl lg:text-2xl font-bold text-[#1e1839]">{pkg.title}</h3>
                       <div className="space-y-1">
-                        <div className="text-2xl lg:text-3xl font-bold text-gray-900">Op Aanvraag</div>
+                        <div className="text-2xl lg:text-3xl font-bold text-[#1e1839]">Op Aanvraag</div>
                         <div className="text-sm lg:text-base text-gray-600">{pkg.sessions}</div>
                       </div>
                     </div>
@@ -605,8 +456,8 @@ export default function PersonalTrainingClientPage() {
                     <Button
                       className={`w-full py-2.5 lg:py-3 text-base lg:text-lg font-semibold ${
                         pkg.popular
-                          ? "bg-gray-900 hover:bg-gray-800 text-white"
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-900"
+                          ? "bg-[#1e1839] hover:bg-[#1e1839]/90 text-white"
+                          : "bg-gray-100 hover:bg-gray-200 text-[#1e1839]"
                       }`}
                       asChild
                     >
@@ -633,7 +484,7 @@ export default function PersonalTrainingClientPage() {
             <Button
               size="lg"
               variant="outline"
-              className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
+              className="border-2 border-[#1e1839] text-[#1e1839] hover:bg-[#1e1839]/10 bg-transparent"
               asChild
             >
               <a
@@ -649,17 +500,18 @@ export default function PersonalTrainingClientPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-12 lg:py-24 bg-gray-900 text-white">
+      {/* CTA Section - #1e1839 background */}
+      <section className="py-12 lg:py-24 bg-[#1e1839] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-2xl lg:text-5xl font-bold mb-3 lg:mb-6">Klaar om te Beginnen?</h2>
-          <p className="text-sm lg:text-xl text-gray-300 max-w-2xl mx-auto mb-6 lg:mb-8 px-2">
-            Neem vandaag nog contact op en zet de eerste stap naar een fitter, gezonder en sterker lichaam.
+          <p className="text-sm lg:text-xl text-white/80 max-w-2xl mx-auto mb-6 lg:mb-8 px-2">
+            Neem vandaag nog contact op voor een vrijblijvend kennismakingsgesprek en ontdek wat personal training voor
+            jou kan betekenen.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center px-4">
             <Button
               size="lg"
-              className="bg-white text-gray-900 hover:bg-gray-100 px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
+              className="bg-[#bad4e1] text-[#1e1839] hover:bg-[#bad4e1]/90 px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
               asChild
             >
               <a
@@ -674,7 +526,7 @@ export default function PersonalTrainingClientPage() {
             <Button
               size="lg"
               variant="outline"
-              className="border-2 border-white text-white hover:bg-white/10 bg-transparent"
+              className="border-2 border-white/30 text-white hover:bg-white/10 bg-transparent"
               asChild
             >
               <a href="tel:0064365571">
@@ -686,188 +538,8 @@ export default function PersonalTrainingClientPage() {
         </div>
       </section>
 
-      {/* Contact Section - Updated with Zorin's WhatsApp */}
-      <section className="py-16 lg:py-24 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
-            <div className="space-y-8">
-              <div className="space-y-6">
-                <Badge className="bg-gray-100 text-gray-700 border-gray-200">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Contact
-                </Badge>
-                <h2 className="text-4xl font-bold text-gray-900">
-                  Klaar om te <span className="text-gray-700">Starten</span>?
-                </h2>
-                <p className="text-sm lg:text-xl text-gray-600 leading-relaxed">
-                  Neem contact met ons op en ontdek hoe personal training jouw leven kan veranderen. Stuur direct een
-                  bericht via WhatsApp voor een snelle reactie.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <a href="tel:0064365571" className="block">
-                  <Card className="border border-gray-200 hover:border-gray-300 transition-colors cursor-pointer">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <Phone className="w-6 h-6 text-gray-700" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-gray-900">Bel Direct</h3>
-                          <p className="text-gray-700 font-medium">06 43 65 571</p>
-                          <p className="text-sm text-gray-500">Ma-Vr: 9:00-18:00</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </a>
-
-                <a href="https://wa.me/31064365571" target="_blank" rel="noopener noreferrer" className="block">
-                  <Card className="border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors cursor-pointer">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                          <MessageCircle className="w-6 h-6 text-green-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-gray-900">WhatsApp (Aanbevolen)</h3>
-                          <p className="text-green-600 font-medium">Start Chat</p>
-                          <p className="text-sm text-gray-500">Snelle reactie gegarandeerd</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </a>
-              </div>
-            </div>
-
-            {/* Contact Form */}
-            <div className="border border-gray-200 rounded-2xl">
-              <Card className="border-0 rounded-2xl shadow-sm">
-                <CardContent className="p-8">
-                  <div className="space-y-6">
-                    <div className="text-center space-y-4">
-                      <h3 className="text-2xl font-bold text-gray-900">Stuur ons een Bericht</h3>
-                      <p className="text-gray-600">Vul het formulier in en we nemen binnen 24 uur contact met je op.</p>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Voornaam *</label>
-                          <Input
-                            name="firstName"
-                            value={formData.firstName}
-                            onChange={handleInputChange}
-                            required
-                            className="border-gray-300 focus:border-gray-500 focus:ring-gray-500"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Achternaam *</label>
-                          <Input
-                            name="lastName"
-                            value={formData.lastName}
-                            onChange={handleInputChange}
-                            required
-                            className="border-gray-300 focus:border-gray-500 focus:ring-gray-500"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-                        <Input
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          required
-                          className="border-gray-300 focus:border-gray-500 focus:ring-gray-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Telefoonnummer</label>
-                        <Input
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          className="border-gray-300 focus:border-gray-500 focus:ring-gray-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Wat is je doel?</label>
-                        <select
-                          name="goal"
-                          value={formData.goal}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
-                        >
-                          <option value="">Selecteer je doel</option>
-                          <option value="gewichtsverlies">Gewichtsverlies</option>
-                          <option value="spieropbouw">Spieropbouw</option>
-                          <option value="fitter-worden">Fitter worden</option>
-                          <option value="kracht-opbouwen">Kracht opbouwen</option>
-                          <option value="revalidatie">Revalidatie</option>
-                          <option value="anders">Anders</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Bericht</label>
-                        <Textarea
-                          name="message"
-                          value={formData.message}
-                          onChange={handleInputChange}
-                          rows={4}
-                          className="resize-none border-gray-300 focus:border-gray-500 focus:ring-gray-500"
-                          placeholder="Vertel ons meer over je doelen en ervaring..."
-                        />
-                      </div>
-
-                      <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full bg-gray-900 hover:bg-gray-800 text-white py-4 text-lg font-semibold"
-                      >
-                        {isSubmitting ? (
-                          <span className="flex items-center gap-3">
-                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                            Versturen...
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-3">
-                            Verstuur Bericht
-                            <ArrowRight className="w-5 h-5" />
-                          </span>
-                        )}
-                      </Button>
-
-                      {submitMessage && (
-                        <div
-                          className={`p-4 rounded-lg text-center ${
-                            submitMessage.type === "success"
-                              ? "bg-green-50 text-green-800 border border-green-200"
-                              : "bg-red-50 text-red-800 border border-red-200"
-                          }`}
-                          role="status"
-                          aria-live="polite"
-                        >
-                          {submitMessage.text}
-                        </div>
-                      )}
-                    </form>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Contact Section - Gray background */}
+      
 
       <Footer />
     </div>

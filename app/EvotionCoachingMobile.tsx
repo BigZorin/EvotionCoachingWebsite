@@ -205,19 +205,16 @@ export default function EvotionCoachingMobile() {
       {/* HERO */}
       <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gray-900 pt-16">
         {/* Video Background */}
-        <div className="absolute inset-0 z-0">
-          <div className="relative w-full h-full">
-            <iframe
-              src="https://www.youtube.com/embed/SpTe8MThxVc?autoplay=1&mute=1&loop=1&playlist=SpTe8MThxVc&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1"
-              className="absolute inset-0 w-full h-full object-cover scale-150"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              style={{ pointerEvents: "none" }}
-              title="Evotion Coaching Video"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#1e1839]/85 via-[#1e1839]/75 to-[#1e1839]/85"></div>
-          </div>
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <iframe
+            src="https://www.youtube.com/embed/SpTe8MThxVc?autoplay=1&mute=1&loop=1&playlist=SpTe8MThxVc&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&vq=hd2160&hd=1&quality=highres&enablejsapi=1"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400%] h-[400%] min-w-full min-h-full"
+            allow="autoplay; encrypted-media; accelerometer; gyroscope"
+            allowFullScreen
+            style={{ pointerEvents: "none" }}
+            title="Evotion Coaching Video"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1e1839]/80 via-[#1e1839]/70 to-[#1e1839]/90"></div>
         </div>
 
         {/* Content */}
@@ -360,7 +357,7 @@ export default function EvotionCoachingMobile() {
       </section>
 
       {/* PERSONAL TRAINING HIGHLIGHT */}
-      <section className="py-16 bg-primary relative overflow-hidden">
+      <section className="py-16 bg-[#1e1839] relative overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
           <div className="space-y-6">
             <Badge className="bg-white/20 text-white border-0">
@@ -374,6 +371,16 @@ export default function EvotionCoachingMobile() {
               Ervaar de kracht van persoonlijke begeleiding met onze gecertificeerde trainers.
             </p>
 
+            <div className="relative w-full aspect-video rounded-2xl overflow-hidden">
+              <Image
+                src="/images/dscf2364.jpg"
+                alt="Personal Training bij Evotion Coaching"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1e1839]/60 to-transparent"></div>
+            </div>
+
             <div className="space-y-3">
               {[
                 { icon: Dumbbell, title: "1-op-1 Training Sessies" },
@@ -382,7 +389,7 @@ export default function EvotionCoachingMobile() {
               ].map((f) => (
                 <div key={f.title} className="flex items-center gap-4 bg-white/10 rounded-lg p-4 backdrop-blur-sm">
                   <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                    <f.icon className="w-5 h-5 text-primary" />
+                    <f.icon className="w-5 h-5 text-[#1e1839]" />
                   </div>
                   <span className="text-white font-medium">{f.title}</span>
                 </div>
@@ -390,7 +397,7 @@ export default function EvotionCoachingMobile() {
             </div>
 
             <Link href="/personal-training">
-              <Button size="lg" className="w-full bg-white text-primary hover:bg-gray-100 font-semibold">
+              <Button size="lg" className="w-full bg-white text-[#1e1839] hover:bg-gray-100 font-semibold">
                 Meer over Personal Training
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>

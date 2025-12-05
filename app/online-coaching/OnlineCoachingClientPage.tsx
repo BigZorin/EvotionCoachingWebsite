@@ -30,10 +30,12 @@ import {
   LineChart,
   RotateCcw,
   Clock,
+  Star,
 } from "lucide-react"
 import { useState } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import Image from "next/image"
 
 export default function OnlineCoachingClientPage() {
   const [expandedFeature, setExpandedFeature] = useState<number | null>(null)
@@ -217,21 +219,25 @@ export default function OnlineCoachingClientPage() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      {/* Hero Section */}
-      <section className="relative py-12 lg:py-32 bg-gradient-to-br from-primary to-primary/80 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/placeholder.svg?height=1080&width=1920')] bg-cover bg-center opacity-10"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/80 to-primary/70"></div>
+      {/* Hero Section - #1e1839 donkerpaars achtergrond */}
+      <section className="relative py-12 lg:py-32 overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <Image src="/images/dscf2364.jpg" alt="Gym background" fill className="object-cover" priority />
+        </div>
+        {/* Purple gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#1e1839]/95 via-[#1e1839]/85 to-[#1e1839]/80"></div>
 
         <div className="container mx-auto px-4 lg:px-6 relative z-10">
-          <div className="max-w-4xl mx-auto text-center space-y-4 lg:space-y-8">
-            <Badge className="bg-secondary/20 text-white hover:bg-secondary/30 backdrop-blur-sm text-xs lg:text-sm px-3 lg:px-4 py-1.5 lg:py-2 inline-flex">
+          <div className="max-w-4xl mx-auto text-center space-y-4 lg:space-8">
+            <Badge className="bg-[#bad4e1]/20 text-white hover:bg-[#bad4e1]/30 backdrop-blur-sm text-xs lg:text-sm px-3 lg:px-4 py-1.5 lg:py-2 inline-flex border-0">
               <MapPin className="w-3 h-3 lg:w-4 lg:h-4 mr-1.5 lg:mr-2" />
               Modulair Coachingprogramma
             </Badge>
 
             <h1 className="text-3xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
               Online Coaching
-              <span className="block text-secondary">Op Jouw Tempo</span>
+              <span className="block text-[#bad4e1]">Op Jouw Tempo</span>
             </h1>
 
             <p className="text-base lg:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto px-2">
@@ -243,7 +249,7 @@ export default function OnlineCoachingClientPage() {
               <Button
                 size="lg"
                 onClick={handleEmail}
-                className="bg-white text-primary hover:bg-gray-100 px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold shadow-xl w-full sm:w-auto"
+                className="bg-white text-[#1e1839] hover:bg-gray-100 px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold shadow-xl w-full sm:w-auto"
               >
                 <Mail className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
                 Stuur een E-mail
@@ -252,7 +258,7 @@ export default function OnlineCoachingClientPage() {
                 size="lg"
                 variant="outline"
                 onClick={() => handleWhatsApp("online coaching traject")}
-                className="border-2 border-white text-white hover:bg-white hover:text-primary px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold bg-transparent w-full sm:w-auto"
+                className="border-2 border-white text-white hover:bg-white hover:text-[#1e1839] px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold bg-transparent w-full sm:w-auto"
               >
                 <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
                 WhatsApp Bericht
@@ -277,15 +283,62 @@ export default function OnlineCoachingClientPage() {
         </div>
       </section>
 
-      {/* Waarom Modulair Section */}
+      {/* Transformaties Section - Witte achtergrond */}
       <section className="py-12 lg:py-24 bg-white">
         <div className="container mx-auto px-4 lg:px-6">
           <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-4 lg:mb-6 inline-flex">
+            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4 lg:mb-6 inline-flex">
+              <Star className="w-4 h-4 mr-2" />
+              Resultaten
+            </Badge>
+            <h2 className="text-2xl lg:text-5xl font-bold text-[#1e1839] mb-3 lg:mb-6">
+              Echte <span className="text-[#bad4e1]">Transformaties</span>
+            </h2>
+            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
+              Bekijk de resultaten van onze klanten die met de Evotion App en online coaching hun doelen hebben bereikt.
+            </p>
+          </div>
+
+          {/* Transformations Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-8 max-w-6xl mx-auto mb-12 lg:mb-20">
+            {[
+              {
+                image: "/images/vrouw-20transformatie.png",
+                result: "-9.5kg",
+              },
+              {
+                image: "/images/salim-20transformatie.png",
+                result: "-8.1kg",
+              },
+              {
+                image: "/images/martin-20transformatie.png",
+                result: "-10.7kg",
+              },
+            ].map((transformation, index) => (
+              <div key={index} className="relative group">
+                <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+                  <Image
+                    src={transformation.image || "/placeholder.svg"}
+                    alt={`Transformatie ${transformation.result}`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Waarom Modulair Section - Lichtgrijze achtergrond */}
+      <section className="py-12 lg:py-24 bg-gray-50">
+        <div className="container mx-auto px-4 lg:px-6">
+          <div className="text-center mb-8 lg:mb-16">
+            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4 lg:mb-6 inline-flex">
               <Puzzle className="w-4 h-4 mr-2" />
               Onze Aanpak
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">
+            <h2 className="text-2xl lg:text-5xl font-bold text-[#1e1839] mb-3 lg:mb-6">
               Waarom een Modulair Programma?
             </h2>
             <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
@@ -311,21 +364,17 @@ export default function OnlineCoachingClientPage() {
                 title: "Progressief",
                 description: "Geleidelijke opbouw voor duurzame transformatie",
               },
-              {
-                icon: RotateCcw,
-                title: "Veilig",
-                description: "Wetenschappelijk onderbouwde methodes",
-              },
+              { icon: RotateCcw, title: "Veilig", description: "Wetenschappelijk onderbouwde methodes" },
             ].map((item, index) => (
               <Card
                 key={index}
-                className="border border-gray-200 hover:shadow-lg transition-all duration-300 text-center"
+                className="border border-gray-200 hover:shadow-lg transition-all duration-300 text-center bg-white"
               >
                 <CardContent className="p-4 lg:p-8 space-y-2 lg:space-y-4">
-                  <div className="w-10 h-10 lg:w-16 lg:h-16 bg-primary/10 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto">
-                    <item.icon className="w-5 h-5 lg:w-8 lg:h-8 text-primary" />
+                  <div className="w-10 h-10 lg:w-16 lg:h-16 bg-[#1e1839]/10 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto">
+                    <item.icon className="w-5 h-5 lg:w-8 lg:h-8 text-[#1e1839]" />
                   </div>
-                  <h3 className="text-sm lg:text-xl font-bold text-gray-900">{item.title}</h3>
+                  <h3 className="text-sm lg:text-xl font-bold text-[#1e1839]">{item.title}</h3>
                   <p className="text-xs lg:text-base text-gray-600 leading-relaxed hidden sm:block">
                     {item.description}
                   </p>
@@ -336,16 +385,16 @@ export default function OnlineCoachingClientPage() {
         </div>
       </section>
 
-      {/* 5 Fases Section */}
-      <section className="py-12 lg:py-24 bg-gray-50">
+      {/* 5 Fases Section - #1e1839 donkerpaars achtergrond */}
+      <section className="py-12 lg:py-24 bg-[#1e1839]">
         <div className="container mx-auto px-4 lg:px-6">
           <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-primary/10 text-primary border-primary/20 mb-4 lg:mb-6 inline-flex">
+            <Badge className="bg-white/20 text-white border-white/30 mb-4 lg:mb-6 inline-flex">
               <Layers className="w-4 h-4 mr-2" />
               Het Programma
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">De 5 Fases van Jouw Reis</h2>
-            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
+            <h2 className="text-2xl lg:text-5xl font-bold text-white mb-3 lg:mb-6">De 5 Fases van Jouw Reis</h2>
+            <p className="text-sm lg:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed px-2">
               Een gestructureerd maar flexibel programma dat jou stap voor stap naar je doelen begeleidt.
             </p>
           </div>
@@ -354,39 +403,43 @@ export default function OnlineCoachingClientPage() {
             {phases.map((phase, index) => (
               <Card
                 key={index}
-                className={`border-2 transition-all duration-300 hover:shadow-lg ${
-                  phase.highlight ? "border-primary bg-primary/5" : "border-gray-200"
+                className={`border-2 transition-all duration-300 hover:shadow-lg bg-white ${
+                  phase.highlight ? "border-[#bad4e1]" : "border-gray-200"
                 }`}
               >
                 <CardContent className="p-4 lg:p-8">
                   <div className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6">
                     <div
                       className={`w-12 h-12 lg:w-16 lg:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center flex-shrink-0 mx-auto lg:mx-0 ${
-                        phase.highlight ? "bg-primary text-white" : "bg-gray-100 text-gray-700"
+                        phase.highlight ? "bg-[#1e1839] text-white" : "bg-[#1e1839]/10 text-[#1e1839]"
                       }`}
                     >
-                      <span className="text-lg lg:text-2xl font-bold">{phase.phase}</span>
+                      {phase.icon}
                     </div>
-                    <div className="flex-1 text-center lg:text-left">
-                      <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3 mb-2 lg:mb-3 justify-center lg:justify-start">
-                        <h3 className="text-lg lg:text-2xl font-bold text-gray-900">{phase.title}</h3>
+                    <div className="flex-grow text-center lg:text-left">
+                      <div className="flex flex-col lg:flex-row lg:items-center gap-1 lg:gap-3 mb-2">
+                        <h3 className="text-lg lg:text-2xl font-bold text-[#1e1839]">{phase.title}</h3>
                         <Badge
                           variant="outline"
-                          className={phase.highlight ? "border-primary text-primary" : "text-gray-500"}
+                          className={`text-xs lg:text-sm w-fit mx-auto lg:mx-0 ${
+                            phase.highlight
+                              ? "border-[#bad4e1] text-[#1e1839] bg-[#bad4e1]/20"
+                              : "border-gray-300 text-gray-600"
+                          }`}
                         >
                           <Clock className="w-3 h-3 mr-1" />
                           {phase.duration}
                         </Badge>
                       </div>
-                      <p className="text-sm lg:text-base text-gray-600 mb-3 lg:mb-4 leading-relaxed">
-                        {phase.description}
-                      </p>
+                      <p className="text-sm lg:text-base text-gray-600 mb-3 lg:mb-4">{phase.description}</p>
                       <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
                         {phase.features.map((feature, idx) => (
-                          <Badge key={idx} variant="secondary" className="bg-gray-100 text-gray-700 text-xs lg:text-sm">
-                            <CheckCircle className="w-3 h-3 mr-1" />
+                          <span
+                            key={idx}
+                            className="text-xs lg:text-sm bg-gray-100 text-gray-700 px-2 lg:px-3 py-1 rounded-full"
+                          >
                             {feature}
-                          </Badge>
+                          </span>
                         ))}
                       </div>
                     </div>
@@ -398,15 +451,15 @@ export default function OnlineCoachingClientPage() {
         </div>
       </section>
 
-      {/* Trajecten Section */}
+      {/* Trajecten Section - Witte achtergrond */}
       <section className="py-12 lg:py-24 bg-white">
         <div className="container mx-auto px-4 lg:px-6">
           <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-4 lg:mb-6 inline-flex">
+            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4 lg:mb-6 inline-flex">
               <Calendar className="w-4 h-4 mr-2" />
               Trajecten
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">Kies Jouw Traject</h2>
+            <h2 className="text-2xl lg:text-5xl font-bold text-[#1e1839] mb-3 lg:mb-6">Kies Jouw Traject</h2>
             <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
               Twee opties voor verschillende doelen en situaties. Beide trajecten omvatten het volledige 5-fasen
               programma.
@@ -418,20 +471,20 @@ export default function OnlineCoachingClientPage() {
               <Card
                 key={index}
                 className={`relative border-2 transition-all duration-300 hover:shadow-2xl ${
-                  pkg.popular ? "border-primary shadow-xl lg:scale-105" : "border-gray-200 hover:border-primary/50"
+                  pkg.popular ? "border-[#1e1839] shadow-xl lg:scale-105" : "border-gray-200 hover:border-[#bad4e1]"
                 }`}
               >
                 {pkg.popular && (
-                  <div className="absolute -top-3 lg:-top-4 left-1/2 transform -translate-x-1/2 w-16 md:w-24 h-4 md:h-6 bg-primary rounded-b-xl"></div>
+                  <div className="absolute -top-3 lg:-top-4 left-1/2 transform -translate-x-1/2 w-16 md:w-24 h-4 md:h-6 bg-[#1e1839] rounded-b-xl"></div>
                 )}
 
                 <CardContent className="p-5 lg:p-8 space-y-4 lg:space-y-6">
                   <div className="text-center space-y-2 lg:space-y-4 pt-2 lg:pt-0">
-                    <h3 className="text-xl lg:text-2xl font-bold text-gray-900">{pkg.title}</h3>
+                    <h3 className="text-xl lg:text-2xl font-bold text-[#1e1839]">{pkg.title}</h3>
                     <div className="space-y-1 lg:space-y-2">
-                      <div className="text-2xl lg:text-3xl font-bold text-primary">Op Aanvraag</div>
-                      <div className="text-sm lg:text-lg font-medium text-gray-700">{pkg.duration}</div>
-                      <div className="text-xs lg:text-sm font-medium text-primary">{pkg.note}</div>
+                      <div className="text-2xl lg:text-3xl font-bold text-[#1e1839]">Op Aanvraag</div>
+                      <div className="text-sm lg:text-lg font-medium text-gray-600">{pkg.duration}</div>
+                      <div className="text-xs lg:text-sm font-medium text-[#bad4e1] text-[rgba(30,24,57,1)]">{pkg.note}</div>
                     </div>
                   </div>
 
@@ -447,11 +500,7 @@ export default function OnlineCoachingClientPage() {
                   <div className="space-y-2 lg:space-y-3 pt-2 lg:pt-4">
                     <Button
                       onClick={handleEmail}
-                      className={`w-full py-2.5 lg:py-3 text-sm lg:text-lg font-semibold ${
-                        pkg.popular
-                          ? "bg-primary hover:bg-primary/90 text-white"
-                          : "bg-gray-900 hover:bg-gray-800 text-white"
-                      }`}
+                      className="w-full py-2.5 lg:py-3 text-sm lg:text-lg font-semibold bg-[#1e1839] hover:bg-[#1e1839]/90 text-white"
                     >
                       <Mail className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
                       Stuur E-mail
@@ -459,7 +508,7 @@ export default function OnlineCoachingClientPage() {
                     <Button
                       variant="outline"
                       onClick={() => handleWhatsApp(pkg.title)}
-                      className="w-full py-2.5 lg:py-3 text-sm lg:text-lg font-semibold border-2"
+                      className="w-full py-2.5 lg:py-3 text-sm lg:text-lg font-semibold border-2 border-[#1e1839] text-[#1e1839] hover:bg-[#1e1839] hover:text-white"
                     >
                       <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
                       WhatsApp
@@ -472,52 +521,76 @@ export default function OnlineCoachingClientPage() {
         </div>
       </section>
 
-      {/* Wat Je Krijgt Section */}
-      <section className="py-12 lg:py-24 bg-gray-50">
+      {/* Wat Je Krijgt Section - Donkerpaarse achtergrond met App */}
+      <section className="py-12 lg:py-24 bg-[#1e1839]">
         <div className="container mx-auto px-4 lg:px-6">
           <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-gray-100 text-gray-700 border-gray-200 mb-4 lg:mb-6 inline-flex">
+            <Badge className="bg-[#bad4e1]/20 text-[#bad4e1] border-[#bad4e1]/30 mb-4 lg:mb-6 inline-flex">
               <Award className="w-4 h-4 mr-2" />
-              Wat Je Krijgt
+              Alles Voor Jouw Succes
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-3 lg:mb-6">Alles voor Jouw Succes</h2>
+            <h2 className="text-2xl lg:text-5xl font-bold text-white mb-3 lg:mb-6">Wat Je Krijgt</h2>
+            <p className="text-sm lg:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed px-2">
+              Alle tools en ondersteuning die je nodig hebt voor een succesvolle transformatie.
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-6 max-w-5xl mx-auto">
-            {[
-              { icon: Dumbbell, title: "Trainingsschema's", desc: "100% op maat gemaakt" },
-              { icon: Apple, title: "Voedingsplan", desc: "Flexibel & praktisch" },
-              { icon: MessageCircle, title: "WhatsApp Support", desc: "Directe communicatie" },
-              { icon: Video, title: "Loom Videos", desc: "Persoonlijke uitleg" },
-              { icon: LineChart, title: "Voortgang Tracking", desc: "Wekelijkse metingen" },
-              { icon: RotateCcw, title: "Aanpassingen", desc: "Wanneer nodig" },
-            ].map((item, index) => (
-              <Card key={index} className="border border-gray-200 text-center">
-                <CardContent className="p-4 lg:p-6 space-y-2 lg:space-y-3">
-                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto">
-                    <item.icon className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center max-w-6xl mx-auto">
+            <div className="relative flex justify-center order-1 lg:order-1">
+              <div className="relative w-64 lg:w-96">
+                <Image
+                  src="/images/evotion-20app-20mock-up.png"
+                  alt="Evotion Coaching App"
+                  width={384}
+                  height={768}
+                  className="object-contain drop-shadow-2xl"
+                />
+              </div>
+            </div>
+
+            {/* Features Grid */}
+            <div className="order-2 lg:order-2">
+              <h3 className="text-xl lg:text-3xl font-bold text-white mb-6 lg:mb-8 text-center lg:text-left">
+                De Evotion Coaching App
+              </h3>
+              <div className="grid grid-cols-2 gap-3 lg:gap-4">
+                {[
+                  { icon: Dumbbell, title: "Trainingsschema's", desc: "100% op maat" },
+                  { icon: Apple, title: "Voedingsplan", desc: "Flexibel & praktisch" },
+                  { icon: MessageCircle, title: "Direct Contact", desc: "Met je coach" },
+                  { icon: Video, title: "Loom Videos", desc: "Persoonlijke uitleg" },
+                  { icon: LineChart, title: "Voortgang", desc: "Tracking & inzichten" },
+                  { icon: RotateCcw, title: "Aanpassingen", desc: "Wanneer nodig" },
+                ].map((item, index) => (
+                  <div
+                    key={index}
+                    className="bg-white/10 backdrop-blur-sm rounded-xl p-4 lg:p-5 text-center border border-white/20 hover:border-[#bad4e1]/50 transition-all"
+                  >
+                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-[#bad4e1]/20 rounded-xl flex items-center justify-center mx-auto mb-2 lg:mb-3">
+                      <item.icon className="w-5 h-5 lg:w-6 lg:h-6 text-[#bad4e1]" />
+                    </div>
+                    <h4 className="text-sm lg:text-base font-bold text-white mb-1">{item.title}</h4>
+                    <p className="text-xs lg:text-sm text-white/60">{item.desc}</p>
                   </div>
-                  <h3 className="text-sm lg:text-lg font-bold text-gray-900">{item.title}</h3>
-                  <p className="text-xs lg:text-sm text-gray-600">{item.desc}</p>
-                </CardContent>
-              </Card>
-            ))}
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-12 lg:py-20 bg-gray-50">
+      {/* FAQ Section - Witte achtergrond */}
+      <section className="py-12 lg:py-20 bg-white">
         <div className="container mx-auto px-4 lg:px-6">
           <div className="text-center max-w-3xl mx-auto mb-10 lg:mb-16">
-            <Badge className="bg-primary/10 text-primary border-primary/20 mb-4 lg:mb-6 inline-flex">
+            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4 lg:mb-6 inline-flex">
               <Layers className="w-4 h-4 mr-2" />
               FAQ
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-gray-900 mb-4 lg:mb-6">
-              Veelgestelde <span className="text-primary">Vragen</span>
+            <h2 className="text-2xl lg:text-5xl font-bold text-[#1e1839] mb-4 lg:mb-6">
+              Veelgestelde <span className="text-[#bad4e1]">Vragen</span>
             </h2>
-            <p className="text-sm lg:text-xl text-gray-600 px-2">
+            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
               Heb je vragen over online coaching of het modulaire programma? Hieronder vind je antwoorden op de meest
               gestelde vragen.
             </p>
@@ -527,8 +600,8 @@ export default function OnlineCoachingClientPage() {
             {faqs.map((faq, index) => (
               <Card
                 key={index}
-                className={`hover:shadow-md transition-all duration-300 ${
-                  expandedFaq === index ? "border-primary" : ""
+                className={`hover:shadow-md transition-all duration-300 bg-white ${
+                  expandedFaq === index ? "border-[#1e1839]" : "border-gray-200"
                 }`}
               >
                 <CardContent className="p-4 md:p-6">
@@ -536,15 +609,15 @@ export default function OnlineCoachingClientPage() {
                     onClick={() => toggleFaq(index)}
                     className="flex items-center justify-between w-full text-left gap-3"
                   >
-                    <h3 className="font-bold text-sm lg:text-lg text-gray-900">{faq.question}</h3>
+                    <h3 className="font-bold text-sm lg:text-lg text-[#1e1839]">{faq.question}</h3>
                     {expandedFaq === index ? (
-                      <ChevronUp className="w-4 h-4 lg:w-5 lg:h-5 text-primary flex-shrink-0" />
+                      <ChevronUp className="w-4 h-4 lg:w-5 lg:h-5 text-[#1e1839] flex-shrink-0" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 lg:w-5 lg:h-5 text-primary flex-shrink-0" />
+                      <ChevronDown className="w-4 h-4 lg:w-5 lg:h-5 text-[#1e1839] flex-shrink-0" />
                     )}
                   </button>
                   {expandedFaq === index && (
-                    <div className="mt-3 md:mt-4 text-gray-600 border-t pt-3 md:pt-4 text-xs lg:text-sm leading-relaxed">
+                    <div className="mt-3 md:mt-4 text-gray-600 border-t border-gray-200 pt-3 md:pt-4 text-xs lg:text-sm leading-relaxed">
                       {faq.answer}
                     </div>
                   )}
@@ -554,18 +627,21 @@ export default function OnlineCoachingClientPage() {
           </div>
 
           <div className="text-center mt-8 md:mt-12">
-            <p className="text-gray-500 mb-4 md:mb-6 text-xs lg:text-base">
+            <p className="text-gray-600 mb-4 md:mb-6 text-xs lg:text-base">
               Heb je een andere vraag die hier niet beantwoord wordt?
             </p>
             <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-              <Button onClick={handleEmail} className="bg-primary hover:bg-primary/90 text-sm lg:text-base">
+              <Button
+                onClick={handleEmail}
+                className="bg-[#1e1839] hover:bg-[#1e1839]/90 text-white text-sm lg:text-base"
+              >
                 <Mail className="w-4 h-4 mr-2" />
                 E-mail Je Vraag
               </Button>
               <Button
                 variant="outline"
                 onClick={() => handleWhatsApp("online coaching")}
-                className="border-2 text-sm lg:text-base"
+                className="border-2 border-[#1e1839] text-[#1e1839] hover:bg-[#1e1839] hover:text-white text-sm lg:text-base"
               >
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Stuur WhatsApp Bericht
@@ -575,10 +651,10 @@ export default function OnlineCoachingClientPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-12 lg:py-24 bg-primary text-white">
+      {/* CTA Section - #1e1839 gradient */}
+      <section className="py-16 lg:py-24 bg-gradient-to-br from-[#1e1839] to-[#1e1839]/80 relative overflow-hidden">
         <div className="container mx-auto px-4 lg:px-6 text-center">
-          <h2 className="text-2xl lg:text-5xl font-bold mb-3 lg:mb-6">Klaar voor Jouw Transformatie?</h2>
+          <h2 className="text-2xl lg:text-5xl font-bold text-white mb-3 lg:mb-6">Klaar voor Jouw Transformatie?</h2>
           <p className="text-sm lg:text-xl text-white/90 max-w-2xl mx-auto mb-6 lg:mb-8 px-2">
             Start vandaag met een programma dat écht bij jou past. Neem contact op voor een vrijblijvend gesprek.
           </p>
@@ -586,7 +662,7 @@ export default function OnlineCoachingClientPage() {
             <Button
               size="lg"
               onClick={handleEmail}
-              className="bg-white text-primary hover:bg-gray-100 px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold"
+              className="bg-white text-[#1e1839] hover:bg-gray-100 px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold"
             >
               <Mail className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
               Stuur een E-mail
@@ -595,7 +671,7 @@ export default function OnlineCoachingClientPage() {
               size="lg"
               variant="outline"
               onClick={() => handleWhatsApp("online coaching")}
-              className="border-2 border-white text-white hover:bg-white hover:text-primary px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold bg-transparent"
+              className="border-2 border-white text-white hover:bg-white hover:text-[#1e1839] px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold bg-transparent"
             >
               <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
               WhatsApp Bericht
