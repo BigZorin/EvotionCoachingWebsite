@@ -124,7 +124,7 @@ export default function CoachesClientPage() {
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Martin Card */}
             <article className="group">
-              <Card className="ev-gradient-border bg-white/80 backdrop-blur border-transparent overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+              <Card className="ev-gradient-border bg-white/80 backdrop-blur border-transparent overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 py-0">
                 <CardContent className="p-0">
                   <div className="relative h-96 overflow-hidden">
                     <Image
@@ -134,7 +134,7 @@ export default function CoachesClientPage() {
                       className="object-cover object-[center_20%] group-hover:scale-105 transition-transform duration-700"
                       priority
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1e1839]/80 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1e1839]/80 via-transparent to-transparent py-0" />
                     <div className="absolute bottom-6 left-6 text-white">
                       <h2 className="text-2xl md:text-3xl font-bold mb-2">Martin Langenberg</h2>
                       <p className="text-white/90">Personal Trainer & Coach</p>
@@ -205,7 +205,7 @@ export default function CoachesClientPage() {
 
             {/* Zorin Card */}
             <article className="group">
-              <Card className="ev-gradient-border bg-white/80 backdrop-blur border-transparent overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+              <Card className="ev-gradient-border bg-white/80 backdrop-blur border-transparent overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 py-0">
                 <CardContent className="p-0">
                   <div className="relative h-96 overflow-hidden">
                     <Image

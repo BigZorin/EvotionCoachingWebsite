@@ -31,6 +31,21 @@ export default function MartinProfileClientPage() {
 
   const certifications = [
     {
+      title: "Metabolism School",
+      institution: "Sam Miller",
+      year: "2025",
+      highlight: true,
+      link: "https://metabolismschool.com/",
+      skills: [
+        "Diepgaand begrip van het menselijk metabolisme en energiehuishouding",
+        "Hormoonbalans en de impact op vetverbranding en spieropbouw",
+        "Metabole flexibiliteit optimaliseren voor betere prestaties",
+        "Schildklierfunctie en stofwisseling ondersteunen via voeding",
+        "Stress, cortisol en hun effect op lichaamscompositie",
+        "Praktische strategieën voor metabole gezondheid op lange termijn",
+      ],
+    },
+    {
       title: "Personal Trainer Cursus",
       institution: "Menno Henselmanns",
       year: "2024",
@@ -151,6 +166,9 @@ export default function MartinProfileClientPage() {
                   <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 text-xs md:text-sm">
                     N1 Certified
                   </Badge>
+                  <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 text-xs md:text-sm">
+                    Metabolism School
+                  </Badge>
                 </div>
                 <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
                   Martin Langenberg
@@ -180,6 +198,12 @@ export default function MartinProfileClientPage() {
                     <span className="text-sm md:text-lg text-white/90">
                       Specialist voor drukke ouders en ondernemers
                     </span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0">
+                      <Award className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-sm md:text-lg text-white/90">Gecertificeerd via Metabolism School</span>
                   </div>
                 </div>
 
@@ -254,8 +278,9 @@ export default function MartinProfileClientPage() {
               </div>
               <h3 className="text-xl font-bold text-[#1e1839] mb-4">Wetenschappelijk Onderbouwd</h3>
               <p className="text-base md:text-lg text-gray-700 leading-loose">
-                Gecertificeerd via N1 Education, de gouden standaard in evidence-based training. Martin combineert
-                jarenlange praktijkervaring met de nieuwste wetenschappelijke inzichten.
+                Gecertificeerd via N1 Education en Metabolism School, de gouden standaarden in evidence-based training
+                en metabole gezondheid. Martin combineert jarenlange praktijkervaring met de nieuwste wetenschappelijke
+                inzichten.
               </p>
             </div>
           </div>
@@ -300,22 +325,47 @@ export default function MartinProfileClientPage() {
             {certifications.map((cert, index) => (
               <div
                 key={index}
-                className="ev-gradient-border bg-white/90 backdrop-blur border-transparent rounded-2xl p-8 hover:shadow-2xl transition-all duration-500 group"
+                className={`${
+                  cert.highlight
+                    ? "bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] md:col-span-2 lg:col-span-3"
+                    : "ev-gradient-border bg-white/90"
+                } backdrop-blur border-transparent rounded-2xl p-8 hover:shadow-2xl transition-all duration-500 group`}
               >
                 <div className="flex items-start justify-between mb-6">
-                  <div className="w-14 h-14 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <Award className="w-7 h-7 text-white" />
+                  <div
+                    className={`w-14 h-14 ${
+                      cert.highlight ? "bg-white/20" : "bg-gradient-to-br from-[#1e1839] to-[#2a1f4d]"
+                    } rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg`}
+                  >
+                    <Award className={`w-7 h-7 ${cert.highlight ? "text-white" : "text-white"}`} />
                   </div>
+                  {cert.highlight && <Badge className="bg-white/20 text-white border-white/30">UNIEK IN NEDERLAND </Badge>}
                 </div>
 
-                <h3 className="text-xl font-bold text-[#1e1839] mb-2 leading-tight">{cert.title}</h3>
-                <p className="text-sm text-gray-600 mb-6 font-medium">{cert.institution}</p>
+                <h3
+                  className={`text-xl font-bold ${cert.highlight ? "text-white" : "text-[#1e1839]"} mb-2 leading-tight`}
+                >
+                  {cert.link ? (
+                    <a href={cert.link} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                      {cert.title} →
+                    </a>
+                  ) : (
+                    cert.title
+                  )}
+                </h3>
+                <p className={`text-sm ${cert.highlight ? "text-white/80" : "text-gray-600"} mb-6 font-medium`}>
+                  {cert.institution}
+                </p>
 
-                <div className="space-y-3">
+                <div className={`grid ${cert.highlight ? "md:grid-cols-2" : ""} gap-3`}>
                   {cert.skills.map((skill, skillIndex) => (
                     <div key={skillIndex} className="flex items-start space-x-2">
-                      <CheckCircle className="w-4 h-4 text-[#1e1839] flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-gray-700 leading-relaxed">{skill}</span>
+                      <CheckCircle
+                        className={`w-4 h-4 ${cert.highlight ? "text-white/80" : "text-[#1e1839]"} flex-shrink-0 mt-0.5`}
+                      />
+                      <span className={`text-sm ${cert.highlight ? "text-white/90" : "text-gray-700"} leading-relaxed`}>
+                        {skill}
+                      </span>
                     </div>
                   ))}
                 </div>
