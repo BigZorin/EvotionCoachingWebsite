@@ -451,16 +451,74 @@ export default function OnlineCoachingClientPage() {
         </div>
       </section>
 
-      {/* Trajecten Section - Witte achtergrond */}
+      {/* Wat Je Krijgt Section - Witte achtergrond */}
       <section className="py-12 lg:py-24 bg-white">
         <div className="container mx-auto px-4 lg:px-6">
           <div className="text-center mb-8 lg:mb-16">
             <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4 lg:mb-6 inline-flex">
+              <Award className="w-4 h-4 mr-2" />
+              Alles Voor Jouw Succes
+            </Badge>
+            <h2 className="text-2xl lg:text-5xl font-bold text-[#1e1839] mb-3 lg:mb-6">Wat Je Krijgt</h2>
+            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
+              Alle tools en ondersteuning die je nodig hebt voor een succesvolle transformatie.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center max-w-6xl mx-auto">
+            <div className="relative flex justify-center order-1 lg:order-1">
+              <div className="relative w-64 lg:w-96">
+                <Image
+                  src="/images/evotion-20app-20mock-up.png"
+                  alt="Evotion Coaching App"
+                  width={384}
+                  height={768}
+                  className="object-contain drop-shadow-2xl"
+                />
+              </div>
+            </div>
+
+            {/* Features Grid */}
+            <div className="order-2 lg:order-2">
+              <h3 className="text-xl lg:text-3xl font-bold text-[#1e1839] mb-6 lg:mb-8 text-center lg:text-left">
+                De Evotion Coaching App
+              </h3>
+              <div className="grid grid-cols-2 gap-3 lg:gap-4">
+                {[
+                  { icon: Dumbbell, title: "Trainingsschema's", desc: "100% op maat" },
+                  { icon: Apple, title: "Voedingsplan", desc: "Flexibel & praktisch" },
+                  { icon: MessageCircle, title: "Direct Contact", desc: "Met je coach" },
+                  { icon: Video, title: "Loom Videos", desc: "Persoonlijke uitleg" },
+                  { icon: LineChart, title: "Voortgang", desc: "Tracking & inzichten" },
+                  { icon: RotateCcw, title: "Aanpassingen", desc: "Wanneer nodig" },
+                ].map((item, index) => (
+                  <div
+                    key={index}
+                    className="bg-[#1e1839]/5 rounded-xl p-4 lg:p-5 text-center border border-[#1e1839]/10 hover:border-[#1e1839]/30 transition-all"
+                  >
+                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-[#1e1839]/10 rounded-xl flex items-center justify-center mx-auto mb-2 lg:mb-3">
+                      <item.icon className="w-5 h-5 lg:w-6 lg:h-6 text-[#1e1839]" />
+                    </div>
+                    <h4 className="text-sm lg:text-base font-bold text-[#1e1839] mb-1">{item.title}</h4>
+                    <p className="text-xs lg:text-sm text-gray-600">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trajecten Section - Donkerpaarse achtergrond */}
+      <section className="py-12 lg:py-24 bg-[#1e1839]">
+        <div className="container mx-auto px-4 lg:px-6">
+          <div className="text-center mb-8 lg:mb-16">
+            <Badge className="bg-white/20 text-white border-white/30 mb-4 lg:mb-6 inline-flex">
               <Calendar className="w-4 h-4 mr-2" />
               Trajecten
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-[#1e1839] mb-3 lg:mb-6">Kies Jouw Traject</h2>
-            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
+            <h2 className="text-2xl lg:text-5xl font-bold text-white mb-3 lg:mb-6">Kies Jouw Traject</h2>
+            <p className="text-sm lg:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed px-2">
               Twee opties voor verschillende doelen en situaties. Beide trajecten omvatten het volledige 5-fasen
               programma.
             </p>
@@ -470,12 +528,12 @@ export default function OnlineCoachingClientPage() {
             {packages.map((pkg, index) => (
               <Card
                 key={index}
-                className={`relative border-2 transition-all duration-300 hover:shadow-2xl ${
-                  pkg.popular ? "border-[#1e1839] shadow-xl lg:scale-105" : "border-gray-200 hover:border-[#bad4e1]"
+                className={`relative border-2 transition-all duration-300 hover:shadow-2xl bg-white ${
+                  pkg.popular ? "border-[#bad4e1] shadow-xl lg:scale-105" : "border-white/20 hover:border-[#bad4e1]"
                 }`}
               >
                 {pkg.popular && (
-                  <div className="absolute -top-3 lg:-top-4 left-1/2 transform -translate-x-1/2 w-16 md:w-24 h-4 md:h-6 bg-[#1e1839] rounded-b-xl"></div>
+                  <div className="absolute -top-3 lg:-top-4 left-1/2 transform -translate-x-1/2 w-16 md:w-24 h-4 md:h-6 bg-[#bad4e1] rounded-b-xl"></div>
                 )}
 
                 <CardContent className="p-5 lg:p-8 space-y-4 lg:space-y-6">
@@ -484,7 +542,7 @@ export default function OnlineCoachingClientPage() {
                     <div className="space-y-1 lg:space-y-2">
                       <div className="text-2xl lg:text-3xl font-bold text-[#1e1839]">Op Aanvraag</div>
                       <div className="text-sm lg:text-lg font-medium text-gray-600">{pkg.duration}</div>
-                      <div className="text-xs lg:text-sm font-medium text-[#bad4e1] text-[rgba(30,24,57,1)]">{pkg.note}</div>
+                      <div className="text-xs lg:text-sm font-medium text-[#1e1839]/70">{pkg.note}</div>
                     </div>
                   </div>
 
@@ -517,64 +575,6 @@ export default function OnlineCoachingClientPage() {
                 </CardContent>
               </Card>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Wat Je Krijgt Section - Donkerpaarse achtergrond met App */}
-      <section className="py-12 lg:py-24 bg-[#1e1839]">
-        <div className="container mx-auto px-4 lg:px-6">
-          <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-[#bad4e1]/20 text-[#bad4e1] border-[#bad4e1]/30 mb-4 lg:mb-6 inline-flex">
-              <Award className="w-4 h-4 mr-2" />
-              Alles Voor Jouw Succes
-            </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-white mb-3 lg:mb-6">Wat Je Krijgt</h2>
-            <p className="text-sm lg:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed px-2">
-              Alle tools en ondersteuning die je nodig hebt voor een succesvolle transformatie.
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center max-w-6xl mx-auto">
-            <div className="relative flex justify-center order-1 lg:order-1">
-              <div className="relative w-64 lg:w-96">
-                <Image
-                  src="/images/evotion-20app-20mock-up.png"
-                  alt="Evotion Coaching App"
-                  width={384}
-                  height={768}
-                  className="object-contain drop-shadow-2xl"
-                />
-              </div>
-            </div>
-
-            {/* Features Grid */}
-            <div className="order-2 lg:order-2">
-              <h3 className="text-xl lg:text-3xl font-bold text-white mb-6 lg:mb-8 text-center lg:text-left">
-                De Evotion Coaching App
-              </h3>
-              <div className="grid grid-cols-2 gap-3 lg:gap-4">
-                {[
-                  { icon: Dumbbell, title: "Trainingsschema's", desc: "100% op maat" },
-                  { icon: Apple, title: "Voedingsplan", desc: "Flexibel & praktisch" },
-                  { icon: MessageCircle, title: "Direct Contact", desc: "Met je coach" },
-                  { icon: Video, title: "Loom Videos", desc: "Persoonlijke uitleg" },
-                  { icon: LineChart, title: "Voortgang", desc: "Tracking & inzichten" },
-                  { icon: RotateCcw, title: "Aanpassingen", desc: "Wanneer nodig" },
-                ].map((item, index) => (
-                  <div
-                    key={index}
-                    className="bg-white/10 backdrop-blur-sm rounded-xl p-4 lg:p-5 text-center border border-white/20 hover:border-[#bad4e1]/50 transition-all"
-                  >
-                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-[#bad4e1]/20 rounded-xl flex items-center justify-center mx-auto mb-2 lg:mb-3">
-                      <item.icon className="w-5 h-5 lg:w-6 lg:h-6 text-[#bad4e1]" />
-                    </div>
-                    <h4 className="text-sm lg:text-base font-bold text-white mb-1">{item.title}</h4>
-                    <p className="text-xs lg:text-sm text-white/60">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </section>

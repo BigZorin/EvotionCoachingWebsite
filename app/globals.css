@@ -30,25 +30,21 @@
   --chart-4: hsl(43 74% 66%);
   --chart-5: hsl(27 87% 67%);
 
-  /* Evotion brand colors */
   --evotion-primary: hsl(252 37% 16%);
   --evotion-secondary: hsl(197 47% 80%);
   --evotion-primary-light: hsl(252 30% 25%);
   --evotion-primary-dark: hsl(252 40% 12%);
 
-  /* Surface colors */
   --surface: hsl(0 0% 100%);
   --surface-elevated: hsl(0 0% 98%);
   --surface-muted: hsl(210 20% 98%);
   --surface-inverse: hsl(252 37% 16%);
 
-  /* Text colors */
   --text-primary: hsl(222.2 84% 4.9%);
   --text-secondary: hsl(215 16% 47%);
   --text-muted: hsl(215 14% 60%);
   --text-inverse: hsl(0 0% 100%);
 
-  /* Hero/dark section colors */
   --hero-background: hsl(220 20% 10%);
   --hero-foreground: hsl(0 0% 100%);
   --hero-muted: hsl(215 16% 70%);
@@ -89,25 +85,21 @@
   --chart-4: hsl(280 65% 60%);
   --chart-5: hsl(340 75% 55%);
 
-  /* Evotion brand colors - dark mode */
   --evotion-primary: hsl(197 47% 80%);
   --evotion-secondary: hsl(252 37% 16%);
   --evotion-primary-light: hsl(197 50% 85%);
   --evotion-primary-dark: hsl(197 45% 70%);
 
-  /* Surface colors - dark mode */
   --surface: hsl(222.2 84% 4.9%);
   --surface-elevated: hsl(217.2 32.6% 12%);
   --surface-muted: hsl(217.2 32.6% 17.5%);
   --surface-inverse: hsl(0 0% 100%);
 
-  /* Text colors - dark mode */
   --text-primary: hsl(210 40% 98%);
   --text-secondary: hsl(215 20% 65%);
   --text-muted: hsl(215 16% 50%);
   --text-inverse: hsl(222.2 84% 4.9%);
 
-  /* Hero/dark section colors - dark mode */
   --hero-background: hsl(252 37% 16%);
   --hero-foreground: hsl(0 0% 100%);
   --hero-muted: hsl(215 20% 65%);
@@ -123,6 +115,8 @@
 }
 
 @theme inline {
+  --font-sans: "Geist", "Geist Fallback";
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -155,71 +149,75 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-
-  /* Evotion brand tokens */
   --color-evotion-primary: var(--evotion-primary);
   --color-evotion-secondary: var(--evotion-secondary);
   --color-evotion-primary-light: var(--evotion-primary-light);
   --color-evotion-primary-dark: var(--evotion-primary-dark);
-
-  /* Surface tokens */
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
   --color-surface-muted: var(--surface-muted);
   --color-surface-inverse: var(--surface-inverse);
-
-  /* Text tokens */
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
   --color-text-inverse: var(--text-inverse);
-
-  /* Hero tokens */
   --color-hero-background: var(--hero-background);
   --color-hero-foreground: var(--hero-foreground);
   --color-hero-muted: var(--hero-muted);
-
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
 }
 
-* {
-  border-color: var(--border);
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
 }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
 }
 
-/* Custom Evotion Coaching styles */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
 .text-evotion-primary {
   color: var(--evotion-primary);
 }
-
 .bg-evotion-primary {
   background-color: var(--evotion-primary);
 }
-
 .border-evotion-primary {
   border-color: var(--evotion-primary);
 }
-
 .text-evotion-secondary {
   color: var(--evotion-secondary);
 }
-
 .bg-evotion-secondary {
   background-color: var(--evotion-secondary);
 }
-
 .border-evotion-secondary {
   border-color: var(--evotion-secondary);
 }
 
-/* Custom animations */
 @keyframes gradientShift {
   0%,
   100% {
@@ -286,96 +284,73 @@ body {
 .animate-fade-in-up {
   animation: fade-in-up 0.6s ease-out forwards;
 }
-
 .animate-fade-in-left {
   animation: fade-in-left 0.6s ease-out forwards;
 }
-
 .animate-fade-in-right {
   animation: fade-in-right 0.6s ease-out forwards;
 }
-
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
-
 .animate-float-delayed {
   animation: float-delayed 3s ease-in-out infinite 1.5s;
 }
 
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
-
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
-
 ::-webkit-scrollbar-thumb {
   background: var(--evotion-primary);
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: #2a2050;
 }
 
-/* Hide v0 built-with button */
-div[id^="v0-built-with-button"] {
+div[id^="v0-built-with-button"],
+[id*="v0-built-with"],
+[class*="v0-built-with"],
+div[style*="Built with"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
 }
 
-/* Additional fallback to hide any v0 branding */
-[id*="v0-built-with"],
-[class*="v0-built-with"],
-div[style*="Built with"] {
-  display: none !important;
-  visibility: hidden !important;
-}
-
-/* Performance optimizations */
 .will-change-transform {
   will-change: transform;
 }
-
 .will-change-opacity {
   will-change: opacity;
 }
-
-/* Focus styles for accessibility */
 .focus-visible:focus {
   outline: 2px solid var(--evotion-primary);
   outline-offset: 2px;
 }
 
-/* Print styles */
 @media print {
   .no-print {
     display: none !important;
   }
 }
 
-/* High contrast mode support */
 @media (prefers-contrast: high) {
   .text-gray-600 {
     color: #000000;
   }
-
   .text-gray-300 {
     color: #ffffff;
   }
 }
 
-/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -387,12 +362,10 @@ div[style*="Built with"] {
   }
 }
 
-/* Visual polish utilities */
 .ev-glow {
   box-shadow: 0 6px 28px rgba(186, 212, 225, 0.25), 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
-/* Gradient border wrapper */
 .ev-gradient-border {
   position: relative;
   border: 1px solid transparent;
@@ -401,7 +374,6 @@ div[style*="Built with"] {
   border-radius: 1rem;
 }
 
-/* Photo frame subtle gradient edge */
 .ev-photo-frame {
   position: relative;
 }
@@ -417,7 +389,6 @@ div[style*="Built with"] {
   pointer-events: none;
 }
 
-/* Button shine effect */
 .ev-shine {
   position: relative;
   overflow: hidden;
@@ -434,6 +405,7 @@ div[style*="Built with"] {
   animation: ev-shine-slide 2.8s ease-in-out infinite;
   pointer-events: none;
 }
+
 @keyframes ev-shine-slide {
   0% {
     left: -150%;
@@ -446,7 +418,6 @@ div[style*="Built with"] {
   }
 }
 
-/* Decorative gradient orbs */
 .ev-orb {
   position: absolute;
   border-radius: 9999px;
@@ -468,7 +439,6 @@ div[style*="Built with"] {
   height: 180px;
 }
 
-/* Improve transform performance on large sections */
 section {
   transform: translate3d(0, 0, 0);
 }

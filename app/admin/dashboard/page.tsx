@@ -1,4 +1,6 @@
 import type { Metadata } from "next"
+import { redirect } from "next/navigation"
+import { checkAdminSession } from "@/app/actions/admin-auth"
 import AdminDashboardClient from "./AdminDashboardClient"
 
 export const metadata: Metadata = {
@@ -10,6 +12,12 @@ export const metadata: Metadata = {
   },
 }
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  const isAuthenticated = await checkAdminSession()
+
+  if (!isAuthenticated) {
+    redirect("/admin/login")
+  }
+
   return <AdminDashboardClient />
 }

@@ -8,7 +8,7 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getCookieLogs, getCalculatorLogs, getContactLogs, clearCookieLogs } from "@/utils/cookie-utils"
-import { getDashboardData } from "@/app/actions/analytics"
+import { logoutAdmin } from "@/app/actions/admin-auth"
 import {
   Activity,
   TrendingUp,
@@ -20,6 +20,7 @@ import {
   Clock,
   Server,
   AlertCircle,
+  LogOut,
 } from "lucide-react"
 
 interface AnalyticsData {
@@ -172,8 +173,11 @@ export default function AdminDashboardClient() {
       const localData = calculateLocalAnalytics()
       setLocalAnalytics(localData)
 
-      const sData = await getDashboardData()
-      setServerData(sData)
+      const response = await fetch("/api/admin/analytics")
+      if (response.ok) {
+        const sData = await response.json()
+        setServerData(sData)
+      }
 
       setLastUpdated(new Date().toLocaleString("nl-NL"))
     } catch (error) {
@@ -225,13 +229,17 @@ export default function AdminDashboardClient() {
     }
   }
 
+  const handleLogout = () => {
+    logoutAdmin()
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#1e1839] via-[#2a2054] to-[#1e1839]">
         <Header />
         <div className="container mx-auto px-4 py-12 flex items-center justify-center">
           <div className="text-white text-xl flex items-center gap-3">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#bad4e1]"></div>
             Analytics laden...
           </div>
         </div>
@@ -249,7 +257,7 @@ export default function AdminDashboardClient() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
-              <p className="text-lg text-gray-300">Evotion Coaching Analytics & Statistieken</p>
+              <p className="text-lg text-[#bad4e1]/80">Evotion Coaching Analytics & Statistieken</p>
             </div>
 
             <div className="flex gap-2">
@@ -261,22 +269,35 @@ export default function AdminDashboardClient() {
                 onClick={exportData}
                 size="sm"
                 variant="outline"
-                className="border-white text-white hover:bg-white hover:text-[#1e1839] bg-transparent"
+                className="border-[#bad4e1]/50 text-[#bad4e1] hover:bg-[#bad4e1]/10 hover:text-white bg-transparent"
               >
                 <Download className="w-4 h-4 mr-2" />
                 Export
+              </Button>
+              {/* Added logout button */}
+              <Button
+                onClick={handleLogout}
+                size="sm"
+                variant="outline"
+                className="border-[#bad4e1]/50 text-[#bad4e1] hover:bg-[#bad4e1]/10 hover:text-white bg-transparent"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Uitloggen
               </Button>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3 mb-8">
-            <Badge variant="secondary" className="bg-white/10 text-white hover:bg-white/20">
+            <Badge
+              variant="secondary"
+              className="bg-[#bad4e1]/10 text-[#bad4e1] border border-[#bad4e1]/20 hover:bg-[#bad4e1]/20"
+            >
               <Clock className="w-4 h-4 mr-2" />
               Laatste update: {lastUpdated}
             </Badge>
             <Badge
               variant="secondary"
-              className={`bg-white/10 text-white hover:bg-white/20 ${serverData ? "border-green-400/50" : "border-red-400/50"}`}
+              className={`bg-[#bad4e1]/10 text-[#bad4e1] border hover:bg-[#bad4e1]/20 ${serverData ? "border-[#bad4e1]/50" : "border-red-400/50"}`}
             >
               <Server className="w-4 h-4 mr-2" />
               Server Status: {serverData ? "Online" : "Offline"}
@@ -284,7 +305,7 @@ export default function AdminDashboardClient() {
           </div>
 
           <Tabs defaultValue="server" className="space-y-8">
-            <TabsList className="bg-white/10 border border-white/10 text-gray-300">
+            <TabsList className="bg-[#1e1839]/50 border border-[#bad4e1]/20 text-[#bad4e1]/70">
               <TabsTrigger
                 value="server"
                 className="data-[state=active]:bg-[#bad4e1] data-[state=active]:text-[#1e1839]"
@@ -305,36 +326,36 @@ export default function AdminDashboardClient() {
               {serverData ? (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                    <Card className="bg-blue-900/20 backdrop-blur-sm border-blue-500/30 hover:bg-blue-900/30 transition-colors">
+                    <Card className="bg-[#1e1839]/40 backdrop-blur-sm border-[#bad4e1]/20 hover:border-[#bad4e1]/40 transition-colors">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-blue-200">Unieke Bezoekers</CardTitle>
+                        <CardTitle className="text-sm font-medium text-[#bad4e1]/80">Unieke Bezoekers</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="text-3xl font-bold text-white">{serverData.stats.visitors}</div>
-                        <p className="text-xs text-blue-300 mt-1 flex items-center">
+                        <p className="text-xs text-[#bad4e1]/60 mt-1 flex items-center">
                           <TrendingUp className="w-3 h-3 mr-1" />
                           Vandaag
                         </p>
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-purple-900/20 backdrop-blur-sm border-purple-500/30 hover:bg-purple-900/30 transition-colors">
+                    <Card className="bg-[#1e1839]/40 backdrop-blur-sm border-[#bad4e1]/20 hover:border-[#bad4e1]/40 transition-colors">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-purple-200">Calculator Starts</CardTitle>
+                        <CardTitle className="text-sm font-medium text-[#bad4e1]/80">Calculator Starts</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="text-3xl font-bold text-white">{serverData.stats.calculatorStarts}</div>
-                        <p className="text-xs text-purple-300 mt-1">Potentiële leads</p>
+                        <p className="text-xs text-[#bad4e1]/60 mt-1">Potentiële leads</p>
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-green-900/20 backdrop-blur-sm border-green-500/30 hover:bg-green-900/30 transition-colors">
+                    <Card className="bg-[#1e1839]/40 backdrop-blur-sm border-[#bad4e1]/20 hover:border-[#bad4e1]/40 transition-colors">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-green-200">Calculator Voltooid</CardTitle>
+                        <CardTitle className="text-sm font-medium text-[#bad4e1]/80">Calculator Voltooid</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="text-3xl font-bold text-white">{serverData.stats.calculatorCompletions}</div>
-                        <p className="text-xs text-green-300 mt-1">
+                        <p className="text-xs text-[#bad4e1]/60 mt-1">
                           {serverData.stats.calculatorStarts > 0
                             ? Math.round(
                                 (serverData.stats.calculatorCompletions / serverData.stats.calculatorStarts) * 100,
@@ -345,35 +366,35 @@ export default function AdminDashboardClient() {
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-orange-900/20 backdrop-blur-sm border-orange-500/30 hover:bg-orange-900/30 transition-colors">
+                    <Card className="bg-[#1e1839]/40 backdrop-blur-sm border-[#bad4e1]/20 hover:border-[#bad4e1]/40 transition-colors">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-orange-200">Nieuwe Leads</CardTitle>
+                        <CardTitle className="text-sm font-medium text-[#bad4e1]/80">Nieuwe Leads</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="text-3xl font-bold text-white">{serverData.stats.leads}</div>
-                        <p className="text-xs text-orange-300 mt-1">Hoog potentieel</p>
+                        <p className="text-xs text-[#bad4e1]/60 mt-1">Hoog potentieel</p>
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-pink-900/20 backdrop-blur-sm border-pink-500/30 hover:bg-pink-900/30 transition-colors">
+                    <Card className="bg-[#1e1839]/40 backdrop-blur-sm border-[#bad4e1]/20 hover:border-[#bad4e1]/40 transition-colors">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-pink-200">Contact Berichten</CardTitle>
+                        <CardTitle className="text-sm font-medium text-[#bad4e1]/80">Contact Berichten</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="text-3xl font-bold text-white">{serverData.stats.contactSubmissions}</div>
-                        <p className="text-xs text-pink-300 mt-1">Direct contact</p>
+                        <p className="text-xs text-[#bad4e1]/60 mt-1">Direct contact</p>
                       </CardContent>
                     </Card>
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <Card className="bg-white/5 backdrop-blur-sm border-white/10">
+                    <Card className="bg-[#1e1839]/30 backdrop-blur-sm border-[#bad4e1]/20">
                       <CardHeader>
                         <CardTitle className="text-white flex items-center gap-2">
-                          <Globe className="w-5 h-5" />
+                          <Globe className="w-5 h-5 text-[#bad4e1]" />
                           Populaire Pagina's
                         </CardTitle>
-                        <CardDescription className="text-gray-400">Meest bezochte pagina's vandaag</CardDescription>
+                        <CardDescription className="text-[#bad4e1]/60">Meest bezochte pagina's vandaag</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
@@ -381,8 +402,8 @@ export default function AdminDashboardClient() {
                             serverData.topPages.map((page, index) => (
                               <div key={index} className="flex items-center justify-between group">
                                 <div className="flex items-center gap-3 overflow-hidden">
-                                  <span className="text-gray-500 font-mono text-sm w-6">{index + 1}.</span>
-                                  <span className="text-gray-200 truncate group-hover:text-white transition-colors">
+                                  <span className="text-[#bad4e1]/50 font-mono text-sm w-6">{index + 1}.</span>
+                                  <span className="text-[#bad4e1]/80 truncate group-hover:text-white transition-colors">
                                     {page.url}
                                   </span>
                                 </div>
@@ -395,7 +416,7 @@ export default function AdminDashboardClient() {
                               </div>
                             ))
                           ) : (
-                            <div className="text-center py-8 text-gray-500 flex flex-col items-center">
+                            <div className="text-center py-8 text-[#bad4e1]/50 flex flex-col items-center">
                               <Activity className="w-8 h-8 mb-2 opacity-50" />
                               <p>Nog geen data beschikbaar voor vandaag</p>
                             </div>
@@ -404,13 +425,13 @@ export default function AdminDashboardClient() {
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-white/5 backdrop-blur-sm border-white/10">
+                    <Card className="bg-[#1e1839]/30 backdrop-blur-sm border-[#bad4e1]/20">
                       <CardHeader>
                         <CardTitle className="text-white flex items-center gap-2">
-                          <Activity className="w-5 h-5" />
+                          <Activity className="w-5 h-5 text-[#bad4e1]" />
                           Recente Activiteit
                         </CardTitle>
-                        <CardDescription className="text-gray-400">Real-time gebruikersacties</CardDescription>
+                        <CardDescription className="text-[#bad4e1]/60">Real-time gebruikersacties</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
@@ -418,26 +439,26 @@ export default function AdminDashboardClient() {
                             serverData.recentActivity.map((activity, index) => (
                               <div
                                 key={index}
-                                className="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/5"
+                                className="flex items-start gap-3 p-3 rounded-lg bg-[#1e1839]/40 border border-[#bad4e1]/10"
                               >
                                 <div className="mt-1">
                                   {activity.type.includes("page_view") ? (
-                                    <Globe className="w-4 h-4 text-blue-400" />
+                                    <Globe className="w-4 h-4 text-[#bad4e1]" />
                                   ) : activity.type.includes("calculator") ? (
-                                    <TrendingUp className="w-4 h-4 text-green-400" />
+                                    <TrendingUp className="w-4 h-4 text-[#bad4e1]" />
                                   ) : (
-                                    <Mail className="w-4 h-4 text-orange-400" />
+                                    <Mail className="w-4 h-4 text-[#bad4e1]" />
                                   )}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium text-white truncate">
                                     {activity.type.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase())}
                                   </p>
-                                  <p className="text-xs text-gray-400 truncate">
+                                  <p className="text-xs text-[#bad4e1]/60 truncate">
                                     {activity.path || activity.url || "Onbekende pagina"}
                                   </p>
                                 </div>
-                                <span className="text-xs text-gray-500 whitespace-nowrap">
+                                <span className="text-xs text-[#bad4e1]/50 whitespace-nowrap">
                                   {new Date(activity.timestamp).toLocaleTimeString("nl-NL", {
                                     hour: "2-digit",
                                     minute: "2-digit",
@@ -446,7 +467,7 @@ export default function AdminDashboardClient() {
                               </div>
                             ))
                           ) : (
-                            <div className="text-center py-8 text-gray-500">
+                            <div className="text-center py-8 text-[#bad4e1]/50">
                               <p>Geen recente activiteit</p>
                             </div>
                           )}
@@ -456,7 +477,7 @@ export default function AdminDashboardClient() {
                   </div>
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                <div className="flex flex-col items-center justify-center py-12 text-[#bad4e1]/60">
                   <AlertCircle className="w-12 h-12 mb-4 text-red-400/50" />
                   <h3 className="text-xl font-semibold text-white mb-2">Server Verbinding Mislukt</h3>
                   <p className="max-w-md text-center mb-6">
@@ -466,7 +487,7 @@ export default function AdminDashboardClient() {
                   <Button
                     onClick={loadAnalytics}
                     variant="outline"
-                    className="border-white/20 text-white hover:bg-white/10 bg-transparent"
+                    className="border-[#bad4e1]/30 text-[#bad4e1] hover:bg-[#bad4e1]/10 bg-transparent"
                   >
                     Opnieuw Proberen
                   </Button>
@@ -475,12 +496,12 @@ export default function AdminDashboardClient() {
             </TabsContent>
 
             <TabsContent value="local" className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <Card className="bg-orange-900/10 border-orange-500/20 mb-6">
+              <Card className="bg-[#1e1839]/40 border-[#bad4e1]/30 mb-6">
                 <CardContent className="p-4 flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-orange-400 shrink-0 mt-0.5" />
+                  <AlertCircle className="w-5 h-5 text-[#bad4e1] shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-orange-200">Lokale Debug Modus</h4>
-                    <p className="text-sm text-orange-200/70">
+                    <h4 className="font-semibold text-white">Lokale Debug Modus</h4>
+                    <p className="text-sm text-[#bad4e1]/70">
                       Deze data is alleen zichtbaar voor jou en toont de logs die in jouw browser zijn opgeslagen. Dit
                       is handig om te testen of tracking werkt.
                     </p>
@@ -489,17 +510,17 @@ export default function AdminDashboardClient() {
               </Card>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card className="bg-white/5 border-white/10">
+                <Card className="bg-[#1e1839]/30 border-[#bad4e1]/20">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm text-gray-400">Jouw Sessies</CardTitle>
+                    <CardTitle className="text-sm text-[#bad4e1]/70">Jouw Sessies</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-white">{localAnalytics?.totalVisitors || 0}</div>
                   </CardContent>
                 </Card>
-                <Card className="bg-white/5 border-white/10">
+                <Card className="bg-[#1e1839]/30 border-[#bad4e1]/20">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm text-gray-400">Jouw Events</CardTitle>
+                    <CardTitle className="text-sm text-[#bad4e1]/70">Jouw Events</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-white">
@@ -507,17 +528,17 @@ export default function AdminDashboardClient() {
                     </div>
                   </CardContent>
                 </Card>
-                <Card className="bg-white/5 border-white/10">
+                <Card className="bg-[#1e1839]/30 border-[#bad4e1]/20">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm text-gray-400">Calculator Acties</CardTitle>
+                    <CardTitle className="text-sm text-[#bad4e1]/70">Calculator Acties</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-white">{localAnalytics?.calculatorStarts || 0}</div>
                   </CardContent>
                 </Card>
-                <Card className="bg-white/5 border-white/10">
+                <Card className="bg-[#1e1839]/30 border-[#bad4e1]/20">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm text-gray-400">Cookie Logs</CardTitle>
+                    <CardTitle className="text-sm text-[#bad4e1]/70">Cookie Logs</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-white">{getCookieLogs().length}</div>
