@@ -1158,7 +1158,7 @@ export default function PresentatieClientPage() {
                 <div className="bg-gradient-to-b from-slate-50 to-slate-100 px-6 md:px-10 py-12">
                   <div className="max-w-6xl mx-auto space-y-8">
                     <h3 className="text-3xl font-bold text-slate-900 text-center mb-8">
-                      Martin's Certificeringen & Expertise
+                      {slide.coach.name.split(" ")[0]}'s Certificeringen & Expertise
                     </h3>
 
                     {slide.coach.certifications.map((cert, idx) => (
@@ -1199,7 +1199,9 @@ export default function PresentatieClientPage() {
                           )}
                         </div>
                         <div className="mt-6 pt-6 border-t-2 border-slate-200">
-                          <h5 className="text-lg font-bold text-slate-900 mb-4">Martin beheerst:</h5>
+                          <h5 className="text-lg font-bold text-slate-900 mb-4">
+                            {slide.coach.name.split(" ")[0]} beheerst:
+                          </h5>
                           <ul className="grid md:grid-cols-2 gap-3">
                             {cert.skills.map((skill, skillIdx) => (
                               <li key={skillIdx} className="flex items-start gap-2 text-slate-700 text-sm">
