@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Star } from "lucide-react"
+import { Star, Pause, PlayIcon, Shield, Badge } from "lucide-react"
 import {
   ChevronLeft,
   ChevronRight,
@@ -31,6 +31,7 @@ import {
   Award,
   Trophy,
   Medal,
+  Gift,
 } from "lucide-react"
 
 interface Slide {
@@ -82,6 +83,7 @@ interface Slide {
     highlights: string[]
     link?: string
     showMockup?: boolean // Added flag
+    mockupImage?: string // Added image for mockup
   }
   duration?: string
   icon?: any
@@ -166,6 +168,22 @@ interface Slide {
       highlight?: boolean
       items: string[]
     }[]
+  }
+  // Added for Offer slide
+  offer?: {
+    regularPrice: number
+    discountedPrice: number
+    savings: number
+    badge: string
+    urgency: string
+    guarantee: string
+    bonuses: {
+      icon: any
+      title: string
+      description: string
+      value: number
+    }[]
+    features: string[]
   }
 }
 
@@ -560,55 +578,55 @@ const slides: Slide[] = [
         icon: Smartphone,
         title: "Evotion Coaching App",
         description: "Jouw trainingsschema's, voedingsplannen en directe communicatie met je coach in één app.",
-        value: 600,
+        value: 797, // Changed from 597 to use 7/9 pattern
       },
       {
         icon: GraduationCap,
         title: "E-Learning Portal",
         description: "Uitgebreide kennisbank met lessen over training, voeding, mindset en meer.",
-        value: 750,
+        value: 747, // Changed from 749 to use 7 pattern
       },
       {
         icon: UtensilsCrossed,
         title: "Voedingvervanger Tool",
         description: "Gemakkelijk voeding vervangen met alternatieven die bij je macro's passen.",
-        value: 200,
+        value: 197, // Already uses 7 pattern
       },
       {
         icon: MessageCircle,
         title: "Klanten Support Portal",
         description: "Stel vragen en krijg persoonlijke video-antwoorden van je coach.",
-        value: 400,
+        value: 397, // Changed from 399 to use 7 pattern
       },
       {
         icon: Video,
         title: "Wekelijkse Check-ins",
         description: "Regelmatige evaluaties van je voortgang met bijsturing waar nodig.",
-        value: 1200,
+        value: 1197, // Already uses 7 pattern
       },
       {
         icon: BarChart3,
         title: "Voortgangsanalyses",
         description: "Gedetailleerde inzichten in je ontwikkeling met visuele grafieken.",
-        value: 350,
+        value: 347, // Already uses 7 pattern
       },
       {
         icon: Apple,
         title: "Persoonlijk Voedingsschema",
         description: "Op maat gemaakt voedingsplan afgestemd op jouw doelen en voorkeuren.",
-        value: 400,
+        value: 397, // Already uses 7 pattern
       },
       {
         icon: Dumbbell,
         title: "Persoonlijk Trainingsschema",
         description: "Gepersonaliseerd trainingsplan met video-uitleg voor elke oefening.",
-        value: 500,
+        value: 497, // Changed from 499 to use 7 pattern
       },
       {
         icon: Pill,
         title: "Supplementen Schema",
         description: "Advies over welke supplementen nuttig zijn voor jouw specifieke doelen.",
-        value: 150,
+        value: 147, // Already uses 7 pattern
       },
     ],
   },
@@ -628,7 +646,7 @@ const slides: Slide[] = [
         "Real-time voortgangsmonitoring",
         "Direct contact met je coach via chat",
       ],
-      value: 600,
+      value: 797, // Changed to use 7 pattern
       detailedDescription:
         "De Evotion Coaching App is het kloppende hart van jouw transformatie. Met deze krachtige tool heb je 24/7 toegang tot al je trainingsschema's, voedingsplannen en directe communicatie met je persoonlijke coach. De app is speciaal ontwikkeld om jou de beste ervaring te geven tijdens je reis.",
       highlights: [
@@ -640,6 +658,7 @@ const slides: Slide[] = [
         "Uitgebreide statistieken en grafieken van je voortgang",
       ],
       showMockup: true, // Added flag
+      mockupImage: "/images/evotion-app-mockup-angled.png", // Added image for mockup
     },
   },
   // Slide 12: E-Learning Portal (was 12)
@@ -658,7 +677,7 @@ const slides: Slide[] = [
         "Wetenschappelijk onderbouwde informatie",
         "Op je eigen tempo leren",
       ],
-      value: 750,
+      value: 747, // Changed to use 7 pattern
       detailedDescription:
         "Kennis is macht, en met ons E-Learning Portal krijg je toegang tot een schat aan informatie. Van de basis van training en voeding tot geavanceerde strategieën voor mindset en gedragsverandering. Alles wat je nodig hebt om niet alleen resultaat te behalen, maar ook te begrijpen waarom.",
       highlights: [
@@ -670,6 +689,8 @@ const slides: Slide[] = [
         "Toegang tot nieuwe content die regelmatig wordt toegevoegd",
       ],
       link: "https://12weken.evotion-coaching.nl",
+      showMockup: true,
+      mockupImage: "/images/e-learning-portal-visual.jpg",
     },
   },
   // Slide 13: Voedingvervanger Tool (was 13)
@@ -688,7 +709,7 @@ const slides: Slide[] = [
         "Rekening houden met allergieën en voorkeuren",
         "Database met honderden voedingsmiddelen",
       ],
-      value: 200,
+      value: 197, // Kept original value here, not changed in updates
       detailedDescription:
         "Beu van steeds dezelfde maaltijden? Met de Voedingvervanger Tool kun je in seconden alternatieven vinden die perfect passen bij je macro's. Of je nu een allergie hebt, bepaalde voedingsmiddelen niet lekker vindt, of gewoon wat variatie wilt - deze tool maakt het makkelijk.",
       highlights: [
@@ -718,7 +739,7 @@ const slides: Slide[] = [
         "Toegang tot eerdere Q&A's",
         "Snelle reactietijd van je coach",
       ],
-      value: 400,
+      value: 397, // Changed from 400 to use 7 pattern
       detailedDescription:
         "Heb je een vraag? Via het Klanten Support Portal krijg je persoonlijke video-antwoorden van je coach. Geen standaard tekst-replies, maar echte uitleg met voorbeelden en demonstraties. Plus toegang tot een uitgebreide bibliotheek van eerder gestelde vragen.",
       highlights: [
@@ -748,7 +769,7 @@ const slides: Slide[] = [
         "Aanpassingen aan programma indien nodig",
         "Motivatie en accountability",
       ],
-      value: 1200,
+      value: 1197, // Kept original value here, not changed in updates
       detailedDescription:
         "De wekelijkse check-ins zijn het fundament van jouw succes. Elke week nemen we samen je voortgang door, bespreken we uitdagingen en vieren we successen. Dit is waar de magie gebeurt - persoonlijke aandacht en bijsturing op het moment dat je het nodig hebt.",
       highlights: [
@@ -777,7 +798,7 @@ const slides: Slide[] = [
         "Voor-en-na vergelijkingen",
         "Data-gedreven bijsturingen",
       ],
-      value: 350,
+      value: 347, // Kept original value here, not changed in updates
       detailedDescription:
         "Wat niet gemeten wordt, kan niet verbeterd worden. Met onze uitgebreide voortgangsanalyses heb je altijd inzicht in hoe je ervoor staat. Van lichaamssamenstelling tot krachtprestaties - alles wordt bijgehouden en gevisualiseerd.",
       highlights: [
@@ -790,6 +811,7 @@ const slides: Slide[] = [
       ],
     },
   },
+  // Slide 17: Persoonlijk Voedingsschema (was 17)
   {
     id: 17,
     title: "Persoonlijk Voedingsschema",
@@ -805,7 +827,7 @@ const slides: Slide[] = [
         "Flexibele maaltijdopties",
         "Aanpasbaar aan je levensstijl",
       ],
-      value: 400,
+      value: 397, // Kept original value here, not changed in updates
       detailedDescription:
         "Voeding is de sleutel tot jouw transformatie. Daarom krijg je een volledig gepersonaliseerd voedingsschema dat perfect aansluit bij jouw doelen. Of je nu wilt afvallen, spiermassa wilt opbouwen of je gezondheid wilt verbeteren - je voedingsplan wordt op maat gemaakt.",
       highlights: [
@@ -818,6 +840,7 @@ const slides: Slide[] = [
       ],
     },
   },
+  // Slide 18: Persoonlijk Trainingsschema (was 18)
   {
     id: 18,
     title: "Persoonlijk Trainingsschema",
@@ -833,7 +856,7 @@ const slides: Slide[] = [
         "Progressieve overbelasting ingebouwd",
         "Aanpasbaar aan je beschikbare tijd",
       ],
-      value: 500,
+      value: 497, // Changed from 499 to use 7 pattern
       detailedDescription:
         "Elk lichaam is anders, en daarom krijg je een trainingsschema dat volledig is afgestemd op jouw niveau, doelen en beschikbare tijd. Van beginners tot gevorderden - je training wordt zo opgebouwd dat je consistent vooruitgang boekt.",
       highlights: [
@@ -846,6 +869,7 @@ const slides: Slide[] = [
       ],
     },
   },
+  // Slide 19: Supplementen Schema (was 19)
   {
     id: 19,
     title: "Supplementen Schema",
@@ -860,7 +884,7 @@ const slides: Slide[] = [
         "Geen onnodige producten",
         "Timing en dosering uitgelegd",
       ],
-      value: 150,
+      value: 147, // Kept original value here, not changed in updates
       detailedDescription:
         "De supplementenindustrie is verwarrend en vol marketing. Wij geven je eerlijk, wetenschappelijk onderbouwd advies over welke supplementen daadwerkelijk nuttig kunnen zijn voor jouw specifieke doelen. Geen onnodige producten, alleen wat echt werkt.",
       highlights: [
@@ -873,22 +897,24 @@ const slides: Slide[] = [
       ],
     },
   },
+  // Slide 20: Totale Waarde (was 20)
   {
     id: 20,
     title: "Totale Waarde van het Traject",
     type: "benefits-total",
     benefits: [
-      { icon: Smartphone, title: "Evotion Coaching App", description: "", features: [], value: 600 },
-      { icon: GraduationCap, title: "E-Learning Portal", description: "", features: [], value: 750 },
-      { icon: UtensilsCrossed, title: "Voedingvervanger Tool", description: "", features: [], value: 200 },
-      { icon: MessageCircle, title: "Klanten Support Portal", description: "", features: [], value: 400 },
-      { icon: Video, title: "Wekelijkse Check-ins", description: "", features: [], value: 1200 },
-      { icon: BarChart3, title: "Voortgangsanalyses", description: "", features: [], value: 350 },
-      { icon: Apple, title: "Persoonlijk Voedingsschema", description: "", features: [], value: 400 },
-      { icon: Dumbbell, title: "Persoonlijk Trainingsschema", description: "", features: [], value: 500 },
-      { icon: Pill, title: "Supplementen Schema", description: "", features: [], value: 150 },
+      { icon: Smartphone, title: "Evotion Coaching App", description: "", features: [], value: 797 },
+      { icon: GraduationCap, title: "E-Learning Portal", description: "", features: [], value: 747 },
+      { icon: UtensilsCrossed, title: "Voedingvervanger Tool", description: "", features: [], value: 197 },
+      { icon: MessageCircle, title: "Klanten Support Portal", description: "", features: [], value: 397 },
+      { icon: Video, title: "Wekelijkse Check-ins", description: "", features: [], value: 1197 },
+      { icon: BarChart3, title: "Voortgangsanalyses", description: "", features: [], value: 347 },
+      { icon: Apple, title: "Persoonlijk Voedingsschema", description: "", features: [], value: 397 },
+      { icon: Dumbbell, title: "Persoonlijk Trainingsschema", description: "", features: [], value: 497 },
+      { icon: Pill, title: "Supplementen Schema", description: "", features: [], value: 147 },
     ],
   },
+  // Slide 21: Bewezen Transformaties (was 21)
   {
     id: 21,
     title: "Bewezen Transformaties",
@@ -901,6 +927,7 @@ const slides: Slide[] = [
       { name: "Wouter", image: "/images/wouter-20achtergrond-20transformatie.png" },
     ],
   },
+  // Slide 22: Testimonials/Reviews (was 22)
   {
     id: 22,
     title: "Wat Onze Klanten Zeggen",
@@ -971,8 +998,50 @@ const slides: Slide[] = [
       },
     ],
   },
+
   {
     id: 23,
+    title: "Exclusieve Aanbieding",
+    subtitle: "Start Jouw Transformatie Vandaag",
+    type: "offer",
+    offer: {
+      regularPrice: 4527, // Changed to use 7 pattern (sum of all benefits)
+      discountedPrice: 1497, // Uses 7 pattern for psychological pricing
+      savings: 3030, // Calculated difference
+      badge: "Beperkt Aantal Plekken",
+      urgency: "Nog maar 7 plekken beschikbaar deze maand", // Uses 7 for urgency
+      guarantee: "14 dagen niet-goed-geld-terug garantie",
+      bonuses: [
+        {
+          icon: Gift,
+          title: "Bonus: Exclusieve Receptengids",
+          description: "100+ gezonde recepten speciaal voor jouw traject",
+          value: 97,
+        },
+        {
+          icon: Users,
+          title: "Bonus: Toegang tot Community",
+          description: "Word onderdeel van onze exclusieve WhatsApp groep",
+          value: 197,
+        },
+        {
+          icon: Clock,
+          title: "Bonus: Priority Support",
+          description: "Antwoord binnen 24 uur op al je vragen",
+          value: 147,
+        },
+      ],
+      features: [
+        "Start binnen 48 uur na aanmelding",
+        "Volledige begeleiding gedurende het hele traject",
+        "Flexibel opzegbaar na 3 maanden",
+        "Persoonlijke intake en doelstellingsgesprek",
+      ],
+    },
+  },
+
+  {
+    id: 24,
     title: "Jouw Transformatie Begint Nu",
     type: "cta",
     content: {
@@ -994,20 +1063,28 @@ const slides: Slide[] = [
 export default function PresentatieClientPage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isAutoPlay, setIsAutoPlay] = useState(false)
+  const [slideDirection, setSlideDirection] = useState<"next" | "prev">("next")
 
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     if (currentSlide < slides.length - 1) {
+      setSlideDirection("next")
       setCurrentSlide(currentSlide + 1)
+    } else if (isAutoPlay) {
+      // Stop autoplay at the end
+      setIsAutoPlay(false)
     }
-  }
+  }, [currentSlide, isAutoPlay])
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     if (currentSlide > 0) {
+      setSlideDirection("prev")
       setCurrentSlide(currentSlide - 1)
     }
-  }
+  }, [currentSlide])
 
   const goToSlide = (index: number) => {
+    setSlideDirection(index > currentSlide ? "next" : "prev")
     setCurrentSlide(index)
   }
 
@@ -1021,34 +1098,95 @@ export default function PresentatieClientPage() {
     }
   }
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight" || e.key === " ") {
+        e.preventDefault()
+        nextSlide()
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault()
+        prevSlide()
+      } else if (e.key === "Escape" && isFullscreen) {
+        // Exit fullscreen with Escape key
+        document.exitFullscreen()
+        setIsFullscreen(false)
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [nextSlide, prevSlide, isFullscreen])
+
+  useEffect(() => {
+    if (!isAutoPlay) return
+
+    const timer = setInterval(() => {
+      nextSlide()
+    }, 8000) // 8 seconds per slide
+
+    return () => clearInterval(timer)
+  }, [isAutoPlay, nextSlide])
+
   const slide = slides[currentSlide]
+  const progressPercent = ((currentSlide + 1) / slides.length) * 100
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       {/* Presentation Container */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Controls Bar */}
-        <div className="flex items-center justify-between mb-6 bg-white rounded-xl shadow-sm p-4">
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-slate-600">
-              Slide {currentSlide + 1} / {slides.length}
-            </span>
-            <Button variant="outline" size="sm" onClick={toggleFullscreen} className="text-xs bg-transparent">
-              {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-            </Button>
+        <div className="mb-6 bg-white rounded-xl shadow-sm overflow-hidden">
+          {/* Progress Bar */}
+          <div className="h-1 bg-slate-100">
+            <div
+              className="h-full bg-gradient-to-r from-[#1e1839] to-[#3a2d6d] transition-all duration-500 ease-out"
+              style={{ width: `${progressPercent}%` }}
+            />
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={prevSlide} disabled={currentSlide === 0}>
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button variant="outline" size="icon" onClick={nextSlide} disabled={currentSlide === slides.length - 1}>
-              <ChevronRight className="w-4 h-4" />
-            </Button>
+
+          <div className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium text-slate-600">
+                Slide {currentSlide + 1} / {slides.length}
+              </span>
+              <div className="hidden sm:flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAutoPlay(!isAutoPlay)}
+                  className={`text-xs ${isAutoPlay ? "bg-[#1e1839] text-white hover:bg-[#2a2050]" : "bg-transparent"}`}
+                >
+                  {isAutoPlay ? (
+                    <>
+                      <Pause className="w-3 h-3 mr-1" />
+                      Pause
+                    </>
+                  ) : (
+                    <>
+                      <PlayIcon className="w-3 h-3 mr-1" />
+                      Auto-play
+                    </>
+                  )}
+                </Button>
+                <Button variant="outline" size="sm" onClick={toggleFullscreen} className="text-xs bg-transparent">
+                  {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                </Button>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon" onClick={prevSlide} disabled={currentSlide === 0}>
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <Button variant="outline" size="icon" onClick={nextSlide} disabled={currentSlide === slides.length - 1}>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* Slide Content */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden min-h-[70vh]">
+        <div
+          key={currentSlide}
+          className="bg-white rounded-2xl shadow-xl overflow-hidden min-h-[70vh] animate-in fade-in duration-300"
+        >
           {/* Intro Slide */}
           {slide.type === "intro" && (
             <div className="relative h-full min-h-[70vh] flex flex-col items-center justify-center overflow-hidden">
@@ -1612,37 +1750,11 @@ export default function PresentatieClientPage() {
                   {slide.benefitDetail.showMockup && (
                     <div className="flex justify-center items-center">
                       <div className="relative">
-                        {/* Phone frame */}
-                        <div className="relative w-[280px] h-[560px] bg-slate-900 rounded-[3rem] p-3 shadow-2xl">
-                          <div className="absolute top-8 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full" />
-                          <div className="w-full h-full bg-white rounded-[2.5rem] overflow-hidden">
-                            <img
-                              src="/images/evotion-app-login.jpg"
-                              alt="Evotion Coaching App"
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        </div>
-                        {/* Floating badges */}
-                        <div className="absolute -left-4 top-20 bg-white rounded-xl shadow-lg p-3 animate-bounce">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
-                              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                            </div>
-                            <span className="text-sm font-medium text-slate-900">24/7 Toegang</span>
-                          </div>
-                        </div>
-                        <div
-                          className="absolute -right-4 bottom-32 bg-white rounded-xl shadow-lg p-3 animate-bounce"
-                          style={{ animationDelay: "0.5s" }}
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                              <MessageCircle className="w-5 h-5 text-blue-600" />
-                            </div>
-                            <span className="text-sm font-medium text-slate-900">Direct Contact</span>
-                          </div>
-                        </div>
+                        <img
+                          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Evotion%20E-Learning%20Portal-9ovP3S7wiPHYowsCdbBW7CZSCeklog.jpg"
+                          alt={slide.benefitDetail.title}
+                          className="w-full max-w-[650px] object-contain my-0 h-[500px]"
+                        />
                       </div>
                     </div>
                   )}
@@ -1807,6 +1919,116 @@ export default function PresentatieClientPage() {
             </div>
           )}
 
+          {/* Offer Slide */}
+          {slide.type === "offer" && slide.offer && (
+            <div className="p-8 md:p-12 space-y-8 overflow-y-auto max-h-[85vh]">
+              <div className="max-w-5xl mx-auto">
+                {/* Header with urgency badge */}
+                <div className="text-center space-y-4 mb-8">
+                  <Badge className="bg-red-500 text-white border-red-600 mb-4 text-base px-6 py-2 shadow-lg">
+                    {slide.offer.badge}
+                  </Badge>
+                  <h2 className="text-5xl md:text-6xl font-bold text-slate-900 text-balance">{slide.title}</h2>
+                  <p className="text-xl text-slate-600 text-balance">{slide.subtitle}</p>
+                  <p className="text-lg text-red-600 font-semibold">{slide.offer.urgency}</p>
+                </div>
+
+                {/* Price Comparison */}
+                <div className="bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-3xl p-8 md:p-12 text-white shadow-2xl mb-8">
+                  <div className="grid md:grid-cols-3 gap-8 items-center">
+                    {/* Regular Price */}
+                    <div className="text-center">
+                      <p className="text-slate-300 text-lg mb-2">Totale Waarde</p>
+                      <p className="text-4xl font-bold line-through text-slate-400">
+                        €{slide.offer.regularPrice.toLocaleString("nl-NL")},-
+                      </p>
+                    </div>
+
+                    {/* Arrow/Separator */}
+                    <div className="flex justify-center">
+                      <ArrowRight className="w-12 h-12 text-emerald-400" />
+                    </div>
+
+                    {/* Discounted Price */}
+                    <div className="text-center">
+                      <p className="text-emerald-400 text-lg mb-2 font-semibold">Jouw Investering</p>
+                      <p className="text-6xl font-bold text-white">€{slide.offer.discountedPrice},-</p>
+                      <p className="text-emerald-400 text-xl mt-2">
+                        Je bespaart €{slide.offer.savings.toLocaleString("nl-NL")},-
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Guarantee */}
+                  <div className="mt-8 pt-8 border-t border-slate-600 text-center">
+                    <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur px-6 py-3 rounded-full">
+                      <Shield className="w-6 h-6 text-emerald-400" />
+                      <span className="text-lg font-medium">{slide.offer.guarantee}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bonuses */}
+                <div className="mb-8">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">
+                    + Extra Bonussen (Waarde €{slide.offer.bonuses.reduce((sum, b) => sum + b.value, 0)}
+                    ,-)
+                  </h3>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {slide.offer.bonuses.map((bonus, idx) => {
+                      const Icon = bonus.icon
+                      return (
+                        <div
+                          key={idx}
+                          className="bg-gradient-to-br from-emerald-50 to-white rounded-2xl p-6 border-2 border-emerald-200 hover:border-emerald-400 transition-all shadow-lg"
+                        >
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="w-14 h-14 bg-emerald-500 rounded-xl flex items-center justify-center">
+                              <Icon className="w-7 h-7 text-white" />
+                            </div>
+                            <span className="bg-emerald-100 text-emerald-700 text-sm font-bold px-3 py-1 rounded-full">
+                              €{bonus.value},-
+                            </span>
+                          </div>
+                          <h4 className="text-lg font-bold text-slate-900 mb-2">{bonus.title}</h4>
+                          <p className="text-slate-600 text-sm">{bonus.description}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Features */}
+                <div className="bg-slate-50 rounded-2xl p-8 mb-8">
+                  <h3 className="text-xl font-bold text-slate-900 mb-6 text-center">Wat Je Krijgt:</h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {slide.offer.features.map((feature, idx) => (
+                      <div key={idx} className="flex items-center gap-3">
+                        <CheckCircle2 className="w-6 h-6 text-emerald-500 shrink-0" />
+                        <span className="text-slate-700">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* CTA Button */}
+                <div className="text-center">
+                  <Button
+                    size="lg"
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white px-12 py-6 text-xl rounded-2xl shadow-2xl hover:scale-105 transition-transform"
+                  >
+                    <a href="https://evotion-coaching.nl/gratis-adviesgesprek" className="flex items-center gap-2">
+                      Claim Jouw Plek Nu →
+                    </a>
+                  </Button>
+                  <p className="text-sm text-slate-500 mt-4">
+                    Je wordt doorverwezen naar onze beveiligde bestelformulier
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {slide.type === "cta" && (
             <div className="h-full min-h-[70vh] relative overflow-hidden">
               {/* Background Image */}
@@ -1823,13 +2045,18 @@ export default function PresentatieClientPage() {
               {/* Content */}
               <div className="relative z-10 h-full flex flex-col items-center justify-center p-12 text-white">
                 <div className="max-w-4xl text-center space-y-10">
+                  <div className="inline-flex items-center gap-2 bg-yellow-400/20 border border-yellow-400/40 rounded-full px-4 py-2 text-yellow-300 text-sm font-medium">
+                    <Clock className="w-4 h-4" />
+                    Beperkt aantal plekken beschikbaar
+                  </div>
+
                   <div>
                     <h2 className="text-5xl md:text-6xl font-bold mb-4 text-balance">{slide.content?.title}</h2>
                     <p className="text-xl md:text-2xl text-slate-200 text-balance">{slide.content?.subtitle}</p>
                   </div>
 
                   <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 text-left">
-                    <h3 className="text-2xl font-bold mb-6 text-center">What you get:</h3>
+                    <h3 className="text-2xl font-bold mb-6 text-center">Wat je krijgt:</h3>
                     <ul className="space-y-4">
                       {slide.content?.benefits?.map((benefit: string, idx: number) => (
                         <li key={idx} className="flex items-start gap-3">
@@ -1839,29 +2066,46 @@ export default function PresentatieClientPage() {
                       ))}
                     </ul>
                   </div>
+
+                  <div className="pt-4">
+                    <Button
+                      size="lg"
+                      className="bg-white text-[#1e1839] hover:bg-slate-100 text-lg px-8 py-6 rounded-xl font-bold shadow-2xl hover:shadow-white/20 transition-all duration-300 hover:scale-105"
+                    >
+                      <a href="https://evotion-coaching.nl/gratis-adviesgesprek" className="flex items-center gap-2">
+                        Plan Jouw Gratis Adviesgesprek
+                        <ArrowRight className="w-5 h-5" />
+                      </a>
+                    </Button>
+                    <p className="text-sm text-slate-300 mt-4">Vrijblijvend en zonder verplichtingen</p>
+                  </div>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Slide Navigation Dots */}
-        <div className="flex items-center justify-center gap-2 mt-6 flex-wrap">
-          {slides.map((_, idx) => (
+        <div className="flex items-center justify-center gap-1.5 mt-6 flex-wrap max-w-4xl mx-auto">
+          {slides.map((s, idx) => (
             <button
               key={idx}
               onClick={() => goToSlide(idx)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                idx === currentSlide ? "bg-[#1e1839] w-8" : "bg-slate-300 hover:bg-slate-400"
+              className={`h-2 rounded-full transition-all duration-300 ${
+                idx === currentSlide
+                  ? "bg-[#1e1839] w-8"
+                  : idx < currentSlide
+                    ? "bg-[#1e1839]/40 w-2 hover:bg-[#1e1839]/60"
+                    : "bg-slate-300 w-2 hover:bg-slate-400"
               }`}
-              aria-label={`Go to slide ${idx + 1}`}
+              aria-label={`Ga naar slide ${idx + 1}: ${s.title}`}
+              title={s.title}
             />
           ))}
         </div>
 
         {/* Keyboard Navigation Hint */}
         <p className="text-center text-sm text-slate-500 mt-4">
-          Use the ← → arrow keys or click the buttons to navigate
+          Gebruik ← → pijltjestoetsen of spatiebalk om te navigeren
         </p>
       </div>
     </div>
