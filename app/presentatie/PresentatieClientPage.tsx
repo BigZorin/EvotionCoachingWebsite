@@ -709,7 +709,7 @@ const slides: Slide[] = [
         "Rekening houden met allergieën en voorkeuren",
         "Database met honderden voedingsmiddelen",
       ],
-      value: 197, // Kept original value here, not changed in updates
+      value: 197,
       detailedDescription:
         "Beu van steeds dezelfde maaltijden? Met de Voedingvervanger Tool kun je in seconden alternatieven vinden die perfect passen bij je macro's. Of je nu een allergie hebt, bepaalde voedingsmiddelen niet lekker vindt, of gewoon wat variatie wilt - deze tool maakt het makkelijk.",
       highlights: [
@@ -721,6 +721,8 @@ const slides: Slide[] = [
         "Maak variatie in je maaltijden zonder extra rekenwerk",
       ],
       link: "https://voedingvervanger.evotion-coaching.nl",
+      showMockup: true,
+      mockupImage: "/images/voedingvervanger-visual.jpg",
     },
   },
   // Slide 14: Klanten Support Portal (was 14)
@@ -739,7 +741,7 @@ const slides: Slide[] = [
         "Toegang tot eerdere Q&A's",
         "Snelle reactietijd van je coach",
       ],
-      value: 397, // Changed from 400 to use 7 pattern
+      value: 397,
       detailedDescription:
         "Heb je een vraag? Via het Klanten Support Portal krijg je persoonlijke video-antwoorden van je coach. Geen standaard tekst-replies, maar echte uitleg met voorbeelden en demonstraties. Plus toegang tot een uitgebreide bibliotheek van eerder gestelde vragen.",
       highlights: [
@@ -751,6 +753,8 @@ const slides: Slide[] = [
         "Snelle reactietijd, meestal binnen 24-48 uur",
       ],
       link: "https://klanten.evotion-coaching.nl",
+      showMockup: true,
+      mockupImage: "/images/support-portal-visual.jpg",
     },
   },
   // Slide 15: Wekelijkse Check-ins (was 15)
@@ -769,7 +773,7 @@ const slides: Slide[] = [
         "Aanpassingen aan programma indien nodig",
         "Motivatie en accountability",
       ],
-      value: 1197, // Kept original value here, not changed in updates
+      value: 1197,
       detailedDescription:
         "De wekelijkse check-ins zijn het fundament van jouw succes. Elke week nemen we samen je voortgang door, bespreken we uitdagingen en vieren we successen. Dit is waar de magie gebeurt - persoonlijke aandacht en bijsturing op het moment dat je het nodig hebt.",
       highlights: [
@@ -780,6 +784,8 @@ const slides: Slide[] = [
         "Vieren van kleine en grote overwinningen",
         "Ruimte voor al je vragen en zorgen",
       ],
+      showMockup: true,
+      mockupImage: "/images/check-ins-visual.jpg",
     },
   },
   // Slide 16: Voortgangsanalyses (was 16)
@@ -798,17 +804,19 @@ const slides: Slide[] = [
         "Voor-en-na vergelijkingen",
         "Data-gedreven bijsturingen",
       ],
-      value: 347, // Kept original value here, not changed in updates
+      value: 347,
       detailedDescription:
         "Wat niet gemeten wordt, kan niet verbeterd worden. Met onze uitgebreide voortgangsanalyses heb je altijd inzicht in hoe je ervoor staat. Van lichaamssamenstelling tot krachtprestaties - alles wordt bijgehouden en gevisualiseerd.",
       highlights: [
         "Wekelijkse weging en omvangmetingen",
         "Foto-vergelijkingen voor visuele voortgang",
         "Grafieken en trends van al je data",
-        "Analyse vaniteitsvolume en intensiteit",
+        "Analyse van trainingsvolume en intensiteit",
         "Voedingscompliance tracking",
         "Maandelijkse overzichten van je transformatie",
       ],
+      showMockup: true,
+      mockupImage: "/images/progress-analytics-visual.jpg",
     },
   },
   // Slide 17: Persoonlijk Voedingsschema (was 17)
@@ -823,11 +831,11 @@ const slides: Slide[] = [
         "Een volledig op maat gemaakt voedingsplan dat is afgestemd op jouw doelen, voorkeuren en levensstijl.",
       features: [
         "Op maat berekende macro's en calorieën",
-        "Rekening met allergieën en voorkeuren",
+        "Rekening houden met allergieën en voorkeuren",
         "Flexibele maaltijdopties",
         "Aanpasbaar aan je levensstijl",
       ],
-      value: 397, // Kept original value here, not changed in updates
+      value: 397,
       detailedDescription:
         "Voeding is de sleutel tot jouw transformatie. Daarom krijg je een volledig gepersonaliseerd voedingsschema dat perfect aansluit bij jouw doelen. Of je nu wilt afvallen, spiermassa wilt opbouwen of je gezondheid wilt verbeteren - je voedingsplan wordt op maat gemaakt.",
       highlights: [
@@ -838,6 +846,8 @@ const slides: Slide[] = [
         "Regelmatige aanpassingen op basis van je voortgang",
         "Ruimte voor sociale momenten en flexibiliteit",
       ],
+      showMockup: true,
+      mockupImage: "/images/nutrition-plan-visual.jpg",
     },
   },
   // Slide 18: Persoonlijk Trainingsschema (was 18)
@@ -856,7 +866,7 @@ const slides: Slide[] = [
         "Progressieve overbelasting ingebouwd",
         "Aanpasbaar aan je beschikbare tijd",
       ],
-      value: 497, // Changed from 499 to use 7 pattern
+      value: 497,
       detailedDescription:
         "Elk lichaam is anders, en daarom krijg je een trainingsschema dat volledig is afgestemd op jouw niveau, doelen en beschikbare tijd. Van beginners tot gevorderden - je training wordt zo opgebouwd dat je consistent vooruitgang boekt.",
       highlights: [
@@ -867,6 +877,8 @@ const slides: Slide[] = [
         "Alternatieve oefeningen voor thuistraining of sportschool",
         "Regelmatige aanpassingen op basis van je voortgang en feedback",
       ],
+      showMockup: true,
+      mockupImage: "/images/training-plan-visual.jpg",
     },
   },
   // Slide 19: Supplementen Schema (was 19)
@@ -884,7 +896,7 @@ const slides: Slide[] = [
         "Geen onnodige producten",
         "Timing en dosering uitgelegd",
       ],
-      value: 147, // Kept original value here, not changed in updates
+      value: 147,
       detailedDescription:
         "De supplementenindustrie is verwarrend en vol marketing. Wij geven je eerlijk, wetenschappelijk onderbouwd advies over welke supplementen daadwerkelijk nuttig kunnen zijn voor jouw specifieke doelen. Geen onnodige producten, alleen wat echt werkt.",
       highlights: [
@@ -895,6 +907,8 @@ const slides: Slide[] = [
         "Geen pushen van onnodige of dure producten",
         "Advies over betrouwbare merken en leveranciers",
       ],
+      showMockup: true,
+      mockupImage: "/images/supplements-plan-visual.jpg",
     },
   },
   // Slide 20: Totale Waarde (was 20)
@@ -1034,7 +1048,7 @@ const slides: Slide[] = [
       features: [
         "Start binnen 48 uur na aanmelding",
         "Volledige begeleiding gedurende het hele traject",
-        "Flexibel opzegbaar na 3 maanden",
+        "Flexibel opzegbaar na 6 maanden",
         "Persoonlijke intake en doelstellingsgesprek",
       ],
     },
@@ -1751,9 +1765,9 @@ export default function PresentatieClientPage() {
                     <div className="flex justify-center items-center">
                       <div className="relative">
                         <img
-                          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Evotion%20E-Learning%20Portal-9ovP3S7wiPHYowsCdbBW7CZSCeklog.jpg"
+                          src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
                           alt={slide.benefitDetail.title}
-                          className="w-full max-w-[650px] object-contain my-0 h-[500px]"
+                          className="w-full max-w-[650px] object-contain py-0 h-[500px] my-0"
                         />
                       </div>
                     </div>
@@ -1925,9 +1939,7 @@ export default function PresentatieClientPage() {
               <div className="max-w-5xl mx-auto">
                 {/* Header with urgency badge */}
                 <div className="text-center space-y-4 mb-8">
-                  <Badge className="bg-red-500 text-white border-red-600 mb-4 text-base px-6 py-2 shadow-lg">
-                    {slide.offer.badge}
-                  </Badge>
+                  
                   <h2 className="text-5xl md:text-6xl font-bold text-slate-900 text-balance">{slide.title}</h2>
                   <p className="text-xl text-slate-600 text-balance">{slide.subtitle}</p>
                   <p className="text-lg text-red-600 font-semibold">{slide.offer.urgency}</p>
@@ -1960,42 +1972,13 @@ export default function PresentatieClientPage() {
                   </div>
 
                   {/* Guarantee */}
-                  <div className="mt-8 pt-8 border-t border-slate-600 text-center">
-                    <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur px-6 py-3 rounded-full">
-                      <Shield className="w-6 h-6 text-emerald-400" />
-                      <span className="text-lg font-medium">{slide.offer.guarantee}</span>
-                    </div>
-                  </div>
+                  
                 </div>
 
                 {/* Bonuses */}
                 <div className="mb-8">
-                  <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">
-                    + Extra Bonussen (Waarde €{slide.offer.bonuses.reduce((sum, b) => sum + b.value, 0)}
-                    ,-)
-                  </h3>
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {slide.offer.bonuses.map((bonus, idx) => {
-                      const Icon = bonus.icon
-                      return (
-                        <div
-                          key={idx}
-                          className="bg-gradient-to-br from-emerald-50 to-white rounded-2xl p-6 border-2 border-emerald-200 hover:border-emerald-400 transition-all shadow-lg"
-                        >
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="w-14 h-14 bg-emerald-500 rounded-xl flex items-center justify-center">
-                              <Icon className="w-7 h-7 text-white" />
-                            </div>
-                            <span className="bg-emerald-100 text-emerald-700 text-sm font-bold px-3 py-1 rounded-full">
-                              €{bonus.value},-
-                            </span>
-                          </div>
-                          <h4 className="text-lg font-bold text-slate-900 mb-2">{bonus.title}</h4>
-                          <p className="text-slate-600 text-sm">{bonus.description}</p>
-                        </div>
-                      )
-                    })}
-                  </div>
+                  
+                  
                 </div>
 
                 {/* Features */}
@@ -2017,7 +2000,7 @@ export default function PresentatieClientPage() {
                     size="lg"
                     className="bg-emerald-500 hover:bg-emerald-600 text-white px-12 py-6 text-xl rounded-2xl shadow-2xl hover:scale-105 transition-transform"
                   >
-                    <a href="https://evotion-coaching.nl/gratis-adviesgesprek" className="flex items-center gap-2">
+                    <a href="https://evotion-coaching.nl/martin-langenberg/martin" className="flex items-center gap-2">
                       Claim Jouw Plek Nu →
                     </a>
                   </Button>
