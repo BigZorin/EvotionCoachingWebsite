@@ -17,6 +17,7 @@ import {
   Calculator,
   Utensils,
   Monitor,
+  TrendingUp,
 } from "lucide-react"
 
 export function Header() {
@@ -66,7 +67,7 @@ export function Header() {
             <div className="flex items-center space-x-8">
               {/* Coaching Dropdown */}
               <div className="relative group">
-                <button className="text-gray-700 hover:text-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-primary/5 flex items-center gap-1">
+                <button className="text-gray-700 hover:text-evotion-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-evotion-primary/5 flex items-center gap-1">
                   Coaching
                   <ChevronDown className="w-4 h-4 group-hover:rotate-180 transition-transform duration-200" />
                 </button>
@@ -76,12 +77,12 @@ export function Header() {
                   <div className="p-2">
                     <Link
                       href="/personal-training"
-                      className={`block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium ${
-                        isActive("/personal-training") ? "bg-primary/5" : ""
+                      className={`block px-4 py-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 rounded-lg transition-colors font-medium ${
+                        isActive("/personal-training") ? "bg-evotion-primary/5" : ""
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Dumbbell className="w-4 h-4 text-primary" />
+                        <Dumbbell className="w-4 h-4 text-evotion-primary" />
                         <div>
                           <div className="font-semibold">Personal Training</div>
                           <div className="text-xs text-gray-500">1-op-1 begeleiding</div>
@@ -90,12 +91,12 @@ export function Header() {
                     </Link>
                     <Link
                       href="/online-coaching"
-                      className={`block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium ${
-                        isActive("/online-coaching") ? "bg-primary/5" : ""
+                      className={`block px-4 py-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 rounded-lg transition-colors font-medium ${
+                        isActive("/online-coaching") ? "bg-evotion-primary/5" : ""
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Monitor className="w-4 h-4 text-primary" />
+                        <Monitor className="w-4 h-4 text-evotion-primary" />
                         <div>
                           <div className="font-semibold">Online Begeleiding</div>
                           <div className="text-xs text-gray-500">Flexibele coaching op afstand</div>
@@ -108,7 +109,7 @@ export function Header() {
 
               {/* OverOns Dropdown */}
               <div className="relative group">
-                <button className="text-gray-700 hover:text-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-primary/5 flex items-center gap-1">
+                <button className="text-gray-700 hover:text-evotion-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-evotion-primary/5 flex items-center gap-1">
                   Over Ons
                   <ChevronDown className="w-4 h-4 group-hover:rotate-180 transition-transform duration-200" />
                 </button>
@@ -118,12 +119,12 @@ export function Header() {
                   <div className="p-2">
                     <Link
                       href="/over-ons/visie-missie"
-                      className={`block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium ${
-                        isActive("/over-ons/visie-missie") ? "bg-primary/5" : ""
+                      className={`block px-4 py-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 rounded-lg transition-colors font-medium ${
+                        isActive("/over-ons/visie-missie") ? "bg-evotion-primary/5" : ""
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Target className="w-4 h-4 text-primary" />
+                        <Target className="w-4 h-4 text-evotion-primary" />
                         <div>
                           <div className="font-semibold">Visie & Missie</div>
                           <div className="text-xs text-gray-500">Onze doelstellingen</div>
@@ -132,12 +133,12 @@ export function Header() {
                     </Link>
                     <Link
                       href="/over-ons/kernwaarden"
-                      className={`block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium ${
-                        isActive("/over-ons/kernwaarden") ? "bg-primary/5" : ""
+                      className={`block px-4 py-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 rounded-lg transition-colors font-medium ${
+                        isActive("/over-ons/kernwaarden") ? "bg-evotion-primary/5" : ""
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <BookOpen className="w-4 h-4 text-primary" />
+                        <BookOpen className="w-4 h-4 text-evotion-primary" />
                         <div>
                           <div className="font-semibold">Kernwaarden</div>
                           <div className="text-xs text-gray-500">Waar wij voor staan</div>
@@ -146,12 +147,12 @@ export function Header() {
                     </Link>
                     <Link
                       href="/over-ons/coaches"
-                      className={`block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium ${
-                        isActive("/over-ons/coaches") ? "bg-primary/5" : ""
+                      className={`block px-4 py-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 rounded-lg transition-colors font-medium ${
+                        isActive("/over-ons/coaches") ? "bg-evotion-primary/5" : ""
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Users2 className="w-4 h-4 text-primary" />
+                        <Users2 className="w-4 h-4 text-evotion-primary" />
                         <div>
                           <div className="font-semibold">Coaches</div>
                           <div className="text-xs text-gray-500">Ons team</div>
@@ -160,12 +161,12 @@ export function Header() {
                     </Link>
                     <Link
                       href="/over-ons/evotion-app"
-                      className={`block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium ${
-                        isActive("/over-ons/evotion-app") ? "bg-primary/5" : ""
+                      className={`block px-4 py-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 rounded-lg transition-colors font-medium ${
+                        isActive("/over-ons/evotion-app") ? "bg-evotion-primary/5" : ""
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Smartphone className="w-4 h-4 text-primary" />
+                        <Smartphone className="w-4 h-4 text-evotion-primary" />
                         <div>
                           <div className="font-semibold">Evotion Coaching App</div>
                           <div className="text-xs text-gray-500">Onze technologie</div>
@@ -178,7 +179,7 @@ export function Header() {
 
               {/* Gratis Dropdown */}
               <div className="relative group">
-                <button className="text-gray-700 hover:text-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-primary/5 flex items-center gap-1">
+                <button className="text-gray-700 hover:text-evotion-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-evotion-primary/5 flex items-center gap-1">
                   Gratis
                   <ChevronDown className="w-4 h-4 group-hover:rotate-180 transition-transform duration-200" />
                 </button>
@@ -188,12 +189,12 @@ export function Header() {
                   <div className="p-2">
                     <Link
                       href="/blog"
-                      className={`block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium ${
-                        isActive("/blog") ? "bg-primary/5" : ""
+                      className={`block px-4 py-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 rounded-lg transition-colors font-medium ${
+                        isActive("/blog") ? "bg-evotion-primary/5" : ""
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <BookOpen className="w-4 h-4 text-primary" />
+                        <BookOpen className="w-4 h-4 text-evotion-primary" />
                         <div>
                           <div className="font-semibold">Blog</div>
                           <div className="text-xs text-gray-500">Gratis fitness & voeding tips</div>
@@ -204,10 +205,10 @@ export function Header() {
                       href="https://voedingvervanger.evotion-coaching.nl/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium"
+                      className="block px-4 py-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 rounded-lg transition-colors font-medium"
                     >
                       <div className="flex items-center gap-3">
-                        <Utensils className="w-4 h-4 text-primary" />
+                        <Utensils className="w-4 h-4 text-evotion-primary" />
                         <div className="flex-1">
                           <div className="font-semibold">Voedingsvervanger</div>
                           <div className="text-xs text-gray-500">Gratis tool</div>
@@ -216,12 +217,12 @@ export function Header() {
                     </a>
                     <Link
                       href="/gratis/caloriebehoefte"
-                      className={`block px-4 py-3 text-gray-700 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors font-medium ${
-                        isActive("/gratis/caloriebehoefte") ? "bg-primary/5" : ""
+                      className={`block px-4 py-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 rounded-lg transition-colors font-medium ${
+                        isActive("/gratis/caloriebehoefte") ? "bg-evotion-primary/5" : ""
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Calculator className="w-4 h-4 text-primary" />
+                        <Calculator className="w-4 h-4 text-evotion-primary" />
                         <div>
                           <div className="font-semibold">Caloriebehoefte Berekenen</div>
                           <div className="text-xs text-gray-500">Gratis calculator</div>
@@ -234,13 +235,13 @@ export function Header() {
 
               <Link
                 href="/resultaten"
-                className={`text-gray-700 hover:text-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-primary/5 ${isActive("/resultaten") ? "text-primary bg-primary/5" : ""}`}
+                className={`text-gray-700 hover:text-evotion-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-evotion-primary/5 ${isActive("/resultaten") ? "text-evotion-primary bg-evotion-primary/5" : ""}`}
               >
                 Resultaten
               </Link>
               <Link
                 href="/contact"
-                className={`text-gray-700 hover:text-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-primary/5 ${isActive("/contact") ? "text-primary bg-primary/5" : ""}`}
+                className={`text-gray-700 hover:text-evotion-primary transition-colors font-medium text-base px-3 py-2 rounded-lg hover:bg-evotion-primary/5 ${isActive("/contact") ? "text-evotion-primary bg-evotion-primary/5" : ""}`}
               >
                 Contact
               </Link>
@@ -251,7 +252,7 @@ export function Header() {
           <div className="hidden lg:flex items-center space-x-3">
             <Button
               size="sm"
-              className="text-white hover:bg-primary/90 shadow-sm hover:shadow-md px-4 py-2 rounded-lg transition-all duration-200 bg-[rgba(30,24,57,1)]"
+              className="text-white hover:bg-evotion-primary/90 shadow-sm hover:shadow-md px-4 py-2 rounded-lg transition-all duration-200 bg-[rgba(30,24,57,1)]"
               asChild
             >
               <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
@@ -308,8 +309,8 @@ export function Header() {
                 {/* Home Link */}
                 <Link
                   href="/"
-                  className={`block text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 font-semibold text-base py-3.5 px-4 rounded-xl ${
-                    pathname === "/" ? "bg-primary/10 text-primary" : ""
+                  className={`block text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 transition-all duration-200 font-semibold text-base py-3.5 px-4 rounded-xl ${
+                    pathname === "/" ? "bg-evotion-primary/10 text-evotion-primary" : ""
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -319,13 +320,13 @@ export function Header() {
                 {/* Coaching Dropdown */}
                 <div className="py-1">
                   <button
-                    className="flex items-center justify-between w-full text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 font-semibold text-base py-3.5 px-4 rounded-xl"
+                    className="flex items-center justify-between w-full text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 transition-all duration-200 font-semibold text-base py-3.5 px-4 rounded-xl"
                     onClick={() => toggleMobileSubmenu("coaching")}
                   >
                     <span>Coaching</span>
                     <ChevronDown
                       className={`w-5 h-5 transition-transform duration-300 ${
-                        expandedMobileMenu === "coaching" ? "rotate-180 text-primary" : ""
+                        expandedMobileMenu === "coaching" ? "rotate-180 text-evotion-primary" : ""
                       }`}
                     />
                   </button>
@@ -338,13 +339,13 @@ export function Header() {
                     <div className="pl-3 pr-1 space-y-1 mt-1">
                       <Link
                         href="/personal-training"
-                        className={`flex items-center gap-3 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
-                          isActive("/personal-training") ? "bg-primary/10 text-primary" : ""
+                        className={`flex items-center gap-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
+                          isActive("/personal-training") ? "bg-evotion-primary/10 text-evotion-primary" : ""
                         }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <Dumbbell className="w-4 h-4 text-primary" />
+                        <div className="w-9 h-9 rounded-lg bg-evotion-primary/10 flex items-center justify-center shrink-0">
+                          <Dumbbell className="w-4 h-4 text-evotion-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-sm">Personal Training</div>
@@ -353,13 +354,13 @@ export function Header() {
                       </Link>
                       <Link
                         href="/online-coaching"
-                        className={`flex items-center gap-3 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
-                          isActive("/online-coaching") ? "bg-primary/10 text-primary" : ""
+                        className={`flex items-center gap-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
+                          isActive("/online-coaching") ? "bg-evotion-primary/10 text-evotion-primary" : ""
                         }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <Monitor className="w-4 h-4 text-primary" />
+                        <div className="w-9 h-9 rounded-lg bg-evotion-primary/10 flex items-center justify-center shrink-0">
+                          <TrendingUp className="w-4 h-4 text-evotion-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-sm">Online Begeleiding</div>
@@ -373,13 +374,13 @@ export function Header() {
                 {/* OverOns Dropdown */}
                 <div className="py-1">
                   <button
-                    className="flex items-center justify-between w-full text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 font-semibold text-base py-3.5 px-4 rounded-xl"
+                    className="flex items-center justify-between w-full text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 transition-all duration-200 font-semibold text-base py-3.5 px-4 rounded-xl"
                     onClick={() => toggleMobileSubmenu("over-ons")}
                   >
                     <span>Over Ons</span>
                     <ChevronDown
                       className={`w-5 h-5 transition-transform duration-300 ${
-                        expandedMobileMenu === "over-ons" ? "rotate-180 text-primary" : ""
+                        expandedMobileMenu === "over-ons" ? "rotate-180 text-evotion-primary" : ""
                       }`}
                     />
                   </button>
@@ -392,13 +393,13 @@ export function Header() {
                     <div className="pl-3 pr-1 space-y-1 mt-1">
                       <Link
                         href="/over-ons/visie-missie"
-                        className={`flex items-center gap-3 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
-                          isActive("/over-ons/visie-missie") ? "bg-primary/10 text-primary" : ""
+                        className={`flex items-center gap-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
+                          isActive("/over-ons/visie-missie") ? "bg-evotion-primary/10 text-evotion-primary" : ""
                         }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <Target className="w-4 h-4 text-primary" />
+                        <div className="w-9 h-9 rounded-lg bg-evotion-primary/10 flex items-center justify-center shrink-0">
+                          <Target className="w-4 h-4 text-evotion-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-sm">Visie & Missie</div>
@@ -407,13 +408,13 @@ export function Header() {
                       </Link>
                       <Link
                         href="/over-ons/kernwaarden"
-                        className={`flex items-center gap-3 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
-                          isActive("/over-ons/kernwaarden") ? "bg-primary/10 text-primary" : ""
+                        className={`flex items-center gap-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
+                          isActive("/over-ons/kernwaarden") ? "bg-evotion-primary/10 text-evotion-primary" : ""
                         }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <BookOpen className="w-4 h-4 text-primary" />
+                        <div className="w-9 h-9 rounded-lg bg-evotion-primary/10 flex items-center justify-center shrink-0">
+                          <BookOpen className="w-4 h-4 text-evotion-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-sm">Kernwaarden</div>
@@ -422,13 +423,13 @@ export function Header() {
                       </Link>
                       <Link
                         href="/over-ons/coaches"
-                        className={`flex items-center gap-3 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
-                          isActive("/over-ons/coaches") ? "bg-primary/10 text-primary" : ""
+                        className={`flex items-center gap-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
+                          isActive("/over-ons/coaches") ? "bg-evotion-primary/10 text-evotion-primary" : ""
                         }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <Users2 className="w-4 h-4 text-primary" />
+                        <div className="w-9 h-9 rounded-lg bg-evotion-primary/10 flex items-center justify-center shrink-0">
+                          <Users2 className="w-4 h-4 text-evotion-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-sm">Coaches</div>
@@ -437,13 +438,13 @@ export function Header() {
                       </Link>
                       <Link
                         href="/over-ons/evotion-app"
-                        className={`flex items-center gap-3 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
-                          isActive("/over-ons/evotion-app") ? "bg-primary/10 text-primary" : ""
+                        className={`flex items-center gap-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
+                          isActive("/over-ons/evotion-app") ? "bg-evotion-primary/10 text-evotion-primary" : ""
                         }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <Smartphone className="w-4 h-4 text-primary" />
+                        <div className="w-9 h-9 rounded-lg bg-evotion-primary/10 flex items-center justify-center shrink-0">
+                          <Smartphone className="w-4 h-4 text-evotion-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-sm">Evotion Coaching App</div>
@@ -457,13 +458,13 @@ export function Header() {
                 {/* Gratis Dropdown */}
                 <div className="py-1">
                   <button
-                    className="flex items-center justify-between w-full text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 font-semibold text-base py-3.5 px-4 rounded-xl"
+                    className="flex items-center justify-between w-full text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 transition-all duration-200 font-semibold text-base py-3.5 px-4 rounded-xl"
                     onClick={() => toggleMobileSubmenu("gratis")}
                   >
                     <span>Gratis</span>
                     <ChevronDown
                       className={`w-5 h-5 transition-transform duration-300 ${
-                        expandedMobileMenu === "gratis" ? "rotate-180 text-primary" : ""
+                        expandedMobileMenu === "gratis" ? "rotate-180 text-evotion-primary" : ""
                       }`}
                     />
                   </button>
@@ -476,13 +477,13 @@ export function Header() {
                     <div className="pl-3 pr-1 space-y-1 mt-1">
                       <Link
                         href="/blog"
-                        className={`flex items-center gap-3 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
-                          isActive("/blog") ? "bg-primary/10 text-primary" : ""
+                        className={`flex items-center gap-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
+                          isActive("/blog") ? "bg-evotion-primary/10 text-evotion-primary" : ""
                         }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <BookOpen className="w-4 h-4 text-primary" />
+                        <div className="w-9 h-9 rounded-lg bg-evotion-primary/10 flex items-center justify-center shrink-0">
+                          <BookOpen className="w-4 h-4 text-evotion-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-sm">Blog</div>
@@ -493,11 +494,11 @@ export function Header() {
                         href="https://voedingvervanger.evotion-coaching.nl/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 py-3 px-4 rounded-xl"
+                        className="flex items-center gap-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 transition-all duration-200 py-3 px-4 rounded-xl"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <Utensils className="w-4 h-4 text-primary" />
+                        <div className="w-9 h-9 rounded-lg bg-evotion-primary/10 flex items-center justify-center shrink-0">
+                          <Utensils className="w-4 h-4 text-evotion-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-sm">Voedingsvervanger</div>
@@ -506,13 +507,13 @@ export function Header() {
                       </a>
                       <Link
                         href="/gratis/caloriebehoefte"
-                        className={`flex items-center gap-3 text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
-                          isActive("/gratis/caloriebehoefte") ? "bg-primary/10 text-primary" : ""
+                        className={`flex items-center gap-3 text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 transition-all duration-200 py-3 px-4 rounded-xl ${
+                          isActive("/gratis/caloriebehoefte") ? "bg-evotion-primary/10 text-evotion-primary" : ""
                         }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <Calculator className="w-4 h-4 text-primary" />
+                        <div className="w-9 h-9 rounded-lg bg-evotion-primary/10 flex items-center justify-center shrink-0">
+                          <Calculator className="w-4 h-4 text-evotion-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-sm">Caloriebehoefte Berekenen</div>
@@ -526,8 +527,8 @@ export function Header() {
                 {/* Resultaten Link */}
                 <Link
                   href="/resultaten"
-                  className={`block text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 font-semibold text-base py-3.5 px-4 rounded-xl ${
-                    isActive("/resultaten") ? "bg-primary/10 text-primary" : ""
+                  className={`block text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 transition-all duration-200 font-semibold text-base py-3.5 px-4 rounded-xl ${
+                    isActive("/resultaten") ? "bg-evotion-primary/10 text-evotion-primary" : ""
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -537,8 +538,8 @@ export function Header() {
                 {/* Contact Link */}
                 <Link
                   href="/contact"
-                  className={`block text-gray-700 hover:text-primary hover:bg-primary/5 transition-all duration-200 font-semibold text-base py-3.5 px-4 rounded-xl ${
-                    isActive("/contact") ? "bg-primary/10 text-primary" : ""
+                  className={`block text-gray-700 hover:text-evotion-primary hover:bg-evotion-primary/5 transition-all duration-200 font-semibold text-base py-3.5 px-4 rounded-xl ${
+                    isActive("/contact") ? "bg-evotion-primary/10 text-evotion-primary" : ""
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -551,7 +552,7 @@ export function Header() {
             <div className="shrink-0 p-4 border-t border-gray-100 bg-white">
               <Button
                 size="lg"
-                className="w-full text-white hover:bg-primary/90 shadow-lg hover:shadow-xl px-6 py-6 rounded-xl transition-all duration-200 bg-[rgba(30,24,57,1)] font-semibold text-base"
+                className="w-full text-white hover:bg-evotion-primary/90 shadow-lg hover:shadow-xl px-6 py-6 rounded-xl transition-all duration-200 bg-[rgba(30,24,57,1)] font-semibold text-base"
                 asChild
               >
                 <Link

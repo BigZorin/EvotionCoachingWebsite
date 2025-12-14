@@ -300,7 +300,7 @@ export default function EvotionCoachingDesktop() {
               </div>
               <CardContent className="p-8 space-y-6">
                 <div className="space-y-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xl">
+                  <div className="w-16 h-16 bg-evotion-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xl">
                     <Dumbbell className="w-8 h-8 text-white" />
                   </div>
                   <div>
@@ -349,7 +349,7 @@ export default function EvotionCoachingDesktop() {
               </div>
               <CardContent className="p-8 space-y-6">
                 <div className="space-y-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-evotion-primary to-evotion-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xl">
+                  <div className="w-16 h-16 bg-evotion-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xl">
                     <TrendingUp className="w-8 h-8 text-white" />
                   </div>
                   <div>
@@ -864,25 +864,15 @@ export default function EvotionCoachingDesktop() {
 
               <div className="space-y-6">
                 {[
-                  {
-                    icon: Phone,
-                    title: "Bel Ons Direct",
-                    desc: "+31 6 10935077",
-                    hint: "Ma-Vr: 9:00-18:00",
-                  },
+                  { icon: Phone, title: "Bel Ons Direct", desc: "+31 6 10 45 85 98", hint: "Ma-Vr: 9:00-18:00" },
                   {
                     icon: MessageCircle,
                     title: "WhatsApp",
                     desc: "Begin Chat",
                     hint: "Snelle reactie gegarandeerd",
-                    href: "https://wa.me/31610935077?text=Hoi%20Martin%2C%20ik%20heb%20interesse%20in%20jullie%20coaching%20programma%27s.%20Kunnen%20we%20een%20kennismakingsgesprek%20inplannen%3F",
+                    href: "https://wa.me/31610458598?text=Hoi%20Martin%2C%20ik%20heb%20interesse%20in%20jullie%20coaching%20programma%27s.%20Kunnen%20we%20een%20kennismakingsgesprek%20inplannen%3F",
                   },
-                  {
-                    icon: Mail,
-                    title: "Email",
-                    desc: "info@evotion-coaching.nl",
-                    hint: "Reactie binnen 24 uur",
-                  },
+                  { icon: Mail, title: "Email", desc: "info@evotioncoaching.nl", hint: "Reactie binnen 24 uur" },
                 ].map((c) => (
                   <div
                     key={c.title}

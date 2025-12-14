@@ -267,12 +267,12 @@ export default function EvotionCoachingMobile() {
       <section className="py-16 bg-gray-50 relative">
         <div className="container mx-auto px-4 relative">
           <div className="text-center mb-12">
-            <Badge className="bg-primary/10 text-primary mb-4">
+            <Badge className="bg-evotion-primary/10 text-evotion-primary mb-4">
               <Target className="w-4 h-4 mr-2" />
               Onze Diensten
             </Badge>
             <h2 className="text-3xl font-extrabold text-gray-900 mb-3">
-              Kies Jouw <span className="text-primary">Transformatie</span>
+              Kies Jouw <span className="text-evotion-primary">Transformatie</span>
             </h2>
             <p className="text-gray-600 leading-relaxed">
               Elke reis is uniek. Daarom bieden we programma's die perfect aansluiten bij jouw doelen.
@@ -289,7 +289,7 @@ export default function EvotionCoachingMobile() {
               >
                 {service.popular && (
                   <div className="absolute top-3 right-3 z-10">
-                    <Badge className="bg-primary text-white text-[10px] px-2 py-1">
+                    <Badge className="bg-evotion-primary text-white text-[10px] px-2 py-1">
                       <Award className="w-3 h-3 mr-1" />
                       POPULAIR
                     </Badge>
@@ -297,12 +297,12 @@ export default function EvotionCoachingMobile() {
                 )}
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4 mb-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                      <service.icon className="w-6 h-6 text-primary" />
+                    <div className="w-12 h-12 bg-evotion-primary/10 rounded-xl flex items-center justify-center">
+                      <service.icon className="w-6 h-6 text-evotion-primary" />
                     </div>
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-gray-900 mb-1">{service.title}</h3>
-                      <p className="text-sm text-primary font-medium mb-2">{service.subtitle}</p>
+                      <p className="text-sm text-evotion-primary font-medium mb-2">{service.subtitle}</p>
                       <p className="text-gray-600 text-sm leading-relaxed">{service.description}</p>
                     </div>
                   </div>
@@ -317,7 +317,7 @@ export default function EvotionCoachingMobile() {
                   </ul>
 
                   <Link href={service.href}>
-                    <Button className="ev-shine w-full bg-primary hover:bg-primary/90 text-white">
+                    <Button className="ev-shine w-full bg-evotion-primary hover:bg-evotion-primary/90 text-white">
                       Meer Informatie
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
@@ -334,7 +334,11 @@ export default function EvotionCoachingMobile() {
                 <p className="text-gray-600 mb-6 text-sm leading-relaxed">
                   Boek een gratis kennismakingsgesprek en ontdek samen met ons wat bij jou past.
                 </p>
-                <Button size="lg" className="ev-shine w-full bg-primary hover:bg-primary/90 text-white" asChild>
+                <Button
+                  size="lg"
+                  className="ev-shine w-full bg-evotion-primary hover:bg-evotion-primary/90 text-white"
+                  asChild
+                >
                   <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
                     <Calendar className="w-5 h-5 mr-2" />
                     Gratis Kennismakingsgesprek
@@ -379,7 +383,7 @@ export default function EvotionCoachingMobile() {
               ].map((f) => (
                 <div key={f.title} className="flex items-center gap-4 bg-white/10 rounded-lg p-4 backdrop-blur-sm">
                   <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                    <f.icon className="w-5 h-5 text-[#1e1839]" />
+                    <f.icon className="w-5 h-5 text-evotion-primary" />
                   </div>
                   <span className="text-white font-medium">{f.title}</span>
                 </div>
@@ -400,12 +404,12 @@ export default function EvotionCoachingMobile() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
-            <Badge className="bg-primary/10 text-primary mb-4">
+            <Badge className="bg-evotion-primary/10 text-evotion-primary mb-4">
               <Smartphone className="w-4 h-4 mr-2" />
               Evotion App
             </Badge>
             <h2 className="text-2xl font-extrabold text-gray-900 mb-3">
-              Jouw Coach <span className="text-primary">in je Zak</span>
+              Jouw Coach <span className="text-evotion-primary">in je Zak</span>
             </h2>
             <p className="text-gray-600 leading-relaxed">
               Alles wat je nodig hebt voor jouw transformatie, in één app.
@@ -429,8 +433,8 @@ export default function EvotionCoachingMobile() {
           <div className="space-y-4">
             {appFeatures.map((f) => (
               <div key={f.title} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <f.icon className="w-5 h-5 text-primary" />
+                <div className="w-10 h-10 bg-evotion-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <f.icon className="w-5 h-5 text-evotion-primary" />
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900 mb-1">{f.title}</h3>
@@ -441,7 +445,11 @@ export default function EvotionCoachingMobile() {
           </div>
 
           <div className="mt-8">
-            <Button className="ev-shine w-full bg-primary hover:bg-primary/90 text-white" size="lg" asChild>
+            <Button
+              className="ev-shine w-full bg-evotion-primary hover:bg-evotion-primary/90 text-white"
+              size="lg"
+              asChild
+            >
               <Link href="/over-ons/evotion-app">
                 Download de App
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -455,12 +463,12 @@ export default function EvotionCoachingMobile() {
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
-            <Badge className="bg-primary/10 text-primary mb-4">
+            <Badge className="bg-evotion-primary/10 text-evotion-primary mb-4">
               <TrendingUp className="w-4 h-4 mr-2" />
               Echte Resultaten
             </Badge>
             <h2 className="text-2xl font-extrabold text-gray-900 mb-3">
-              Ongelooflijke <span className="text-primary">Transformaties</span>
+              Ongelooflijke <span className="text-evotion-primary">Transformaties</span>
             </h2>
             <p className="text-gray-600 leading-relaxed">Zie hoe onze klanten hun droomlichaam hebben bereikt.</p>
           </div>
@@ -478,7 +486,7 @@ export default function EvotionCoachingMobile() {
                 </div>
                 <CardContent className="p-5">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">{t.name}'s Transformatie</h3>
-                  <p className="text-primary font-semibold mb-3">{t.result}</p>
+                  <p className="text-evotion-primary font-semibold mb-3">{t.result}</p>
                   <p className="text-gray-600 text-sm italic">"{t.quote}"</p>
                 </CardContent>
               </Card>
@@ -486,7 +494,11 @@ export default function EvotionCoachingMobile() {
           </div>
 
           <div className="mt-10">
-            <Button className="ev-shine w-full bg-primary hover:bg-primary/90 text-white" size="lg" asChild>
+            <Button
+              className="ev-shine w-full bg-evotion-primary hover:bg-evotion-primary/90 text-white"
+              size="lg"
+              asChild
+            >
               <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
                 <Sparkles className="w-5 h-5 mr-2" />
                 Start Jouw Transformatie
@@ -497,7 +509,7 @@ export default function EvotionCoachingMobile() {
       </section>
 
       {/* TESTIMONIALS */}
-      <section className="py-16 bg-gradient-to-br from-gray-900 via-primary to-primary relative overflow-hidden">
+      <section className="py-16 bg-gradient-to-br from-gray-900 via-evotion-primary to-evotion-primary relative overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-10">
             <Badge className="bg-white/20 text-white border-white/30 mb-4">
@@ -521,7 +533,7 @@ export default function EvotionCoachingMobile() {
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent className="p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary font-bold text-lg">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-evotion-primary font-bold text-lg">
                   {testimonials[activeTestimonial].initial}
                 </div>
                 <div>
@@ -562,12 +574,12 @@ export default function EvotionCoachingMobile() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
-            <Badge className="bg-primary/10 text-primary mb-4">
+            <Badge className="bg-evotion-primary/10 text-evotion-primary mb-4">
               <MessageCircle className="w-4 h-4 mr-2" />
               Contact
             </Badge>
             <h2 className="text-2xl font-extrabold text-gray-900 mb-3">
-              Klaar om te <span className="text-primary">Beginnen</span>?
+              Klaar om te <span className="text-evotion-primary">Beginnen</span>?
             </h2>
             <p className="text-gray-600 leading-relaxed">
               Neem contact met ons op voor een gratis kennismakingsgesprek.
@@ -577,23 +589,13 @@ export default function EvotionCoachingMobile() {
           {/* Quick Contact */}
           <div className="space-y-4 mb-10">
             {[
-              {
-                icon: Phone,
-                title: "Bel Ons",
-                value: "+31 6 10935077",
-                href: "tel:+31610935077",
-              },
-              {
-                icon: MessageCircle,
-                title: "WhatsApp",
-                value: "Start een Chat",
-                href: "https://wa.me/31610935077?text=Hoi%20Martin%2C%20ik%20heb%20interesse%20in%20jullie%20coaching%20programma%27s.",
-              },
+              { icon: Phone, title: "Bel Ons", subtitle: "+31 6 10 45 85 98", href: "tel:+31610458598" },
+              { icon: MessageCircle, title: "WhatsApp", subtitle: "Chat direct", href: "https://wa.me/31610458598" },
               {
                 icon: Mail,
                 title: "Email",
-                value: "info@evotion-coaching.nl",
-                href: "mailto:info@evotion-coaching.nl",
+                subtitle: "info@evotioncoaching.nl",
+                href: "mailto:info@evotioncoaching.nl",
               },
             ].map((c) => (
               <a
@@ -601,16 +603,20 @@ export default function EvotionCoachingMobile() {
                 href={c.href}
                 target={c.title === "WhatsApp" ? "_blank" : undefined}
                 rel={c.title === "WhatsApp" ? "noopener noreferrer" : undefined}
-                className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                className="flex items-center gap-4 bg-white rounded-xl p-6 border border-gray-200 hover:border-evotion-primary transition-all duration-300 group"
               >
-                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-evotion-primary rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                   <c.icon className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-900">{c.title}</h4>
-                  <p className="text-sm text-gray-600">{c.value}</p>
+                  <h4 className="font-bold text-gray-900 group-hover:text-evotion-primary transition-colors">
+                    {c.title}
+                  </h4>
+                  <p className="text-sm text-gray-600 group-hover:text-evotion-primary transition-colors">
+                    {c.subtitle}
+                  </p>
                 </div>
-                <ArrowRight className="w-5 h-5 text-gray-400 ml-auto" />
+                <ArrowRight className="w-5 h-5 text-gray-400 ml-auto group-hover:text-evotion-primary transition-colors" />
               </a>
             ))}
           </div>
@@ -648,7 +654,7 @@ export default function EvotionCoachingMobile() {
                     name="goal"
                     value={formData.goal}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-evotion-primary focus:border-transparent"
                   >
                     <option value="">Selecteer je doel</option>
                     <option value="gewichtsverlies">Gewichtsverlies</option>
@@ -673,7 +679,7 @@ export default function EvotionCoachingMobile() {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="ev-shine w-full bg-primary hover:bg-primary/90 text-white"
+                  className="ev-shine w-full bg-evotion-primary hover:bg-evotion-primary/90 text-white"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
