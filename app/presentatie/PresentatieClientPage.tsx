@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Star, Pause, PlayIcon, Shield, Badge } from "lucide-react"
+import { Star, Pause, PlayIcon } from "lucide-react"
 import {
   ChevronLeft,
   ChevronRight,
@@ -1321,7 +1321,7 @@ export default function PresentatieClientPage() {
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                           <div className="shrink-0">
                             <div
-                              className={`w-24 h-24 ${cert.highlight ? "bg-[#1e1839]" : "bg-slate-700"} rounded-2xl flex items-center justify-center`}
+                              className={`w-24 h-24 ${cert.highlight ? "bg-[#1e1839]" : "bg-slate-700"} rounded-xl flex items-center justify-center`}
                             >
                               <GraduationCap className="w-12 h-12 text-white" />
                             </div>
@@ -1763,11 +1763,23 @@ export default function PresentatieClientPage() {
                   {/* Right side - App Mockup (only for Evotion App slide) */}
                   {slide.benefitDetail.showMockup && (
                     <div className="flex justify-center items-center">
-                      <div className="relative">
+                      <div className="relative" id={`benefit-mockup-container-${slide.id}`}>
                         <img
                           src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
                           alt={slide.benefitDetail.title}
-                          className="w-full max-w-[650px] object-contain py-0 h-[500px] my-0"
+                          id={`benefit-mockup-img-${slide.id}`}
+                          style={{
+                            width: "100%",
+                            maxWidth: "650px",
+                            objectFit: "contain",
+                            paddingTop: "0",
+                            paddingBottom: "0",
+                            height: "400px",
+                            marginTop: "60px",
+                            marginBottom: "60px",
+                          }}
+                          data-slide-id={slide.id}
+                          data-benefit-title={slide.benefitDetail.title}
                         />
                       </div>
                     </div>
@@ -1939,7 +1951,6 @@ export default function PresentatieClientPage() {
               <div className="max-w-5xl mx-auto">
                 {/* Header with urgency badge */}
                 <div className="text-center space-y-4 mb-8">
-                  
                   <h2 className="text-5xl md:text-6xl font-bold text-slate-900 text-balance">{slide.title}</h2>
                   <p className="text-xl text-slate-600 text-balance">{slide.subtitle}</p>
                   <p className="text-lg text-red-600 font-semibold">{slide.offer.urgency}</p>
@@ -1972,14 +1983,10 @@ export default function PresentatieClientPage() {
                   </div>
 
                   {/* Guarantee */}
-                  
                 </div>
 
                 {/* Bonuses */}
-                <div className="mb-8">
-                  
-                  
-                </div>
+                <div className="mb-8"></div>
 
                 {/* Features */}
                 <div className="bg-slate-50 rounded-2xl p-8 mb-8">
