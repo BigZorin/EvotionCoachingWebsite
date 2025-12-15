@@ -120,7 +120,7 @@ export default function EvotionAppClientPage() {
       <Header />
       <main className="min-h-screen bg-gray-50">
         {/* HERO SECTION */}
-        <section className="relative py-16 lg:py-24 overflow-hidden bg-gradient-to-br from-white via-gray-50 to-primary/5">
+        <section className="relative py-16 lg:py-24 overflow-hidden bg-white">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 relative">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               {/* Left: Content */}
@@ -131,14 +131,14 @@ export default function EvotionAppClientPage() {
                 transition={{ duration: 0.8 }}
               >
                 <div className="space-y-4">
-                  <Badge className="bg-primary/10 text-primary border-primary/20 px-4 py-2">
+                  <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 px-4 py-2">
                     <Crown className="w-4 h-4 mr-2" />
                     Exclusief voor coaching klanten
                   </Badge>
 
                   <h1 className="text-3xl lg:text-6xl font-bold text-gray-900 leading-tight">
                     De Evotion
-                    <span className="text-primary block">Coaching App</span>
+                    <span className="text-[#1e1839] block">Coaching App</span>
                   </h1>
 
                   <p className="text-lg lg:text-xl text-gray-600 leading-relaxed max-w-xl">
@@ -151,7 +151,7 @@ export default function EvotionAppClientPage() {
                   <Link href="/online-coaching">
                     <Button
                       size="lg"
-                      className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg rounded-xl shadow-lg"
+                      className="bg-[#1e1839] hover:bg-[#1e1839]/90 text-white px-8 py-4 text-lg rounded-xl shadow-lg"
                     >
                       <Crown className="w-5 h-5 mr-2" />
                       Start met Coaching
@@ -163,7 +163,7 @@ export default function EvotionAppClientPage() {
                       <Button
                         size="lg"
                         variant="outline"
-                        className="border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-4 text-lg rounded-xl bg-transparent"
+                        className="border-2 border-[#1e1839] text-[#1e1839] hover:bg-[#1e1839] hover:text-white px-8 py-4 text-lg rounded-xl bg-transparent"
                       >
                         <Play className="w-5 h-5 mr-2" />
                         Bekijk Demo
@@ -209,25 +209,6 @@ export default function EvotionAppClientPage() {
               >
                 <div className="relative">
                   <DeviceMockup images={heroScreens} />
-
-                  {/* Floating badges */}
-                  <motion.div
-                    className="absolute -top-4 -left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg"
-                    animate={{ y: [-5, 5, -5] }}
-                    transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-                  >
-                    <CheckCircle className="w-4 h-4 inline mr-1" />
-                    Live
-                  </motion.div>
-
-                  <motion.div
-                    className="absolute -bottom-4 -right-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg"
-                    animate={{ y: [5, -5, 5] }}
-                    transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut", delay: 1 }}
-                  >
-                    <Award className="w-4 h-4 inline mr-1" />
-                    Premium
-                  </motion.div>
                 </div>
               </motion.div>
             </div>
@@ -238,11 +219,11 @@ export default function EvotionAppClientPage() {
         <section className="py-12 bg-white">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6">
             <motion.div
-              className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-3xl p-8 border border-primary/20"
+              className="bg-gradient-to-r from-[#1e1839]/5 to-[#1e1839]/10 rounded-3xl p-8 border border-[#1e1839]/20"
               {...fadeIn()}
             >
               <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 bg-[#1e1839] rounded-2xl flex items-center justify-center shadow-lg">
                   <Lock className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -256,7 +237,7 @@ export default function EvotionAppClientPage() {
                     {["Online Coaching", "Premium Coaching", "12-Weken Vetverlies", "Personal Training"].map(
                       (program) => (
                         <div key={program} className="flex items-center gap-3 bg-white rounded-xl p-4 shadow-sm">
-                          <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
+                          <CheckCircle className="w-5 h-5 text-[#1e1839] flex-shrink-0" />
                           <span className="font-medium text-gray-900">{program}</span>
                         </div>
                       ),
@@ -300,7 +281,7 @@ export default function EvotionAppClientPage() {
                     ref={(el) => (featureRefs.current[index] = el)}
                     className={`rounded-3xl p-8 transition-all duration-500 ${
                       activeFeature === index
-                        ? "bg-white shadow-xl border-2 border-primary/20"
+                        ? "bg-white shadow-xl border-2 border-[#1e1839]/20"
                         : "bg-white/50 hover:bg-white hover:shadow-lg border border-gray-200"
                     }`}
                     initial={{ opacity: 0, y: 30 }}
@@ -311,7 +292,9 @@ export default function EvotionAppClientPage() {
                     <div className="flex items-start gap-6">
                       <div
                         className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
-                          activeFeature === index ? "bg-primary text-white shadow-lg" : "bg-primary/10 text-primary"
+                          activeFeature === index
+                            ? "bg-[#1e1839] text-white shadow-lg"
+                            : "bg-[#1e1839]/10 text-[#1e1839]"
                         }`}
                       >
                         <feature.icon className="w-7 h-7" />
@@ -324,7 +307,7 @@ export default function EvotionAppClientPage() {
                           {feature.highlights.map((highlight) => (
                             <span
                               key={highlight}
-                              className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium"
+                              className="bg-[#1e1839]/10 text-[#1e1839] px-3 py-1 rounded-full text-sm font-medium"
                             >
                               {highlight}
                             </span>
@@ -354,8 +337,8 @@ export default function EvotionAppClientPage() {
                   className="text-center p-6 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors"
                   {...fadeIn(index * 0.1)}
                 >
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <stat.icon className="w-6 h-6 text-primary" />
+                  <div className="w-12 h-12 bg-[#1e1839]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <stat.icon className="w-6 h-6 text-[#1e1839]" />
                   </div>
                   <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
                   <div className="text-gray-600 font-medium">{stat.label}</div>
@@ -401,7 +384,7 @@ export default function EvotionAppClientPage() {
         </section>
 
         {/* CTA SECTION */}
-        <section className="py-24 bg-gradient-to-br from-primary to-primary/90 text-white relative overflow-hidden">
+        <section className="py-24 bg-gradient-to-br from-[#1e1839] to-[#1e1839]/90 text-white relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('/images/pattern.svg')] opacity-10" />
 
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 relative">
@@ -417,7 +400,7 @@ export default function EvotionAppClientPage() {
                   <Button
                     size="lg"
                     variant="secondary"
-                    className="bg-white text-primary hover:bg-gray-100 px-10 py-5 text-xl font-bold rounded-2xl shadow-xl"
+                    className="bg-white text-[#1e1839] hover:bg-gray-100 px-10 py-5 text-xl font-bold rounded-2xl shadow-xl"
                   >
                     <Calendar className="w-6 h-6 mr-3" />
                     Bekijk Coaching Opties
@@ -427,7 +410,7 @@ export default function EvotionAppClientPage() {
                 <Link href="/contact">
                   <Button
                     size="lg"
-                    className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary px-10 py-5 text-xl font-bold rounded-2xl"
+                    className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-[#1e1839] px-10 py-5 text-xl font-bold rounded-2xl"
                   >
                     <Clock className="w-6 h-6 mr-3" />
                     Gratis Kennismaking
