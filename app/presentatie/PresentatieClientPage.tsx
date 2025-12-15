@@ -1681,13 +1681,10 @@ export default function PresentatieClientPage() {
                         key={idx}
                         className="bg-gradient-to-br from-white to-slate-50 border-2 border-slate-200 rounded-2xl p-6 space-y-4 hover:border-[#1e1839] hover:shadow-xl transition-all duration-300"
                       >
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center">
                           <div className="w-14 h-14 bg-[#1e1839] rounded-xl flex items-center justify-center">
                             <Icon className="w-7 h-7 text-white" />
                           </div>
-                          <span className="bg-emerald-100 text-emerald-700 text-sm font-bold px-4 py-1.5 rounded-full">
-                            €{card.value},-
-                          </span>
                         </div>
                         <h3 className="text-xl font-bold text-slate-900">{card.title}</h3>
                         <p className="text-slate-600 text-sm leading-relaxed">{card.description}</p>
@@ -1696,24 +1693,14 @@ export default function PresentatieClientPage() {
                   })}
                 </div>
 
-                {/* Total Value Summary */}
-                <div className="bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-6 text-white">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div>
-                      <p className="text-slate-300 text-sm">Totale waarde van het pakket</p>
-                      <p className="text-3xl font-bold text-emerald-400">
-                        €{slide.benefitCards?.reduce((sum, b) => sum + b.value, 0).toLocaleString("nl-NL")},-
-                      </p>
-                    </div>
-                    <Button
-                      size="lg"
-                      onClick={nextSlide}
-                      className="bg-white text-[#1e1839] hover:bg-slate-100 px-8 py-4 text-lg rounded-xl"
-                    >
-                      Bekijk details per onderdeel
-                      <ArrowRight className="w-5 h-5 ml-2" />
-                    </Button>
-                  </div>
+                <div className="flex justify-center pt-4">
+                  <Button
+                    size="lg"
+                    onClick={nextSlide}
+                    className="bg-[#1e1839] hover:bg-[#1e1839]/90 text-white px-8 py-6 text-lg rounded-xl"
+                  >
+                    Bekijk Details <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -1722,18 +1709,13 @@ export default function PresentatieClientPage() {
           {slide.type === "benefit-detail" && slide.benefitDetail && (
             <div className="p-8 md:p-12 space-y-8 overflow-y-auto max-h-[85vh]">
               <div className="max-w-6xl mx-auto">
-                {/* Header with icon and value */}
+                {/* Header with icon */}
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-6 pb-8 border-b-2 border-slate-200">
                   <div className="w-20 h-20 bg-[#1e1839] rounded-2xl flex items-center justify-center shrink-0">
                     {slide.benefitDetail.icon && <slide.benefitDetail.icon className="w-10 h-10 text-white" />}
                   </div>
                   <div className="flex-1">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                      <h2 className="text-3xl md:text-4xl font-bold text-slate-900">{slide.benefitDetail.title}</h2>
-                      <span className="bg-emerald-100 text-emerald-700 text-xl font-bold px-6 py-2 rounded-full whitespace-nowrap">
-                        Waarde: €{slide.benefitDetail.value},-
-                      </span>
-                    </div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900">{slide.benefitDetail.title}</h2>
                     <p className="text-lg text-slate-600 mt-2">{slide.benefitDetail.description}</p>
                   </div>
                 </div>
@@ -1764,7 +1746,7 @@ export default function PresentatieClientPage() {
                   {slide.benefitDetail.showMockup && (
                     <div className="flex justify-center items-center">
                       <div className="relative" id={`benefit-mockup-container-${slide.id}`}>
-                        <img
+                        <img className="rounded-xl"
                           src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
                           alt={slide.benefitDetail.title}
                           id={`benefit-mockup-img-${slide.id}`}
