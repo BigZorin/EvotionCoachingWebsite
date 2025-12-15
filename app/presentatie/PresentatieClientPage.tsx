@@ -1,8 +1,10 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import type React from "react"
+
+import { useState, useEffect, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Star, Pause, PlayIcon } from "lucide-react"
+import { Pause, PlayIcon, Menu, X, Star } from "lucide-react" // Added Star
 import {
   ChevronLeft,
   ChevronRight,
@@ -1079,6 +1081,10 @@ export default function PresentatieClientPage() {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isAutoPlay, setIsAutoPlay] = useState(false)
   const [slideDirection, setSlideDirection] = useState<"next" | "prev">("next")
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const touchStartX = useRef<number | null>(null)
+  const touchEndX = useRef<number | null>(null)
+  const minSwipeDistance = 50
 
   const nextSlide = useCallback(() => {
     if (currentSlide < slides.length - 1) {
@@ -1100,6 +1106,7 @@ export default function PresentatieClientPage() {
   const goToSlide = (index: number) => {
     setSlideDirection(index > currentSlide ? "next" : "prev")
     setCurrentSlide(index)
+    setIsMobileMenuOpen(false) // Close mobile menu when selecting slide
   }
 
   const toggleFullscreen = () => {
@@ -1109,6 +1116,27 @@ export default function PresentatieClientPage() {
     } else {
       document.exitFullscreen()
       setIsFullscreen(false)
+    }
+  }
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchEndX.current = null
+    touchStartX.current = e.targetTouches[0].clientX
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return
+    const distance = touchStartX.current - touchEndX.current
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+    if (isLeftSwipe) {
+      nextSlide()
+    } else if (isRightSwipe) {
+      prevSlide()
     }
   }
 
@@ -1146,9 +1174,49 @@ export default function PresentatieClientPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setIsMobileMenuOpen(false)} />
+          <div className="absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-white shadow-2xl overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-slate-200 p-4 flex items-center justify-between">
+              <h3 className="font-bold text-slate-900">Alle Slides</h3>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-slate-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-2 pb-24">
+              {slides.map((s, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => goToSlide(idx)}
+                  className={`w-full text-left p-3 rounded-xl transition-all ${
+                    idx === currentSlide
+                      ? "bg-[#1e1839] text-white"
+                      : idx < currentSlide
+                        ? "bg-slate-100 text-slate-600"
+                        : "bg-slate-50 text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                        idx === currentSlide ? "bg-white text-[#1e1839]" : "bg-slate-200 text-slate-600"
+                      }`}
+                    >
+                      {idx + 1}
+                    </span>
+                    <span className="text-sm font-medium line-clamp-1">{s.title}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Presentation Container */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-6 bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <div className="mb-4 sm:mb-6 bg-white rounded-xl shadow-sm overflow-hidden">
           {/* Progress Bar */}
           <div className="h-1 bg-slate-100">
             <div
@@ -1157,10 +1225,10 @@ export default function PresentatieClientPage() {
             />
           </div>
 
-          <div className="flex items-center justify-between p-4">
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-slate-600">
-                Slide {currentSlide + 1} / {slides.length}
+          <div className="flex items-center justify-between p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <span className="text-xs sm:text-sm font-medium text-slate-600">
+                {currentSlide + 1}/{slides.length}
               </span>
               <div className="hidden sm:flex items-center gap-2">
                 <Button
@@ -1186,11 +1254,31 @@ export default function PresentatieClientPage() {
                 </Button>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={prevSlide} disabled={currentSlide === 0}>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="lg:hidden h-9 w-9"
+              >
+                <Menu className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={prevSlide}
+                disabled={currentSlide === 0}
+                className="h-9 w-9 sm:h-10 sm:w-10 bg-transparent"
+              >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <Button variant="outline" size="icon" onClick={nextSlide} disabled={currentSlide === slides.length - 1}>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={nextSlide}
+                disabled={currentSlide === slides.length - 1}
+                className="h-9 w-9 sm:h-10 sm:w-10 bg-transparent"
+              >
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
@@ -1199,11 +1287,14 @@ export default function PresentatieClientPage() {
 
         <div
           key={currentSlide}
-          className="bg-white rounded-2xl shadow-xl overflow-hidden min-h-[70vh] animate-in fade-in duration-300"
+          className="bg-white rounded-2xl shadow-xl overflow-hidden min-h-[60vh] sm:min-h-[70vh] animate-in fade-in duration-300"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
         >
           {/* Intro Slide */}
           {slide.type === "intro" && (
-            <div className="relative h-full min-h-[70vh] flex flex-col items-center justify-center overflow-hidden">
+            <div className="relative h-full min-h-[60vh] sm:min-h-[70vh] flex flex-col items-center justify-center overflow-hidden">
               {/* Video Background */}
               <div className="absolute inset-0 z-0">
                 <div className="relative w-full h-full">
@@ -1220,21 +1311,20 @@ export default function PresentatieClientPage() {
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="relative z-10 max-w-4xl text-center space-y-8 p-12 text-white">
-                <div className="inline-block px-6 py-2 bg-white/10 rounded-full text-sm font-medium backdrop-blur-sm">
+              <div className="relative z-10 max-w-4xl text-center space-y-4 sm:space-y-8 p-6 sm:p-12 text-white">
+                <div className="inline-block px-4 sm:px-6 py-1.5 sm:py-2 bg-white/10 rounded-full text-xs sm:text-sm font-medium backdrop-blur-sm">
                   Evotion Coaching Programma
                 </div>
-                <h1 className="text-6xl md:text-7xl font-bold leading-tight text-balance">{slide.title}</h1>
-                <p className="text-2xl md:text-3xl text-slate-200 text-balance">{slide.subtitle}</p>
-                <div className="pt-8">
+                <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold leading-tight text-balance">{slide.title}</h1>
+                <p className="text-lg sm:text-2xl md:text-3xl text-slate-200 text-balance">{slide.subtitle}</p>
+                <div className="pt-4 sm:pt-8">
                   <Button
                     size="lg"
                     onClick={nextSlide}
-                    className="bg-white text-[#1e1839] hover:bg-slate-100 px-8 py-6 text-lg rounded-xl"
+                    className="bg-white text-[#1e1839] hover:bg-slate-100 px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg rounded-xl"
                   >
                     Start Presentatie
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                    <ArrowRight className="w-4 sm:w-5 h-4 sm:h-5 ml-2" />
                   </Button>
                 </div>
               </div>
@@ -1244,29 +1334,31 @@ export default function PresentatieClientPage() {
           {/* Coach Slide */}
           {slide.type === "coach" && slide.coach && (
             <div className="relative h-full overflow-y-auto">
-              {/* Hero Section */}
-              <div className="relative bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] text-white py-16 px-6 md:px-10">
-                <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-10">
-                  <div className="relative w-48 h-48 rounded-full overflow-hidden border-4 border-white/30 shadow-xl">
+              <div className="relative bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] text-white py-8 sm:py-16 px-4 sm:px-6 md:px-10">
+                <div className="max-w-6xl mx-auto flex flex-col items-center gap-6 sm:gap-10 md:flex-row">
+                  <div className="relative w-32 h-32 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-white/30 shadow-xl shrink-0">
                     <img
                       src={slide.coach.image || "/placeholder.svg"}
                       alt={slide.coach.name}
-                      className="w-full object-cover leading-7 my-0 h-72"
+                      className="w-full object-cover leading-7 my-0 h-48 sm:h-72"
                     />
                   </div>
                   <div className="text-center md:text-left">
-                    <h2 className="text-4xl md:text-5xl font-bold leading-tight text-balance">{slide.title}</h2>
-                    <p className="text-xl md:text-2xl text-slate-200 mt-3 text-balance">{slide.subtitle}</p>
-                    <p className="text-lg md:text-xl italic text-white/90 mt-6 max-w-3xl leading-relaxed text-balance">
+                    <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold leading-tight text-balance">
+                      {slide.title}
+                    </h2>
+                    <p className="text-lg sm:text-xl md:text-2xl text-slate-200 mt-2 sm:mt-3 text-balance">
+                      {slide.subtitle}
+                    </p>
+                    <p className="text-base sm:text-lg md:text-xl italic text-white/90 mt-4 sm:mt-6 max-w-3xl leading-relaxed text-balance">
                       &ldquo;{slide.coach.tagline}&rdquo;
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Highlights Section */}
-              <div className="bg-white px-6 md:px-10 py-12">
-                <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-6">
+              <div className="bg-white px-4 sm:px-6 md:px-10 py-8 sm:py-12">
+                <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
                   {slide.coach.highlights.map((highlight, idx) => {
                     const IconComponent =
                       highlight.icon === "Clock"
@@ -1277,26 +1369,26 @@ export default function PresentatieClientPage() {
                             ? Heart
                             : highlight.icon === "Award"
                               ? Award
-                              : highlight.icon === "Trophy" // For Zorin
+                              : highlight.icon === "Trophy"
                                 ? Trophy
-                                : highlight.icon === "Medal" // For Zorin
+                                : highlight.icon === "Medal"
                                   ? Medal
-                                  : highlight.icon === "TrendingUp" // For Zorin
+                                  : highlight.icon === "TrendingUp"
                                     ? TrendingUp
-                                    : highlight.icon === "Target" // For Zorin
+                                    : highlight.icon === "Target"
                                       ? Target
                                       : null
                     return (
                       <div
                         key={idx}
-                        className="flex items-center gap-4 bg-slate-50 border-2 border-slate-200 rounded-xl p-6 hover:border-[#1e1839]/30 hover:shadow-lg transition-all duration-300"
+                        className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4 bg-slate-50 border-2 border-slate-200 rounded-xl p-4 sm:p-6 hover:border-[#1e1839]/30 hover:shadow-lg transition-all duration-300"
                       >
                         {IconComponent && (
-                          <div className="w-12 h-12 bg-[#1e1839] rounded-xl flex items-center justify-center shrink-0">
-                            <IconComponent className="w-6 h-6 text-white" />
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#1e1839] rounded-xl flex items-center justify-center shrink-0">
+                            <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                           </div>
                         )}
-                        <p className="text-sm font-semibold text-slate-700 leading-tight text-balance">
+                        <p className="text-xs sm:text-sm font-semibold text-slate-700 leading-tight text-balance text-center sm:text-left">
                           {highlight.text}
                         </p>
                       </div>
@@ -1307,28 +1399,28 @@ export default function PresentatieClientPage() {
 
               {/* Certifications Section */}
               {slide.coach.certifications && slide.coach.certifications.length > 0 && (
-                <div className="bg-gradient-to-b from-slate-50 to-slate-100 px-6 md:px-10 py-12">
+                <div className="bg-gradient-to-b from-slate-50 to-slate-100 px-4 sm:px-6 md:px-10 py-8 sm:py-12">
                   <div className="max-w-6xl mx-auto space-y-8">
-                    <h3 className="text-3xl font-bold text-slate-900 text-center mb-8">
+                    <h3 className="text-2xl md:text-3xl font-bold text-slate-900 text-center mb-6 sm:mb-8">
                       {slide.coach.name.split(" ")[0]}'s Certificeringen & Expertise
                     </h3>
 
                     {slide.coach.certifications.map((cert, idx) => (
                       <div
                         key={idx}
-                        className={`bg-white rounded-2xl p-8 shadow-lg border-2 ${cert.highlight ? "border-[#1e1839]" : "border-slate-200"}`}
+                        className={`bg-white rounded-2xl p-6 sm:p-8 shadow-lg border-2 ${cert.highlight ? "border-[#1e1839]" : "border-slate-200"}`}
                       >
-                        <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+                        <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
                           <div className="shrink-0">
                             <div
-                              className={`w-24 h-24 ${cert.highlight ? "bg-[#1e1839]" : "bg-slate-700"} rounded-xl flex items-center justify-center`}
+                              className={`w-16 h-16 ${cert.highlight ? "bg-[#1e1839]" : "bg-slate-700"} rounded-xl flex items-center justify-center`}
                             >
-                              <GraduationCap className="w-12 h-12 text-white" />
+                              <GraduationCap className="w-8 h-8 text-white" />
                             </div>
                           </div>
-                          <div className="flex-1">
-                            <h4 className="text-2xl font-bold text-slate-900">{cert.title}</h4>
-                            <p className="text-lg text-slate-600 mt-1">
+                          <div className="flex-1 text-center md:text-left">
+                            <h4 className="text-xl sm:text-2xl font-bold text-slate-900">{cert.title}</h4>
+                            <p className="text-base sm:text-lg text-slate-600 mt-1">
                               {cert.institution} ({cert.year})
                             </p>
                             {cert.link && (
@@ -1336,27 +1428,27 @@ export default function PresentatieClientPage() {
                                 href={cert.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="mt-3 inline-flex items-center gap-1 text-sm text-blue-600 hover:underline font-semibold"
+                                className="mt-2 sm:mt-3 inline-flex items-center gap-1 text-sm text-blue-600 hover:underline font-semibold"
                               >
                                 Bekijk de opleiding <ExternalLink className="w-4 h-4" />
                               </a>
                             )}
                           </div>
                           {cert.badge && (
-                            <div className="shrink-0">
-                              <span className="bg-yellow-400 text-black text-sm font-bold px-4 py-2 rounded-full shadow-md">
+                            <div className="shrink-0 mt-2 md:mt-0">
+                              <span className="bg-yellow-400 text-black text-xs sm:text-sm font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-md">
                                 {cert.badge}
                               </span>
                             </div>
                           )}
                         </div>
-                        <div className="mt-6 pt-6 border-t-2 border-slate-200">
-                          <h5 className="text-lg font-bold text-slate-900 mb-4">
+                        <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t-2 border-slate-200">
+                          <h5 className="text-base sm:text-lg font-bold text-slate-900 mb-3 sm:mb-4">
                             {slide.coach.name.split(" ")[0]} beheerst:
                           </h5>
-                          <ul className="grid md:grid-cols-2 gap-3">
+                          <ul className="grid md:grid-cols-2 gap-2 sm:gap-3">
                             {cert.skills.map((skill, skillIdx) => (
-                              <li key={skillIdx} className="flex items-start gap-2 text-slate-700 text-sm">
+                              <li key={skillIdx} className="flex items-start gap-2 text-slate-700 text-xs sm:text-sm">
                                 <CheckCircle2 className="w-4 h-4 text-[#1e1839] shrink-0 mt-0.5" />
                                 <span>{skill}</span>
                               </li>
@@ -1371,61 +1463,61 @@ export default function PresentatieClientPage() {
 
               {/* Achievements Section (for Zorin) - Same style as Martin's certifications */}
               {slide.coach.achievements && slide.coach.achievements.length > 0 && (
-                <div className="bg-slate-50 px-6 md:px-10 py-12">
-                  <div className="max-w-6xl mx-auto space-y-6">
-                    <div className="text-center mb-8">
-                      <div className="inline-flex items-center gap-2 bg-[#1e1839]/10 px-4 py-2 rounded-full border border-[#1e1839]/20 mb-4">
-                        <Trophy className="w-5 h-5 text-[#1e1839]" />
-                        <span className="text-sm font-bold uppercase tracking-wider text-[#1e1839]">
+                <div className="bg-slate-50 px-4 sm:px-6 md:px-10 py-8 sm:py-12">
+                  <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+                    <div className="text-center">
+                      <div className="inline-flex items-center gap-2 bg-[#1e1839]/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-[#1e1839]/20 mb-3 sm:mb-4">
+                        <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-[#1e1839]" />
+                        <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#1e1839]">
                           Prestaties & Track Record
                         </span>
                       </div>
-                      <h3 className="text-3xl md:text-4xl font-bold text-slate-900">Zorin's Prestaties</h3>
+                      <h3 className="text-2xl md:text-4xl font-bold text-slate-900">Zorin's Prestaties</h3>
                     </div>
 
                     {/* Achievement Cards - Same style as Martin's certifications */}
                     {slide.coach.achievements.map((achievement, idx) => (
                       <div
                         key={idx}
-                        className={`bg-white rounded-2xl p-8 shadow-lg border-2 ${
+                        className={`bg-white rounded-2xl p-6 sm:p-8 shadow-lg border-2 ${
                           achievement.highlight ? "border-[#1e1839]" : "border-slate-200"
                         }`}
                       >
-                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
-                          <div className="flex items-center gap-4">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4 sm:mb-6">
+                          <div className="flex items-center gap-3 sm:gap-4">
                             <div
-                              className={`w-16 h-16 rounded-xl flex items-center justify-center ${
+                              className={`w-14 h-14 flex items-center justify-center rounded-xl ${
                                 achievement.highlight
                                   ? "bg-gradient-to-br from-yellow-400 to-orange-500"
                                   : "bg-[#1e1839]/10"
                               }`}
                             >
                               {achievement.highlight ? (
-                                <Trophy className="w-8 h-8 text-white" />
+                                <Trophy className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
                               ) : idx === 1 ? (
-                                <Medal className="w-8 h-8 text-[#1e1839]" />
+                                <Medal className="w-7 h-7 sm:w-8 sm:h-8 text-[#1e1839]" />
                               ) : idx === 2 ? (
-                                <TrendingUp className="w-8 h-8 text-[#1e1839]" />
+                                <TrendingUp className="w-7 h-7 sm:w-8 sm:h-8 text-[#1e1839]" />
                               ) : (
-                                <Users className="w-8 h-8 text-[#1e1839]" />
+                                <Users className="w-7 h-7 sm:w-8 sm:h-8 text-[#1e1839]" />
                               )}
                             </div>
                             <div>
-                              <h4 className="text-2xl font-bold text-slate-900">{achievement.title}</h4>
+                              <h4 className="text-xl sm:text-2xl font-bold text-slate-900">{achievement.title}</h4>
                             </div>
                           </div>
                           {achievement.badge && (
-                            <div className="shrink-0">
-                              <span className="bg-yellow-400 text-black text-sm font-bold px-4 py-2 rounded-full shadow-md">
+                            <div className="shrink-0 mt-2 md:mt-0">
+                              <span className="bg-yellow-400 text-black text-xs sm:text-sm font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-md">
                                 {achievement.badge}
                               </span>
                             </div>
                           )}
                         </div>
-                        <div className="mt-6 pt-6 border-t-2 border-slate-200">
-                          <ul className="grid md:grid-cols-2 gap-3">
+                        <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t-2 border-slate-200">
+                          <ul className="grid md:grid-cols-2 gap-2 sm:gap-3">
                             {achievement.items.map((item, itemIdx) => (
-                              <li key={itemIdx} className="flex items-start gap-2 text-slate-700 text-sm">
+                              <li key={itemIdx} className="flex items-start gap-2 text-slate-700 text-xs sm:text-sm">
                                 <CheckCircle2 className="w-4 h-4 text-[#1e1839] shrink-0 mt-0.5" />
                                 <span>{item}</span>
                               </li>
@@ -1434,14 +1526,6 @@ export default function PresentatieClientPage() {
                         </div>
                       </div>
                     ))}
-
-                    {/* Zorin's Certification - Henselmans PT Cursus */}
-                    {slide.coach.certifications && slide.coach.certifications.length > 0 && (
-                      <div className="mt-10">
-                        <div className="text-center mb-6"></div>
-                        {slide.coach.certifications.map((cert, idx) => null)}
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
@@ -1451,15 +1535,17 @@ export default function PresentatieClientPage() {
           {slide.type === "values" && (
             <div className="relative h-full overflow-y-auto">
               {/* Hero Visie Section */}
-              <div className="relative bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] text-white py-12 px-6 md:px-10">
-                <div className="max-w-5xl mx-auto text-center space-y-6">
-                  <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 mb-2">
-                    <Target className="w-5 h-5" />
-                    <span className="text-sm font-semibold uppercase tracking-wider">Onze Visie</span>
+              <div className="relative bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] text-white py-8 sm:py-12 px-4 sm:px-6 md:px-10">
+                <div className="max-w-5xl mx-auto text-center space-y-4 sm:space-y-6">
+                  <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/20 mb-1 sm:mb-2">
+                    <Target className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">Onze Visie</span>
                   </div>
-                  <h2 className="text-3xl md:text-5xl font-bold text-balance leading-tight">{slide.vision?.text}</h2>
-                  <div className="pt-4">
-                    <p className="text-xl md:text-2xl font-light italic text-white/90 text-balance">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-balance leading-tight">
+                    {slide.vision?.text}
+                  </h2>
+                  <div className="pt-3 sm:pt-4">
+                    <p className="text-base sm:text-xl md:text-2xl font-light italic text-white/90 text-balance">
                       &ldquo;{slide.vision?.tagline}&rdquo;
                     </p>
                   </div>
@@ -1467,28 +1553,30 @@ export default function PresentatieClientPage() {
               </div>
 
               {/* Mission Section */}
-              <div className="bg-white px-6 md:px-10 py-10">
+              <div className="bg-white px-4 sm:px-6 md:px-10 py-6 sm:py-10">
                 <div className="max-w-5xl mx-auto">
-                  <div className="text-center mb-8">
-                    <div className="inline-flex items-center gap-2 bg-[#1e1839]/5 px-4 py-2 rounded-full border border-[#1e1839]/10 mb-3">
-                      <Heart className="w-5 h-5 text-[#1e1839]" />
-                      <span className="text-sm font-semibold uppercase tracking-wider text-[#1e1839]">Onze Missie</span>
+                  <div className="text-center mb-6 sm:mb-8">
+                    <div className="inline-flex items-center gap-2 bg-[#1e1839]/5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-[#1e1839]/10 mb-2 sm:mb-3">
+                      <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-[#1e1839]" />
+                      <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-[#1e1839]">
+                        Onze Missie
+                      </span>
                     </div>
-                    <p className="text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto leading-relaxed text-balance">
+                    <p className="text-base sm:text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto leading-relaxed text-balance">
                       {slide.mission?.text}
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto">
                     {slide.mission?.goals.map((goal: string, idx: number) => (
                       <div
                         key={idx}
-                        className="relative bg-gradient-to-br from-slate-50 to-white border-2 border-[#1e1839]/10 rounded-2xl p-6 text-center hover:border-[#1e1839]/30 hover:shadow-lg transition-all duration-300 group"
+                        className="relative bg-gradient-to-br from-slate-50 to-white border-2 border-[#1e1839]/10 rounded-2xl p-4 sm:p-6 text-center hover:border-[#1e1839]/30 hover:shadow-lg transition-all duration-300 group"
                       >
-                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-xl flex items-center justify-center text-white text-lg font-bold shadow-lg group-hover:scale-110 transition-transform">
+                        <div className="absolute -top-3.5 sm:-top-4 left-1/2 -translate-x-1/2 w-8 sm:w-10 h-8 sm:h-10 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-xl flex items-center justify-center text-white text-sm sm:text-lg font-bold shadow-lg group-hover:scale-110 transition-transform">
                           {idx + 1}
                         </div>
-                        <p className="text-sm md:text-base font-bold text-slate-900 mt-3 leading-tight text-balance">
+                        <p className="text-xs sm:text-sm md:text-base font-bold text-slate-900 mt-2 sm:mt-3 leading-tight text-balance">
                           {goal}
                         </p>
                       </div>
@@ -1498,28 +1586,28 @@ export default function PresentatieClientPage() {
               </div>
 
               {/* Core Values Section */}
-              <div className="bg-gradient-to-b from-slate-50 to-slate-100 px-6 md:px-10 py-10">
+              <div className="bg-gradient-to-b from-slate-50 to-slate-100 px-4 sm:px-6 md:px-10 py-6 sm:py-10">
                 <div className="max-w-6xl mx-auto">
-                  <div className="text-center mb-8">
-                    <h3 className="text-2xl md:text-4xl font-bold text-slate-900 mb-2">Onze 7 Kernwaarden</h3>
-                    <p className="text-slate-600 text-base md:text-lg">De fundamenten van onze coaching aanpak</p>
+                  <div className="text-center mb-6 sm:mb-8">
+                    <h3 className="text-2xl md:text-4xl font-bold text-slate-900 mb-1 sm:mb-2">Onze 7 Kernwaarden</h3>
+                    <p className="text-slate-600 text-sm md:text-lg">De fundamenten van onze coaching aanpak</p>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
                     {slide.coreValues?.map((value: any, idx: number) => {
                       const Icon = value.icon
                       return (
                         <div
                           key={idx}
-                          className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl border border-slate-200/50 hover:border-[#1e1839]/20 transition-all duration-300 group"
+                          className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-xl border border-slate-200/50 hover:border-[#1e1839]/20 transition-all duration-300 group"
                         >
-                          <div className="w-14 h-14 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                            <Icon className="w-7 h-7 text-white" />
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-xl flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
+                            <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                           </div>
-                          <h4 className="text-base md:text-lg font-bold text-slate-900 mb-2 leading-tight">
+                          <h4 className="text-base sm:text-lg font-bold text-slate-900 mb-1 sm:mb-2 leading-tight">
                             {value.title}
                           </h4>
-                          <p className="text-xs md:text-sm text-slate-600 leading-relaxed">{value.description}</p>
+                          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{value.description}</p>
                         </div>
                       )
                     })}
@@ -1530,28 +1618,30 @@ export default function PresentatieClientPage() {
           )}
 
           {slide.type === "overview" && (
-            <div className="p-12 space-y-12">
-              <div className="text-center space-y-4">
-                <h2 className="text-5xl font-bold text-slate-900 text-balance">{slide.title}</h2>
-                <p className="text-xl text-slate-600 text-balance">{slide.subtitle}</p>
+            <div className="p-6 sm:p-8 md:p-12 space-y-8 sm:space-y-12">
+              <div className="text-center space-y-2 sm:space-y-4">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 text-balance">
+                  {slide.title}
+                </h2>
+                <p className="text-base sm:text-xl text-slate-600 text-balance">{slide.subtitle}</p>
               </div>
-              <div className="grid md:grid-cols-5 gap-6 max-w-6xl mx-auto">
+              <div className="grid md:grid-cols-5 gap-3 sm:gap-6 max-w-6xl mx-auto">
                 {slide.phases?.map((phase, idx) => {
                   const Icon = phase.icon
                   return (
                     <div key={idx} className="relative group">
-                      <div className="bg-gradient-to-br from-slate-50 to-white border-2 border-slate-200 rounded-2xl p-6 text-center space-y-4 hover:border-[#1e1839] transition-all duration-300 hover:shadow-xl">
-                        <div className="w-16 h-16 mx-auto bg-[#1e1839] rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <Icon className="w-8 h-8 text-white" />
+                      <div className="bg-gradient-to-br from-slate-50 to-white border-2 border-slate-200 rounded-2xl p-4 sm:p-6 text-center space-y-3 sm:space-y-4 hover:border-[#1e1839] transition-all duration-300 hover:shadow-xl">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-[#1e1839] rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-lg text-slate-900">{phase.name}</h3>
-                          <p className="text-sm text-slate-600 mt-2">{phase.duration}</p>
+                          <h3 className="font-bold text-base sm:text-lg text-slate-900">{phase.name}</h3>
+                          <p className="text-xs sm:text-sm text-slate-600 mt-1 sm:mt-2">{phase.duration}</p>
                         </div>
                       </div>
                       {idx < 4 && (
-                        <div className="hidden md:block absolute top-1/2 -right-3 transform -translate-y-1/2 z-10">
-                          <ArrowRight className="w-6 h-6 text-slate-300" />
+                        <div className="hidden md:block absolute top-1/2 -right-2 transform -translate-y-1/2 z-10">
+                          <ArrowRight className="w-5 h-5 text-slate-300" />
                         </div>
                       )}
                     </div>
@@ -1560,134 +1650,222 @@ export default function PresentatieClientPage() {
               </div>
 
               {/* Modular Explanation Section */}
-              <div className="mt-16 space-y-8 max-w-5xl mx-auto">
-                <div className="text-center space-y-3">
-                  <h3 className="text-3xl font-bold text-slate-900">{slide.modularExplanation?.title}</h3>
-                  <p className="text-lg text-slate-600 text-balance">{slide.modularExplanation?.subtitle}</p>
+              <div className="mt-8 sm:mt-16 space-y-6 sm:space-y-8 max-w-5xl mx-auto">
+                <div className="text-center space-y-2 sm:space-y-3">
+                  <h3 className="text-2xl sm:text-3xl font-bold text-slate-900">{slide.modularExplanation?.title}</h3>
+                  <p className="text-base sm:text-lg text-slate-600 text-balance">
+                    {slide.modularExplanation?.subtitle}
+                  </p>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
                   {slide.modularExplanation?.points.map((point, idx) => {
                     const Icon = point.icon
                     return (
                       <div
                         key={idx}
-                        className="bg-white border-2 border-slate-200 rounded-2xl p-8 space-y-4 hover:border-[#1e1839] transition-all duration-300 hover:shadow-lg"
+                        className="bg-white rounded-2xl border-2 border-slate-200 p-6 sm:p-8 space-y-3 sm:space-y-4 hover:border-[#1e1839] transition-all duration-300 hover:shadow-lg"
                       >
-                        <div className="w-12 h-12 bg-[#1e1839] rounded-xl flex items-center justify-center">
-                          <Icon className="w-6 h-6 text-white" />
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#1e1839] rounded-xl flex items-center justify-center">
+                          <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                         </div>
                         <h4 className="text-lg font-bold text-slate-900">{point.title}</h4>
-                        <p className="text-slate-600 leading-relaxed">{point.description}</p>
+                        <p className="text-slate-600 text-sm leading-relaxed">{point.description}</p>
                       </div>
                     )
                   })}
                 </div>
 
-                <div className="bg-gradient-to-br from-[#1e1839] to-[#2a2050] rounded-2xl p-8 text-white">
-                  <p className="text-lg leading-relaxed text-center">{slide.modularExplanation?.vision}</p>
+                <div className="bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-6 sm:p-8 text-white">
+                  <p className="text-base sm:text-lg leading-relaxed text-center">{slide.modularExplanation?.vision}</p>
                 </div>
               </div>
             </div>
           )}
 
-          {slide.type === "transformations" && (
-            <div className="min-h-[70vh] p-12 bg-gradient-to-br from-slate-50 to-white">
-              <div className="max-w-6xl mx-auto space-y-12">
+          {slide.type === "phase" && slide.content && (
+            <div className="p-4 sm:p-8 md:p-12 overflow-y-auto max-h-[85vh]">
+              <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
                 {/* Header */}
-                <div className="text-center space-y-4">
-                  <h2 className="text-5xl font-bold text-slate-900">{slide.title}</h2>
-                  <p className="text-xl text-slate-600">{slide.subtitle}</p>
+                <div className="text-center space-y-3 sm:space-y-4">
+                  <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-1.5 sm:py-2 bg-[#1e1839]/10 rounded-full">
+                    {slide.icon && <slide.icon className="w-4 h-4 sm:w-5 sm:h-5 text-[#1e1839]" />}
+                    <span className="text-xs sm:text-sm font-medium text-[#1e1839]">{slide.duration}</span>
+                  </div>
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 text-balance">
+                    {slide.title}
+                  </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {slide.transformations?.map((transformation: any, index: number) => (
-                    <div key={index}>
-                      <img
-                        src={transformation.image || "/placeholder.svg"}
-                        alt={`Transformatie ${index + 1}`}
-                        className="w-full h-auto object-cover"
-                      />
-                    </div>
-                  ))}
+                {/* Goal Card */}
+                <div className="bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-6 sm:p-8 text-white text-center">
+                  <p className="text-sm sm:text-base uppercase tracking-wider text-slate-300 mb-2">
+                    Doel van deze fase
+                  </p>
+                  <p className="text-lg sm:text-xl md:text-2xl font-semibold text-balance">{slide.content.goal}</p>
                 </div>
 
-                {/* Bottom text */}
-                <div className="text-center pt-8">
-                  <p className="text-lg text-slate-700 text-balance max-w-3xl mx-auto">
-                    Deze transformaties zijn bereikt met ons modulaire programma. Iedereen had een uniek traject,
-                    afgestemd op hun persoonlijke situatie en doelen. Jouw transformatie kan de volgende zijn.
+                {/* Highlights */}
+                <div className="bg-white rounded-2xl border-2 border-slate-200 p-6 sm:p-8">
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-4 sm:mb-6 text-center">
+                    Wat gebeurt er in deze fase?
+                  </h3>
+                  <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+                    {slide.content.highlights.map((highlight: string, idx: number) => (
+                      <div key={idx} className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-[#1e1839] shrink-0 mt-0.5" />
+                        <span className="text-sm sm:text-base text-slate-700">{highlight}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Result */}
+                <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-6 sm:p-8 text-center">
+                  <p className="text-sm sm:text-base uppercase tracking-wider text-emerald-600 mb-2">Resultaat</p>
+                  <p className="text-lg sm:text-xl font-semibold text-emerald-800 text-balance">
+                    {slide.content.result}
                   </p>
                 </div>
               </div>
             </div>
           )}
 
-          {slide.type === "reviews" && (
-            <div className="space-y-8 pb-2 p-8">
-              <div className="text-center space-y-4">
-                <div className="flex items-center justify-center gap-2">
-                  <div className="flex gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-8 h-8 fill-yellow-400 text-yellow-400" />
-                    ))}
+          {slide.type === "phase-goals" && slide.goals && (
+            <div className="p-4 sm:p-8 md:p-12 overflow-y-auto max-h-[85vh]">
+              <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+                {/* Header */}
+                <div className="text-center space-y-3 sm:space-y-4">
+                  <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-1.5 sm:py-2 bg-[#1e1839]/10 rounded-full">
+                    {slide.icon && <slide.icon className="w-4 h-4 sm:w-5 sm:h-5 text-[#1e1839]" />}
+                    <span className="text-xs sm:text-sm font-medium text-[#1e1839]">{slide.duration}</span>
                   </div>
-                  <span className="text-3xl font-bold text-slate-900">{slide.rating?.toFixed(1)}</span>
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 text-balance">
+                    {slide.title}
+                  </h2>
+                  <p className="text-base sm:text-lg text-slate-600">Kies het doel dat bij jou past</p>
                 </div>
-                <p className="text-lg text-slate-600">Gebaseerd op Google Reviews</p>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[650px] overflow-y-auto pr-2 px-4">
-                {slide.reviews?.map((review, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-slate-50 border border-slate-200 rounded-xl p-6 space-y-3 hover:shadow-lg transition-shadow"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="font-semibold text-slate-900">{review.name}</h4>
-                        <p className="text-sm text-slate-500">{review.date}</p>
-                      </div>
-                      <div className="flex gap-0.5">
-                        {[...Array(review.rating)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                {/* Goals Grid */}
+                <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+                  {slide.goals.map((goal: { title: string; description: string; details: string[] }, idx: number) => (
+                    <div
+                      key={idx}
+                      className="bg-white rounded-2xl border-2 border-slate-200 p-5 sm:p-6 hover:border-[#1e1839] hover:shadow-lg transition-all"
+                    >
+                      <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">{goal.title}</h3>
+                      <p className="text-sm sm:text-base text-slate-600 mb-4">{goal.description}</p>
+                      <ul className="space-y-2">
+                        {goal.details.map((detail: string, detailIdx: number) => (
+                          <li key={detailIdx} className="flex items-start gap-2 text-xs sm:text-sm text-slate-700">
+                            <CheckCircle2 className="w-4 h-4 text-[#1e1839] shrink-0 mt-0.5" />
+                            <span>{detail}</span>
+                          </li>
                         ))}
-                      </div>
+                      </ul>
                     </div>
-                    <p className="text-sm text-slate-700 leading-relaxed">{review.text}</p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {slide.type === "flexibility" && slide.content && (
+            <div className="p-4 sm:p-8 md:p-12 overflow-y-auto max-h-[85vh]">
+              <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
+                {/* Header */}
+                <div className="text-center space-y-3 sm:space-y-4">
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 text-balance">
+                    {slide.title}
+                  </h2>
+                  <p className="text-base sm:text-lg text-slate-600 text-balance">{slide.content.title}</p>
+                </div>
+
+                {/* Flexibility Points */}
+                <div className="space-y-4 sm:space-y-6">
+                  {slide.content.points.map(
+                    (
+                      point: { icon: React.ComponentType<{ className?: string }>; title: string; description: string },
+                      idx: number,
+                    ) => {
+                      const PointIcon = point.icon
+                      return (
+                        <div
+                          key={idx}
+                          className="bg-white rounded-2xl border-2 border-slate-200 p-5 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left hover:border-[#1e1839] hover:shadow-lg transition-all"
+                        >
+                          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#1e1839] rounded-xl flex items-center justify-center shrink-0">
+                            <PointIcon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-1 sm:mb-2">{point.title}</h3>
+                            <p className="text-sm sm:text-base text-slate-600">{point.description}</p>
+                          </div>
+                        </div>
+                      )
+                    },
+                  )}
+                </div>
+
+                {/* Visual representation of the cycle */}
+                <div className="bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-6 sm:p-8 text-white text-center">
+                  <p className="text-sm sm:text-base uppercase tracking-wider text-slate-300 mb-3">
+                    Het Cyclische Proces
+                  </p>
+                  <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
+                    <span className="bg-white/20 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium">
+                      Fase C
+                    </span>
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="bg-white/20 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium">
+                      Fase D
+                    </span>
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="bg-white/20 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium">
+                      Fase E
+                    </span>
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 rotate-180 sm:rotate-0" />
+                    <span className="bg-emerald-500/30 border border-emerald-400 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium">
+                      Herhaal
+                    </span>
                   </div>
-                ))}
+                  <p className="text-xs sm:text-sm text-slate-300 mt-4">
+                    Bereik meerdere doelen binnen jouw 6-12 maanden traject
+                  </p>
+                </div>
               </div>
             </div>
           )}
 
           {slide.type === "benefits-intro" && (
-            <div className="p-8 md:p-12 overflow-y-auto max-h-[85vh]">
-              <div className="max-w-6xl mx-auto space-y-8">
-                <div className="text-center space-y-4">
-                  <div className="inline-block px-6 py-2 bg-[#1e1839]/10 rounded-full text-sm font-medium text-[#1e1839]">
+            <div className="p-4 sm:p-8 md:p-12 overflow-y-auto max-h-[85vh]">
+              <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+                <div className="text-center space-y-2 sm:space-y-4">
+                  <div className="inline-block px-4 sm:px-6 py-1.5 sm:py-2 bg-[#1e1839]/10 rounded-full text-xs sm:text-sm font-medium text-[#1e1839]">
                     Jouw Investering
                   </div>
-                  <h2 className="text-4xl md:text-5xl font-bold text-slate-900 text-balance">{slide.title}</h2>
-                  <p className="text-xl text-slate-600 text-balance">{slide.subtitle}</p>
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 text-balance">
+                    {slide.title}
+                  </h2>
+                  <p className="text-base sm:text-xl text-slate-600 text-balance">{slide.subtitle}</p>
                 </div>
 
                 {/* Benefits Cards Grid */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 pt-4">
                   {slide.benefitCards?.map((card, idx) => {
                     const Icon = card.icon
                     return (
                       <div
                         key={idx}
-                        className="bg-gradient-to-br from-white to-slate-50 border-2 border-slate-200 rounded-2xl p-6 space-y-4 hover:border-[#1e1839] hover:shadow-xl transition-all duration-300"
+                        className="bg-gradient-to-br from-white to-slate-50 border-2 border-slate-200 rounded-2xl p-4 sm:p-6 space-y-2 sm:space-y-4 hover:border-[#1e1839] hover:shadow-xl transition-all duration-300"
                       >
                         <div className="flex items-center">
-                          <div className="w-14 h-14 bg-[#1e1839] rounded-xl flex items-center justify-center">
-                            <Icon className="w-7 h-7 text-white" />
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#1e1839] rounded-xl flex items-center justify-center">
+                            <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                           </div>
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900">{card.title}</h3>
-                        <p className="text-slate-600 text-sm leading-relaxed">{card.description}</p>
+                        <h3 className="text-lg sm:text-xl font-bold text-slate-900">{card.title}</h3>
+                        <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">{card.description}</p>
                       </div>
                     )
                   })}
@@ -1697,9 +1875,9 @@ export default function PresentatieClientPage() {
                   <Button
                     size="lg"
                     onClick={nextSlide}
-                    className="bg-[#1e1839] hover:bg-[#1e1839]/90 text-white px-8 py-6 text-lg rounded-xl"
+                    className="bg-[#1e1839] hover:bg-[#1e1839]/90 text-white px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg rounded-xl"
                   >
-                    Bekijk Details <ArrowRight className="w-5 h-5 ml-2" />
+                    Bekijk Details <ArrowRight className="w-4 sm:w-5 h-4 sm:h-5 ml-2" />
                   </Button>
                 </div>
               </div>
@@ -1707,62 +1885,133 @@ export default function PresentatieClientPage() {
           )}
 
           {slide.type === "benefit-detail" && slide.benefitDetail && (
-            <div className="p-8 md:p-12 space-y-8 overflow-y-auto max-h-[85vh]">
+            <div className="p-4 sm:p-8 md:p-12 space-y-6 sm:space-y-8 overflow-y-auto max-h-[85vh]">
               <div className="max-w-6xl mx-auto">
-                {/* Header with icon */}
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-6 pb-8 border-b-2 border-slate-200">
-                  <div className="w-20 h-20 bg-[#1e1839] rounded-2xl flex items-center justify-center shrink-0">
-                    {slide.benefitDetail.icon && <slide.benefitDetail.icon className="w-10 h-10 text-white" />}
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 pb-6 sm:pb-8 border-b-2 border-slate-200 text-center sm:text-left">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#1e1839] rounded-2xl flex items-center justify-center shrink-0">
+                    {slide.benefitDetail.icon && (
+                      <slide.benefitDetail.icon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                    )}
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900">{slide.benefitDetail.title}</h2>
-                    <p className="text-lg text-slate-600 mt-2">{slide.benefitDetail.description}</p>
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900">
+                      {slide.benefitDetail.title}
+                    </h2>
+                    <p className="text-base sm:text-lg text-slate-600 mt-2">{slide.benefitDetail.description}</p>
                   </div>
                 </div>
 
-                {/* Content layout - with or without mockup */}
                 <div
-                  className={`py-8 ${slide.benefitDetail.showMockup ? "grid md:grid-cols-2 gap-8 items-start" : ""}`}
+                  className={`py-6 sm:py-8 ${slide.benefitDetail.showMockup ? "flex flex-col lg:grid lg:grid-cols-2 gap-6 sm:gap-8 items-start" : ""}`}
                 >
                   {/* Left side - Description and highlights */}
-                  <div className="space-y-6">
-                    <p className="text-lg text-slate-700 leading-relaxed">{slide.benefitDetail.detailedDescription}</p>
+                  <div className="space-y-4 sm:space-y-6">
+                    <p className="text-base sm:text-lg text-slate-700 leading-relaxed">
+                      {slide.benefitDetail.detailedDescription}
+                    </p>
 
                     {/* Highlights grid */}
-                    <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-6 border-2 border-slate-200">
-                      <h3 className="text-xl font-bold text-slate-900 mb-4">Dit krijg je:</h3>
-                      <div className="space-y-3">
+                    <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200">
+                      <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-3 sm:mb-4">Dit krijg je:</h3>
+                      <div className="space-y-2 sm:space-y-3">
                         {slide.benefitDetail.highlights.map((highlight, idx) => (
-                          <div key={idx} className="flex items-start gap-3">
-                            <CheckCircle2 className="w-5 h-5 text-[#1e1839] shrink-0 mt-0.5" />
-                            <span className="text-slate-700 text-sm">{highlight}</span>
+                          <div key={idx} className="flex items-start gap-2 sm:gap-3">
+                            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#1e1839] shrink-0 mt-0.5" />
+                            <span className="text-slate-700 text-xs sm:text-sm">{highlight}</span>
                           </div>
                         ))}
                       </div>
                     </div>
                   </div>
 
-                  {/* Right side - App Mockup (only for Evotion App slide) */}
+                  {/* Right side - App Mockup */}
                   {slide.benefitDetail.showMockup && (
-                    <div className="flex justify-center items-center">
-                      <div className="relative" id={`benefit-mockup-container-${slide.id}`}>
-                        <img className="rounded-xl"
-                          src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
-                          alt={slide.benefitDetail.title}
-                          id={`benefit-mockup-img-${slide.id}`}
-                          style={{
-                            width: "100%",
-                            maxWidth: "650px",
-                            objectFit: "contain",
-                            paddingTop: "0",
-                            paddingBottom: "0",
-                            height: "400px",
-                            marginTop: "60px",
-                            marginBottom: "60px",
-                          }}
-                          data-slide-id={slide.id}
-                          data-benefit-title={slide.benefitDetail.title}
-                        />
+                    <div
+                      className="flex justify-center items-center order-first lg:order-last w-full"
+                      id={`mockup-wrapper-${slide.id}`}
+                    >
+                      <div className="relative mx-auto flex justify-center" id={`benefit-mockup-container-${slide.id}`}>
+                        {/* Slide 11: Evotion Coaching App */}
+                        {slide.id === 11 && (
+                          <img className="my-14"
+                            src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
+                            alt={slide.benefitDetail.title}
+                            id="mockup-img-evotion-app"
+                            style={{ maxHeight: "600px", width: "auto", objectFit: "contain" }}
+                          />
+                        )}
+                        {/* Slide 12: E-Learning Portal */}
+                        {slide.id === 12 && (
+                          <img
+                            src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
+                            alt={slide.benefitDetail.title}
+                            id="mockup-img-elearning"
+                            style={{ maxHeight: "500px", width: "auto", objectFit: "contain" }}
+                          />
+                        )}
+                        {/* Slide 13: Voedingvervanger Tool */}
+                        {slide.id === 13 && (
+                          <img
+                            src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
+                            alt={slide.benefitDetail.title}
+                            id="mockup-img-voedingvervanger"
+                            style={{ maxHeight: "500px", width: "auto", objectFit: "contain" }}
+                          />
+                        )}
+                        {/* Slide 14: Klanten Support Portal */}
+                        {slide.id === 14 && (
+                          <img
+                            src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
+                            alt={slide.benefitDetail.title}
+                            id="mockup-img-support"
+                            style={{ maxHeight: "500px", width: "auto", objectFit: "contain" }}
+                          />
+                        )}
+                        {/* Slide 15: Wekelijkse Check-ins */}
+                        {slide.id === 15 && (
+                          <img
+                            src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
+                            alt={slide.benefitDetail.title}
+                            id="mockup-img-checkins"
+                            style={{ maxHeight: "500px", width: "auto", objectFit: "contain" }}
+                          />
+                        )}
+                        {/* Slide 16: Voortgangsanalyses */}
+                        {slide.id === 16 && (
+                          <img
+                            src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
+                            alt={slide.benefitDetail.title}
+                            id="mockup-img-voortgang"
+                            style={{ maxHeight: "500px", width: "auto", objectFit: "contain" }}
+                          />
+                        )}
+                        {/* Slide 17: Persoonlijk Voedingsschema */}
+                        {slide.id === 17 && (
+                          <img
+                            src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
+                            alt={slide.benefitDetail.title}
+                            id="mockup-img-voeding"
+                            style={{ maxHeight: "500px", width: "auto", objectFit: "contain" }}
+                          />
+                        )}
+                        {/* Slide 18: Persoonlijk Trainingsschema */}
+                        {slide.id === 18 && (
+                          <img
+                            src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
+                            alt={slide.benefitDetail.title}
+                            id="mockup-img-training"
+                            style={{ maxHeight: "500px", width: "auto", objectFit: "contain" }}
+                          />
+                        )}
+                        {/* Slide 19: Supplementen Schema */}
+                        {slide.id === 19 && (
+                          <img
+                            src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
+                            alt={slide.benefitDetail.title}
+                            id="mockup-img-supplementen"
+                            style={{ maxHeight: "500px", width: "auto", objectFit: "contain" }}
+                          />
+                        )}
                       </div>
                     </div>
                   )}
@@ -1775,10 +2024,10 @@ export default function PresentatieClientPage() {
                       href={slide.benefitDetail.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 bg-[#1e1839] text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-[#2a1f4d] transition-colors"
+                      className="inline-flex items-center gap-2 bg-[#1e1839] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold hover:bg-[#2a1f4d] transition-colors"
                     >
                       Bekijk {slide.benefitDetail.title}
-                      <ExternalLink className="w-5 h-5" />
+                      <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" />
                     </a>
                   </div>
                 )}
@@ -1786,148 +2035,121 @@ export default function PresentatieClientPage() {
             </div>
           )}
 
-          {slide.type === "benefits-total" && (
-            <div className="p-12 space-y-8">
-              <div className="text-center space-y-4">
-                <h2 className="text-4xl md:text-5xl font-bold text-slate-900">{slide.title}</h2>
+          {slide.type === "benefits-total" && slide.benefits && (
+            <div className="h-full p-4 sm:p-6 md:p-12 flex flex-col">
+              <div className="text-center mb-4 sm:mb-8">
+                <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-slate-900 text-balance">
+                  {slide.title}
+                </h2>
               </div>
 
-              <div className="max-w-4xl mx-auto">
-                {/* List of all benefits with values */}
-                <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-8 border-2 border-slate-200 space-y-4">
-                  {slide.benefits?.map((benefit, idx) => {
-                    const Icon = benefit.icon
-                    return (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between py-3 border-b border-slate-200 last:border-0"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-[#1e1839] rounded-xl flex items-center justify-center shrink-0">
-                            <Icon className="w-5 h-5 text-white" />
+              <div className="flex-1 flex flex-col justify-center max-w-3xl mx-auto w-full">
+                <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-200 p-4 sm:p-6 md:p-8 mb-4 sm:mb-6">
+                  <div className="space-y-2 sm:space-y-3">
+                    {slide.benefits.map((benefit, idx) => {
+                      const Icon = benefit.icon
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between py-2 sm:py-3 border-b border-slate-100 last:border-0"
+                        >
+                          <div className="flex items-center gap-2 sm:gap-4">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-slate-100 flex items-center justify-center">
+                              <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" />
+                            </div>
+                            <span className="text-sm sm:text-base md:text-lg font-medium text-slate-800">
+                              {benefit.title}
+                            </span>
                           </div>
-                          <span className="text-lg font-medium text-slate-900">{benefit.title}</span>
+                          <span className="text-sm sm:text-base md:text-lg font-bold text-[#00C9A7]">
+                            €{benefit.value},-
+                          </span>
                         </div>
-                        <span className="text-lg font-semibold text-emerald-600">€{benefit.value},-</span>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div className="bg-[#1e1839] rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 text-center">
+                  <p className="text-white/80 text-sm sm:text-base md:text-lg mb-1 sm:mb-2">Totale Waarde</p>
+                  <p className="text-3xl sm:text-5xl md:text-6xl font-bold text-[#00C9A7]">
+                    €{slide.benefits.reduce((sum, b) => sum + b.value, 0).toLocaleString("nl-NL")},-
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {slide.type === "transformations" && slide.transformations && (
+            <div className="h-full p-4 sm:p-6 md:p-12 flex flex-col overflow-hidden">
+              <div className="text-center mb-4 sm:mb-6 shrink-0">
+                <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-slate-900 text-balance">
+                  {slide.title}
+                </h2>
+                <p className="text-base sm:text-lg md:text-xl text-slate-600 mt-2 text-balance">{slide.subtitle}</p>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto w-full pb-4">
+                  {slide.transformations.map((transformation, idx) => (
+                    <div key={idx} className="relative group flex flex-col items-center">
+                      <div className="w-full max-w-sm mx-auto rounded-xl sm:rounded-2xl overflow-hidden shadow-xl aspect-[3/4]">
+                        <img
+                          src={transformation.image || "/placeholder.svg"}
+                          alt={`${transformation.name} transformatie`}
+                          className="w-full h-full object-cover object-top"
+                        />
                       </div>
-                    )
-                  })}
-                </div>
-
-                {/* Total value */}
-                <div className="mt-8 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-8 text-white">
-                  <div className="text-center space-y-4">
-                    <h3 className="text-2xl font-bold">Totale Waarde</h3>
-                    <p className="text-6xl font-bold text-emerald-400">
-                      €{slide.benefits?.reduce((sum, b) => sum + b.value, 0).toLocaleString("nl-NL")},-
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {slide.type === "phase" && (
-            <div className="p-12 space-y-10">
-              <div className="flex items-center gap-6 pb-6 border-b-2 border-slate-200">
-                <div className="w-20 h-20 bg-[#1e1839] rounded-2xl flex items-center justify-center shrink-0">
-                  {slide.icon && <slide.icon className="w-10 h-10 text-white" />}
-                </div>
-                <div>
-                  <h2 className="text-4xl md:text-5xl font-bold text-slate-900">{slide.title}</h2>
-                  <p className="text-lg text-slate-600 mt-2">{slide.duration}</p>
-                </div>
-              </div>
-
-              <div className="space-y-8 max-w-4xl">
-                <div className="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-8 border-2 border-slate-200">
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">Doel van deze fase:</h3>
-                  <p className="text-lg text-slate-700 leading-relaxed">{slide.content?.goal}</p>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-2xl font-bold text-slate-900">Wat je krijgt:</h3>
-                  <ul className="space-y-3">
-                    {slide.content?.highlights?.map((item, idx) => (
-                      <li key={idx} className="flex items-start gap-3">
-                        <CheckCircle2 className="w-6 h-6 text-[#1e1839] shrink-0 mt-0.5" />
-                        <span className="text-lg text-slate-700">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="bg-[#1e1839] rounded-2xl p-8 text-white">
-                  <h3 className="text-xl font-bold mb-3">Resultaat:</h3>
-                  <p className="text-lg leading-relaxed text-slate-100">{slide.content?.result}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {slide.type === "phase-goals" && (
-            <div className="p-12 space-y-10">
-              <div className="flex items-center gap-6 pb-6 border-b-2 border-slate-200">
-                <div className="w-20 h-20 bg-[#1e1839] rounded-2xl flex items-center justify-center shrink-0">
-                  {slide.icon && <slide.icon className="w-10 h-10 text-white" />}
-                </div>
-                <div>
-                  <h2 className="text-4xl md:text-5xl font-bold text-slate-900">{slide.title}</h2>
-                  <p className="text-lg text-slate-600 mt-2">{slide.duration}</p>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                {slide.goals?.map((goal, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-gradient-to-br from-slate-50 to-white border-2 border-slate-200 rounded-2xl p-8 space-y-4 hover:border-[#1e1839] transition-all duration-300 hover:shadow-xl"
-                  >
-                    <div>
-                      <h3 className="text-2xl font-bold text-slate-900">{goal.title}</h3>
-                      <p className="text-slate-600 mt-2">{goal.description}</p>
                     </div>
-                    <ul className="space-y-2">
-                      {goal.details.map((detail, detailIdx) => (
-                        <li key={detailIdx} className="flex items-start gap-2">
-                          <CheckCircle2 className="w-5 h-5 text-[#1e1839] shrink-0 mt-0.5" />
-                          <span className="text-sm text-slate-700">{detail}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
-          {slide.type === "flexibility" && (
-            <div className="p-12 space-y-12">
-              <div className="text-center space-y-4">
-                <h2 className="text-5xl font-bold text-slate-900 text-balance">{slide.title}</h2>
-                <p className="text-2xl text-slate-600 text-balance">{slide.content?.title}</p>
+          {slide.type === "reviews" && slide.reviews && (
+            <div className="h-full p-4 sm:p-6 md:p-8 flex flex-col overflow-hidden">
+              <div className="text-center mb-3 sm:mb-4">
+                <h2 className="text-xl sm:text-3xl md:text-4xl font-bold text-slate-900 text-balance">{slide.title}</h2>
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-yellow-400 fill-yellow-400" />
+                    ))}
+                  </div>
+                  <span className="text-base sm:text-lg md:text-xl font-bold text-slate-900">{slide.rating}</span>
+                  <span className="text-xs sm:text-sm text-slate-500">({slide.totalReviews} reviews)</span>
+                </div>
               </div>
-              <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                {slide.content?.points?.map((point: any, idx: number) => {
-                  const Icon = point.icon
-                  return (
+
+              <div className="flex-1 overflow-y-auto pr-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+                  {slide.reviews.map((review, idx) => (
                     <div
                       key={idx}
-                      className="bg-gradient-to-br from-slate-50 to-white border-2 border-slate-200 rounded-2xl p-8 text-center space-y-4 hover:border-[#1e1839] transition-all duration-300 hover:shadow-xl"
+                      className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-md border border-slate-100 sm:py-4 my-2.5"
                     >
-                      <div className="w-16 h-16 mx-auto bg-[#1e1839] rounded-2xl flex items-center justify-center">
-                        <Icon className="w-8 h-8 text-white" />
+                      <div className="flex items-start gap-2 mb-2">
+                        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#1e1839] flex items-center justify-center text-white font-bold text-xs sm:text-sm shrink-0">
+                          {review.name.charAt(0)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-slate-900 text-xs sm:text-sm truncate">{review.name}</p>
+                          <div className="flex items-center gap-0.5">
+                            {[...Array(review.rating)].map((_, i) => (
+                              <Star key={i} className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-yellow-400 fill-yellow-400" />
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                      <h3 className="text-xl font-bold text-slate-900">{point.title}</h3>
-                      <p className="text-slate-600 leading-relaxed">{point.description}</p>
+                      <p className="text-slate-700 text-xs sm:text-sm leading-relaxed">{review.text}</p>
+                      <p className="text-slate-400 text-xs mt-1.5">{review.date}</p>
                     </div>
-                  )
-                })}
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
-          {/* Offer Slide */}
           {slide.type === "offer" && slide.offer && (
             <div className="p-8 md:p-12 space-y-8 overflow-y-auto max-h-[85vh]">
               <div className="max-w-5xl mx-auto">
@@ -2002,7 +2224,7 @@ export default function PresentatieClientPage() {
           )}
 
           {slide.type === "cta" && (
-            <div className="h-full min-h-[70vh] relative overflow-hidden">
+            <div className="h-full min-h-[60vh] sm:min-h-[70vh] relative overflow-hidden">
               {/* Background Image */}
               <div className="absolute inset-0">
                 <img
@@ -2010,46 +2232,50 @@ export default function PresentatieClientPage() {
                   alt="Fitness transformation"
                   className="w-full h-full object-cover"
                 />
-                {/* Purple overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-[#1e1839]/95 via-[#2a2050]/90 to-[#1e1839]/95" />
               </div>
 
-              {/* Content */}
-              <div className="relative z-10 h-full flex flex-col items-center justify-center p-12 text-white">
-                <div className="max-w-4xl text-center space-y-10">
-                  <div className="inline-flex items-center gap-2 bg-yellow-400/20 border border-yellow-400/40 rounded-full px-4 py-2 text-yellow-300 text-sm font-medium">
-                    <Clock className="w-4 h-4" />
+              <div className="relative z-10 h-full flex flex-col items-center justify-center p-4 sm:p-8 md:p-12 text-white">
+                <div className="max-w-4xl text-center space-y-6 sm:space-y-10">
+                  <div className="inline-flex items-center gap-2 bg-yellow-400/20 border border-yellow-400/40 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-yellow-300 text-xs sm:text-sm font-medium">
+                    <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                     Beperkt aantal plekken beschikbaar
                   </div>
 
                   <div>
-                    <h2 className="text-5xl md:text-6xl font-bold mb-4 text-balance">{slide.content?.title}</h2>
-                    <p className="text-xl md:text-2xl text-slate-200 text-balance">{slide.content?.subtitle}</p>
+                    <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-3 sm:mb-4 text-balance">
+                      {slide.content?.title}
+                    </h2>
+                    <p className="text-base sm:text-xl md:text-2xl text-slate-200 text-balance">
+                      {slide.content?.subtitle}
+                    </p>
                   </div>
 
-                  <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 text-left">
-                    <h3 className="text-2xl font-bold mb-6 text-center">Wat je krijgt:</h3>
-                    <ul className="space-y-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-8 text-left">
+                    <h3 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6 text-center">Wat je krijgt:</h3>
+                    <ul className="space-y-2 sm:space-y-4">
                       {slide.content?.benefits?.map((benefit: string, idx: number) => (
-                        <li key={idx} className="flex items-start gap-3">
-                          <CheckCircle2 className="w-6 h-6 text-white shrink-0 mt-0.5" />
-                          <span className="text-lg">{benefit}</span>
+                        <li key={idx} className="flex items-start gap-2 sm:gap-3">
+                          <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-white shrink-0 mt-0.5" />
+                          <span className="text-sm sm:text-lg">{benefit}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="pt-4">
+                  <div className="pt-2 sm:pt-4">
                     <Button
                       size="lg"
-                      className="bg-white text-[#1e1839] hover:bg-slate-100 text-lg px-8 py-6 rounded-xl font-bold shadow-2xl hover:shadow-white/20 transition-all duration-300 hover:scale-105"
+                      className="bg-white text-[#1e1839] hover:bg-slate-100 text-sm sm:text-lg px-6 sm:px-8 py-4 sm:py-6 rounded-xl font-bold shadow-2xl hover:shadow-white/20 transition-all duration-300 hover:scale-105"
                     >
                       <a href="https://evotion-coaching.nl/gratis-adviesgesprek" className="flex items-center gap-2">
                         Plan Jouw Gratis Adviesgesprek
-                        <ArrowRight className="w-5 h-5" />
+                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                       </a>
                     </Button>
-                    <p className="text-sm text-slate-300 mt-4">Vrijblijvend en zonder verplichtingen</p>
+                    <p className="text-xs sm:text-sm text-slate-300 mt-3 sm:mt-4">
+                      Vrijblijvend en zonder verplichtingen
+                    </p>
                   </div>
                 </div>
               </div>
@@ -2057,7 +2283,7 @@ export default function PresentatieClientPage() {
           )}
         </div>
 
-        <div className="flex items-center justify-center gap-1.5 mt-6 flex-wrap max-w-4xl mx-auto">
+        <div className="hidden sm:flex items-center justify-center gap-1.5 mt-6 flex-wrap max-w-4xl mx-auto">
           {slides.map((s, idx) => (
             <button
               key={idx}
@@ -2075,11 +2301,37 @@ export default function PresentatieClientPage() {
           ))}
         </div>
 
-        {/* Keyboard Navigation Hint */}
-        <p className="text-center text-sm text-slate-500 mt-4">
-          Gebruik ← → pijltjestoetsen of spatiebalk om te navigeren
+        <p className="text-center text-xs sm:text-sm text-slate-500 mt-4">
+          <span className="hidden sm:inline">Gebruik ← → pijltjestoetsen of spatiebalk om te navigeren</span>
+          <span className="sm:hidden">Swipe links/rechts of gebruik de knoppen om te navigeren</span>
         </p>
       </div>
+
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3 flex items-center justify-between sm:hidden z-40">
+        <Button
+          variant="outline"
+          onClick={prevSlide}
+          disabled={currentSlide === 0}
+          className="flex-1 mr-2 bg-transparent"
+        >
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Vorige
+        </Button>
+        <div className="text-center px-3">
+          <span className="text-sm font-bold text-[#1e1839]">{currentSlide + 1}</span>
+          <span className="text-sm text-slate-400">/{slides.length}</span>
+        </div>
+        <Button
+          onClick={nextSlide}
+          disabled={currentSlide === slides.length - 1}
+          className="flex-1 ml-2 bg-[#1e1839] hover:bg-[#2a2050] text-white"
+        >
+          Volgende
+          <ChevronRight className="w-4 h-4 ml-1" />
+        </Button>
+      </div>
+
+      <div className="h-16 sm:hidden" />
     </div>
   )
 }
