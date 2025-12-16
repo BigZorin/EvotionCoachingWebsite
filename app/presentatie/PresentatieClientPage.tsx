@@ -1951,7 +1951,7 @@ export default function PresentatieClientPage() {
                         )}
                         {/* Slide 13: Voedingvervanger Tool */}
                         {slide.id === 13 && (
-                          <img
+                          <img className="rounded-xl"
                             src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
                             alt={slide.benefitDetail.title}
                             id="mockup-img-voedingvervanger"
@@ -1960,7 +1960,7 @@ export default function PresentatieClientPage() {
                         )}
                         {/* Slide 14: Klanten Support Portal */}
                         {slide.id === 14 && (
-                          <img
+                          <img className="rounded-xl"
                             src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
                             alt={slide.benefitDetail.title}
                             id="mockup-img-support"
@@ -1969,7 +1969,7 @@ export default function PresentatieClientPage() {
                         )}
                         {/* Slide 15: Wekelijkse Check-ins */}
                         {slide.id === 15 && (
-                          <img
+                          <img className="rounded-xl"
                             src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
                             alt={slide.benefitDetail.title}
                             id="mockup-img-checkins"
@@ -1978,7 +1978,7 @@ export default function PresentatieClientPage() {
                         )}
                         {/* Slide 16: Voortgangsanalyses */}
                         {slide.id === 16 && (
-                          <img
+                          <img className="rounded-xl"
                             src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
                             alt={slide.benefitDetail.title}
                             id="mockup-img-voortgang"
@@ -1987,7 +1987,7 @@ export default function PresentatieClientPage() {
                         )}
                         {/* Slide 17: Persoonlijk Voedingsschema */}
                         {slide.id === 17 && (
-                          <img
+                          <img className="rounded-xl"
                             src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
                             alt={slide.benefitDetail.title}
                             id="mockup-img-voeding"
@@ -1996,7 +1996,7 @@ export default function PresentatieClientPage() {
                         )}
                         {/* Slide 18: Persoonlijk Trainingsschema */}
                         {slide.id === 18 && (
-                          <img
+                          <img className="rounded-xl"
                             src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
                             alt={slide.benefitDetail.title}
                             id="mockup-img-training"
@@ -2005,7 +2005,7 @@ export default function PresentatieClientPage() {
                         )}
                         {/* Slide 19: Supplementen Schema */}
                         {slide.id === 19 && (
-                          <img
+                          <img className="rounded-xl"
                             src={slide.benefitDetail.mockupImage || "/placeholder.svg"}
                             alt={slide.benefitDetail.title}
                             id="mockup-img-supplementen"
@@ -2211,7 +2211,7 @@ export default function PresentatieClientPage() {
                     size="lg"
                     className="bg-emerald-500 hover:bg-emerald-600 text-white px-12 py-6 text-xl rounded-2xl shadow-2xl hover:scale-105 transition-transform"
                   >
-                    <a href="https://evotion-coaching.nl/martin-langenberg/martin" className="flex items-center gap-2">
+                    <a href="https://buy.stripe.com/00w5kCgFU0QGc5S2Rc6c00l" className="flex items-center gap-2">
                       Claim Jouw Plek Nu →
                     </a>
                   </Button>
