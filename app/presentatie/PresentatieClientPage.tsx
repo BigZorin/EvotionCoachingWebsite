@@ -2268,7 +2268,7 @@ export default function PresentatieClientPage() {
                       size="lg"
                       className="bg-white text-[#1e1839] hover:bg-slate-100 text-sm sm:text-lg px-6 sm:px-8 py-4 sm:py-6 rounded-xl font-bold shadow-2xl hover:shadow-white/20 transition-all duration-300 hover:scale-105"
                     >
-                      <a href="https://evotion-coaching.nl/gratis-adviesgesprek" className="flex items-center gap-2">
+                      <a href="https://calendly.com/evotion/evotion-coaching" className="flex items-center gap-2">
                         Plan Jouw Gratis Adviesgesprek
                         <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                       </a>
