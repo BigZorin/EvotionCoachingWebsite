@@ -216,8 +216,8 @@ export default function OnlineCoachingClientPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-[#1e1839]/95 via-[#1e1839]/85 to-[#1e1839]/98" />
         </div>
 
-        <div className="container mx-auto px-6 relative z-10 pt-20 lg:pt-0">
-          <div className="max-w-4xl mx-auto text-center my-6">
+        <div className="container mx-auto px-6 relative z-10 pt-20 pb-16 lg:pt-0 lg:pb-0 pr-6">
+          <div className="max-w-4xl mx-auto text-center my-0">
             {/* Badge */}
             <div className={`mb-6 transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               <Badge className="bg-white/10 text-white border-white/20 backdrop-blur-sm px-4 py-2">
