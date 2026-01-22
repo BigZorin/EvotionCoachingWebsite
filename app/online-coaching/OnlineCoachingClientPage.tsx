@@ -550,10 +550,6 @@ export default function OnlineCoachingClientPage() {
                     : 'border border-white/20 hover:border-white/50 hover:shadow-lg'
                 }`}
               >
-                {pkg.popular && (
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-[#1e1839]" />
-                )}
-                
                 <CardContent className="p-6 lg:p-8">
                   {pkg.popular && (
                     <Badge className="bg-[#1e1839] text-white mb-4">Aanbevolen</Badge>
