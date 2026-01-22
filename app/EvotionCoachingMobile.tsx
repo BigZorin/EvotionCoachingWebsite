@@ -1,7 +1,9 @@
 "use client"
 
+import { useRef } from "react"
+
 import type React from "react"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -37,7 +39,7 @@ export default function EvotionCoachingMobile() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
-  const transformationRef = useRef<HTMLDivElement>(null)
+  const transformationRef = useRef(null)
 
   const testimonials = [
     {
@@ -358,14 +360,12 @@ export default function EvotionCoachingMobile() {
       </section>
 
       {/* APP HIGHLIGHT - Compact */}
-      <section className="py-20 bg-[#f8f8f8] relative">
-        {/* Visual divider */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1e1839]/5 via-[#1e1839]/10 to-[#1e1839]/5" />
+      <section className="py-20 bg-[#1e1839] relative">
         <div className="container mx-auto px-6">
           <div className="flex items-center gap-5">
             {/* Phone Mockup */}
             <div className="relative w-28 flex-shrink-0">
-              <div className="bg-[#1e1839] rounded-[1.5rem] p-1.5 shadow-2xl">
+              <div className="bg-white/10 rounded-[1.5rem] p-1.5 shadow-2xl">
                 <div className="bg-white rounded-[1.25rem] overflow-hidden aspect-[9/19] relative">
                   <Image
                     src="/images/evotion-logo-mockup-desktop.png"
@@ -379,15 +379,15 @@ export default function EvotionCoachingMobile() {
             
             {/* Content */}
             <div className="flex-1">
-              <p className="text-xs font-semibold text-[#1e1839]/60 tracking-widest uppercase mb-2">Evotion App</p>
-              <h3 className="text-xl font-bold text-[#1e1839] mb-2">
+              <p className="text-xs font-semibold text-white/50 tracking-widest uppercase mb-2">Evotion App</p>
+              <h3 className="text-xl font-bold text-white mb-2">
                 Jouw coach in je broekzak
               </h3>
-              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+              <p className="text-sm text-white/70 mb-4 leading-relaxed">
                 Training, voeding en chat met je coach - alles in een app.
               </p>
               <Link href="/over-ons/evotion-app">
-                <span className="inline-flex items-center text-sm font-semibold text-[#1e1839]">
+                <span className="inline-flex items-center text-sm font-semibold text-white">
                   Ontdek meer
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </span>
@@ -397,84 +397,61 @@ export default function EvotionCoachingMobile() {
         </div>
       </section>
 
-      {/* TRANSFORMATIONS - Auto-scrolling Carousel */}
+      {/* PERSONAL TRAINING HIGHLIGHT */}
       <section className="py-20 bg-white relative">
-        {/* Top accent */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#1e1839]/20 to-transparent" />
         <div className="container mx-auto px-6">
-          <div className="mb-8">
-            <p className="text-xs font-semibold text-[#1e1839]/60 tracking-widest uppercase mb-3">Resultaten</p>
+          <div className="mb-6">
+            <p className="text-xs font-semibold text-[#1e1839]/50 tracking-widest uppercase mb-3">Personal Training</p>
             <h2 className="text-2xl font-bold text-[#1e1839]">
-              Echte transformaties
+              1-op-1 begeleiding
             </h2>
           </div>
-
-          {/* Auto-scrolling Carousel - Full width images */}
-          <div 
-            ref={transformationRef}
-            className="flex gap-0 overflow-x-auto pb-4 -mx-6 snap-x snap-mandatory scrollbar-hide scroll-smooth"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {transformations.map((t, index) => (
-              <div 
-                key={t.name} 
-                className={`flex-shrink-0 w-screen snap-center transition-all duration-500 ${
-                  index === activeTransformation ? 'opacity-100' : 'opacity-40'
-                }`}
-              >
-                <div className="relative aspect-[1/1]">
-                  <Image
-                    src={t.image || "/placeholder.svg"}
-                    alt={`${t.name}'s transformatie`}
-                    fill
-                    className="object-cover object-top"
-                  />
+          
+          {/* Image */}
+          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6">
+            <Image
+              src="/images/personal-training-session.jpeg"
+              alt="Personal Training Sessie"
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+          </div>
+          
+          <p className="text-gray-600 text-sm leading-relaxed mb-6">
+            Ervaar de kracht van persoonlijke begeleiding. Volledige aandacht, directe feedback en op maat gemaakte trainingen.
+          </p>
+          
+          {/* Features */}
+          <div className="space-y-3 mb-6">
+            {[
+              { icon: Dumbbell, text: "Volledige persoonlijke aandacht" },
+              { icon: Target, text: "Op maat gemaakte trainingen" },
+              { icon: Clock, text: "Flexibele planning" },
+            ].map((feature) => (
+              <div key={feature.text} className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-[#1e1839]/10 rounded-lg flex items-center justify-center">
+                  <feature.icon className="w-4 h-4 text-[#1e1839]" />
                 </div>
+                <span className="text-gray-700 text-sm">{feature.text}</span>
               </div>
             ))}
           </div>
-
-          {/* Dots indicator */}
-          <div className="flex justify-center gap-2 mt-4">
-            {transformations.map((_, i) => (
-              <button
-                type="button"
-                key={i}
-                onClick={() => {
-                  setActiveTransformation(i)
-                  if (transformationRef.current) {
-                    const scrollWidth = transformationRef.current.scrollWidth / transformations.length
-                    transformationRef.current.scrollTo({
-                      left: scrollWidth * i,
-                      behavior: 'smooth'
-                    })
-                  }
-                }}
-                className={`h-1.5 rounded-full transition-all ${
-                  i === activeTransformation ? "bg-[#1e1839] w-6" : "bg-gray-300 w-1.5"
-                }`}
-              />
-            ))}
-          </div>
-
-          <div className="mt-8">
-            <Button
-              className="w-full bg-[#1e1839] hover:bg-[#1e1839]/90 text-white rounded-2xl h-14 font-semibold"
-              asChild
-            >
-              <Link href="/resultaten">
-                Bekijk Alle Resultaten
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
-            </Button>
-          </div>
+          
+          <Button
+            className="w-full bg-[#1e1839] text-white hover:bg-[#1e1839]/90 rounded-2xl h-12 font-semibold"
+            asChild
+          >
+            <Link href="/personal-training">
+              Meer over Personal Training
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
+          </Button>
         </div>
       </section>
 
       {/* TESTIMONIALS - Auto-sliding */}
       <section className="py-20 bg-[#1e1839] overflow-hidden relative">
-        {/* Top glow effect */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         <div className="container mx-auto px-6">
           {/* Header */}
           <div className="text-center mb-8">
@@ -502,9 +479,9 @@ export default function EvotionCoachingMobile() {
                   key={testimonial.name}
                   className="w-full flex-shrink-0 px-1"
                 >
-                  <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-11 h-11 bg-white/10 rounded-full flex items-center justify-center text-white font-semibold">
+                      <div className="w-11 h-11 bg-white rounded-full flex items-center justify-center text-[#1e1839] font-semibold">
                         {testimonial.initial}
                       </div>
                       <div>
@@ -516,13 +493,9 @@ export default function EvotionCoachingMobile() {
                         </div>
                       </div>
                     </div>
-                    <p className="text-white/80 leading-relaxed text-sm">"{testimonial.text}"</p>
-                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/10">
-                      <div className="w-4 h-4 bg-white rounded flex items-center justify-center">
-                        <span className="text-[8px] font-bold text-blue-600">G</span>
-                      </div>
-                      <span className="text-[11px] text-white/50">Geverifieerde Google review</span>
-                    </div>
+                    <p className="text-white/70 text-sm leading-relaxed">
+                      "{testimonial.text}"
+                    </p>
                   </div>
                 </div>
               ))}
@@ -545,17 +518,71 @@ export default function EvotionCoachingMobile() {
         </div>
       </section>
 
-      {/* CONTACT - Streamlined */}
+      {/* TRANSFORMATIONS - Compact single-card slider */}
       <section className="py-20 bg-white relative">
-        {/* Top decorative line */}
-        <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+        <div className="container mx-auto px-6">
+          <div className="mb-6">
+            <p className="text-xs font-semibold text-[#1e1839]/50 tracking-widest uppercase mb-3">Resultaten</p>
+            <h2 className="text-2xl font-bold text-[#1e1839]">
+              Echte transformaties
+            </h2>
+          </div>
+
+          {/* Single card display with fade animation */}
+          <div className="relative h-96 mb-4 overflow-hidden rounded-2xl shadow-lg">
+            {transformations.map((t, index) => (
+              <div 
+                key={t.name}
+                onClick={() => setActiveTransformation((index + 1) % transformations.length)}
+                className={`absolute inset-0 cursor-pointer transition-opacity duration-700 ease-in-out ${
+                  index === activeTransformation ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                }`}
+              >
+                <Image
+                  src={t.image || "/placeholder.svg"}
+                  alt={`${t.name}'s transformatie`}
+                  fill
+                  className="object-cover object-top"
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Progress bar */}
+          <div className="flex gap-1 mb-6">
+            {transformations.map((_, i) => (
+              <button
+                type="button"
+                key={i}
+                onClick={() => setActiveTransformation(i)}
+                className={`h-1 rounded-full flex-1 transition-all duration-300 ${
+                  i === activeTransformation ? 'bg-[#1e1839]' : 'bg-gray-200'
+                }`}
+              />
+            ))}
+          </div>
+
+          <Button
+            className="w-full bg-[#1e1839] text-white hover:bg-[#1e1839]/90 rounded-2xl h-14 font-semibold"
+            asChild
+          >
+            <Link href="/resultaten">
+              Bekijk Alle Resultaten
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
+          </Button>
+        </div>
+      </section>
+
+      {/* CONTACT - Streamlined */}
+      <section className="py-20 bg-[#1e1839] relative">
         <div className="container mx-auto px-6">
           <div className="mb-10">
-            <p className="text-xs font-semibold text-[#1e1839]/60 tracking-widest uppercase mb-3">Contact</p>
-            <h2 className="text-2xl font-bold text-[#1e1839] mb-2">
+            <p className="text-xs font-semibold text-white/50 tracking-widest uppercase mb-3">Contact</p>
+            <h2 className="text-2xl font-bold text-white mb-2">
               Klaar om te beginnen?
             </h2>
-            <p className="text-gray-600 text-sm">
+            <p className="text-white/70 text-sm">
               Neem contact op voor een gratis kennismaking.
             </p>
           </div>
@@ -564,37 +591,37 @@ export default function EvotionCoachingMobile() {
           <div className="grid grid-cols-3 gap-3 mb-8">
             <a
               href="tel:+31610458598"
-              className="flex flex-col items-center gap-2 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 bg-white/10 rounded-2xl hover:bg-white/15 transition-colors"
             >
               <div className="w-11 h-11 bg-white rounded-xl flex items-center justify-center shadow-sm">
                 <Phone className="w-5 h-5 text-[#1e1839]" />
               </div>
-              <span className="text-xs font-medium text-[#1e1839]">Bellen</span>
+              <span className="text-xs font-medium text-white">Bellen</span>
             </a>
             <a
               href="https://wa.me/31610458598"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center gap-2 p-4 bg-green-50 rounded-2xl hover:bg-green-100 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 bg-green-500/20 rounded-2xl hover:bg-green-500/30 transition-colors"
             >
               <div className="w-11 h-11 bg-green-500 rounded-xl flex items-center justify-center shadow-sm">
                 <MessageCircle className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xs font-medium text-green-700">WhatsApp</span>
+              <span className="text-xs font-medium text-green-400">WhatsApp</span>
             </a>
             <a
               href="mailto:info@evotioncoaching.nl"
-              className="flex flex-col items-center gap-2 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 bg-white/10 rounded-2xl hover:bg-white/15 transition-colors"
             >
               <div className="w-11 h-11 bg-white rounded-xl flex items-center justify-center shadow-sm">
                 <Mail className="w-5 h-5 text-[#1e1839]" />
               </div>
-              <span className="text-xs font-medium text-[#1e1839]">Email</span>
+              <span className="text-xs font-medium text-white">Email</span>
             </a>
           </div>
 
           {/* Contact Form */}
-          <div className="bg-gray-50 rounded-2xl p-6">
+          <div className="bg-white rounded-2xl p-6">
             <h3 className="text-base font-bold text-[#1e1839] mb-1">Stuur een bericht</h3>
             <p className="text-gray-500 text-xs mb-5">We reageren binnen 24 uur.</p>
 
@@ -607,7 +634,7 @@ export default function EvotionCoachingMobile() {
                     value={formData.firstName} 
                     onChange={handleInputChange} 
                     required 
-                    className="bg-white border-0 rounded-xl h-12 text-sm"
+                    className="bg-gray-50 border-0 rounded-xl h-12 text-sm"
                   />
                 </div>
                 <div>
@@ -617,7 +644,7 @@ export default function EvotionCoachingMobile() {
                     value={formData.lastName} 
                     onChange={handleInputChange} 
                     required 
-                    className="bg-white border-0 rounded-xl h-12 text-sm"
+                    className="bg-gray-50 border-0 rounded-xl h-12 text-sm"
                   />
                 </div>
               </div>
@@ -629,7 +656,7 @@ export default function EvotionCoachingMobile() {
                 value={formData.email} 
                 onChange={handleInputChange} 
                 required 
-                className="bg-white border-0 rounded-xl h-12 text-sm"
+                className="bg-gray-50 border-0 rounded-xl h-12 text-sm"
               />
 
               <Input 
@@ -638,14 +665,14 @@ export default function EvotionCoachingMobile() {
                 placeholder="Telefoonnummer"
                 value={formData.phone} 
                 onChange={handleInputChange} 
-                className="bg-white border-0 rounded-xl h-12 text-sm"
+                className="bg-gray-50 border-0 rounded-xl h-12 text-sm"
               />
 
               <select
                 name="goal"
                 value={formData.goal}
                 onChange={handleInputChange}
-                className="w-full px-4 h-12 bg-white border-0 rounded-xl text-sm text-gray-900 focus:ring-2 focus:ring-[#1e1839]/20"
+                className="w-full px-4 h-12 bg-gray-50 border-0 rounded-xl text-sm text-gray-900 focus:ring-2 focus:ring-[#1e1839]/20"
               >
                 <option value="">Wat is je doel?</option>
                 <option value="gewichtsverlies">Gewichtsverlies</option>
@@ -661,7 +688,7 @@ export default function EvotionCoachingMobile() {
                 onChange={handleInputChange}
                 rows={3}
                 placeholder="Je bericht..."
-                className="bg-white border-0 rounded-xl text-sm resize-none"
+                className="bg-gray-50 border-0 rounded-xl text-sm resize-none"
               />
 
               <Button

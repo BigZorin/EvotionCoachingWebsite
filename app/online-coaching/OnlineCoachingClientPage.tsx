@@ -9,19 +9,13 @@ import {
   ChevronDown,
   ChevronUp,
   Smartphone,
-  User,
   Zap,
-  BarChart,
   TrendingUp,
   Award,
-  MapPin,
   Mail,
   MessageCircle,
   Play,
   Heart,
-  Settings,
-  GraduationCap,
-  Video,
   Puzzle,
   Layers,
   Calendar,
@@ -31,135 +25,137 @@ import {
   RotateCcw,
   Clock,
   Star,
+  ArrowRight,
+  Video,
+  GraduationCap,
+  User,
 } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import Image from "next/image"
 
 export default function OnlineCoachingClientPage() {
-  const [expandedFeature, setExpandedFeature] = useState<number | null>(null)
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
+  const [activeTransformation, setActiveTransformation] = useState(0)
+  const [activeFeature, setActiveFeature] = useState(0)
+  const [isLoaded, setIsLoaded] = useState(false)
+  const transformationRef = useRef<HTMLDivElement>(null)
+  const featuresRef = useRef<HTMLDivElement>(null)
 
-  const features = [
-    {
-      icon: <Smartphone className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />,
-      title: "De Evotion Coaching App",
-      description:
-        "Krijg toegang tot onze geavanceerde coaching app met gepersonaliseerde trainingsschema's, voedingsplannen en directe communicatie met je coach.",
-    },
-    {
-      icon: <GraduationCap className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />,
-      title: "E-Learning Portal",
-      description:
-        "Toegang tot 12weken.evotion-coaching.nl met uitgebreide educatie over training, voeding en mindset om zelfkennis op te doen.",
-    },
-    {
-      icon: <Video className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />,
-      title: "Klanten Support Portal",
-      description:
-        "Via klanten.evotion-coaching.nl krijg je antwoord op al je vragen, meestal in video-format door Martin persoonlijk beantwoord.",
-    },
-    {
-      icon: <User className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />,
-      title: "Wekelijkse Check-ins",
-      description:
-        "Elke week een persoonlijke check-in met je coach om voortgang te bespreken, vragen te beantwoorden en je programma bij te sturen.",
-    },
-    {
-      icon: <BarChart className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />,
-      title: "Voortgangsanalyses",
-      description:
-        "Regelmatige metingen en foto's om je transformatie te documenteren en je programma data-gedreven te optimaliseren.",
-    },
-    {
-      icon: <Settings className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />,
-      title: "Modulair & Flexibel",
-      description:
-        "Het programma past zich aan jou aan, niet andersom. Elke fase duurt precies zo lang als jij nodig hebt voor optimaal resultaat.",
-    },
+  useEffect(() => {
+    setIsLoaded(true)
+  }, [])
+
+  // Auto-scroll transformations
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTransformation((prev) => (prev + 1) % 3)
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Auto-scroll features (slower, 3 seconds)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveFeature((prev) => (prev + 1) % 6)
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    if (featuresRef.current) {
+      const cardWidth = 280 + 16 // card width + gap
+      const scrollAmount = activeFeature * cardWidth
+      featuresRef.current.scrollTo({ left: scrollAmount, behavior: 'smooth' })
+    }
+  }, [activeFeature])
+
+  useEffect(() => {
+    if (transformationRef.current) {
+      const scrollAmount = activeTransformation * transformationRef.current.offsetWidth
+      transformationRef.current.scrollTo({ left: scrollAmount, behavior: 'smooth' })
+    }
+  }, [activeTransformation])
+
+  const transformations = [
+    { image: "/images/vrouw-20transformatie.png", name: "Kim", result: "-9.5kg" },
+    { image: "/images/salim-20transformatie.png", name: "Salim", result: "-8.1kg" },
+    { image: "/images/martin-20transformatie.png", name: "Martin", result: "-10.7kg" },
   ]
 
   const phases = [
     {
-      phase: "1",
-      title: "A: Onboarding",
+      step: 1,
+      title: "Onboarding",
       duration: "±1 week",
-      icon: <Play className="w-5 h-5" />,
+      icon: Play,
       description: "Intake, kennismaking en opzetten van je volledige programma",
-      features: ["Volledige doorloop van het 5-fasen programma", "Toegang tot de Evotion Coaching App"],
-      highlight: false,
+      color: "from-blue-500 to-blue-600",
     },
     {
-      phase: "2",
-      title: "B: Herstel",
+      step: 2,
+      title: "Herstel",
       duration: "4-8 weken",
-      icon: <Heart className="w-5 h-5" />,
+      icon: Heart,
       description: "Metabolisme herstellen en gezonde gewoontes opbouwen",
-      features: ["Toegang tot e-learning portal (12weken.evotion-coaching.nl)", "Toegang tot klanten support portal"],
-      highlight: false,
+      color: "from-green-500 to-green-600",
     },
     {
-      phase: "3",
-      title: "C: Voorbereiding",
+      step: 3,
+      title: "Voorbereiding",
       duration: "2-4 weken",
-      icon: <Target className="w-5 h-5" />,
-      description: "Mentaal en fysiek klaarstomen voor de intensieve doelfase",
-      features: ["Wekelijkse persoonlijke check-ins", "Op maat gemaakt trainings- en voedingsplan"],
-      highlight: false,
+      icon: TrendingUp,
+      description: "Mentaal en fysiek voorbereiden op de vetverliesfase",
+      color: "from-yellow-500 to-yellow-600",
     },
     {
-      phase: "4",
-      title: "D: Doelfase",
-      duration: "8-12 weken",
-      icon: <Zap className="w-5 h-5" />,
-      description: "Intensief werken aan jouw specifieke doel (kan cyclisch herhaald)",
-      features: ["Voortgangsanalyses met foto's en metingen", "Onbeperkte coach support via app"],
+      step: 4,
+      title: "Doelfase",
+      duration: "8-16 weken",
+      icon: Target,
+      description: "Actief vetverliezen met maximale resultaten",
+      color: "from-orange-500 to-orange-600",
       highlight: true,
     },
     {
-      phase: "5",
-      title: "E: Optimalisatie",
-      duration: "4-8 weken",
-      icon: <TrendingUp className="w-5 h-5" />,
-      description: "Resultaten verankeren en onderhoudsplan ontwikkelen",
-      features: ["Meerdere doelfases mogelijk (cyclisch)", "Extra tijd voor duurzame gewoontevorming"],
-      highlight: false,
+      step: 5,
+      title: "Nazorg",
+      duration: "4+ weken",
+      icon: Award,
+      description: "Resultaten behouden en levensstijl integreren",
+      color: "from-purple-500 to-purple-600",
     },
   ]
 
   const packages = [
     {
-      title: "6 Maanden Traject",
+      title: "6 Maanden",
+      subtitle: "Complete Transformatie",
       duration: "24 weken begeleiding",
       features: [
-        "Volledige doorloop van het 5-fasen programma",
-        "Toegang tot de Evotion Coaching App",
-        "Toegang tot e-learning portal (12weken.evotion-coaching.nl)",
-        "Toegang tot klanten support portal",
-        "Wekelijkse persoonlijke check-ins",
-        "Op maat gemaakt trainings- en voedingsplan",
-        "Voortgangsanalyses met foto's en metingen",
-        "Onbeperkte coach support via app",
+        "Volledige 5-fasen doorloop",
+        "Evotion Coaching App",
+        "E-learning portal",
+        "Klanten support portal",
+        "Wekelijkse check-ins",
+        "Op maat gemaakt plan",
       ],
       popular: false,
-      note: "Ideaal voor een complete transformatie",
     },
     {
-      title: "12 Maanden Traject",
+      title: "12 Maanden",
+      subtitle: "Maximaal Resultaat",
       duration: "52 weken begeleiding",
       features: [
-        "Alle voordelen van het 6 maanden traject",
-        "Meerdere doelfases mogelijk (cyclisch)",
-        "Extra tijd voor duurzame gewoontevorming",
-        "Seizoensgebonden aanpassingen",
-        "Diepgaande lange termijn strategie",
-        "Maximale flexibiliteit in je reis",
-        "Uitgebreide educatie en zelfstandigheid",
-        "Langdurige ondersteuning en begeleiding",
+        "Alles van 6 maanden",
+        "Meerdere doelfases",
+        "Extra gewoontevorming",
+        "Seizoensaanpassingen",
+        "Lange termijn strategie",
+        "Maximale flexibiliteit",
       ],
       popular: true,
-      note: "Aanbevolen voor maximale en duurzame resultaten",
     },
   ]
 
@@ -167,38 +163,24 @@ export default function OnlineCoachingClientPage() {
     {
       question: "Wat houdt het modulaire programma precies in?",
       answer:
-        "Ons modulaire coachingprogramma bestaat uit 5 flexibele fases: Onboarding, Herstel, Voorbereiding, Doelfase en Optimalisatie. Het verschil met standaard programma's is dat elke fase precies zo lang duurt als jij nodig hebt. Het programma past zich aan jou aan, niet andersom. Binnen een 6 of 12 maanden traject kun je zelfs meerdere doelen bereiken door cyclisch terug te keren naar de doelfase.",
+        "Ons modulaire coachingprogramma bestaat uit 5 flexibele fases: Onboarding, Herstel, Voorbereiding, Doelfase en Optimalisatie. Het verschil met standaard programma's is dat elke fase precies zo lang duurt als jij nodig hebt. Het programma past zich aan jou aan, niet andersom.",
     },
     {
       question: "Wat is het verschil tussen 6 en 12 maanden?",
       answer:
-        "Het 6 maanden traject is perfect voor een complete doorloop van alle fases en het bereiken van één hoofddoel. Het 12 maanden traject biedt extra tijd voor meerdere doelen (bijvoorbeeld eerst vetverlies, dan spieropbouw), diepere gewoontevorming en meer flexibiliteit. Bij 12 maanden kun je de doelfase cyclisch herhalen voor verschillende doelstellingen.",
+        "Het 6 maanden traject is perfect voor een complete doorloop van alle fases en het bereiken van één hoofddoel. Het 12 maanden traject biedt extra tijd voor meerdere doelen (bijvoorbeeld eerst vetverlies, dan spieropbouw), diepere gewoontevorming en meer flexibiliteit.",
     },
     {
       question: "Hoe werken de wekelijkse check-ins?",
       answer:
-        "Elke week heb je een persoonlijk check-in moment met je coach. Je deelt je voortgang, metingen en eventuele uitdagingen via de app. Je coach bekijkt alles en geeft uitgebreide feedback, vaak in video-format. Zo blijf je altijd op koers en wordt je programma continu geoptimaliseerd op basis van jouw resultaten.",
+        "Elke week heb je een persoonlijk check-in moment met je coach. Je deelt je voortgang, metingen en eventuele uitdagingen via de app. Je coach bekijkt alles en geeft uitgebreide feedback, vaak in video-format.",
     },
     {
-      question: "Wat krijg ik allemaal met de Evotion Coaching App?",
+      question: "Kan ik ook thuis trainen?",
       answer:
-        "Via de app krijg je toegang tot je gepersonaliseerde trainingsschema's met video-instructies, je voedingsplan, directe communicatie met je coach, voortgangsmonitoring met foto's en metingen, en alle tools die je nodig hebt voor je transformatie. Daarnaast krijg je toegang tot het e-learning portal voor educatie en het klanten support portal voor al je vragen.",
-    },
-    {
-      question: "Kan ik ook thuis trainen of moet ik naar de sportschool?",
-      answer:
-        "Je kunt zowel thuis als in de sportschool trainen. Je coach stelt een programma samen dat past bij jouw beschikbare apparatuur en situatie. Of je nu thuis traint met minimale uitrusting, of in een volledig uitgeruste sportschool - je programma wordt volledig aangepast aan jouw mogelijkheden.",
-    },
-    {
-      question: "Hoe neem ik contact op om te starten?",
-      answer:
-        "Je kunt ons bereiken via e-mail op info@evotion-coaching.nl of stuur een bericht via WhatsApp. We plannen dan een vrijblijvend kennismakingsgesprek om je doelen te bespreken en te kijken welk traject het beste bij jou past.",
+        "Je kunt zowel thuis als in de sportschool trainen. Je coach stelt een programma samen dat past bij jouw beschikbare apparatuur en situatie.",
     },
   ]
-
-  const toggleFeature = (index: number) => {
-    setExpandedFeature(expandedFeature === index ? null : index)
-  }
 
   const toggleFaq = (index: number) => {
     setExpandedFaq(expandedFaq === index ? null : index)
@@ -212,116 +194,335 @@ export default function OnlineCoachingClientPage() {
     const message = encodeURIComponent(
       `Hoi Martin, ik heb interesse in het ${pakket} voor online coaching. Kunnen we een kennismakingsgesprek plannen?`,
     )
-    window.open(`https://wa.me/31612345678?text=${message}`, "_blank")
+    window.open(`https://wa.me/31638521671?text=${message}`, "_blank")
   }
 
   return (
     <div className="min-h-screen bg-white">
       <Header />
 
-      {/* Hero Section - #1e1839 donkerpaars achtergrond */}
-      <section className="relative py-12 lg:py-32 overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0">
-          <Image src="/images/dscf2364.jpg" alt="Gym background" fill className="object-cover" priority />
+      {/* HERO - Premium Design */}
+      <section className="relative min-h-[90vh] lg:min-h-screen flex items-center overflow-hidden bg-[#1e1839]">
+        {/* Video Background */}
+        <div className="absolute inset-0 z-0">
+          <iframe
+            src="https://www.youtube.com/embed/SpTe8MThxVc?autoplay=1&mute=1&loop=1&playlist=SpTe8MThxVc&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] lg:w-[200%] lg:h-[200%]"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            style={{ pointerEvents: "none" }}
+            title="Evotion Coaching Video"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1e1839]/95 via-[#1e1839]/85 to-[#1e1839]/98" />
         </div>
-        {/* Purple gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1e1839]/95 via-[#1e1839]/85 to-[#1e1839]/80"></div>
 
-        <div className="container mx-auto px-4 lg:px-6 relative z-10">
-          <div className="max-w-4xl mx-auto text-center space-y-4 lg:space-8">
-            <Badge className="bg-[#bad4e1]/20 text-white hover:bg-[#bad4e1]/30 backdrop-blur-sm text-xs lg:text-sm px-3 lg:px-4 py-1.5 lg:py-2 inline-flex border-0">
-              <MapPin className="w-3 h-3 lg:w-4 lg:h-4 mr-1.5 lg:mr-2" />
-              Modulair Coachingprogramma
-            </Badge>
+        <div className="container mx-auto px-6 relative z-10 pt-20 lg:pt-0">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Badge */}
+            <div className={`mb-6 transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <Badge className="bg-white/10 text-white border-white/20 backdrop-blur-sm px-4 py-2">
+                <Smartphone className="w-4 h-4 mr-2" />
+                Modulair 5-Fasen Programma
+              </Badge>
+            </div>
 
-            <h1 className="text-3xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+            {/* Title */}
+            <h1 className={`text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight transition-all duration-700 delay-100 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               Online Coaching
-              <span className="block text-[#bad4e1]">Op Jouw Tempo</span>
+              <span className="block text-[#bad4e1] mt-2">Op Jouw Tempo</span>
             </h1>
 
-            <p className="text-base lg:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto px-2">
-              Een persoonlijk 5-fasen programma dat zich aanpast aan jouw lichaam, doelen en tempo. Geen standaard
-              schema's, maar maatwerk voor duurzame resultaten.
+            {/* Subtitle */}
+            <p className={`text-lg lg:text-xl text-white/80 mb-8 max-w-2xl mx-auto leading-relaxed transition-all duration-700 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              Een persoonlijk programma dat zich aanpast aan jouw lichaam, doelen en tempo. Geen standaard schema's, maar maatwerk.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center pt-2 lg:pt-4 px-4">
+            {/* CTAs */}
+            <div className={`flex flex-col sm:flex-row gap-4 justify-center mb-12 transition-all duration-700 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               <Button
                 size="lg"
                 onClick={handleEmail}
-                className="bg-white text-[#1e1839] hover:bg-gray-100 px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold shadow-xl w-full sm:w-auto"
+                className="bg-white text-[#1e1839] hover:bg-gray-100 px-8 py-6 text-lg font-semibold rounded-2xl shadow-xl"
               >
-                <Mail className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
-                Stuur een E-mail
+                <Mail className="w-5 h-5 mr-2" />
+                Start Gesprek
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 onClick={() => handleWhatsApp("online coaching traject")}
-                className="border-2 border-white text-white hover:bg-white hover:text-[#1e1839] px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold bg-transparent w-full sm:w-auto"
+                className="border-2 border-white text-white hover:bg-white hover:text-[#1e1839] px-8 py-6 text-lg font-semibold rounded-2xl bg-transparent"
               >
-                <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
-                WhatsApp Bericht
+                <MessageCircle className="w-5 h-5 mr-2" />
+                WhatsApp
               </Button>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 lg:gap-6 pt-4 lg:pt-8 max-w-2xl mx-auto">
-              <div className="text-center">
-                <div className="text-xl lg:text-3xl font-bold text-white mb-1">5</div>
-                <div className="text-xs lg:text-sm text-white/80">Flexibele Fases</div>
-              </div>
-              <div className="text-center">
-                <div className="text-xl lg:text-3xl font-bold text-white mb-1">100%</div>
-                <div className="text-xs lg:text-sm text-white/80">Op Maat Gemaakt</div>
-              </div>
-              <div className="text-center">
-                <div className="text-xl lg:text-3xl font-bold text-white mb-1">6-12</div>
-                <div className="text-xs lg:text-sm text-white/80">Maanden Traject</div>
-              </div>
+            {/* Stats */}
+            <div className={`grid grid-cols-3 gap-6 max-w-lg mx-auto transition-all duration-700 delay-400 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              {[
+                { value: "5", label: "Fases" },
+                { value: "100%", label: "Op Maat" },
+                { value: "6-12", label: "Maanden" },
+              ].map((stat, i) => (
+                <div key={i} className="text-center">
+                  <div className="text-2xl lg:text-3xl font-bold text-white">{stat.value}</div>
+                  <div className="text-xs lg:text-sm text-white/60">{stat.label}</div>
+                </div>
+              ))}
             </div>
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce hidden lg:block">
+          <ChevronDown className="w-6 h-6 text-white/50" />
+        </div>
+      </section>
+
+      {/* WHAT YOU GET - Horizontal scroll on mobile */}
+      <section className="py-16 lg:py-32 bg-white overflow-hidden">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-8 lg:mb-16">
+            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4">
+              <Award className="w-4 h-4 mr-2" />
+              Alles Inclusief
+            </Badge>
+            <h2 className="text-3xl lg:text-5xl font-bold text-[#1e1839] mb-4">
+              Wat Je <span className="text-[#bad4e1]">Krijgt</span>
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto text-sm lg:text-base">
+              Alle tools en ondersteuning voor een succesvolle transformatie.
+            </p>
+          </div>
+
+          {/* Mobile: Compact sliding ticker */}
+          <div className="lg:hidden overflow-hidden">
+            {/* Single active feature display */}
+            <div className="relative h-20 mb-4">
+              {[
+                { icon: Smartphone, title: "Evotion App", desc: "Trainingen, voeding & chat" },
+                { icon: GraduationCap, title: "E-Learning", desc: "Educatie over training & voeding" },
+                { icon: Video, title: "Support Portal", desc: "Video-antwoorden op je vragen" },
+                { icon: User, title: "Wekelijkse Check-ins", desc: "Persoonlijke begeleiding" },
+                { icon: LineChart, title: "Voortgangsanalyses", desc: "Foto's en metingen" },
+                { icon: RotateCcw, title: "Flexibel Programma", desc: "Past zich aan jou aan" },
+              ].map((item, index) => (
+                <div
+                  key={index}
+                  onClick={() => setActiveFeature((index + 1) % 6)}
+                  className={`absolute inset-0 flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer transition-all duration-500 ease-out ${
+                    index === activeFeature 
+                      ? 'opacity-100 translate-x-0' 
+                      : index === (activeFeature - 1 + 6) % 6
+                        ? 'opacity-0 -translate-x-full'
+                        : 'opacity-0 translate-x-full'
+                  }`}
+                >
+                  <div className="w-14 h-14 rounded-xl bg-[#1e1839] flex items-center justify-center flex-shrink-0">
+                    <item.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-grow min-w-0">
+                    <h3 className="text-base font-bold text-[#1e1839]">{item.title}</h3>
+                    <p className="text-sm text-gray-600 truncate">{item.desc}</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                </div>
+              ))}
+            </div>
+            
+            {/* Progress bar */}
+            <div className="flex gap-1">
+              {[0, 1, 2, 3, 4, 5].map((index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveFeature(index)}
+                  className={`h-1 rounded-full flex-1 transition-all duration-300 ${
+                    index === activeFeature ? 'bg-[#1e1839]' : 'bg-gray-200'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop: Grid layout */}
+          <div className="hidden lg:grid grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {[
+              { icon: Smartphone, title: "Evotion App", desc: "Trainingen, voeding & chat" },
+              { icon: GraduationCap, title: "E-Learning", desc: "Educatie over training & voeding" },
+              { icon: Video, title: "Support Portal", desc: "Video-antwoorden op je vragen" },
+              { icon: User, title: "Wekelijkse Check-ins", desc: "Persoonlijke begeleiding" },
+              { icon: LineChart, title: "Voortgangsanalyses", desc: "Foto's en metingen" },
+              { icon: RotateCcw, title: "Flexibel Programma", desc: "Past zich aan jou aan" },
+            ].map((item, index) => (
+              <div
+                key={index}
+                className="group p-6 bg-gray-50 rounded-2xl border border-gray-100 hover:border-[#1e1839]/20 hover:shadow-lg transition-all duration-300"
+              >
+                <div className="w-12 h-12 bg-[#1e1839] rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <item.icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-[#1e1839] mb-1">{item.title}</h3>
+                <p className="text-sm text-gray-600">{item.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Transformaties Section - Witte achtergrond */}
-      <section className="py-12 lg:py-24 bg-white">
-        <div className="container mx-auto px-4 lg:px-6">
-          <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4 lg:mb-6 inline-flex">
-              <Star className="w-4 h-4 mr-2" />
-              Resultaten
+      {/* 5 PHASES - Timeline Design */}
+      <section className="py-20 lg:py-32 bg-[#1e1839] relative overflow-hidden">
+        {/* Subtle pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+            backgroundSize: '40px 40px'
+          }} />
+        </div>
+
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-12 lg:mb-16">
+            <Badge className="bg-white/10 text-white border-white/20 mb-4">
+              <Layers className="w-4 h-4 mr-2" />
+              Het Programma
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-[#1e1839] mb-3 lg:mb-6">
-              Echte <span className="text-[#bad4e1]">Transformaties</span>
+            <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4">
+              De 5 Fases
             </h2>
-            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
-              Bekijk de resultaten van onze klanten die met de Evotion App en online coaching hun doelen hebben bereikt.
+            <p className="text-white/70 max-w-2xl mx-auto">
+              Een gestructureerd maar flexibel programma dat zich aanpast aan jouw tempo.
             </p>
           </div>
 
-          {/* Transformations Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-8 max-w-6xl mx-auto mb-12 lg:mb-20">
-            {[
-              {
-                image: "/images/vrouw-20transformatie.png",
-                result: "-9.5kg",
-              },
-              {
-                image: "/images/salim-20transformatie.png",
-                result: "-8.1kg",
-              },
-              {
-                image: "/images/martin-20transformatie.png",
-                result: "-10.7kg",
-              },
-            ].map((transformation, index) => (
-              <div key={index} className="relative group">
-                <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+          {/* Desktop Timeline */}
+          <div className="hidden lg:block max-w-5xl mx-auto">
+            <div className="relative">
+              {/* Connection line */}
+              <div className="absolute top-8 left-0 right-0 h-0.5 bg-white/20" />
+              
+              <div className="grid grid-cols-5 gap-4">
+                {phases.map((phase, index) => (
+                  <div key={index} className="relative">
+                    {/* Step number */}
+                    <div className={`w-16 h-16 mx-auto rounded-2xl bg-white/20 flex items-center justify-center text-white text-2xl font-bold shadow-lg z-10 relative ${phase.highlight ? 'ring-4 ring-white/30 scale-110' : ''}`}>
+                      {phase.step}
+                    </div>
+                    
+                    {/* Content */}
+                    <div className={`mt-6 text-center ${phase.highlight ? 'transform -translate-y-1' : ''}`}>
+                      <span className="text-xs text-white/40 uppercase tracking-wider">Stap {phase.step}</span>
+                      <h3 className={`font-bold mb-1 ${phase.highlight ? 'text-white text-lg' : 'text-white/90'}`}>
+                        {phase.title}
+                      </h3>
+                      <Badge variant="outline" className="border-white/30 text-white/70 text-xs mb-2">
+                        {phase.duration}
+                      </Badge>
+                      <p className="text-white/60 text-sm leading-relaxed">
+                        {phase.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile - Simple stacked cards */}
+          <div className="lg:hidden space-y-3">
+            {phases.map((phase, index) => (
+              <div 
+                key={index} 
+                className={`p-5 rounded-2xl transition-all ${
+                  phase.highlight 
+                    ? 'bg-white/15 border border-white/20' 
+                    : 'bg-white/5'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white text-sm font-bold">
+                      {phase.step}
+                    </span>
+                    <h3 className={`font-bold ${phase.highlight ? 'text-white' : 'text-white/90'}`}>
+                      {phase.title}
+                    </h3>
+                  </div>
+                  <span className="text-xs text-white/50 bg-white/10 px-2 py-1 rounded-full">
+                    {phase.duration}
+                  </span>
+                </div>
+                <p className="text-white/60 text-sm leading-relaxed pl-11">{phase.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TRANSFORMATIONS - Auto Carousel Mobile */}
+      <section className="py-20 lg:py-32 bg-white relative">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+        
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4">
+              <Star className="w-4 h-4 mr-2" />
+              Resultaten
+            </Badge>
+            <h2 className="text-3xl lg:text-5xl font-bold text-[#1e1839] mb-4">
+              Echte Transformaties
+            </h2>
+          </div>
+
+          {/* Mobile Carousel */}
+          <div className="lg:hidden">
+            <div 
+              ref={transformationRef}
+              className="flex gap-0 overflow-x-auto -mx-6 snap-x snap-mandatory scrollbar-hide scroll-smooth"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {transformations.map((t, index) => (
+                <div 
+                  key={t.name} 
+                  className={`flex-shrink-0 w-screen snap-center transition-all duration-500 ${
+                    index === activeTransformation ? 'opacity-100' : 'opacity-40'
+                  }`}
+                >
+                  <div className="relative aspect-[1/1]">
+                    <Image
+                      src={t.image || "/placeholder.svg"}
+                      alt={`${t.name}'s transformatie`}
+                      fill
+                      className="object-cover object-top"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Dots */}
+            <div className="flex justify-center gap-2 mt-4">
+              {transformations.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveTransformation(index)}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === activeTransformation ? 'bg-[#1e1839] w-6' : 'bg-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop Grid */}
+          <div className="hidden lg:grid grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {transformations.map((t, index) => (
+              <div key={t.name} className="group">
+                <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-lg border border-gray-100 group-hover:shadow-xl transition-all">
                   <Image
-                    src={transformation.image || "/placeholder.svg"}
-                    alt={`Transformatie ${transformation.result}`}
+                    src={t.image || "/placeholder.svg"}
+                    alt={`${t.name}'s transformatie`}
                     fill
-                    className="object-cover"
+                    className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
               </div>
@@ -330,246 +531,72 @@ export default function OnlineCoachingClientPage() {
         </div>
       </section>
 
-      {/* Waarom Modulair Section - Lichtgrijze achtergrond */}
-      <section className="py-12 lg:py-24 bg-gray-50">
-        <div className="container mx-auto px-4 lg:px-6">
-          <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4 lg:mb-6 inline-flex">
-              <Puzzle className="w-4 h-4 mr-2" />
-              Onze Aanpak
-            </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-[#1e1839] mb-3 lg:mb-6">
-              Waarom een Modulair Programma?
-            </h2>
-            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
-              Geen standaard schema's of one-size-fits-all aanpak. Jouw lichaam is uniek en verdient een programma dat
-              zich aanpast.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-8">
-            {[
-              {
-                icon: Puzzle,
-                title: "Flexibel",
-                description: "Elke fase wordt aangepast aan jouw voortgang en feedback",
-              },
-              {
-                icon: Target,
-                title: "Doelgericht",
-                description: "Specifieke doelen per fase voor meetbare resultaten",
-              },
-              {
-                icon: TrendingUp,
-                title: "Progressief",
-                description: "Geleidelijke opbouw voor duurzame transformatie",
-              },
-              { icon: RotateCcw, title: "Veilig", description: "Wetenschappelijk onderbouwde methodes" },
-            ].map((item, index) => (
-              <Card
-                key={index}
-                className="border border-gray-200 hover:shadow-lg transition-all duration-300 text-center bg-white"
-              >
-                <CardContent className="p-4 lg:p-8 space-y-2 lg:space-y-4">
-                  <div className="w-10 h-10 lg:w-16 lg:h-16 bg-[#1e1839]/10 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto">
-                    <item.icon className="w-5 h-5 lg:w-8 lg:h-8 text-[#1e1839]" />
-                  </div>
-                  <h3 className="text-sm lg:text-xl font-bold text-[#1e1839]">{item.title}</h3>
-                  <p className="text-xs lg:text-base text-gray-600 leading-relaxed hidden sm:block">
-                    {item.description}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 5 Fases Section - #1e1839 donkerpaars achtergrond */}
-      <section className="py-12 lg:py-24 bg-[#1e1839]">
-        <div className="container mx-auto px-4 lg:px-6">
-          <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-white/20 text-white border-white/30 mb-4 lg:mb-6 inline-flex">
-              <Layers className="w-4 h-4 mr-2" />
-              Het Programma
-            </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-white mb-3 lg:mb-6">De 5 Fases van Jouw Reis</h2>
-            <p className="text-sm lg:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed px-2">
-              Een gestructureerd maar flexibel programma dat jou stap voor stap naar je doelen begeleidt.
-            </p>
-          </div>
-
-          <div className="space-y-4 lg:space-y-6 max-w-4xl mx-auto">
-            {phases.map((phase, index) => (
-              <Card
-                key={index}
-                className={`border-2 transition-all duration-300 hover:shadow-lg bg-white ${
-                  phase.highlight ? "border-[#bad4e1]" : "border-gray-200"
-                }`}
-              >
-                <CardContent className="p-4 lg:p-8">
-                  <div className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6">
-                    <div
-                      className={`w-12 h-12 lg:w-16 lg:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center flex-shrink-0 mx-auto lg:mx-0 ${
-                        phase.highlight ? "bg-[#1e1839] text-white" : "bg-[#1e1839]/10 text-[#1e1839]"
-                      }`}
-                    >
-                      {phase.icon}
-                    </div>
-                    <div className="flex-grow text-center lg:text-left">
-                      <div className="flex flex-col lg:flex-row lg:items-center gap-1 lg:gap-3 mb-2">
-                        <h3 className="text-lg lg:text-2xl font-bold text-[#1e1839]">{phase.title}</h3>
-                        <Badge
-                          variant="outline"
-                          className={`text-xs lg:text-sm w-fit mx-auto lg:mx-0 ${
-                            phase.highlight
-                              ? "border-[#bad4e1] text-[#1e1839] bg-[#bad4e1]/20"
-                              : "border-gray-300 text-gray-600"
-                          }`}
-                        >
-                          <Clock className="w-3 h-3 mr-1" />
-                          {phase.duration}
-                        </Badge>
-                      </div>
-                      <p className="text-sm lg:text-base text-gray-600 mb-3 lg:mb-4">{phase.description}</p>
-                      <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
-                        {phase.features.map((feature, idx) => (
-                          <span
-                            key={idx}
-                            className="text-xs lg:text-sm bg-gray-100 text-gray-700 px-2 lg:px-3 py-1 rounded-full"
-                          >
-                            {feature}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Wat Je Krijgt Section - Witte achtergrond */}
-      <section className="py-12 lg:py-24 bg-white">
-        <div className="container mx-auto px-4 lg:px-6">
-          <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4 lg:mb-6 inline-flex">
-              <Award className="w-4 h-4 mr-2" />
-              Alles Voor Jouw Succes
-            </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-[#1e1839] mb-3 lg:mb-6">Wat Je Krijgt</h2>
-            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
-              Alle tools en ondersteuning die je nodig hebt voor een succesvolle transformatie.
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center max-w-6xl mx-auto">
-            <div className="relative flex justify-center order-1 lg:order-1">
-              <div className="relative w-64 lg:w-96">
-                <Image
-                  src="/images/evotion-20app-20mock-up.png"
-                  alt="Evotion Coaching App"
-                  width={384}
-                  height={768}
-                  className="object-contain drop-shadow-2xl"
-                />
-              </div>
-            </div>
-
-            {/* Features Grid */}
-            <div className="order-2 lg:order-2">
-              <h3 className="text-xl lg:text-3xl font-bold text-[#1e1839] mb-6 lg:mb-8 text-center lg:text-left">
-                De Evotion Coaching App
-              </h3>
-              <div className="grid grid-cols-2 gap-3 lg:gap-4">
-                {[
-                  { icon: Dumbbell, title: "Trainingsschema's", desc: "100% op maat" },
-                  { icon: Apple, title: "Voedingsplan", desc: "Flexibel & praktisch" },
-                  { icon: MessageCircle, title: "Direct Contact", desc: "Met je coach" },
-                  { icon: Video, title: "Loom Videos", desc: "Persoonlijke uitleg" },
-                  { icon: LineChart, title: "Voortgang", desc: "Tracking & inzichten" },
-                  { icon: RotateCcw, title: "Aanpassingen", desc: "Wanneer nodig" },
-                ].map((item, index) => (
-                  <div
-                    key={index}
-                    className="bg-[#1e1839]/5 rounded-xl p-4 lg:p-5 text-center border border-[#1e1839]/10 hover:border-[#1e1839]/30 transition-all"
-                  >
-                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-[#1e1839]/10 rounded-xl flex items-center justify-center mx-auto mb-2 lg:mb-3">
-                      <item.icon className="w-5 h-5 lg:w-6 lg:h-6 text-[#1e1839]" />
-                    </div>
-                    <h4 className="text-sm lg:text-base font-bold text-[#1e1839] mb-1">{item.title}</h4>
-                    <p className="text-xs lg:text-sm text-gray-600">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trajecten Section - Donkerpaarse achtergrond */}
-      <section className="py-12 lg:py-24 bg-[#1e1839]">
-        <div className="container mx-auto px-4 lg:px-6">
-          <div className="text-center mb-8 lg:mb-16">
-            <Badge className="bg-white/20 text-white border-white/30 mb-4 lg:mb-6 inline-flex">
+      {/* PRICING - Modern Cards */}
+      <section className="py-20 lg:py-32 bg-gray-50 relative">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1e1839]/5 via-[#1e1839]/10 to-[#1e1839]/5" />
+        
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12 lg:mb-16">
+            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4">
               <Calendar className="w-4 h-4 mr-2" />
               Trajecten
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-white mb-3 lg:mb-6">Kies Jouw Traject</h2>
-            <p className="text-sm lg:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed px-2">
-              Twee opties voor verschillende doelen en situaties. Beide trajecten omvatten het volledige 5-fasen
-              programma.
-            </p>
+            <h2 className="text-3xl lg:text-5xl font-bold text-[#1e1839] mb-4">
+              Kies Jouw Traject
+            </h2>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-4 lg:gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {packages.map((pkg, index) => (
               <Card
                 key={index}
-                className={`relative border-2 transition-all duration-300 hover:shadow-2xl bg-white ${
-                  pkg.popular ? "border-[#bad4e1] shadow-xl lg:scale-105" : "border-white/20 hover:border-[#bad4e1]"
+                className={`relative overflow-hidden transition-all duration-300 ${
+                  pkg.popular 
+                    ? 'border-2 border-[#1e1839] shadow-xl scale-[1.02]' 
+                    : 'border border-gray-200 hover:border-[#1e1839]/30 hover:shadow-lg'
                 }`}
               >
                 {pkg.popular && (
-                  <div className="absolute -top-3 lg:-top-4 left-1/2 transform -translate-x-1/2 w-16 md:w-24 h-4 md:h-6 bg-[#bad4e1] rounded-b-xl"></div>
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-[#1e1839]" />
                 )}
-
-                <CardContent className="p-5 lg:p-8 space-y-4 lg:space-y-6">
-                  <div className="text-center space-y-2 lg:space-y-4 pt-2 lg:pt-0">
-                    <h3 className="text-xl lg:text-2xl font-bold text-[#1e1839]">{pkg.title}</h3>
-                    <div className="space-y-1 lg:space-y-2">
-                      <div className="text-2xl lg:text-3xl font-bold text-[#1e1839]">Op Aanvraag</div>
-                      <div className="text-sm lg:text-lg font-medium text-gray-600">{pkg.duration}</div>
-                      <div className="text-xs lg:text-sm font-medium text-[#1e1839]/70">{pkg.note}</div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 lg:space-y-3">
+                
+                <CardContent className="p-6 lg:p-8">
+                  {pkg.popular && (
+                    <Badge className="bg-[#1e1839] text-white mb-4">Aanbevolen</Badge>
+                  )}
+                  
+                  <h3 className="text-2xl lg:text-3xl font-bold text-[#1e1839] mb-1">{pkg.title}</h3>
+                  <p className="text-gray-600 mb-2">{pkg.subtitle}</p>
+                  <p className="text-sm text-[#1e1839]/70 mb-6">{pkg.duration}</p>
+                  
+                  <div className="space-y-3 mb-8">
                     {pkg.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-start gap-2 lg:gap-3">
-                        <CheckCircle className="w-4 h-4 lg:w-5 lg:h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-xs lg:text-sm">{feature}</span>
+                      <div key={idx} className="flex items-center gap-3">
+                        <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                        <span className="text-gray-700 text-sm">{feature}</span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="space-y-2 lg:space-y-3 pt-2 lg:pt-4">
+                  <div className="space-y-3">
                     <Button
-                      onClick={handleEmail}
-                      className="w-full py-2.5 lg:py-3 text-sm lg:text-lg font-semibold bg-[#1e1839] hover:bg-[#1e1839]/90 text-white"
+                      onClick={() => handleWhatsApp(pkg.title)}
+                      className={`w-full py-6 text-base font-semibold rounded-xl ${
+                        pkg.popular 
+                          ? 'bg-[#1e1839] hover:bg-[#1e1839]/90 text-white' 
+                          : 'bg-[#1e1839] hover:bg-[#1e1839]/90 text-white'
+                      }`}
                     >
-                      <Mail className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
-                      Stuur E-mail
+                      <MessageCircle className="w-5 h-5 mr-2" />
+                      Start via WhatsApp
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => handleWhatsApp(pkg.title)}
-                      className="w-full py-2.5 lg:py-3 text-sm lg:text-lg font-semibold border-2 border-[#1e1839] text-[#1e1839] hover:bg-[#1e1839] hover:text-white"
+                      onClick={handleEmail}
+                      className="w-full py-6 text-base font-semibold rounded-xl border-2 border-[#1e1839]/20 text-[#1e1839] hover:bg-[#1e1839]/5 bg-transparent"
                     >
-                      <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
-                      WhatsApp
+                      <Mail className="w-5 h-5 mr-2" />
+                      Stuur E-mail
                     </Button>
                   </div>
                 </CardContent>
@@ -579,103 +606,75 @@ export default function OnlineCoachingClientPage() {
         </div>
       </section>
 
-      {/* FAQ Section - Witte achtergrond */}
-      <section className="py-12 lg:py-20 bg-white">
-        <div className="container mx-auto px-4 lg:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-10 lg:mb-16">
-            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4 lg:mb-6 inline-flex">
-              <Layers className="w-4 h-4 mr-2" />
+      {/* FAQ - Clean Accordion */}
+      <section className="py-20 lg:py-32 bg-gray-50">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4">
               FAQ
             </Badge>
-            <h2 className="text-2xl lg:text-5xl font-bold text-[#1e1839] mb-4 lg:mb-6">
-              Veelgestelde <span className="text-[#bad4e1]">Vragen</span>
+            <h2 className="text-3xl lg:text-5xl font-bold text-[#1e1839] mb-4">
+              Veelgestelde Vragen
             </h2>
-            <p className="text-sm lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
-              Heb je vragen over online coaching of het modulaire programma? Hieronder vind je antwoorden op de meest
-              gestelde vragen.
-            </p>
           </div>
 
-          <div className="max-w-3xl mx-auto space-y-3 md:space-y-4">
+          <div className="max-w-2xl mx-auto space-y-3">
             {faqs.map((faq, index) => (
-              <Card
+              <div
                 key={index}
-                className={`hover:shadow-md transition-all duration-300 bg-white ${
-                  expandedFaq === index ? "border-[#1e1839]" : "border-gray-200"
+                className={`border rounded-xl transition-all ${
+                  expandedFaq === index ? 'border-[#1e1839] bg-[#1e1839]/5' : 'border-gray-200'
                 }`}
               >
-                <CardContent className="p-4 md:p-6">
-                  <button
-                    onClick={() => toggleFaq(index)}
-                    className="flex items-center justify-between w-full text-left gap-3"
-                  >
-                    <h3 className="font-bold text-sm lg:text-lg text-[#1e1839]">{faq.question}</h3>
-                    {expandedFaq === index ? (
-                      <ChevronUp className="w-4 h-4 lg:w-5 lg:h-5 text-[#1e1839] flex-shrink-0" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 lg:w-5 lg:h-5 text-[#1e1839] flex-shrink-0" />
-                    )}
-                  </button>
-                  {expandedFaq === index && (
-                    <div className="mt-3 md:mt-4 text-gray-600 border-t border-gray-200 pt-3 md:pt-4 text-xs lg:text-sm leading-relaxed">
-                      {faq.answer}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                <button
+                  onClick={() => toggleFaq(index)}
+                  className="flex items-center justify-between w-full text-left p-5 gap-4"
+                >
+                  <h3 className="font-semibold text-[#1e1839]">{faq.question}</h3>
+                  <ChevronDown className={`w-5 h-5 text-[#1e1839] flex-shrink-0 transition-transform ${expandedFaq === index ? 'rotate-180' : ''}`} />
+                </button>
+                {expandedFaq === index && (
+                  <div className="px-5 pb-5 text-gray-600 text-sm leading-relaxed border-t border-gray-100 pt-4">
+                    {faq.answer}
+                  </div>
+                )}
+              </div>
             ))}
-          </div>
-
-          <div className="text-center mt-8 md:mt-12">
-            <p className="text-gray-600 mb-4 md:mb-6 text-xs lg:text-base">
-              Heb je een andere vraag die hier niet beantwoord wordt?
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-              <Button
-                onClick={handleEmail}
-                className="bg-[#1e1839] hover:bg-[#1e1839]/90 text-white text-sm lg:text-base"
-              >
-                <Mail className="w-4 h-4 mr-2" />
-                E-mail Je Vraag
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleWhatsApp("online coaching")}
-                className="border-2 border-[#1e1839] text-[#1e1839] hover:bg-[#1e1839] hover:text-white text-sm lg:text-base"
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Stuur WhatsApp Bericht
-              </Button>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section - #1e1839 gradient */}
-      <section className="py-16 lg:py-24 bg-gradient-to-br from-[#1e1839] to-[#1e1839]/80 relative overflow-hidden">
-        <div className="container mx-auto px-4 lg:px-6 text-center">
-          <h2 className="text-2xl lg:text-5xl font-bold text-white mb-3 lg:mb-6">Klaar voor Jouw Transformatie?</h2>
-          <p className="text-sm lg:text-xl text-white/90 max-w-2xl mx-auto mb-6 lg:mb-8 px-2">
-            Start vandaag met een programma dat écht bij jou past. Neem contact op voor een vrijblijvend gesprek.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center px-4">
-            <Button
-              size="lg"
-              onClick={handleEmail}
-              className="bg-white text-[#1e1839] hover:bg-gray-100 px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold"
-            >
-              <Mail className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
-              Stuur een E-mail
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => handleWhatsApp("online coaching")}
-              className="border-2 border-white text-white hover:bg-white hover:text-[#1e1839] px-6 lg:px-8 py-4 lg:py-6 text-base lg:text-lg font-semibold bg-transparent"
-            >
-              <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2" />
-              WhatsApp Bericht
-            </Button>
+      {/* CTA - Final Push */}
+      <section className="py-20 lg:py-32 bg-[#1e1839] relative overflow-hidden">
+        <div className="container mx-auto px-6 text-center relative z-10">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-2xl lg:text-4xl font-bold text-white mb-4">
+              Klaar voor Jouw Transformatie?
+            </h2>
+            <p className="text-white/70 max-w-xl mx-auto mb-8">
+              Start vandaag met een programma dat echt bij jou past.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                size="lg"
+                onClick={handleEmail}
+                className="bg-white text-[#1e1839] hover:bg-gray-100 px-8 py-6 text-lg font-semibold rounded-2xl shadow-lg"
+              >
+                <Mail className="w-5 h-5 mr-2" />
+                Stuur E-mail
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => handleWhatsApp("online coaching")}
+                className="border-2 border-white text-white hover:bg-white hover:text-[#1e1839] px-8 py-6 text-lg font-semibold rounded-2xl bg-transparent"
+              >
+                <MessageCircle className="w-5 h-5 mr-2" />
+                WhatsApp
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </div>
           </div>
         </div>
       </section>

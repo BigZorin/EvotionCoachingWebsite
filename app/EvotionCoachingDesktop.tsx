@@ -601,9 +601,9 @@ export default function EvotionCoachingDesktop() {
                 ].map((feature) => (
                   <div 
                     key={feature.title} 
-                    className="flex items-center gap-5 bg-gray-50 rounded-2xl p-5 hover:bg-gray-100 transition-colors duration-300"
+                    className="flex items-center gap-5 bg-gray-50 rounded-2xl p-5 hover:bg-gray-100 transition-colors duration-300 border border-gray-100"
                   >
-                    <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                    <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100">
                       <feature.icon className="w-7 h-7 text-evotion-primary" />
                     </div>
                     <div>
@@ -631,7 +631,7 @@ export default function EvotionCoachingDesktop() {
             <div className="relative lg:order-0">
               <div className="relative mx-auto w-72 lg:w-80">
                 {/* Glow */}
-                <div className="absolute -inset-8 bg-gradient-to-b from-evotion-primary/20 to-transparent rounded-full blur-3xl opacity-50" />
+                <div className="absolute -inset-8 bg-gradient-to-b from-evotion-primary/10 to-transparent rounded-full blur-3xl opacity-50" />
                 
                 {/* Phone Frame */}
                 <div className="relative bg-gray-900 rounded-[3rem] p-3 shadow-2xl">
@@ -650,8 +650,77 @@ export default function EvotionCoachingDesktop() {
         </div>
       </section>
 
+      {/* TESTIMONIALS */}
+      <section className="py-32 bg-[#1e1839] relative overflow-hidden">
+        <div className="container mx-auto px-6 lg:px-12 relative z-10">
+          {/* Section Header */}
+          <div className="max-w-3xl mx-auto text-center space-y-6 mb-16">
+            <div className="flex items-center justify-center gap-3">
+              <div className="flex">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-6 h-6 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <span className="text-2xl font-bold text-white">5.0</span>
+              <span className="text-white/60">op Google</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+              Wat onze klanten zeggen
+            </h2>
+          </div>
+
+          {/* Testimonials Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {testimonials.map((testimonial, i) => (
+              <div
+                key={testimonial.name}
+                className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/15 transition-all duration-300"
+              >
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#1e1839] font-semibold">
+                    {testimonial.initial}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">{testimonial.name}</p>
+                    <div className="flex gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-white/70 leading-relaxed">"{testimonial.text}"</p>
+                <div className="flex items-center gap-2 mt-6 pt-6 border-t border-white/10">
+                  <div className="w-5 h-5 bg-white rounded flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-blue-600">G</span>
+                  </div>
+                  <span className="text-xs text-white/50">Geverifieerde Google review</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* View All Button */}
+          <div className="text-center mt-12">
+            <Button
+              variant="outline"
+              size="lg"
+              className="border border-white/20 text-white hover:bg-white hover:text-[#1e1839] px-8 py-6 rounded-full font-medium bg-transparent transition-all duration-300 group"
+              asChild
+            >
+              <a href="https://g.page/r/CXnvQA8AAABEEAg/review" target="_blank" rel="noopener noreferrer">
+                <span className="flex items-center gap-3">
+                  Bekijk Alle Reviews
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </a>
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* TRANSFORMATIONS */}
-      <section className="py-32 bg-gray-50 relative">
+      <section className="py-32 bg-white relative">
         <div className="container mx-auto px-6 lg:px-12">
           {/* Section Header */}
           <div className="max-w-3xl mx-auto text-center space-y-6 mb-20">
@@ -667,7 +736,7 @@ export default function EvotionCoachingDesktop() {
           {/* Transformation Cards */}
           <div className="space-y-8 max-w-6xl mx-auto">
             {/* Martin */}
-            <div className="group bg-white rounded-3xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-500">
+            <div className="group bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-500">
               <div className="grid lg:grid-cols-2">
                 <div className="relative aspect-[4/5] lg:aspect-auto lg:min-h-[500px]">
                   <Image
@@ -707,7 +776,7 @@ export default function EvotionCoachingDesktop() {
             </div>
 
             {/* Salim */}
-            <div className="group bg-white rounded-3xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-500">
+            <div className="group bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-500">
               <div className="grid lg:grid-cols-2">
                 <div className="p-8 lg:p-12 flex flex-col justify-center lg:order-1">
                   <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
@@ -741,7 +810,7 @@ export default function EvotionCoachingDesktop() {
             </div>
 
             {/* Wouter */}
-            <div className="group bg-white rounded-3xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-500">
+            <div className="group bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-500">
               <div className="grid lg:grid-cols-2">
                 <div className="relative aspect-[4/5] lg:aspect-auto lg:min-h-[500px]">
                   <Image
@@ -800,94 +869,16 @@ export default function EvotionCoachingDesktop() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="py-32 bg-[#1e1839] relative overflow-hidden">
-        {/* Background Pattern */}
-        <div 
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-            backgroundSize: '48px 48px'
-          }}
-        />
-        
-        <div className="container mx-auto px-6 lg:px-12 relative z-10">
-          {/* Section Header */}
-          <div className="max-w-3xl mx-auto text-center space-y-6 mb-16">
-            <div className="flex items-center justify-center gap-3">
-              <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-6 h-6 text-yellow-400 fill-current" />
-                ))}
-              </div>
-              <span className="text-2xl font-bold text-white">5.0</span>
-              <span className="text-gray-400">op Google</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
-              Wat onze klanten zeggen
-            </h2>
-          </div>
-
-          {/* Testimonials Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {testimonials.map((testimonial, i) => (
-              <div
-                key={testimonial.name}
-                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300"
-              >
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-br from-evotion-primary to-evotion-primary/70 rounded-full flex items-center justify-center text-white font-semibold">
-                    {testimonial.initial}
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-white">{testimonial.name}</h4>
-                    <div className="flex gap-0.5 mt-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <p className="text-gray-300 leading-relaxed">"{testimonial.text}"</p>
-                <div className="flex items-center gap-2 mt-6 pt-6 border-t border-white/10">
-                  <div className="w-5 h-5 bg-white rounded flex items-center justify-center">
-                    <span className="text-[10px] font-bold text-blue-600">G</span>
-                  </div>
-                  <span className="text-xs text-gray-500">Geverifieerde Google review</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* View All Button */}
-          <div className="text-center mt-12">
-            <Button
-              variant="outline"
-              size="lg"
-              className="border border-white/20 text-white hover:bg-white hover:text-gray-900 px-8 py-6 rounded-full font-medium bg-transparent transition-all duration-300 group"
-              asChild
-            >
-              <a href="https://g.page/r/CXnvQA8AAABEEAg/review" target="_blank" rel="noopener noreferrer">
-                <span className="flex items-center gap-3">
-                  Bekijk Alle Reviews
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </span>
-              </a>
-            </Button>
-          </div>
-        </div>
-      </section>
-
       {/* CONTACT */}
-      <section id="contact" className="py-32 bg-white relative">
+      <section id="contact" className="py-32 bg-[#1e1839] relative">
         <div className="container mx-auto px-6 lg:px-12">
           {/* Section Header */}
           <div className="max-w-3xl mx-auto text-center space-y-6 mb-20">
-            <p className="text-sm font-medium text-evotion-primary tracking-widest uppercase">Contact</p>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+            <p className="text-sm font-medium text-white/60 tracking-widest uppercase">Contact</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
               Klaar om te beginnen?
             </h2>
-            <p className="text-lg text-gray-600 leading-relaxed">
+            <p className="text-lg text-white/70 leading-relaxed">
               Neem contact met ons op voor een gratis kennismakingsgesprek. We bespreken jouw doelen en maken een plan op maat.
             </p>
           </div>
@@ -896,8 +887,8 @@ export default function EvotionCoachingDesktop() {
             {/* Contact Options */}
             <div className="space-y-8">
               <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-gray-900">Neem direct contact op</h3>
-                <p className="text-gray-600">
+                <h3 className="text-2xl font-bold text-white">Neem direct contact op</h3>
+                <p className="text-white/70">
                   We staan klaar om al je vragen te beantwoorden en je te helpen bij het kiezen van het juiste programma.
                 </p>
               </div>
@@ -931,24 +922,24 @@ export default function EvotionCoachingDesktop() {
                     href={contact.href}
                     target={contact.title === "WhatsApp" ? "_blank" : undefined}
                     rel={contact.title === "WhatsApp" ? "noopener noreferrer" : undefined}
-                    className="flex items-center gap-5 bg-gray-50 rounded-2xl p-5 hover:bg-gray-100 transition-all duration-300 group"
+                    className="flex items-center gap-5 bg-white/10 rounded-2xl p-5 hover:bg-white/15 transition-all duration-300 group border border-white/10"
                   >
                     <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-                      <contact.icon className="w-7 h-7 text-evotion-primary" />
+                      <contact.icon className="w-7 h-7 text-[#1e1839]" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900">{contact.title}</h4>
-                      <p className="text-gray-700">{contact.desc}</p>
-                      <p className="text-sm text-gray-500">{contact.hint}</p>
+                      <h4 className="font-semibold text-white">{contact.title}</h4>
+                      <p className="text-white/80">{contact.desc}</p>
+                      <p className="text-sm text-white/50">{contact.hint}</p>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-evotion-primary group-hover:translate-x-1 transition-all" />
+                    <ArrowRight className="w-5 h-5 text-white/40 group-hover:text-white group-hover:translate-x-1 transition-all" />
                   </a>
                 ))}
               </div>
             </div>
 
             {/* Contact Form */}
-            <div className="bg-gray-50 rounded-3xl p-8 lg:p-10">
+            <div className="bg-white rounded-3xl p-8 lg:p-10">
               <div className="space-y-6">
                 <div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Stuur een bericht</h3>
