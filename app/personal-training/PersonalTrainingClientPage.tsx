@@ -214,7 +214,7 @@ export default function PersonalTrainingClientPage() {
         </div>
 
         <div className="container mx-auto px-6 relative z-10 pt-20 lg:pt-0">
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="max-w-4xl mx-auto text-center my-6">
             {/* Badge */}
             <div className={`mb-6 transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               <Badge className="bg-white/10 text-white border-white/20 backdrop-blur-sm px-4 py-2">
