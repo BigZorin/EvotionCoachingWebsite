@@ -14,113 +14,86 @@ import {
   Heart,
   Quote,
   MessageCircle,
-  CheckCircle,
   Award,
   Target,
-  Users,
   TrendingUp,
   MessageSquare,
+  Calendar,
+  CheckCircle,
+  BookOpen,
+  Dumbbell,
+  Brain,
+  Utensils,
 } from "lucide-react"
 
 export default function MartinProfileClientPage() {
-  const [isVisible, setIsVisible] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [activeCert, setActiveCert] = useState(0)
 
   useEffect(() => {
-    setIsVisible(true)
+    setIsLoaded(true)
+    
+    // Auto-rotate certifications on mobile
+    const interval = setInterval(() => {
+      setActiveCert((prev) => (prev + 1) % 7)
+    }, 4000)
+    return () => clearInterval(interval)
   }, [])
+
+  const whatsappLink = `https://wa.me/31610935077?text=${encodeURIComponent("Hoi Martin, ik wil graag meer weten over coaching!")}`
 
   const certifications = [
     {
       title: "Metabolism School",
-      institution: "Sam Miller",
+      org: "Sam Miller",
       year: "2025",
+      desc: "Metabolisme, hormonen en energiebalans.",
       highlight: true,
-      link: "https://metabolismschool.com/",
-      skills: [
-        "Diepgaand begrip van het menselijk metabolisme en energiehuishouding",
-        "Hormoonbalans en de impact op vetverbranding en spieropbouw",
-        "Metabole flexibiliteit optimaliseren voor betere prestaties",
-        "Schildklierfunctie en stofwisseling ondersteunen via voeding",
-        "Stress, cortisol en hun effect op lichaamscompositie",
-        "Praktische strategieën voor metabole gezondheid op lange termijn",
-      ],
+      icon: Brain,
     },
     {
-      title: "Personal Trainer Cursus",
-      institution: "Menno Henselmanns",
-      year: "2024",
-      skills: [
-        "Wetenschappelijk onderbouwde trainings- en voedingsprincipes",
-        "Persoonlijke trainingsprogramma's ontwerpen voor kracht, spieropbouw en vetverlies",
-        "Inzicht in evidence-based voeding en supplementatie",
-        "Coachingstrategieën voor het begeleiden van cliënten",
-        "Analyse van klantendata voor maatwerkprogramma's",
-        "Gedragsverandering en motivatie toepassen om klantresultaten te verbeteren",
-      ],
+      title: "J3 University Level 1",
+      org: "John Jewett",
+      year: "2025",
+      desc: "Bodybuilding coaching en wedstrijdvoorbereiding.",
+      highlight: true,
+      icon: Dumbbell,
     },
     {
-      title: "Nutrition and Program Design for Trainability",
-      institution: "N1 Education",
+      title: "Personal Trainer",
+      org: "Menno Henselmans",
       year: "2024",
-      skills: [
-        "Inzicht in individuele respons op trainingsstimuli en programma-aanpassing",
-        "Gepersonaliseerde voeding- en trainingsplannen ontwerpen op basis van biofeedback",
-        "Voeding (macronutriënten) aanpassen voor vetverlies of spieropbouw en periodiseren",
-        "Volume, intensiteit, en frequentie optimaliseren op basis van aanpassing en herstel",
-        "Hormonen begrijpen en voeding/training afstemmen voor metabole ondersteuning",
-        "Progressie faseren op basis van feedback en aanpassingsvermogen van cliënten",
-      ],
+      desc: "Wetenschappelijk onderbouwde krachttraining.",
+      icon: Dumbbell,
     },
     {
-      title: "Practical Nutrition Level 1 & 2",
-      institution: "Frank den Blanken",
+      title: "Nutrition & Program Design",
+      org: "N1 Education",
       year: "2024",
-      skills: [
-        "Basisprincipes van voeding: koolhydraten, eiwitten, vetten",
-        "Energiebehoeften en calorieberekening",
-        "Geavanceerde macro- en micronutriënten",
-        "Dieetmanipulatie zoals carb cycling en periodisering",
-        "Supplementen voor sportprestaties",
-        "Voeding rond training en herstel",
-      ],
+      desc: "Voeding en trainingsschema ontwerp.",
+      highlight: true,
+      icon: Utensils,
+    },
+    {
+      title: "Practical Nutrition 1 & 2",
+      org: "Frank den Blanken",
+      year: "2024",
+      desc: "Praktische voedingscoaching.",
+      icon: Utensils,
     },
     {
       title: "Personal Trainer Academie",
-      institution: "Frank den Blanken",
+      org: "Frank den Blanken",
       year: "2024",
-      skills: [
-        "Gedetailleerde kennis van lichaam, spieren, gewrichten en hun samenwerking",
-        "Begrijpen van biomechanica voor juiste trainingsvormen",
-        "Basis- en geavanceerde trainingsprincipes: overload, specificiteit, periodisering, herstel",
-        "Maatwerkprogramma's maken voor beginners, gevorderden, en specifieke doelen",
-        "Basisprincipes van voeding en toepassing bij trainingsdoelen",
-        "Voedingsstrategieën voor optimale resultaten met cliënten",
-      ],
+      desc: "Klantbegeleiding en resultaatgericht werken.",
+      icon: Award,
     },
     {
-      title: "Level 1",
-      institution: "J3University",
+      title: "Biomechanics Course",
+      org: "N1 Education",
       year: "2024",
-      skills: [
-        "Anatomie en biomechanica",
-        "Voeding en macronutriënten",
-        "Trainingsprogrammering",
-        "Correcte techniek en uitvoering van oefeningen",
-        "Voedingsstrategieën voor spieropbouw en vetverlies",
-      ],
-    },
-    {
-      title: "Biomechanics and Execution Course",
-      institution: "N1 Education",
-      year: "2024",
-      skills: [
-        "Inzicht in biomechanica en hoe het lichaam beweegt tijdens oefeningen",
-        "Correcte uitvoering van oefeningen om prestaties te verbeteren en blessures te voorkomen",
-        "Aanpassen van oefeningen op basis van individuele anatomie en doelen",
-        "Optimaliseren van spieractivatie door juiste techniek",
-        "Analyse van bewegingspatronen voor efficiënte krachttraining",
-        "Toepassing van biomechanische principes voor betere resultaten",
-      ],
+      desc: "Bewegingsleer en optimale uitvoering.",
+      icon: Target,
     },
   ]
 
@@ -128,372 +101,297 @@ export default function MartinProfileClientPage() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      <section className="pb-3 px-4 md:pt-3 pt-3">
-        <div className="max-w-6xl mx-auto">
-          <Link
-            href="/over-ons/coaches"
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-[#1e1839] hover:bg-gray-100 transition-all duration-300 group text-sm font-medium"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
-            Terug naar Coaches
-          </Link>
-        </div>
-      </section>
+      {/* Floating Back Button */}
+      <Link
+        href="/over-ons/coaches"
+        className="fixed top-24 left-4 lg:left-8 z-50 inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm text-[#1e1839] px-4 py-2 rounded-full shadow-lg hover:shadow-xl hover:bg-white transition-all duration-300 group text-sm font-medium border border-gray-100"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        <span className="hidden sm:inline">Terug naar Coaches</span>
+        <span className="sm:hidden">Terug</span>
+      </Link>
 
-      <section className="pb-12 md:pb-16 px-4 bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] relative overflow-hidden">
-        {/* Subtle pattern overlay */}
+      {/* HERO - Paars */}
+      <section className="relative min-h-[90vh] lg:min-h-screen flex items-center bg-[#1e1839] overflow-hidden">
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-5"
           style={{
             backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
             backgroundSize: "32px 32px",
           }}
         />
+        
+        <div className="container mx-auto px-6 relative z-10 py-12 lg:py-0">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div className={`order-2 lg:order-1 transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+              <div className="flex flex-wrap gap-2 mb-4">
+                <Badge className="bg-white/10 text-white border-white/20 backdrop-blur-sm">
+                  <Clock className="w-3 h-3 mr-1" />
+                  25+ Jaar Ervaring
+                </Badge>
+                <Badge className="bg-white/10 text-white border-white/20 backdrop-blur-sm">
+                  <Award className="w-3 h-3 mr-1" />
+                  N1 Certified
+                </Badge>
+              </div>
+              
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 leading-tight">
+                Martin Langenberg
+              </h1>
+              
+              <p className="text-xl md:text-2xl text-white/80 mb-4 font-medium">
+                Head Coach Evotion
+              </p>
+              
+              <p className="text-base md:text-lg text-white/70 mb-6 leading-relaxed max-w-xl">
+                Personal trainer die drukke professionals helpt fit en gezond te blijven. Met 25+ jaar ervaring en de nieuwste wetenschappelijke inzichten.
+              </p>
 
-        <div className="max-w-6xl mx-auto relative z-10 py-12 md:py-16">
-          <div
-            className={`transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-          >
-            <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
-              <div className="order-2 lg:order-1">
-                <div className="flex flex-wrap gap-2 mb-4 md:mb-6">
-                  <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 text-xs md:text-sm">
-                    25+ Jaar Ervaring
-                  </Badge>
-                  <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 text-xs md:text-sm">
-                    Ondernemer & Vader
-                  </Badge>
-                  <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 text-xs md:text-sm">
-                    N1 Certified
-                  </Badge>
-                  <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 text-xs md:text-sm">
-                    Metabolism School
-                  </Badge>
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                  <div className="text-xl md:text-2xl font-bold text-white mb-1">25+</div>
+                  <div className="text-xs text-white/70">Jaar Ervaring</div>
                 </div>
-                <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
-                  Martin Langenberg
-                </h1>
-                <p className="text-base md:text-xl text-white/90 mb-8 md:mb-10 leading-relaxed">
-                  Personal trainer en coach die drukke professionals helpt om fit en gezond te blijven — met een aanpak
-                  die écht past bij jouw leven.
-                </p>
-
-                <div className="space-y-3 md:space-y-4 mb-8 md:mb-10">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0">
-                      <Clock className="w-5 h-5 text-white" />
-                    </div>
-                    <span className="text-sm md:text-lg text-white/90">25+ jaar ervaring in krachttraining</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0">
-                      <GraduationCap className="w-5 h-5 text-white" />
-                    </div>
-                    <span className="text-sm md:text-lg text-white/90">Gecertificeerd via N1 Education</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0">
-                      <Heart className="w-5 h-5 text-white" />
-                    </div>
-                    <span className="text-sm md:text-lg text-white/90">
-                      Specialist voor drukke ouders en ondernemers
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0">
-                      <Award className="w-5 h-5 text-white" />
-                    </div>
-                    <span className="text-sm md:text-lg text-white/90">Gecertificeerd via Metabolism School</span>
-                  </div>
+                <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                  <div className="text-xl md:text-2xl font-bold text-white mb-1">7</div>
+                  <div className="text-xs text-white/70">Certificeringen</div>
                 </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-                  <Link
-                    href="https://wa.me/31610935077?text=Hoi%20Martin%2C%20ik%20ben%20klaar%20om%20te%20starten%20met%20begeleiding!%20Ik%20kom%20via%20jouw%20coaching%20pagina."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Button
-                      size="lg"
-                      className="bg-white text-[#1e1839] hover:bg-white/90 w-full sm:w-auto font-semibold px-8"
-                    >
-                      <MessageSquare className="w-5 h-5 mr-2" />
-                      WhatsApp Martin
-                    </Button>
-                  </Link>
-                  <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="border-2 border-white/30 text-white hover:bg-white/10 w-full sm:w-auto backdrop-blur-sm px-8 bg-transparent"
-                    >
-                      <MessageCircle className="w-5 h-5 mr-2" />
-                      Gratis Gesprek
-                    </Button>
-                  </Link>
+                <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                  <div className="text-xl md:text-2xl font-bold text-white mb-1">100+</div>
+                  <div className="text-xs text-white/70">Klanten</div>
                 </div>
               </div>
-              <div className="relative order-1 lg:order-2">
-                <div className="relative w-full h-[350px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl ev-gradient-border bg-white/10 backdrop-blur border-transparent">
-                  <Image
-                    src="/images/martin-foto.avif"
-                    alt="Martin Langenberg - Personal Trainer met 25+ jaar ervaring"
-                    fill
-                    className="object-cover object-[center_20%]"
-                    priority
-                  />
-                </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link href={whatsappLink} target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" className="bg-white text-[#1e1839] hover:bg-white/90 font-semibold w-full sm:w-auto">
+                    <MessageSquare className="w-5 h-5 mr-2" />
+                    WhatsApp Martin
+                  </Button>
+                </Link>
+                <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-[#1e1839] w-full sm:w-auto bg-transparent">
+                    <Calendar className="w-5 h-5 mr-2" />
+                    Gratis Gesprek
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            <div className={`relative order-1 lg:order-2 transition-all duration-700 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+              <div className="relative w-full h-[350px] md:h-[500px] lg:h-[600px] rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
+                <Image
+                  src="/images/martin-foto.avif"
+                  alt="Martin Langenberg - Personal Trainer"
+                  fill
+                  className="object-cover object-[center_20%]"
+                  priority
+                />
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* About Section */}
-      <section className="py-16 md:py-24 px-4 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4">
-              <Users className="w-4 h-4 mr-2" />
+      {/* ABOUT - Wit */}
+      <section className="py-16 lg:py-24 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-10 lg:mb-14">
+            <Badge className="bg-[#1e1839]/10 text-[#1e1839] mb-4">
+              <Heart className="w-4 h-4 mr-2" />
               Over Martin
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-6">Waarom Martin?</h2>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#1e1839] mb-4">
+              Waarom Martin?
+            </h2>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            <div className="ev-gradient-border bg-white/80 backdrop-blur border-transparent rounded-2xl p-8 hover:shadow-2xl transition-all duration-500 group">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Target className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-[#1e1839] mb-4">Ervaring die Telt</h3>
-              <p className="text-base md:text-lg text-gray-700 leading-loose">
-                Met 25+ jaar ervaring in krachttraining weet Martin precies wat werkt. Als ondernemer en vader van drie
-                begrijpt hij de uitdagingen van een druk leven en hoe je toch fit kunt blijven.
-              </p>
-            </div>
-
-            <div className="ev-gradient-border bg-white/80 backdrop-blur border-transparent rounded-2xl p-8 hover:shadow-2xl transition-all duration-500 group">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                <Award className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-[#1e1839] mb-4">Wetenschappelijk Onderbouwd</h3>
-              <p className="text-base md:text-lg text-gray-700 leading-loose">
-                Gecertificeerd via N1 Education en Metabolism School, de gouden standaarden in evidence-based training
-                en metabole gezondheid. Martin combineert jarenlange praktijkervaring met de nieuwste wetenschappelijke
-                inzichten.
-              </p>
-            </div>
-          </div>
-
-          {/* Enhanced quote card */}
-          <div className="bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] rounded-2xl p-10 md:p-14 shadow-2xl border border-white/10">
-            <Quote className="w-12 h-12 text-white/40 mx-auto mb-6" />
-            <blockquote className="text-lg md:text-2xl italic mb-6 leading-relaxed text-center text-white font-medium">
-              "Ik train je voor het leven, niet alleen voor de gym. Echte transformatie gebeurt wanneer gezonde
-              gewoontes zo natuurlijk worden als ademhalen."
-            </blockquote>
-            <cite className="text-white/90 font-semibold text-center block not-italic">— Martin Langenberg</cite>
-          </div>
-        </div>
-      </section>
-
-      {/* Certifications Section */}
-      <section className="py-16 md:py-24 px-4 bg-gradient-to-br from-[#1e1839]/5 via-white to-[#1e1839]/5 relative overflow-hidden">
-        {/* Subtle pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, #1e1839 1px, transparent 0)`,
-            backgroundSize: "32px 32px",
-          }}
-        />
-
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="text-center mb-12 md:mb-16">
-            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4">
-              <GraduationCap className="w-4 h-4 mr-2" />
-              Certificeringen & Opleiding
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-6">Expertise & Kennis</h2>
-            <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Martin blijft zichzelf continu ontwikkelen met de beste opleidingen in de industrie, zodat jij profiteert
-              van de nieuwste inzichten.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {certifications.map((cert, index) => (
-              <div
-                key={index}
-                className={`${
-                  cert.highlight
-                    ? "bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] md:col-span-2 lg:col-span-3"
-                    : "ev-gradient-border bg-white/90"
-                } backdrop-blur border-transparent rounded-2xl p-8 hover:shadow-2xl transition-all duration-500 group`}
-              >
-                <div className="flex items-start justify-between mb-6">
-                  <div
-                    className={`w-14 h-14 ${
-                      cert.highlight ? "bg-white/20" : "bg-gradient-to-br from-[#1e1839] to-[#2a1f4d]"
-                    } rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg`}
-                  >
-                    <Award className={`w-7 h-7 ${cert.highlight ? "text-white" : "text-white"}`} />
-                  </div>
-                  {cert.highlight && <Badge className="bg-white/20 text-white border-white/30">UNIEK IN NEDERLAND </Badge>}
-                </div>
-
-                <h3
-                  className={`text-xl font-bold ${cert.highlight ? "text-white" : "text-[#1e1839]"} mb-2 leading-tight`}
-                >
-                  {cert.link ? (
-                    <a href={cert.link} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                      {cert.title} →
-                    </a>
-                  ) : (
-                    cert.title
-                  )}
-                </h3>
-                <p className={`text-sm ${cert.highlight ? "text-white/80" : "text-gray-600"} mb-6 font-medium`}>
-                  {cert.institution}
-                </p>
-
-                <div className={`grid ${cert.highlight ? "md:grid-cols-2" : ""} gap-3`}>
-                  {cert.skills.map((skill, skillIndex) => (
-                    <div key={skillIndex} className="flex items-start space-x-2">
-                      <CheckCircle
-                        className={`w-4 h-4 ${cert.highlight ? "text-white/80" : "text-[#1e1839]"} flex-shrink-0 mt-0.5`}
-                      />
-                      <span className={`text-sm ${cert.highlight ? "text-white/90" : "text-gray-700"} leading-relaxed`}>
-                        {skill}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Approach Section */}
-      <section className="py-16 md:py-24 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Werkwijze
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-6">Martin's Aanpak</h2>
-            <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Een bewezen methode die flexibel is, wetenschappelijk onderbouwd, en afgestemd op jouw unieke situatie.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 mb-10">
             {[
-              {
-                number: "1",
-                title: "Maatwerk",
-                description:
-                  "Geen standaard programma's, maar oplossingen die passen bij jouw leven, doelen en beschikbare tijd.",
-                icon: Target,
-              },
-              {
-                number: "2",
-                title: "Flexibiliteit",
-                description:
-                  "Aanpasbaar aan jouw drukte en omstandigheden, zodat je altijd kunt blijven volhouden op de lange termijn.",
-                icon: TrendingUp,
-              },
-              {
-                number: "3",
-                title: "Educatie",
-                description:
-                  "Je leert waarom je doet wat je doet, zodat je uiteindelijk zelfstandig verder kunt en onafhankelijk wordt.",
-                icon: GraduationCap,
-              },
-            ].map((step, index) => (
-              <div
-                key={index}
-                className="ev-gradient-border bg-white/80 backdrop-blur border-transparent rounded-2xl p-8 hover:shadow-2xl transition-all duration-500 group text-center"
-              >
-                {/* Enhanced number badge */}
-                <div className="w-16 h-16 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <span className="text-white font-bold text-2xl">{step.number}</span>
+              { icon: Clock, title: "25+ Jaar Ervaring", desc: "Praktijkervaring gecombineerd met de nieuwste wetenschappelijke inzichten." },
+              { icon: Heart, title: "Begrip voor Jouw Leven", desc: "Als ondernemer en vader begrijpt hij de uitdagingen van een druk leven." },
+              { icon: GraduationCap, title: "Altijd Leren", desc: "Continu bijscholen bij de beste in het vakgebied wereldwijd." },
+            ].map((item, i) => (
+              <div key={i} className="bg-gray-50 rounded-2xl p-6 lg:p-8 hover:shadow-lg transition-all group">
+                <div className="w-12 h-12 lg:w-14 lg:h-14 bg-[#1e1839] rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <item.icon className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
                 </div>
-                <div className="mb-4">
-                  <step.icon className="w-8 h-8 text-[#1e1839] mx-auto" />
-                </div>
-                <h3 className="text-xl font-bold text-[#1e1839] mb-4">{step.title}</h3>
-                <p className="text-sm md:text-base text-gray-700 leading-relaxed">{step.description}</p>
+                <h3 className="text-lg lg:text-xl font-bold text-[#1e1839] mb-2">{item.title}</h3>
+                <p className="text-sm lg:text-base text-gray-600 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
 
-          {/* Enhanced expectations card */}
-          <div className="ev-gradient-border bg-gradient-to-br from-white to-[#1e1839]/5 backdrop-blur border-transparent rounded-2xl p-10 md:p-14 shadow-xl">
-            <h3 className="text-xl md:text-3xl font-bold text-[#1e1839] mb-8 text-center">Wat je kunt verwachten</h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              {[
-                "Persoonlijk trainingsplan dat past bij jouw schema en doelen",
-                "Voedingsadvies zonder extreme diëten of onrealistische restricties",
-                "Regelmatige check-ins en bijsturing op basis van jouw voortgang",
-                "Kennis en tools om zelfstandig verder te gaan na de coaching",
-                "Toegang tot de Evotion app voor tracking en communicatie",
-                "Ondersteuning bij het doorbreken van limiterende overtuigingen",
-              ].map((item, index) => (
-                <div key={index} className="flex items-start space-x-4">
-                  {/* Enhanced checkmark */}
-                  <div className="w-6 h-6 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-md">
-                    <CheckCircle className="w-4 h-4 text-white" />
+          {/* Quote */}
+          <div className="bg-[#1e1839] rounded-2xl p-6 lg:p-10 max-w-3xl mx-auto">
+            <Quote className="w-8 h-8 text-white/40 mb-4" />
+            <blockquote className="text-lg lg:text-xl text-white italic mb-4 leading-relaxed">
+              "Ik train je voor het leven, niet alleen voor de gym. Het gaat om duurzame verandering die past bij wie je bent."
+            </blockquote>
+            <cite className="text-white/80 font-semibold not-italic">— Martin Langenberg</cite>
+          </div>
+        </div>
+      </section>
+
+      {/* CERTIFICATIONS - Paars */}
+      <section className="py-16 lg:py-24 bg-[#1e1839]">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-10 lg:mb-14">
+            <Badge className="bg-white/10 text-white border-white/20 mb-4">
+              <GraduationCap className="w-4 h-4 mr-2" />
+              Opleidingen
+            </Badge>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+              Expertise & Certificeringen
+            </h2>
+            <p className="text-base lg:text-lg text-white/70 max-w-2xl mx-auto">
+              Continu investeren in kennis bij de beste coaches en instituten ter wereld.
+            </p>
+          </div>
+
+          {/* Mobile: Carousel */}
+          <div className="lg:hidden">
+            <div className="relative h-48 mb-4">
+              {certifications.map((cert, index) => (
+                <button
+                  type="button"
+                  key={cert.title}
+                  onClick={() => setActiveCert(index)}
+                  className={`absolute inset-0 bg-white rounded-2xl p-5 text-left transition-all duration-500 ${
+                    index === activeCert ? 'opacity-100 z-10 scale-100' : 'opacity-0 z-0 scale-95'
+                  }`}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      cert.highlight ? 'bg-gradient-to-br from-[#1e1839] to-purple-600' : 'bg-[#1e1839]'
+                    }`}>
+                      <cert.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-base font-bold text-[#1e1839] truncate">{cert.title}</h3>
+                        {cert.highlight && <Award className="w-4 h-4 text-purple-600 flex-shrink-0" />}
+                      </div>
+                      <p className="text-sm text-gray-500 mb-2">{cert.org} ({cert.year})</p>
+                      <p className="text-sm text-gray-600 line-clamp-2">{cert.desc}</p>
+                    </div>
                   </div>
-                  <span className="text-sm md:text-base text-gray-700 leading-relaxed">{item}</span>
-                </div>
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-1">
+              {certifications.map((_, i) => (
+                <button
+                  type="button"
+                  key={i}
+                  onClick={() => setActiveCert(i)}
+                  className={`h-1 rounded-full flex-1 transition-all ${i === activeCert ? 'bg-white' : 'bg-white/30'}`}
+                />
               ))}
             </div>
           </div>
+
+          {/* Desktop: Grid */}
+          <div className="hidden lg:grid grid-cols-3 gap-6">
+            {certifications.map((cert) => (
+              <div 
+                key={cert.title} 
+                className={`bg-white rounded-2xl p-6 hover:shadow-xl transition-all group ${
+                  cert.highlight ? 'ring-2 ring-purple-400' : ''
+                }`}
+              >
+                <div className="flex items-start gap-4 mb-4">
+                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform ${
+                    cert.highlight ? 'bg-gradient-to-br from-[#1e1839] to-purple-600' : 'bg-[#1e1839]'
+                  }`}>
+                    <cert.icon className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-[#1e1839]">{cert.title}</h3>
+                    <p className="text-sm text-gray-500">{cert.org} ({cert.year})</p>
+                  </div>
+                </div>
+                <p className="text-gray-600 leading-relaxed">{cert.desc}</p>
+                {cert.highlight && (
+                  <Badge className="mt-4 bg-purple-100 text-purple-700">Highlight</Badge>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="py-16 md:py-24 px-4 bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] relative overflow-hidden">
-        {/* Subtle pattern overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-            backgroundSize: "32px 32px",
-          }}
-        />
+      {/* APPROACH - Wit */}
+      <section className="py-16 lg:py-24 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-10 lg:mb-14">
+            <Badge className="bg-[#1e1839]/10 text-[#1e1839] mb-4">
+              <Target className="w-4 h-4 mr-2" />
+              Werkwijze
+            </Badge>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#1e1839] mb-4">
+              Mijn Aanpak
+            </h2>
+          </div>
 
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-10 md:p-16">
-            <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 md:mb-6">Klaar om te Beginnen?</h2>
-            <p className="text-base md:text-xl text-white/90 mb-8 md:mb-10 leading-relaxed max-w-2xl mx-auto">
-              Ontdek hoe Martin's persoonlijke aanpak jou kan helpen om duurzame resultaten te boeken, zelfs met een
-              druk schema. Plan een gratis kennismakingsgesprek in.
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
+            {[
+              { 
+                step: "01", 
+                title: "Maatwerk", 
+                desc: "Geen standaard schema's maar oplossingen die passen bij jouw leven, werk en gezin.",
+                icon: Target,
+              },
+              { 
+                step: "02", 
+                title: "Flexibiliteit", 
+                desc: "Aanpasbaar aan jouw drukte zodat je kunt volhouden, ook in drukke periodes.",
+                icon: TrendingUp,
+              },
+              { 
+                step: "03", 
+                title: "Educatie", 
+                desc: "Je leert waarom je doet wat je doet, zodat je uiteindelijk zelfstandig verder kunt.",
+                icon: BookOpen,
+              },
+            ].map((step, i) => (
+              <div key={i} className="relative bg-gray-50 rounded-2xl p-6 lg:p-8 hover:shadow-lg transition-all group">
+                <div className="absolute -top-3 -left-3 w-10 h-10 bg-[#1e1839] rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  {step.step}
+                </div>
+                <div className="w-12 h-12 bg-[#1e1839]/10 rounded-xl flex items-center justify-center mb-4 mt-2 group-hover:bg-[#1e1839] transition-colors">
+                  <step.icon className="w-6 h-6 text-[#1e1839] group-hover:text-white transition-colors" />
+                </div>
+                <h3 className="text-lg lg:text-xl font-bold text-[#1e1839] mb-2">{step.title}</h3>
+                <p className="text-sm lg:text-base text-gray-600 leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA - Paars */}
+      <section className="py-16 lg:py-24 bg-[#1e1839]">
+        <div className="container mx-auto px-6">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+              Klaar om te starten?
+            </h2>
+            <p className="text-base lg:text-lg text-white/80 mb-8 max-w-xl mx-auto">
+              Plan een gratis kennismakingsgesprek en ontdek hoe Martin jou kan helpen je doelen te bereiken.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="https://wa.me/31610935077?text=Hoi%20Martin%2C%20ik%20ben%20klaar%20om%20te%20starten%20met%20begeleiding!%20Ik%20kom%20via%20jouw%20coaching%20pagina."
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button
-                  size="lg"
-                  className="bg-white text-[#1e1839] hover:bg-white/90 font-semibold px-10 py-6 text-lg w-full sm:w-auto"
-                >
+              <Link href={whatsappLink} target="_blank" rel="noopener noreferrer">
+                <Button size="lg" className="bg-white text-[#1e1839] hover:bg-white/90 font-semibold w-full sm:w-auto">
                   <MessageSquare className="w-5 h-5 mr-2" />
                   WhatsApp Martin
                 </Button>
               </Link>
               <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-2 border-white/30 text-white hover:bg-white/10 px-10 py-6 text-lg backdrop-blur-sm w-full sm:w-auto bg-transparent"
-                >
+                <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-[#1e1839] w-full sm:w-auto bg-transparent">
                   <MessageCircle className="w-5 h-5 mr-2" />
-                  Gratis Kennismakingsgesprek
+                  Gratis Gesprek
                 </Button>
               </Link>
             </div>

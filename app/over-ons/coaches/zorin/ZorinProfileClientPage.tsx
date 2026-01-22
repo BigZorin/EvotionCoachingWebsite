@@ -92,18 +92,15 @@ export default function ZorinProfileClientPage() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      {/* Back Button */}
-      <section className="py-3 px-4 bg-[#1e1839]">
-        <div className="max-w-6xl mx-auto">
-          <Link
-            href="/over-ons/coaches"
-            className="inline-flex items-center text-white/80 hover:text-white transition-all group text-sm"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-            Terug naar Coaches
-          </Link>
-        </div>
-      </section>
+      {/* Floating Back Button */}
+      <Link
+        href="/over-ons/coaches"
+        className="fixed top-24 left-4 lg:left-8 z-50 inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm text-[#1e1839] px-4 py-2 rounded-full shadow-lg hover:shadow-xl hover:bg-white transition-all duration-300 group text-sm font-medium border border-gray-100"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        <span className="hidden sm:inline">Terug naar Coaches</span>
+        <span className="sm:hidden">Terug</span>
+      </Link>
 
       {/* HERO - Paars */}
       <section className="relative min-h-[90vh] lg:min-h-screen flex items-center bg-[#1e1839] overflow-hidden">
