@@ -473,40 +473,36 @@ export default function OnlineCoachingClientPage() {
             </h2>
           </div>
 
-          {/* Mobile Carousel */}
+          {/* Mobile - Single card with fade animation */}
           <div className="lg:hidden">
-            <div 
-              ref={transformationRef}
-              className="flex gap-0 overflow-x-auto -mx-6 snap-x snap-mandatory scrollbar-hide scroll-smooth"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
+            <div className="relative h-[560px] mb-4 overflow-hidden rounded-2xl shadow-lg">
               {transformations.map((t, index) => (
                 <div 
-                  key={t.name} 
-                  className={`flex-shrink-0 w-screen snap-center transition-all duration-500 ${
-                    index === activeTransformation ? 'opacity-100' : 'opacity-40'
+                  key={t.name}
+                  onClick={() => setActiveTransformation((index + 1) % transformations.length)}
+                  className={`absolute inset-0 cursor-pointer transition-opacity duration-700 ease-in-out ${
+                    index === activeTransformation ? 'opacity-100 z-10' : 'opacity-0 z-0'
                   }`}
                 >
-                  <div className="relative aspect-[1/1]">
-                    <Image
-                      src={t.image || "/placeholder.svg"}
-                      alt={`${t.name}'s transformatie`}
-                      fill
-                      className="object-cover object-top"
-                    />
-                  </div>
+                  <Image
+                    src={t.image || "/placeholder.svg"}
+                    alt={`${t.name}'s transformatie`}
+                    fill
+                    className="object-cover object-top"
+                  />
                 </div>
               ))}
             </div>
             
-            {/* Dots */}
-            <div className="flex justify-center gap-2 mt-4">
-              {transformations.map((_, index) => (
+            {/* Progress bar */}
+            <div className="flex gap-1 mb-6">
+              {transformations.map((_, i) => (
                 <button
-                  key={index}
-                  onClick={() => setActiveTransformation(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    index === activeTransformation ? 'bg-[#1e1839] w-6' : 'bg-gray-300'
+                  type="button"
+                  key={i}
+                  onClick={() => setActiveTransformation(i)}
+                  className={`h-1 rounded-full flex-1 transition-all duration-300 ${
+                    i === activeTransformation ? 'bg-[#1e1839]' : 'bg-gray-200'
                   }`}
                 />
               ))}
@@ -532,16 +528,14 @@ export default function OnlineCoachingClientPage() {
       </section>
 
       {/* PRICING - Modern Cards */}
-      <section className="py-20 lg:py-32 bg-gray-50 relative">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1e1839]/5 via-[#1e1839]/10 to-[#1e1839]/5" />
-        
+      <section className="py-20 lg:py-32 bg-[#1e1839] relative">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12 lg:mb-16">
-            <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4">
+            <Badge className="bg-white/10 text-white border-white/20 mb-4">
               <Calendar className="w-4 h-4 mr-2" />
               Trajecten
             </Badge>
-            <h2 className="text-3xl lg:text-5xl font-bold text-[#1e1839] mb-4">
+            <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4">
               Kies Jouw Traject
             </h2>
           </div>
@@ -550,10 +544,10 @@ export default function OnlineCoachingClientPage() {
             {packages.map((pkg, index) => (
               <Card
                 key={index}
-                className={`relative overflow-hidden transition-all duration-300 ${
+                className={`relative overflow-hidden transition-all duration-300 bg-white ${
                   pkg.popular 
-                    ? 'border-2 border-[#1e1839] shadow-xl scale-[1.02]' 
-                    : 'border border-gray-200 hover:border-[#1e1839]/30 hover:shadow-lg'
+                    ? 'border-2 border-white shadow-xl scale-[1.02]' 
+                    : 'border border-white/20 hover:border-white/50 hover:shadow-lg'
                 }`}
               >
                 {pkg.popular && (
@@ -581,11 +575,7 @@ export default function OnlineCoachingClientPage() {
                   <div className="space-y-3">
                     <Button
                       onClick={() => handleWhatsApp(pkg.title)}
-                      className={`w-full py-6 text-base font-semibold rounded-xl ${
-                        pkg.popular 
-                          ? 'bg-[#1e1839] hover:bg-[#1e1839]/90 text-white' 
-                          : 'bg-[#1e1839] hover:bg-[#1e1839]/90 text-white'
-                      }`}
+                      className="w-full py-6 text-base font-semibold rounded-xl bg-[#1e1839] hover:bg-[#1e1839]/90 text-white"
                     >
                       <MessageCircle className="w-5 h-5 mr-2" />
                       Start via WhatsApp
@@ -607,7 +597,7 @@ export default function OnlineCoachingClientPage() {
       </section>
 
       {/* FAQ - Clean Accordion */}
-      <section className="py-20 lg:py-32 bg-gray-50">
+      <section className="py-20 lg:py-32 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
             <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 mb-4">
@@ -623,7 +613,7 @@ export default function OnlineCoachingClientPage() {
               <div
                 key={index}
                 className={`border rounded-xl transition-all ${
-                  expandedFaq === index ? 'border-[#1e1839] bg-[#1e1839]/5' : 'border-gray-200'
+                  expandedFaq === index ? 'border-[#1e1839] bg-[#1e1839]/5' : 'border-gray-200 bg-gray-50'
                 }`}
               >
                 <button
