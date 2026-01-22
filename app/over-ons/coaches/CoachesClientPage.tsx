@@ -6,15 +6,23 @@ import Link from "next/link"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Trophy, Award, Users, Target, ArrowRight, Star, Dumbbell } from "lucide-react"
 
 export default function CoachesClientPage() {
-  const [isVisible, setIsVisible] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [activeCoach, setActiveCoach] = useState(0)
 
   useEffect(() => {
-    setIsVisible(true)
+    setIsLoaded(true)
+  }, [])
+
+  // Auto-rotate coaches on mobile
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveCoach((prev) => (prev + 1) % 2)
+    }, 5000)
+    return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {
@@ -62,12 +70,69 @@ export default function CoachesClientPage() {
     }
   }, [])
 
+  const coaches = [
+    {
+      name: "Martin Langenberg",
+      role: "Personal Trainer & Coach",
+      image: "/images/martin-foto.avif",
+      badges: ["25+ Jaar Ervaring", "Gecertificeerd", "Ondernemer & Vader"],
+      description: "Met meer dan 25 jaar ervaring in krachttraining en coaching helpt Martin drukke ondernemers en ouders met duurzame transformaties door maatwerk, flexibiliteit en evidence-based methoden.",
+      highlights: [
+        { title: "Evidence-based coaching", subtitle: "Wetenschappelijk onderbouwde methoden" },
+        { title: "Persoonlijke aanpak", subtitle: "Op maat gemaakt voor jouw situatie" },
+        { title: "Duurzame resultaten", subtitle: "Focus op lange termijn succes" },
+      ],
+      link: "/over-ons/coaches/martin",
+      buttonText: "Lees Martin's Verhaal",
+    },
+    {
+      name: "Zorin Wijnands",
+      role: "6x Nederlands Kampioen",
+      image: "/images/zorin-foto.png",
+      badges: ["6x Kampioen", "Gecertificeerd", "790kg Total"],
+      description: "Als 6-voudig Nederlands kampioen powerlifting combineert Zorin topsport expertise met mentale coaching voor diepgaande transformaties op fysiek én mentaal gebied.",
+      highlights: [
+        { title: "Powerlifting expertise", subtitle: "Topsport ervaring op nationaal niveau" },
+        { title: "Mentale coaching", subtitle: "Doorbreken van mentale barrières" },
+        { title: "Bewustwording & groei", subtitle: "Holistische benadering van transformatie" },
+      ],
+      link: "/over-ons/coaches/zorin",
+      buttonText: "Lees Zorin's Verhaal",
+    },
+  ]
+
+  const stats = [
+    { value: "25+", label: "Jaar Ervaring" },
+    { value: "6x", label: "NL Kampioen" },
+    { value: "500+", label: "Tevreden Klanten" },
+    { value: "100%", label: "Gecertificeerd" },
+  ]
+
+  const reasons = [
+    {
+      icon: Award,
+      title: "Bewezen Expertise",
+      description: "Gecertificeerd door toonaangevende instituten en jarenlange praktijkervaring op het hoogste niveau.",
+    },
+    {
+      icon: Users,
+      title: "Persoonlijke Aanpak",
+      description: "Geen standaardoplossingen. Elke coaching is op maat gemaakt voor jouw unieke situatie en doelen.",
+    },
+    {
+      icon: Target,
+      title: "Duurzame Resultaten",
+      description: "Focus op lange termijn transformatie. We maken je sterker én onafhankelijker.",
+    },
+  ]
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
 
-      <section className="pt-32 pb-20 px-4 bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] relative overflow-hidden">
-        {/* Subtle pattern overlay */}
+      {/* HERO - Paars */}
+      <section className="relative min-h-[60vh] lg:min-h-[70vh] flex items-center justify-center bg-[#1e1839] overflow-hidden">
+        {/* Background Pattern */}
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -76,314 +141,251 @@ export default function CoachesClientPage() {
           }}
         />
 
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div
-            className={`transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-          >
-            <Badge className="mb-6 bg-white/10 text-white border-white/20 backdrop-blur-sm hover:bg-white/20">
-              <Users className="w-3 h-3 mr-2" />
-              ONZE COACHES
-            </Badge>
-            <h1 className="text-3xl md:text-6xl font-bold text-white mb-6 leading-tight">
+        <div className="container mx-auto px-6 relative z-10 py-32">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className={`mb-6 transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <Badge className="bg-white/10 text-white border-white/20 backdrop-blur-sm px-4 py-2">
+                <Users className="w-3 h-3 mr-2" />
+                ONZE COACHES
+              </Badge>
+            </div>
+            
+            <h1 className={`text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight transition-all duration-700 delay-100 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               Ontmoet de Experts
               <span className="block text-white/80 mt-2">Achter Jouw Succes</span>
             </h1>
-            <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-              Twee ervaren coaches met unieke specialisaties, één gemeenschappelijk doel: jou helpen de beste versie van
-              jezelf te worden.
+            
+            <p className={`text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed transition-all duration-700 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              Twee ervaren coaches met unieke specialisaties, één gemeenschappelijk doel: jou helpen de beste versie van jezelf te worden.
             </p>
           </div>
         </div>
       </section>
 
-      <section className="py-12 px-4 bg-gray-50 border-b border-gray-200">
-        <div className="max-w-6xl mx-auto">
+      {/* STATS - Wit */}
+      <section className="py-12 lg:py-16 bg-white">
+        <div className="container mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-2">25+</div>
-              <div className="text-sm text-gray-600">Jaar Ervaring</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-2">6x</div>
-              <div className="text-sm text-gray-600">NL Kampioen</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-2">500+</div>
-              <div className="text-sm text-gray-600">Tevreden Klanten</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-2">100%</div>
-              <div className="text-sm text-gray-600">Gecertificeerd</div>
-            </div>
+            {stats.map((stat, index) => (
+              <div 
+                key={stat.label}
+                className={`text-center transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+                style={{ transitionDelay: `${index * 100}ms` }}
+              >
+                <div className="text-3xl md:text-5xl font-bold text-[#1e1839] mb-2">{stat.value}</div>
+                <div className="text-sm md:text-base text-gray-600">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12">
-            {/* Martin Card */}
-            <article className="group">
-              <Card className="ev-gradient-border bg-white/80 backdrop-blur border-transparent overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 py-0">
-                <CardContent className="p-0">
-                  <div className="relative h-96 overflow-hidden">
-                    <Image
-                      src="/images/martin-foto.avif"
-                      alt="Martin Langenberg - Gecertificeerde Personal Trainer en Coach met 25+ jaar ervaring in Sneek, Friesland"
-                      fill
-                      className="object-cover object-[center_20%] group-hover:scale-105 transition-transform duration-700"
-                      priority
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1e1839]/80 via-transparent to-transparent py-0" />
-                    <div className="absolute bottom-6 left-6 text-white">
-                      <h2 className="text-2xl md:text-3xl font-bold mb-2">Martin Langenberg</h2>
-                      <p className="text-white/90">Personal Trainer & Coach</p>
-                    </div>
-                  </div>
+      {/* COACHES - Paars */}
+      <section className="py-20 lg:py-32 bg-[#1e1839]">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12 lg:mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+              Jouw Coaches
+            </h2>
+            <p className="text-lg text-white/70 max-w-2xl mx-auto">
+              Kies de coach die het beste bij jouw doelen past
+            </p>
+          </div>
 
-                  <div className="p-8 md:p-10">
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 hover:bg-[#1e1839]/20">
-                        <Trophy className="w-3 h-3 mr-1" />
-                        25+ Jaar Ervaring
-                      </Badge>
-                      <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 hover:bg-[#1e1839]/20">
-                        <Award className="w-3 h-3 mr-1" />
-                        Gecertificeerd
-                      </Badge>
-                      <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 hover:bg-[#1e1839]/20">
-                        <Users className="w-3 h-3 mr-1" />
-                        Ondernemer & Vader
-                      </Badge>
-                    </div>
-
-                    <p className="text-gray-700 mb-6 leading-loose text-lg">
-                      Met meer dan 25 jaar ervaring in krachttraining en coaching helpt Martin drukke ondernemers en
-                      ouders met duurzame transformaties door maatwerk, flexibiliteit en evidence-based methoden.
-                    </p>
-
-                    <div className="space-y-4 mb-8">
-                      <div className="flex items-start">
-                        <div className="w-6 h-6 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
-                          <Star className="w-3 h-3 text-white" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900 mb-1">Evidence-based coaching</div>
-                          <div className="text-sm text-gray-600">Wetenschappelijk onderbouwde methoden</div>
-                        </div>
-                      </div>
-                      <div className="flex items-start">
-                        <div className="w-6 h-6 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
-                          <Target className="w-3 h-3 text-white" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900 mb-1">Persoonlijke aanpak</div>
-                          <div className="text-sm text-gray-600">Op maat gemaakt voor jouw situatie</div>
-                        </div>
-                      </div>
-                      <div className="flex items-start">
-                        <div className="w-6 h-6 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
-                          <Dumbbell className="w-3 h-3 text-white" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900 mb-1">Duurzame resultaten</div>
-                          <div className="text-sm text-gray-600">Focus op lange termijn succes</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <Link href="/over-ons/coaches/martin" aria-label="Lees het volledige verhaal van Martin Langenberg">
-                      <Button className="w-full bg-gradient-to-r from-[#1e1839] to-[#2a1f4d] hover:opacity-90 text-white group/btn">
-                        Lees Martin's Verhaal
-                        <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+          {/* Mobile - Single card with fade */}
+          <div className="lg:hidden">
+            <div className="relative h-[500px] mb-4 overflow-hidden rounded-2xl">
+              {coaches.map((coach, index) => (
+                <div
+                  key={coach.name}
+                  onClick={() => setActiveCoach((index + 1) % coaches.length)}
+                  className={`absolute inset-0 cursor-pointer transition-opacity duration-700 ease-in-out ${
+                    index === activeCoach ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                  }`}
+                >
+                  <Image
+                    src={coach.image || "/placeholder.svg"}
+                    alt={coach.name}
+                    fill
+                    className="object-cover object-top"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="text-2xl font-bold text-white mb-1">{coach.name}</h3>
+                    <p className="text-white/80 mb-4">{coach.role}</p>
+                    <p className="text-white/70 text-sm mb-4 line-clamp-2">{coach.description}</p>
+                    <Link href={coach.link}>
+                      <Button className="w-full bg-white text-[#1e1839] hover:bg-white/90">
+                        {coach.buttonText}
+                        <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
                   </div>
-                </CardContent>
-              </Card>
-            </article>
+                </div>
+              ))}
+            </div>
+            
+            {/* Progress bar */}
+            <div className="flex gap-2">
+              {coaches.map((_, i) => (
+                <button
+                  type="button"
+                  key={i}
+                  onClick={() => setActiveCoach(i)}
+                  className={`h-1 rounded-full flex-1 transition-all duration-300 ${
+                    i === activeCoach ? 'bg-white' : 'bg-white/30'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
 
-            {/* Zorin Card */}
-            <article className="group">
-              <Card className="ev-gradient-border bg-white/80 backdrop-blur border-transparent overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 py-0">
-                <CardContent className="p-0">
-                  <div className="relative h-96 overflow-hidden">
-                    <Image
-                      src="/images/zorin-foto.png"
-                      alt="Zorin Wijnands - 6x Nederlands Kampioen Powerlifting en Mental Coach"
-                      fill
-                      className="object-cover object-[center_10%] group-hover:scale-105 transition-transform duration-700"
-                      priority
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1e1839]/80 via-transparent to-transparent" />
-                    <div className="absolute bottom-6 left-6 text-white">
-                      <h2 className="text-2xl md:text-3xl font-bold mb-2">Zorin Wijnands</h2>
-                      <p className="text-white/90">6x Nederlands Kampioen</p>
-                    </div>
+          {/* Desktop - Two columns */}
+          <div className="hidden lg:grid grid-cols-2 gap-8">
+            {coaches.map((coach, index) => (
+              <div 
+                key={coach.name}
+                className="group bg-white rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-500"
+              >
+                <div className="relative h-[500px] overflow-hidden">
+                  <Image
+                    src={coach.image || "/placeholder.svg"}
+                    alt={coach.name}
+                    fill
+                    className={`object-cover group-hover:scale-105 transition-transform duration-700 ${
+                      index === 0 ? 'object-[center_20%]' : 'object-top'
+                    }`}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1e1839]/80 via-transparent to-transparent" />
+                  <div className="absolute bottom-6 left-6 text-white">
+                    <h3 className="text-2xl font-bold mb-1">{coach.name}</h3>
+                    <p className="text-white/90">{coach.role}</p>
                   </div>
-
-                  <div className="p-8 md:p-10">
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 hover:bg-[#1e1839]/20">
-                        <Trophy className="w-3 h-3 mr-1" />
-                        6x Kampioen
+                </div>
+                
+                <div className="p-8">
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {coach.badges.map((badge) => (
+                      <Badge key={badge} className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20">
+                        {badge}
                       </Badge>
-                      <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 hover:bg-[#1e1839]/20">
-                        <Award className="w-3 h-3 mr-1" />
-                        Gecertificeerd
-                      </Badge>
-                      <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 hover:bg-[#1e1839]/20">
-                        790kg Total
-                      </Badge>
-                    </div>
-
-                    <p className="text-gray-700 mb-6 leading-loose text-lg">
-                      Als 6-voudig Nederlands kampioen powerlifting combineert Zorin topsport expertise met mentale
-                      coaching voor diepgaande transformaties op fysiek én mentaal gebied.
-                    </p>
-
-                    <div className="space-y-4 mb-8">
-                      <div className="flex items-start">
-                        <div className="w-6 h-6 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
-                          <Trophy className="w-3 h-3 text-white" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900 mb-1">Powerlifting expertise</div>
-                          <div className="text-sm text-gray-600">Topsport ervaring op nationaal niveau</div>
-                        </div>
-                      </div>
-                      <div className="flex items-start">
-                        <div className="w-6 h-6 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
-                          <Target className="w-3 h-3 text-white" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900 mb-1">Mentale coaching</div>
-                          <div className="text-sm text-gray-600">Doorbreken van mentale barrières</div>
-                        </div>
-                      </div>
-                      <div className="flex items-start">
-                        <div className="w-6 h-6 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                    ))}
+                  </div>
+                  
+                  <p className="text-gray-700 mb-6 leading-relaxed">
+                    {coach.description}
+                  </p>
+                  
+                  <div className="space-y-3 mb-8">
+                    {coach.highlights.map((highlight, i) => (
+                      <div key={i} className="flex items-start">
+                        <div className="w-6 h-6 bg-[#1e1839] rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
                           <Star className="w-3 h-3 text-white" />
                         </div>
                         <div>
-                          <div className="font-semibold text-gray-900 mb-1">Bewustwording & groei</div>
-                          <div className="text-sm text-gray-600">Holistische benadering van transformatie</div>
+                          <div className="font-semibold text-gray-900">{highlight.title}</div>
+                          <div className="text-sm text-gray-600">{highlight.subtitle}</div>
                         </div>
                       </div>
-                    </div>
-
-                    <Link href="/over-ons/coaches/zorin" aria-label="Lees het volledige verhaal van Zorin Wijnands">
-                      <Button className="w-full bg-gradient-to-r from-[#1e1839] to-[#2a1f4d] hover:opacity-90 text-white group/btn">
-                        Lees Zorin's Verhaal
-                        <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
-                      </Button>
-                    </Link>
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
-            </article>
+                  
+                  <Link href={coach.link}>
+                    <Button className="w-full bg-[#1e1839] hover:bg-[#2a1f4d] text-white group/btn">
+                      {coach.buttonText}
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Why Choose Us Section */}
-      <section className="py-20 px-4 bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-hidden">
-        {/* Subtle pattern overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, #1e1839 1px, transparent 0)`,
-            backgroundSize: "32px 32px",
-          }}
-        />
-
-        <div className="max-w-5xl mx-auto relative z-10">
-          <div className="text-center mb-16">
+      {/* WHY EVOTION - Wit */}
+      <section className="py-20 lg:py-32 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12 lg:mb-16">
             <Badge className="mb-4 bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20">
               <Star className="w-3 h-3 mr-2" />
               WAAROM EVOTION
             </Badge>
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">Waarom Kiezen voor Evotion Coaches?</h2>
-            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+              Waarom Kiezen voor Evotion?
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Twee verschillende specialisaties, één gemeenschappelijke missie: jouw succes.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="group">
-              <Card className="ev-gradient-border bg-white/80 backdrop-blur border-transparent h-full hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <Award className="w-8 h-8 text-white" />
+          {/* Mobile - Horizontal scroll */}
+          <div className="lg:hidden">
+            <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 snap-x snap-mandatory scrollbar-hide">
+              {reasons.map((reason, index) => (
+                <div 
+                  key={reason.title}
+                  className="flex-shrink-0 w-[85%] snap-center bg-gray-50 rounded-2xl p-6"
+                >
+                  <div className="w-14 h-14 bg-[#1e1839] rounded-2xl flex items-center justify-center mb-4">
+                    <reason.icon className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#1e1839] transition-colors">
-                    Bewezen Expertise
-                  </h3>
-                  <p className="text-base md:text-lg text-gray-600 leading-loose">
-                    Gecertificeerd door toonaangevende instituten en jarenlange praktijkervaring op het hoogste niveau.
-                  </p>
-                </CardContent>
-              </Card>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">{reason.title}</h3>
+                  <p className="text-gray-600 leading-relaxed">{reason.description}</p>
+                </div>
+              ))}
             </div>
+          </div>
 
-            <div className="group">
-              <Card className="ev-gradient-border bg-white/80 backdrop-blur border-transparent h-full hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <Users className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#1e1839] transition-colors">
-                    Persoonlijke Aanpak
-                  </h3>
-                  <p className="text-base md:text-lg text-gray-600 leading-loose">
-                    Geen standaardoplossingen. Elke coaching is op maat gemaakt voor jouw unieke situatie en doelen.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="group">
-              <Card className="ev-gradient-border bg-white/80 backdrop-blur border-transparent h-full hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <Target className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#1e1839] transition-colors">
-                    Duurzame Resultaten
-                  </h3>
-                  <p className="text-base md:text-lg text-gray-600 leading-loose">
-                    Focus op lange termijn transformatie. We maken je sterker én onafhankelijker, niet afhankelijk van
-                    coaching.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+          {/* Desktop - Grid */}
+          <div className="hidden lg:grid grid-cols-3 gap-8">
+            {reasons.map((reason, index) => (
+              <div 
+                key={reason.title}
+                className="group bg-gray-50 rounded-2xl p-8 hover:bg-[#1e1839] transition-all duration-500"
+              >
+                <div className="w-16 h-16 bg-[#1e1839] group-hover:bg-white rounded-2xl flex items-center justify-center mb-6 transition-colors duration-500">
+                  <reason.icon className="w-8 h-8 text-white group-hover:text-[#1e1839] transition-colors duration-500" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 group-hover:text-white mb-4 transition-colors duration-500">
+                  {reason.title}
+                </h3>
+                <p className="text-gray-600 group-hover:text-white/80 leading-relaxed transition-colors duration-500">
+                  {reason.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 px-4 bg-[rgba(30,24,57,1)]">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Klaar om te Beginnen?</h2>
-          <p className="text-lg md:text-xl text-gray-300 mb-8 leading-relaxed">
-            Plan een gratis kennismakingsgesprek en ontdek welke coach en aanpak het beste bij jou past.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact">
-              <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 font-semibold">
-                Plan Gratis Gesprek
-              </Button>
-            </Link>
-            <Link href="/#diensten">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent"
-              >
-                Bekijk Onze Diensten
-              </Button>
-            </Link>
+      {/* CTA - Paars */}
+      <section className="py-20 lg:py-24 bg-[#1e1839]">
+        <div className="container mx-auto px-6">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+              Klaar om te Beginnen?
+            </h2>
+            <p className="text-lg text-white/70 mb-8 leading-relaxed">
+              Plan een gratis kennismakingsgesprek en ontdek welke coach en aanpak het beste bij jou past.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/contact">
+                <Button size="lg" className="w-full sm:w-auto bg-white text-[#1e1839] hover:bg-white/90 font-semibold px-8">
+                  Plan Gratis Gesprek
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+              <Link href="/#diensten">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10 bg-transparent px-8"
+                >
+                  Bekijk Diensten
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
