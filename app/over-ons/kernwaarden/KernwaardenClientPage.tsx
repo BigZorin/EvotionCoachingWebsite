@@ -1,12 +1,11 @@
 "use client"
 
-import React from "react"
+import React, { useState, useEffect } from "react"
 import { Header } from "@/components/header"
 import Footer from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import {
   ArrowRight,
-  Star,
   Brain,
   Target,
   HandHeart,
@@ -14,81 +13,59 @@ import {
   MessageSquare,
   UserCheck,
   Activity,
-  Sparkles,
   Calendar,
 } from "lucide-react"
 import Link from "next/link"
-import { useScrollAnimation } from "@/hooks/use-scroll-animation"
 
 export function KernwaardenClientPage() {
-  // Scroll animations
-  const heroAnimation = useScrollAnimation({ threshold: 0.2 })
-  const valuesAnimation = useScrollAnimation({ threshold: 0.1 })
-  const ctaAnimation = useScrollAnimation({ threshold: 0.2 })
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [activeValue, setActiveValue] = useState(0)
+
+  useEffect(() => {
+    setIsLoaded(true)
+    
+    // Auto-rotate kernwaarden op mobiel
+    const interval = setInterval(() => {
+      setActiveValue((prev) => (prev + 1) % coreValues.length)
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [])
 
   const coreValues = [
     {
       icon: Brain,
       title: "Bewustzijn en Zelfinzicht",
-      description:
-        "Groei begint bij bewustwording – weten wie je bent, wat je beweegt en hoe je keuzes invloed hebben. Door reflectie en eerlijk inzicht ontstaat ruimte voor authentieke ontwikkeling.",
-      quote: "Zelfkennis is de sleutel tot transformatie",
-      gradient: "from-[#1e1839] to-[#2a1f4d]",
-      bgGradient: "from-[#1e1839]/5 to-[#2a1f4d]/5",
+      description: "Groei begint bij bewustwording – weten wie je bent, wat je beweegt en hoe je keuzes invloed hebben.",
     },
     {
       icon: Target,
-      title: "Verantwoordelijkheid en Eigenaarschap",
-      description:
-        "Echte transformatie begint wanneer je verantwoordelijkheid neemt voor je eigen keuzes en resultaten. Eigenaarschap betekent: zelf je koers bepalen en trouw blijven aan je intenties.",
-      quote: "Jij bent de architect van je eigen succes",
-      gradient: "from-[#1e1839] to-[#2a1f4d]",
-      bgGradient: "from-[#1e1839]/5 to-[#2a1f4d]/5",
+      title: "Verantwoordelijkheid",
+      description: "Echte transformatie begint wanneer je verantwoordelijkheid neemt voor je eigen keuzes en resultaten.",
     },
     {
       icon: HandHeart,
       title: "Dienstbaarheid",
-      description:
-        "Elke interactie is een kans om te helpen. Vanuit oprechte betrokkenheid staan we klaar om anderen te ondersteunen. Door echt te luisteren ontstaat begeleiding die ertoe doet.",
-      quote: "Echte kracht ligt in het helpen van anderen",
-      gradient: "from-[#1e1839] to-[#2a1f4d]",
-      bgGradient: "from-[#1e1839]/5 to-[#2a1f4d]/5",
+      description: "Vanuit oprechte betrokkenheid staan we klaar om anderen te ondersteunen met begeleiding die ertoe doet.",
     },
     {
       icon: Lightbulb,
-      title: "Continue Ontwikkeling en Innovatie",
-      description:
-        "Groei stopt nooit. Door te blijven leren en vernieuwen ontstaat vooruitgang. Kennis en methodes worden voortdurend aangescherpt om jou zo goed mogelijk te ondersteunen.",
-      quote: "Stilstand is achteruitgang",
-      gradient: "from-[#1e1839] to-[#2a1f4d]",
-      bgGradient: "from-[#1e1839]/5 to-[#2a1f4d]/5",
+      title: "Continue Ontwikkeling",
+      description: "Groei stopt nooit. Door te blijven leren en vernieuwen ontstaat vooruitgang.",
     },
     {
       icon: MessageSquare,
-      title: "Transparantie en Eerlijkheid",
-      description:
-        "Helderheid in communicatie en intentie is de basis van vertrouwen. We zijn open over wat we doen, waarom we het doen en wat je kunt verwachten.",
-      quote: "Eerlijkheid bouwt bruggen",
-      gradient: "from-[#1e1839] to-[#2a1f4d]",
-      bgGradient: "from-[#1e1839]/5 to-[#2a1f4d]/5",
+      title: "Transparantie",
+      description: "Helderheid in communicatie en intentie is de basis van vertrouwen.",
     },
     {
       icon: UserCheck,
       title: "Empathie en Respect",
-      description:
-        "Ieder mens bewandelt zijn eigen pad. Er is geen one-size-fits-all. We stemmen af op de unieke behoeften, ritmes en uitdagingen van ieder individu.",
-      quote: "Diversiteit is onze kracht",
-      gradient: "from-[#1e1839] to-[#2a1f4d]",
-      bgGradient: "from-[#1e1839]/5 to-[#2a1f4d]/5",
+      description: "Ieder mens bewandelt zijn eigen pad. We stemmen af op unieke behoeften en uitdagingen.",
     },
     {
       icon: Activity,
       title: "Gezondheid en Welzijn",
-      description:
-        "Gezondheid draait om balans – fysiek, mentaal én emotioneel. Evotion integreert training, voeding, mindset en herstel in één allesomvattende aanpak.",
-      quote: "Een gezond lichaam herbergt een gezond lichaam",
-      gradient: "from-[#1e1839] to-[#2a1f4d]",
-      bgGradient: "from-[#1e1839]/5 to-[#2a1f4d]/5",
+      description: "Gezondheid draait om balans – fysiek, mentaal én emotioneel in één allesomvattende aanpak.",
     },
   ]
 
@@ -96,8 +73,9 @@ export function KernwaardenClientPage() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      <section className="relative bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] py-20 md:py-32 overflow-hidden">
-        {/* Subtle pattern overlay */}
+      {/* HERO - Paars */}
+      <section className="relative min-h-[60vh] lg:min-h-[70vh] flex items-center justify-center bg-[#1e1839] overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839]" />
         <div
           className="absolute inset-0 opacity-10"
           style={{
@@ -106,166 +84,220 @@ export function KernwaardenClientPage() {
           }}
         />
 
-        <div className="container mx-auto px-4 lg:px-6 max-w-5xl relative z-10">
-          <div
-            ref={heroAnimation.ref}
-            className={`text-center animate-on-scroll ${heroAnimation.isVisible ? "animate-visible" : ""}`}
-          >
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-5 py-2.5 rounded-full text-sm font-medium mb-8 border border-white/20">
-              <Sparkles className="w-4 h-4" />
-              Onze Kern. Jouw Groei.
+        <div className="container mx-auto px-6 relative z-10 pt-20 pb-16 lg:pt-0 lg:pb-0">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className={`transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <span className="inline-block bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium mb-6 border border-white/20">
+                Onze Kern. Jouw Groei.
+              </span>
             </div>
-            <h1 className="text-3xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">Kernwaarden</h1>
-            <p className="text-base md:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed mb-8">
-              Deze waarden vormen de basis van onze coaching filosofie en bepalen hoe we jou begeleiden in jouw
-              transformatie naar een sterker, vrijer en gezonder leven.
+            
+            <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 transition-all duration-700 delay-100 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              Kernwaarden
+            </h1>
+            
+            <p className={`text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed mb-8 transition-all duration-700 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              De basis van onze coaching filosofie en hoe we jou begeleiden naar een sterker leven
             </p>
-            <div className="inline-block bg-white/10 backdrop-blur-sm px-6 py-3 rounded-xl border border-white/20">
-              <p className="text-white font-semibold text-base md:text-lg italic">
-                "It is time to bring your evolution in motion"
-              </p>
+            
+            <div className={`transition-all duration-700 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <div className="inline-block bg-white/10 backdrop-blur-sm px-6 py-3 rounded-xl border border-white/20">
+                <p className="text-white font-medium text-base md:text-lg italic">
+                  "It is time to bring your evolution in motion"
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-20 md:py-32 bg-white">
-        <div className="container mx-auto px-4 lg:px-6 max-w-7xl">
-          <div
-            ref={valuesAnimation.ref}
-            className={`space-y-16 md:space-y-24 animate-on-scroll ${valuesAnimation.isVisible ? "animate-visible" : ""}`}
-          >
-            {coreValues.map((value, index) => (
-              <div
-                key={index}
-                className={`flex flex-col ${
-                  index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
-                } gap-8 md:gap-12 items-center group`}
-              >
-                {/* Icon side with gradient background */}
-                <div className="w-full md:w-1/3 flex justify-center">
-                  <div className={`relative`}>
-                    {/* Gradient background blob */}
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br ${value.bgGradient} rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition-opacity duration-500`}
-                    />
+      {/* KERNWAARDEN OVERZICHT - Wit */}
+      <section className="py-20 lg:py-32 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12 lg:mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+              Waar We Voor Staan
+            </h2>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+              7 kernwaarden die onze aanpak definiëren
+            </p>
+          </div>
 
-                    {/* Icon container */}
-                    <div
-                      className={`relative w-40 h-40 md:w-48 md:h-48 bg-gradient-to-br ${value.gradient} rounded-3xl flex items-center justify-center shadow-2xl group-hover:scale-105 group-hover:rotate-3 transition-all duration-500`}
-                    >
+          {/* Mobile - Single card with fade */}
+          <div className="lg:hidden">
+            <div className="relative h-80 mb-6">
+              {coreValues.map((value, index) => (
+                <div
+                  key={value.title}
+                  onClick={() => setActiveValue((index + 1) % coreValues.length)}
+                  className={`absolute inset-0 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-6 cursor-pointer transition-all duration-700 ${
+                    index === activeValue ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                  }`}
+                >
+                  <div className="flex flex-col items-center text-center h-full justify-center">
+                    <div className="w-16 h-16 bg-white/10 rounded-xl flex items-center justify-center mb-4">
                       {React.createElement(value.icon, {
-                        className: "w-20 h-20 md:w-24 md:h-24 text-white",
+                        className: "w-8 h-8 text-white",
                         strokeWidth: 1.5,
                       })}
                     </div>
+                    <h3 className="text-xl font-bold text-white mb-3">{value.title}</h3>
+                    <p className="text-white/80 text-sm leading-relaxed">{value.description}</p>
                   </div>
                 </div>
+              ))}
+            </div>
+            
+            {/* Progress bar */}
+            <div className="flex gap-1">
+              {coreValues.map((_, i) => (
+                <button
+                  type="button"
+                  key={i}
+                  onClick={() => setActiveValue(i)}
+                  className={`h-1 rounded-full flex-1 transition-all duration-300 ${
+                    i === activeValue ? 'bg-[#1e1839]' : 'bg-gray-200'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
 
-                {/* Content side */}
-                <div className="w-full md:w-2/3 space-y-6">
-                  <div>
-                    <h3 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4 group-hover:text-[#1e1839] transition-colors duration-300">
-                      {value.title}
-                    </h3>
-                    <p className="text-base md:text-xl text-gray-700 leading-relaxed">{value.description}</p>
-                  </div>
-
-                  {/* Quote with gradient accent */}
-                  <div
-                    className={`bg-gradient-to-r ${value.bgGradient} rounded-2xl p-6 border-l-4 border-gradient-to-b ${value.gradient}`}
-                  >
-                    <p className="text-gray-900 font-semibold text-lg md:text-2xl italic flex items-start gap-3">
-                      <Star
-                        className={`w-5 h-5 flex-shrink-0 mt-1 bg-gradient-to-br ${value.gradient} bg-clip-text text-transparent`}
-                        fill="currentColor"
-                      />
-                      {value.quote}
-                    </p>
-                  </div>
+          {/* Desktop - Grid */}
+          <div className="hidden lg:grid grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {coreValues.slice(0, 6).map((value, index) => (
+              <div
+                key={value.title}
+                className="group bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              >
+                <div className="w-14 h-14 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  {React.createElement(value.icon, {
+                    className: "w-7 h-7 text-white",
+                    strokeWidth: 1.5,
+                  })}
                 </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{value.title}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{value.description}</p>
               </div>
             ))}
           </div>
+          
+          {/* 7th value centered */}
+          <div className="hidden lg:flex justify-center mt-6">
+            <div className="group bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 max-w-sm">
+              <div className="w-14 h-14 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform mx-auto">
+                {React.createElement(coreValues[6].icon, {
+                  className: "w-7 h-7 text-white",
+                  strokeWidth: 1.5,
+                })}
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">{coreValues[6].title}</h3>
+              <p className="text-gray-600 text-sm leading-relaxed text-center">{coreValues[6].description}</p>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="py-20 md:py-28 bg-gradient-to-br from-gray-50 to-white">
-        <div className="container mx-auto px-4 lg:px-6 max-w-6xl">
-          <div className="text-center mb-16">
-            <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">Waarden in Actie</h2>
-            <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Deze waarden zijn niet alleen woorden, maar vormen de basis van alles wat we doen
+      {/* WAARDEN IN ACTIE - Paars */}
+      <section className="py-20 lg:py-32 bg-[#1e1839]">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+              Waarden in Actie
+            </h2>
+            <p className="text-white/70 text-lg max-w-2xl mx-auto">
+              Niet alleen woorden, maar de basis van alles wat we doen
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="group text-center bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <div className="text-4xl md:text-5xl font-bold text-white mb-3">7</div>
-              <div className="text-sm text-white/90 font-medium">Kernwaarden</div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 max-w-4xl mx-auto">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10">
+              <div className="text-3xl lg:text-4xl font-bold text-white mb-2">7</div>
+              <div className="text-white/70 text-sm">Kernwaarden</div>
             </div>
-            <div className="group text-center bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <div className="text-4xl md:text-5xl font-bold text-white mb-3">100%</div>
-              <div className="text-sm text-white/90 font-medium">Transparantie</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10">
+              <div className="text-3xl lg:text-4xl font-bold text-white mb-2">100%</div>
+              <div className="text-white/70 text-sm">Transparantie</div>
             </div>
-            <div className="group text-center bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <div className="text-4xl md:text-5xl font-bold text-white mb-3">∞</div>
-              <div className="text-sm text-white/90 font-medium">Groei Mogelijkheden</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10">
+              <div className="text-3xl lg:text-4xl font-bold text-white mb-2">∞</div>
+              <div className="text-white/70 text-sm">Groei</div>
             </div>
-            <div className="group text-center bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <div className="text-4xl md:text-5xl font-bold text-white mb-3">1</div>
-              <div className="text-sm text-white/90 font-medium">Jouw Unieke Pad</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10">
+              <div className="text-3xl lg:text-4xl font-bold text-white mb-2">1</div>
+              <div className="text-white/70 text-sm">Jouw Pad</div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-20 md:py-32 bg-gradient-to-br from-[#1e1839] via-[#2a1f4d] to-[#1e1839] relative overflow-hidden">
-        {/* Subtle pattern */}
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-            backgroundSize: "32px 32px",
-          }}
-        />
-
-        <div className="container mx-auto px-4 lg:px-6 max-w-5xl relative z-10">
-          <div
-            ref={ctaAnimation.ref}
-            className={`text-center animate-on-scroll ${ctaAnimation.isVisible ? "animate-visible" : ""}`}
-          >
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-10 md:p-16">
-              <h3 className="text-2xl md:text-4xl font-bold text-white mb-6 leading-tight">
-                Ervaar onze kernwaarden in actie
-              </h3>
-              <p className="text-base md:text-xl text-white/90 mb-10 max-w-3xl mx-auto leading-relaxed">
-                Ontdek hoe onze waarden jouw transformatie kunnen ondersteunen. Laten we samen werken aan een sterker,
-                vrijer en gezonder leven.
+      {/* HOE WE WERKEN - Wit */}
+      <section className="py-20 lg:py-32 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+                Hoe We Werken
+              </h2>
+              <p className="text-gray-600 text-lg">
+                Onze waarden vertaald naar jouw traject
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  size="lg"
-                  className="bg-white text-[#1e1839] hover:bg-white/90 font-semibold px-10 py-6 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
-                  asChild
-                >
-                  <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
-                    <Calendar className="w-5 h-5 mr-2" />
-                    Plan een Gesprek
-                  </Link>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-2 border-white/30 text-white hover:bg-white/10 bg-transparent backdrop-blur-sm font-semibold px-10 py-6 text-lg transition-all duration-300 hover:scale-105"
-                  asChild
-                >
-                  <Link href="/over-ons/visie-missie">
-                    Lees Onze Visie & Missie
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Link>
-                </Button>
-              </div>
+            </div>
+
+            <div className="space-y-6">
+              {[
+                { num: "01", title: "Luisteren en begrijpen", desc: "We nemen de tijd om jouw situatie, doelen en uitdagingen echt te begrijpen." },
+                { num: "02", title: "Persoonlijke aanpak", desc: "Geen standaard programma, maar een plan dat past bij jouw leven en mogelijkheden." },
+                { num: "03", title: "Samen groeien", desc: "We blijven naast je staan, passen aan waar nodig en vieren successen samen." },
+              ].map((step, index) => (
+                <div key={step.num} className="flex gap-6 items-start">
+                  <div className="w-12 h-12 bg-[#1e1839] rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-bold text-sm">{step.num}</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-1">{step.title}</h3>
+                    <p className="text-gray-600">{step.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA - Paars */}
+      <section className="py-20 lg:py-32 bg-[#1e1839]">
+        <div className="container mx-auto px-6">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+              Ervaar Onze Waarden
+            </h2>
+            <p className="text-white/80 text-lg mb-10 max-w-2xl mx-auto">
+              Ontdek hoe onze kernwaarden jouw transformatie kunnen ondersteunen. 
+              Laten we samen werken aan een sterker, vrijer en gezonder leven.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                size="lg"
+                className="bg-white text-[#1e1839] hover:bg-white/90 font-semibold px-8 py-6 text-lg"
+                asChild
+              >
+                <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
+                  <Calendar className="w-5 h-5 mr-2" />
+                  Plan een Gesprek
+                </Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 border-white/30 text-white hover:bg-white/10 bg-transparent font-semibold px-8 py-6 text-lg"
+                asChild
+              >
+                <Link href="/over-ons/visie-missie">
+                  Onze Visie & Missie
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
