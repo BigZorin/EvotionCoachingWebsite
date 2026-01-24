@@ -1,5 +1,5 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import CookieConsent from "@/components/cookie-consent"
@@ -7,6 +7,13 @@ import Script from "next/script"
 import { AnalyticsTracker } from "@/components/analytics-tracker"
 
 const inter = Inter({ subsets: ["latin"] })
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
 
 export const metadata: Metadata = {
   title: "Evotion Coaching - Jouw Partner in Gezonde Gewichtsbeheersing",
@@ -78,6 +85,20 @@ export default function RootLayout({
         <meta name="theme-color" content="#1e1839" />
       </head>
       <body className={inter.className}>
+        {/* Suppress ResizeObserver loop error */}
+        <Script id="resize-observer-fix" strategy="beforeInteractive">
+          {`
+            const resizeObserverErr = window.onerror;
+            window.onerror = function(message, source, lineno, colno, error) {
+              if (message === 'ResizeObserver loop completed with undelivered notifications.' || 
+                  message === 'ResizeObserver loop limit exceeded') {
+                return true;
+              }
+              return resizeObserverErr ? resizeObserverErr(message, source, lineno, colno, error) : false;
+            };
+          `}
+        </Script>
+
         {/* Google Analytics */}
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-MCL41XYPGM" strategy="afterInteractive" />
         <Script id="google-analytics" strategy="afterInteractive">
