@@ -339,19 +339,18 @@ export default function EvotionCoachingMobile() {
           </div>
 
           {/* Quick Action */}
-          <div className="mt-10 p-6 bg-gray-50 rounded-2xl">
-            <div className="flex items-center justify-between">
+          <div className="mt-10 p-5 bg-gray-50 rounded-2xl">
+            <div className="flex flex-col gap-4">
               <div>
-                <p className="font-semibold text-[#1e1839] text-sm">Niet zeker welke?</p>
-                <p className="text-xs text-gray-500">Gratis adviesgesprek van 15 min</p>
+                <p className="font-semibold text-[#1e1839] text-base">Niet zeker welke?</p>
+                <p className="text-sm text-gray-500 mt-1">Gratis adviesgesprek van 15 min</p>
               </div>
               <Button
-                size="sm"
-                className="bg-[#1e1839] hover:bg-[#1e1839]/90 text-white rounded-xl h-10 px-4"
+                className="w-full bg-[#1e1839] hover:bg-[#1e1839]/90 text-white rounded-xl h-12 text-base font-medium"
                 asChild
               >
                 <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
-                  Plan in
+                  Plan gesprek in
                 </Link>
               </Button>
             </div>
