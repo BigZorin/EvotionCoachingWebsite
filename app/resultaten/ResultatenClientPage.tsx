@@ -130,9 +130,9 @@ export function ResultatenClientPage() {
               {/* Stats */}
               <div className={`grid grid-cols-3 gap-4 mt-12 max-w-lg mx-auto transition-all duration-700 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                 {[
-                  { value: "28.8kg", label: "Totaal verlies" },
+                  { value: "~10kg", label: "Gem. gewichtsverlies" },
                   { value: "5.0", label: "Google score" },
-                  { value: "45", label: "Weken coaching" },
+                  { value: "~26", label: "Gem. weken coaching" },
                 ].map((stat) => (
                   <div key={stat.label} className="text-center p-3 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
                     <div className="text-xl md:text-2xl font-bold text-white mb-1">{stat.value}</div>
