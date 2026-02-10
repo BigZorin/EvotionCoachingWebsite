@@ -17,8 +17,6 @@ import {
   Utensils,
   BookOpen,
   ArrowRight,
-  RefreshCw,
-  BarChart3,
   Heart,
 } from "lucide-react"
 
@@ -259,62 +257,79 @@ export default function EvotionAppClientPage() {
           </div>
         </section>
 
-        {/* INCLUDED - Wit */}
+        {/* BESCHIKBAARHEID - Wit */}
         <section className="py-20 lg:py-28 bg-white">
           <div className="container mx-auto px-6">
             <div className="text-center mb-12 lg:mb-16">
               <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-[#1e1839] mb-4">
-                Inbegrepen bij elk programma
+                Hoe krijg je toegang?
               </h2>
               <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
-                Ongeacht welk coaching programma je kiest, de app is altijd inbegrepen.
+                De Evotion App is standaard inbegrepen bij onze Online Coaching en optioneel beschikbaar bij Personal Training.
               </p>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
-              {[
-                { name: "Online Coaching", href: "/online-coaching", icon: Smartphone },
-                { name: "Premium Coaching", href: "/premium-coaching", icon: Crown },
-                { name: "12-Weken Vetverlies", href: "/12-weken-vetverlies", icon: RefreshCw },
-                { name: "Personal Training", href: "/personal-training", icon: Dumbbell },
-              ].map((program) => {
-                const Icon = program.icon
-                return (
-                  <Link
-                    key={program.name}
-                    href={program.href}
-                    className="group flex items-center gap-4 bg-gray-50 rounded-2xl p-5 hover:bg-[#1e1839] transition-all duration-300"
-                  >
-                    <div className="w-10 h-10 bg-[#1e1839] group-hover:bg-white rounded-xl flex items-center justify-center flex-shrink-0 transition-colors">
-                      <Icon className="w-5 h-5 text-white group-hover:text-[#1e1839] transition-colors" />
-                    </div>
-                    <div>
-                      <span className="font-semibold text-[#1e1839] group-hover:text-white transition-colors">{program.name}</span>
-                      <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-white/60 inline-block ml-2 group-hover:translate-x-1 transition-all" />
-                    </div>
-                  </Link>
-                )
-              })}
+            <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              {/* Online Coaching */}
+              <Link
+                href="/online-coaching"
+                className="group bg-[#1e1839] rounded-2xl p-8 hover:scale-[1.02] transition-all duration-300"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
+                    <Smartphone className="w-6 h-6 text-white" />
+                  </div>
+                  <Badge className="bg-white/20 text-white border-0 text-xs">Inbegrepen</Badge>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Online Coaching</h3>
+                <p className="text-white/70 text-sm leading-relaxed mb-4">
+                  Volledige toegang tot de app met trainingsschema, voedingsplan, coach chat en meer.
+                </p>
+                <div className="flex items-center text-white/60 text-sm group-hover:text-white transition-colors">
+                  Bekijk programma
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+
+              {/* Personal Training */}
+              <Link
+                href="/personal-training"
+                className="group bg-gray-50 rounded-2xl p-8 hover:bg-gray-100 transition-all duration-300"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-[#1e1839]/10 rounded-xl flex items-center justify-center">
+                    <Dumbbell className="w-6 h-6 text-[#1e1839]" />
+                  </div>
+                  <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-0 text-xs">Optioneel</Badge>
+                </div>
+                <h3 className="text-xl font-bold text-[#1e1839] mb-2">Personal Training</h3>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  Optioneel bij te kopen als aanvulling op je personal training sessies.
+                </p>
+                <div className="flex items-center text-gray-400 text-sm group-hover:text-[#1e1839] transition-colors">
+                  Bekijk programma
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 max-w-3xl mx-auto mt-16">
-              {[
-                { number: "500+", label: "Gebruikers", icon: BarChart3 },
-                { number: "5.0", label: "Beoordeling", icon: Heart },
-                { number: "98%", label: "Tevredenheid", icon: CheckCircle },
-              ].map((stat) => {
-                const Icon = stat.icon
-                return (
-                  <div key={stat.label} className="text-center">
-                    <div className="w-10 h-10 bg-[#1e1839]/10 rounded-xl flex items-center justify-center mx-auto mb-3">
-                      <Icon className="w-5 h-5 text-[#1e1839]" />
-                    </div>
-                    <div className="text-2xl md:text-3xl font-bold text-[#1e1839] mb-1">{stat.number}</div>
-                    <div className="text-sm text-gray-500">{stat.label}</div>
+            {/* Features checklist */}
+            <div className="mt-12 max-w-2xl mx-auto">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  "Trainingsschema op maat",
+                  "Persoonlijk voedingsplan",
+                  "Direct contact met coach",
+                  "Wekelijkse check-ins",
+                  "Voortgang bijhouden",
+                  "E-learning modules",
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-2 text-sm text-gray-600">
+                    <CheckCircle className="w-4 h-4 text-[#1e1839] flex-shrink-0" />
+                    {item}
                   </div>
-                )
-              })}
+                ))}
+              </div>
             </div>
           </div>
         </section>
