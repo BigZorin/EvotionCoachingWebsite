@@ -128,18 +128,7 @@ export function ResultatenClientPage() {
               </p>
 
               {/* Stats */}
-              <div className={`grid grid-cols-3 gap-4 mt-12 max-w-lg mx-auto transition-all duration-700 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                {[
-                  { value: "~10kg", label: "Gem. gewichtsverlies" },
-                  { value: "5.0", label: "Google score" },
-                  { value: "~26", label: "Gem. weken coaching" },
-                ].map((stat) => (
-                  <div key={stat.label} className="text-center p-3 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
-                    <div className="text-xl md:text-2xl font-bold text-white mb-1">{stat.value}</div>
-                    <div className="text-xs text-white/60">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
+              
             </div>
           </div>
         </section>
@@ -269,54 +258,31 @@ export function ResultatenClientPage() {
               </div>
             </div>
 
-            {/* Mobile: Single testimonial carousel */}
-            <div className="lg:hidden">
-              <div className="relative h-52 mb-4">
-                {testimonials.map((testimonial, index) => (
-                  <div
-                    key={testimonial.name}
-                    className={`absolute inset-0 transition-opacity duration-500 ${
-                      index === activeTestimonial ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                    }`}
-                  >
-                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 h-full flex flex-col justify-between">
-                      <div>
-                        <Quote className="w-5 h-5 text-white/30 mb-3" />
-                        <p className="text-white/80 text-sm leading-relaxed">
-                          {testimonial.text}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3 mt-4">
-                        <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#1e1839] font-semibold text-sm">
-                          {testimonial.initial}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-white text-sm">{testimonial.name}</p>
-                          <div className="flex gap-0.5">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
-                            ))}
-                          </div>
-                        </div>
+            {/* Mobile: Scrollable list */}
+            <div className="lg:hidden space-y-4">
+              {testimonials.map((testimonial) => (
+                <div
+                  key={testimonial.name}
+                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10"
+                >
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#1e1839] font-semibold text-sm flex-shrink-0">
+                      {testimonial.initial}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white text-sm">{testimonial.name}</p>
+                      <div className="flex gap-0.5">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
+                        ))}
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-
-              {/* Dots */}
-              <div className="flex justify-center gap-2 mt-4">
-                {testimonials.map((_, i) => (
-                  <button
-                    type="button"
-                    key={i}
-                    onClick={() => setActiveTestimonial(i)}
-                    className={`h-1.5 rounded-full transition-all ${
-                      i === activeTestimonial ? "bg-white w-6" : "bg-white/30 w-1.5"
-                    }`}
-                  />
-                ))}
-              </div>
+                  <p className="text-white/80 text-sm leading-relaxed">
+                    {testimonial.text}
+                  </p>
+                </div>
+              ))}
             </div>
 
             {/* Desktop: Grid */}

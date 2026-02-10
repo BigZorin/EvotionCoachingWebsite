@@ -102,48 +102,30 @@ export function BlogClientPage() {
             </p>
           </div>
 
-          {/* Mobile: Single card carousel */}
+          {/* Mobile: Horizontal scroll chips + expandable */}
           <div className="lg:hidden">
-            <div className="relative h-44 mb-4">
-              {blogCategories.map((cat, index) => {
+            <div className="flex gap-2 overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide">
+              {blogCategories.map((cat) => {
                 const Icon = categoryIcons[cat.icon] || Shield
+                const isSelected = selectedCategory === cat.slug
                 return (
                   <button
                     type="button"
                     key={cat.slug}
-                    onClick={() => {
-                      setActivePillar(index)
-                      setSelectedCategory(cat.slug === selectedCategory ? null : cat.slug)
-                    }}
-                    className={`absolute inset-0 bg-white rounded-2xl p-6 border transition-all duration-500 text-left py-0 ${
-                      index === activePillar ? 'opacity-100 scale-100 border-[#1e1839]/20 shadow-lg' : 'opacity-0 scale-95 pointer-events-none border-transparent'
-                    } ${selectedCategory === cat.slug ? 'ring-2 ring-[#1e1839]' : ''}`}
+                    onClick={() => setSelectedCategory(isSelected ? null : cat.slug)}
+                    className={`flex items-center gap-2 px-4 py-3 rounded-xl border whitespace-nowrap transition-all flex-shrink-0 ${
+                      isSelected
+                        ? 'bg-[#1e1839] text-white border-[#1e1839]'
+                        : 'bg-white text-[#1e1839] border-gray-200'
+                    }`}
                   >
-                    <div className={`w-12 h-12 ${cat.color} rounded-xl flex items-center justify-center mb-4`}>
-                      <Icon className="w-6 h-6 text-white" />
+                    <div className={`w-7 h-7 ${isSelected ? 'bg-white/20' : cat.color} rounded-lg flex items-center justify-center`}>
+                      <Icon className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-white'}`} />
                     </div>
-                    <h3 className="text-lg font-bold text-[#1e1839] mb-2">{cat.name}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">{cat.description}</p>
-                    <div className="mt-3 text-xs text-gray-400">
-                      {blogArticles.filter((a) => a.category.slug === cat.slug).length} artikelen
-                    </div>
+                    <span className="text-sm font-medium">{cat.name}</span>
                   </button>
                 )
               })}
-            </div>
-
-            {/* Progress dots */}
-            <div className="flex justify-center gap-2">
-              {blogCategories.map((_, i) => (
-                <button
-                  type="button"
-                  key={i}
-                  onClick={() => setActivePillar(i)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    i === activePillar ? 'w-8 bg-[#1e1839]' : 'w-1.5 bg-gray-300'
-                  }`}
-                />
-              ))}
             </div>
           </div>
 

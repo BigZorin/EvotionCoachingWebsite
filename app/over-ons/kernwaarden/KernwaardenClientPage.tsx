@@ -114,44 +114,27 @@ export function KernwaardenClientPage() {
             </p>
           </div>
 
-          {/* Mobile - Single card carousel */}
-          <div className="lg:hidden">
-            <div className="relative h-72 mb-6">
-              {coreValues.map((value, index) => (
-                <div
-                  key={value.title}
-                  onClick={() => setActiveValue((index + 1) % coreValues.length)}
-                  className={`absolute inset-0 bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-6 cursor-pointer transition-all duration-700 ${
-                    index === activeValue ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                  }`}
-                >
-                  <div className="flex flex-col items-center text-center h-full justify-center">
-                    <div className="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center mb-4">
-                      {React.createElement(value.icon, {
-                        className: "w-7 h-7 text-white",
-                        strokeWidth: 1.5,
-                      })}
-                    </div>
-                    <h3 className="text-xl font-bold text-white mb-3">{value.title}</h3>
+          {/* Mobile - Scrollable list */}
+          <div className="lg:hidden space-y-4">
+            {coreValues.map((value) => (
+              <div
+                key={value.title}
+                className="bg-gradient-to-br from-[#1e1839] to-[#2a1f4d] rounded-2xl p-5"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-11 h-11 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    {React.createElement(value.icon, {
+                      className: "w-5 h-5 text-white",
+                      strokeWidth: 1.5,
+                    })}
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white mb-1">{value.title}</h3>
                     <p className="text-white/80 text-sm leading-relaxed">{value.description}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-            
-            {/* Progress bar */}
-            <div className="flex gap-1">
-              {coreValues.map((_, i) => (
-                <button
-                  type="button"
-                  key={i}
-                  onClick={() => setActiveValue(i)}
-                  className={`h-1 rounded-full flex-1 transition-all duration-300 ${
-                    i === activeValue ? 'bg-[#1e1839]' : 'bg-gray-200'
-                  }`}
-                />
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
 
           {/* Desktop - Staggered grid */}
