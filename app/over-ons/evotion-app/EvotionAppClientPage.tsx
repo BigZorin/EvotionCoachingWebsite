@@ -250,7 +250,7 @@ export default function EvotionAppClientPage() {
                   <p className="text-white/60 text-sm leading-relaxed">{item.desc}</p>
                   {index < howItWorks.length - 1 && (
                     <div className="hidden md:block absolute">
-                      <ArrowRight className="w-5 h-5 text-white/30" />
+                      
                     </div>
                   )}
                 </div>
