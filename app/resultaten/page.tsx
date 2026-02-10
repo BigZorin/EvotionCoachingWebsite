@@ -3,50 +3,15 @@ import { ResultatenClientPage } from "./ResultatenClientPage"
 import Script from "next/script"
 
 export const metadata: Metadata = {
-  title: "Resultaten & Transformaties - Bewezen Succes | Evotion Coaching",
-  description:
-    "🏆 Bekijk de indrukwekkende transformaties van onze cliënten! ✅ Martin: -10.7kg in 11 weken ✅ Salim: -8.1kg in 26 weken ✅ Wouter: -2.1kg body recomp. Echte resultaten, echte mensen. Jij bent de volgende!",
-  keywords: [
-    "fitness resultaten friesland",
-    "vetverlies transformaties",
-    "body transformation voorbeelden",
-    "afvallen resultaten",
-    "vet verliezen succes",
-    "fitness voor en na",
-    "coaching resultaten",
-    "body recomposition",
-    "vetverlies transformatie",
-    "fitness success stories",
-    "personal training resultaten",
-    "online coaching succes",
-    "12 weken vetverlies resultaten",
-    "online vetverliezen resultaten",
-  ],
+  title: "Resultaten & Transformaties | Evotion Coaching",
+  description: "Bekijk de transformaties van onze cliënten. Echte resultaten door persoonlijke begeleiding en bewezen methodes.",
   openGraph: {
-    title: "Resultaten & Transformaties - Bewezen Succes | Evotion Coaching",
-    description:
-      "🏆 Bekijk de indrukwekkende transformaties van onze cliënten! Echte resultaten door bewezen coaching methodes.",
-    url: "https://evotion-coaching.nl/resultaten",
-    images: [
-      {
-        url: "/images/martin-transformation-professional.png",
-        width: 1200,
-        height: 630,
-        alt: "Martin's transformatie - 10.7kg gewichtsverlies in 11 weken",
-        type: "image/png",
-      },
-    ],
+    title: "Resultaten & Transformaties | Evotion Coaching",
+    description: "Echte transformaties door persoonlijke begeleiding en bewezen methodes.",
+    url: "https://evotioncoaching.nl/resultaten",
+    siteName: "Evotion Coaching",
+    locale: "nl_NL",
     type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Resultaten & Transformaties - Bewezen Succes | Evotion Coaching",
-    description:
-      "🏆 Bekijk de indrukwekkende transformaties van onze cliënten! Echte resultaten door bewezen coaching.",
-    images: ["/images/martin-transformation-professional.png"],
-  },
-  alternates: {
-    canonical: "https://evotion-coaching.nl/resultaten",
   },
 }
 

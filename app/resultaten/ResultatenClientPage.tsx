@@ -1,337 +1,247 @@
 "use client"
 
-import type React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import {
-  Phone,
-  MessageCircle,
-  Mail,
   ArrowRight,
   Star,
   TrendingUp,
-  Users,
   Award,
   Clock,
-  Target,
   CheckCircle,
+  Quote,
 } from "lucide-react"
-import { useState } from "react"
-import { sendContactEmail } from "@/app/actions/contact"
-
-interface Transformation {
-  name: string
-  image: string
-  testimonial: string
-  fullStory: string
-  achievements: string[]
-  quote: string
-  focusAreas: string[]
-  timeframe: string
-  startWeight?: string
-  endWeight?: string
-}
+import { useState, useEffect } from "react"
 
 export function ResultatenClientPage() {
-  const transformations: Transformation[] = [
-    // 1. Salim first
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [activeTransformation, setActiveTransformation] = useState(0)
+  const [activeTestimonial, setActiveTestimonial] = useState(0)
+
+  const transformations = [
     {
       name: "Salim",
-      image: "/images/salim-transformation-professional.png",
-      testimonial:
-        "Dankzij Evotion Coaching heb ik mijn levensstijl volledig omgegooid. De coaches zijn ontzettend motiverend en deskundig.",
-      fullStory:
-        "Salim wilde zijn levensstijl drastisch omgooien en had behoefte aan deskundige begeleiding. In 26 weken heeft hij met Evotion Coaching een gestructureerd plan gevolgd dat perfect aansloot bij zijn drukke schema.",
-      achievements: [
-        "8.1 kg gewichtsverlies",
-        "Verhoogde energieniveaus",
-        "Verbeterde slaapkwaliteit",
-        "Consistente gezonde gewoontes",
-      ],
+      image: "/images/salim-20transformatie.png",
       quote: "In 26 weken heb ik niet alleen gewicht verloren, maar ook een compleet nieuwe levensstijl opgebouwd!",
-      focusAreas: ["Gewichtsverlies", "Gezonde gewoontes", "Energieverbetering"],
+      results: ["8.1 kg gewichtsverlies", "Verhoogde energie", "Betere slaapkwaliteit", "Gezonde gewoontes"],
       timeframe: "26 weken",
-      startWeight: "91.2 kg",
-      endWeight: "83.1 kg",
+      focus: "Gewichtsverlies",
     },
-    // 2. Martin second
     {
       name: "Martin",
-      image: "/images/martin-transformation-professional.png",
-      testimonial:
-        "Ik ben super blij met de resultaten die ik heb behaald met Evotion Coaching. De persoonlijke begeleiding en het op maat gemaakte plan hebben echt het verschil gemaakt.",
-      fullStory:
-        "Martin begon zijn reis met het doel om fitter te worden en meer energie te krijgen. In slechts 11 weken heeft hij met een gepersonaliseerd trainings- en voedingsplan niet alleen zijn fysieke doelen overtroffen, maar ook een duurzame levensstijl ontwikkeld.",
-      achievements: [
-        "10.7 kg gewichtsverlies",
-        "Verdubbeling van kracht",
-        "Verbeterde conditie",
-        "Meer zelfvertrouwen",
-      ],
+      image: "/images/martin-20transformatie.png",
       quote: "In 11 weken heeft Evotion Coaching mijn leven veranderd. Ik voel me sterker en energieker dan ooit!",
-      focusAreas: ["Gewichtsverlies", "Krachttraining", "Duurzame levensstijl"],
+      results: ["10.7 kg gewichtsverlies", "Verdubbeling van kracht", "Betere conditie", "Meer zelfvertrouwen"],
       timeframe: "11 weken",
-      startWeight: "107.2 kg",
-      endWeight: "96.5 kg",
+      focus: "Krachttraining",
     },
-    // 3. Wouter third
     {
-      name: "Wouter",
-      image: "/images/wouter-transformation-professional.png",
-      testimonial:
-        "De aanpak van Evotion Coaching is uniek. Ze kijken verder dan alleen training en voeding, en helpen je ook mentaal sterker te worden.",
-      fullStory:
-        "Wouter zocht naar een aanpak die verder ging dan alleen sporten; hij wilde een complete body recomposition. In 8 weken heeft hij met Evotion Coaching geleerd hoe voeding, training en mindset samenkomen voor optimale lichaamssamenstelling.",
-      achievements: [
-        "Body recomposition",
-        "Vetmassa naar spiermassa",
-        "Verbeterde lichaamssamenstelling",
-        "Sterkere mentale focus",
-      ],
-      quote: "In 8 weken heb ik mijn lichaam compleet getransformeerd - van vet naar spieren!",
-      focusAreas: ["Body Recomposition", "Lichaamssamenstelling", "Mentale veerkracht"],
-      timeframe: "8 weken",
-      startWeight: "69.6 kg",
-      endWeight: "67.5 kg",
+      name: "Kim",
+      image: "/images/vrouw-20transformatie.png",
+      quote: "Een prachtig cadeau aan jezelf! Na 3 weken al geweldige resultaten. Veel energie en gezond eten.",
+      results: ["Body recomposition", "Meer energie", "Gezonde levensstijl", "Mentaal sterker"],
+      timeframe: "12 weken",
+      focus: "Levensstijl",
     },
   ]
 
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    goal: "",
-    message: "",
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitMessage, setSubmitMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const testimonials = [
+    {
+      name: "Kim Altena",
+      text: "Een prachtig cadeau aan jezelf! Na 3 weken al geweldige resultaten. Veel energie, goed slapen en lekker gezond eten. Martin is zeer professioneel en heeft uitgebreide kennis.",
+      initial: "K",
+    },
+    {
+      name: "Ingrid Eekhof",
+      text: "Martin weet heel goed de balans te bewaren tussen nuchtere professionele benadering en persoonlijke betrokkenheid. De wekelijkse feedback motiveert mij iedere keer weer.",
+      initial: "I",
+    },
+    {
+      name: "Wouter Baerveldt",
+      text: "Martin heeft veel kennis op gebied van sport, voeding en mindset en weet dit op een toegankelijke maar no-nonsense manier over te brengen. Al mooie resultaten behaald!",
+      initial: "W",
+    },
+    {
+      name: "Marcel MPW",
+      text: "Martin is een prima coach. Doet en zegt wat hij belooft. Geeft ook ongezouten commentaar. Zegt dingen als: je betaalt me niet om je vriend te zijn, ik ben je coach.",
+      initial: "M",
+    },
+    {
+      name: "Casper Lenten",
+      text: "Professioneel advies en goede resultaten. Aanrader als je een verschil wil maken in je levensstijl en gezondheid.",
+      initial: "C",
+    },
+    {
+      name: "Hessel Van Der Molen",
+      text: "Heel erg tevreden over Martin als persoonlijke coach. Hij is streng en zegt waar het op staat. Precies wat ik nodig had!",
+      initial: "H",
+    },
+  ]
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  useEffect(() => {
+    setIsLoaded(true)
+  }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setSubmitMessage(null)
+  // Auto-rotate transformations
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTransformation((prev) => (prev + 1) % transformations.length)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [transformations.length])
 
-    try {
-      const result = await sendContactEmail({
-        name: `${formData.firstName} ${formData.lastName}`.trim(),
-        email: formData.email,
-        phone: formData.phone,
-        subject: formData.goal || "algemeen",
-        message: formData.message,
-      })
-
-      if (result.success) {
-        setSubmitMessage({ type: "success", text: result.message || "Bericht verzonden!" })
-        setFormData({
-          firstName: "",
-          lastName: "",
-          email: "",
-          phone: "",
-          goal: "",
-          message: "",
-        })
-      } else {
-        setSubmitMessage({ type: "error", text: result.error || "Er ging iets mis." })
-      }
-    } catch (error) {
-      setSubmitMessage({ type: "error", text: "Er ging iets mis bij het verzenden." })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+  // Auto-rotate testimonials
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [testimonials.length])
 
   return (
     <>
       <Header />
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="w-full py-12 md:py-20 lg:py-24 bg-gradient-to-br from-gray-50 to-white">
-          <div className="container px-4 md:px-6 max-w-6xl mx-auto">
-            <div className="text-center space-y-6 mb-12">
-              <Badge className="bg-evotion-primary/10 text-evotion-primary border border-evotion-primary/20 text-sm px-4 py-2">
-                <Award className="w-4 h-4 mr-2" />
-                Bewezen Resultaten
-              </Badge>
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight">
-                Echte <span className="text-evotion-primary">Transformaties</span>
-              </h1>
-              <p className="max-w-3xl mx-auto text-base md:text-xl text-gray-600 leading-relaxed">
-                Ontdek hoe onze cliënten hun doelen hebben bereikt en hun leven hebben getransformeerd met persoonlijke
-                begeleiding en bewezen methodes.
-              </p>
-            </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-evotion-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Users className="w-8 h-8 text-evotion-primary" />
-                </div>
-                <div className="text-xl md:text-3xl font-bold text-gray-900">200+</div>
-                <div className="text-sm text-gray-600">Tevreden Cliënten</div>
+        {/* HERO - Paars */}
+        <section className="relative bg-[#1e1839] pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent" />
+          <div className="container mx-auto px-6 relative z-10">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className={`transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                <Badge className="bg-white/10 text-white border-white/20 backdrop-blur-sm px-4 py-2 mb-6">
+                  <Award className="w-4 h-4 mr-2" />
+                  Bewezen Resultaten
+                </Badge>
               </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-evotion-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <TrendingUp className="w-8 h-8 text-evotion-primary" />
-                </div>
-                <div className="text-xl md:text-3xl font-bold text-gray-900">95%</div>
-                <div className="text-sm text-gray-600">Succesvol</div>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-evotion-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Award className="w-8 h-8 text-evotion-primary" />
-                </div>
-                <div className="text-xl md:text-3xl font-bold text-gray-900">21kg</div>
-                <div className="text-sm text-gray-600">Totaal Verlies</div>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-evotion-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Star className="w-8 h-8 text-evotion-primary" />
-                </div>
-                <div className="text-xl md:text-3xl font-bold text-gray-900">4.9</div>
-                <div className="text-sm text-gray-600">Gemiddelde Score</div>
+
+              <h1 className={`text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6 transition-all duration-700 delay-100 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                Echte Transformaties
+              </h1>
+
+              <p className={`text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed transition-all duration-700 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                Ontdek hoe onze cliënten hun doelen hebben bereikt met persoonlijke begeleiding en bewezen methodes.
+              </p>
+
+              {/* Stats */}
+              <div className={`grid grid-cols-3 gap-4 mt-12 max-w-lg mx-auto transition-all duration-700 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                {[
+                  { value: "28.8kg", label: "Totaal verlies" },
+                  { value: "5.0", label: "Google score" },
+                  { value: "45", label: "Weken coaching" },
+                ].map((stat) => (
+                  <div key={stat.label} className="text-center p-3 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
+                    <div className="text-xl md:text-2xl font-bold text-white mb-1">{stat.value}</div>
+                    <div className="text-xs text-white/60">{stat.label}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </section>
 
-        {/* Transformations */}
-        <section className="py-16 md:py-20 bg-white">
-          <div className="container px-4 md:px-6 max-w-7xl mx-auto">
-            <div className="space-y-20 md:space-y-32">
-              {transformations.map((transformation, index) => (
-                <div
-                  key={index}
-                  className={`grid lg:grid-cols-2 gap-8 lg:gap-16 items-center ${index % 2 === 1 ? "lg:grid-flow-col-dense" : ""}`}
-                >
-                  {/* Image - All use portrait format now */}
-                  <div className={`${index % 2 === 1 ? "lg:col-start-2" : ""}`}>
-                    <div className="relative">
-                      <div className="aspect-[9/16] relative rounded-3xl overflow-hidden shadow-2xl max-w-sm mx-auto">
-                        <Image
-                          src={transformation.image || "/placeholder.svg"}
-                          alt={`${transformation.name} transformatie`}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                        />
-                      </div>
+        {/* TRANSFORMATIES - Wit */}
+        <section className="py-20 lg:py-28 bg-white">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-12 lg:mb-16">
+              <p className="text-xs font-semibold text-[#1e1839]/50 tracking-widest uppercase mb-3">Voor & Na</p>
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-[#1e1839] mb-4">
+                Transformaties van onze cliënten
+              </h2>
+            </div>
 
-                      {/* Stats overlay - Special handling for Wouter's body recomposition */}
-                      {transformation.startWeight && transformation.endWeight && (
-                        <div className="absolute -bottom-6 -right-6 bg-white rounded-2xl shadow-xl p-6 border-2 border-gray-100">
-                          <div className="text-center">
-                            {transformation.name === "Wouter" ? (
-                              <>
-                                <div className="text-2xl font-bold text-evotion-primary mb-1">Body Recomp</div>
-                                <div className="text-sm text-gray-600 font-medium">{transformation.timeframe}</div>
-                              </>
-                            ) : (
-                              <>
-                                <div className="text-3xl font-bold text-evotion-primary mb-1">
-                                  {transformation.startWeight} → {transformation.endWeight}
-                                </div>
-                                <div className="text-sm text-gray-600 font-medium">{transformation.timeframe}</div>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+            {/* Mobile: Carousel */}
+            <div className="lg:hidden">
+              <div className="relative h-[440px] mb-6 overflow-hidden rounded-2xl shadow-lg">
+                {transformations.map((t, index) => (
+                  <div
+                    key={t.name}
+                    onClick={() => setActiveTransformation((index + 1) % transformations.length)}
+                    className={`absolute inset-0 cursor-pointer transition-opacity duration-700 ease-in-out ${
+                      index === activeTransformation ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                    }`}
+                  >
+                    <Image
+                      src={t.image || "/placeholder.svg"}
+                      alt={`${t.name}'s transformatie`}
+                      fill
+                      className="object-cover object-top"
+                    />
                   </div>
+                ))}
+              </div>
 
-                  {/* Content - Compact for all */}
-                  <div className={`space-y-6 ${index % 2 === 1 ? "lg:col-start-1" : ""}`}>
-                    {/* Header */}
-                    <div className="space-y-4">
-                      <div>
-                        <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-3 leading-tight">
-                          {transformation.name}'s
-                          <br />
-                          <span className="text-evotion-primary">Transformatie</span>
-                        </h2>
+              {/* Progress bar */}
+              <div className="flex gap-2 mb-6">
+                {transformations.map((_, i) => (
+                  <button
+                    type="button"
+                    key={i}
+                    onClick={() => setActiveTransformation(i)}
+                    className={`h-1 rounded-full flex-1 transition-all duration-300 ${
+                      i === activeTransformation ? 'bg-[#1e1839]' : 'bg-gray-200'
+                    }`}
+                  />
+                ))}
+              </div>
 
-                        {/* Focus Areas */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {transformation.focusAreas.map((area, areaIndex) => (
-                            <Badge
-                              key={areaIndex}
-                              className="bg-evotion-primary/10 text-evotion-primary border border-evotion-primary/20 px-3 py-1 text-sm font-medium"
-                            >
-                              <Target className="w-3 h-3 mr-1" />
-                              {area}
-                            </Badge>
-                          ))}
-                        </div>
+              {/* Active transformation info */}
+              <div className="bg-gray-50 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-[#1e1839]">{transformations[activeTransformation].name}</h3>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-[#1e1839]/60" />
+                    <span className="text-sm text-[#1e1839]/60">{transformations[activeTransformation].timeframe}</span>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600 italic mb-4">"{transformations[activeTransformation].quote}"</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {transformations[activeTransformation].results.map((result) => (
+                    <div key={result} className="flex items-center gap-2 text-sm text-gray-700">
+                      <CheckCircle className="w-3.5 h-3.5 text-[#1e1839] flex-shrink-0" />
+                      {result}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-                        {/* Timeframe */}
-                        <div className="flex items-center gap-2 text-gray-600 mb-4">
-                          <Clock className="w-4 h-4 text-evotion-primary" />
-                          <span className="font-medium text-sm">Transformatie in {transformation.timeframe}</span>
-                        </div>
-                      </div>
-
-                      {/* Story - Compact */}
-                      <div className="bg-gray-50 rounded-xl p-5">
-                        <p className="text-sm md:text-base text-gray-700 leading-relaxed">{transformation.fullStory}</p>
+            {/* Desktop: Full cards */}
+            <div className="hidden lg:grid grid-cols-3 gap-8">
+              {transformations.map((t) => (
+                <div key={t.name} className="group">
+                  <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 hover:shadow-xl transition-all">
+                    <div className="relative aspect-[4/5]">
+                      <Image
+                        src={t.image || "/placeholder.svg"}
+                        alt={`${t.name}'s transformatie`}
+                        fill
+                        className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute top-4 right-4">
+                        <Badge className="bg-white/90 text-[#1e1839] border-0 backdrop-blur-sm">
+                          <Clock className="w-3 h-3 mr-1" />
+                          {t.timeframe}
+                        </Badge>
                       </div>
                     </div>
-
-                    {/* Achievements - Compact */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg md:text-xl font-bold text-gray-900 flex items-center gap-2">
-                        <div className="w-6 h-6 bg-evotion-primary/10 rounded-full flex items-center justify-center">
-                          <Award className="w-3 h-3 text-evotion-primary" />
-                        </div>
-                        Behaalde Resultaten
-                      </h3>
-
-                      <div className="grid gap-3">
-                        {transformation.achievements.map((achievement, achIndex) => (
-                          <div
-                            key={achIndex}
-                            className="flex items-center gap-3 bg-white border border-gray-200 rounded-lg p-3 hover:border-evotion-primary/20 transition-colors"
-                          >
-                            <div className="w-8 h-8 bg-gradient-to-br from-evotion-primary to-evotion-primary/80 rounded-full flex items-center justify-center flex-shrink-0">
-                              <CheckCircle className="w-4 h-4 text-white" />
-                            </div>
-                            <span className="text-base font-semibold text-gray-800">{achievement}</span>
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-xl font-bold text-[#1e1839]">{t.name}</h3>
+                        <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-0 text-xs">{t.focus}</Badge>
+                      </div>
+                      <p className="text-sm text-gray-600 italic mb-4">"{t.quote}"</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {t.results.map((result) => (
+                          <div key={result} className="flex items-center gap-2 text-sm text-gray-700">
+                            <CheckCircle className="w-3.5 h-3.5 text-[#1e1839] flex-shrink-0" />
+                            {result}
                           </div>
                         ))}
-                      </div>
-                    </div>
-
-                    {/* Quote - Compact */}
-                    <div className="relative">
-                      <div className="absolute -top-3 -left-3 w-8 h-8 bg-evotion-primary/10 rounded-full flex items-center justify-center">
-                        <span className="text-xl font-bold text-evotion-primary">"</span>
-                      </div>
-                      <div className="bg-gradient-to-br from-evotion-primary/5 to-evotion-primary/10 border-l-4 border-evotion-primary rounded-xl p-6 ml-2">
-                        <blockquote className="text-base md:text-lg font-medium text-gray-800 italic leading-relaxed mb-3">
-                          {transformation.quote}
-                        </blockquote>
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-evotion-primary rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold">{transformation.name[0]}</span>
-                          </div>
-                          <div>
-                            <p className="font-bold text-evotion-primary">— {transformation.name}</p>
-                            <p className="text-xs text-gray-600">Evotion Coaching Cliënt</p>
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -341,250 +251,198 @@ export function ResultatenClientPage() {
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-16 md:py-20 bg-gradient-to-br from-evotion-primary to-evotion-primary/90">
-          <div className="container px-4 md:px-6 max-w-4xl mx-auto text-center">
-            <div className="space-y-6">
-              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                Jouw Transformatie Begint Nu
+        {/* TESTIMONIALS - Paars */}
+        <section className="py-20 lg:py-28 bg-[#1e1839]">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-12 lg:mb-16">
+              <p className="text-xs font-semibold text-white/50 tracking-widest uppercase mb-3">Google Reviews</p>
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+                Wat onze cliënten zeggen
               </h2>
-              <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-                Sluit je aan bij onze succesvolle cliënten en start jouw eigen transformatiereis. Persoonlijke
-                begeleiding, bewezen resultaten.
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <span className="text-white/70 text-sm">5.0 op Google</span>
+              </div>
+            </div>
+
+            {/* Mobile: Single testimonial carousel */}
+            <div className="lg:hidden">
+              <div className="relative h-52 mb-4">
+                {testimonials.map((testimonial, index) => (
+                  <div
+                    key={testimonial.name}
+                    className={`absolute inset-0 transition-opacity duration-500 ${
+                      index === activeTestimonial ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                    }`}
+                  >
+                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 h-full flex flex-col justify-between">
+                      <div>
+                        <Quote className="w-5 h-5 text-white/30 mb-3" />
+                        <p className="text-white/80 text-sm leading-relaxed">
+                          {testimonial.text}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3 mt-4">
+                        <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#1e1839] font-semibold text-sm">
+                          {testimonial.initial}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-white text-sm">{testimonial.name}</p>
+                          <div className="flex gap-0.5">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Dots */}
+              <div className="flex justify-center gap-2 mt-4">
+                {testimonials.map((_, i) => (
+                  <button
+                    type="button"
+                    key={i}
+                    onClick={() => setActiveTestimonial(i)}
+                    className={`h-1.5 rounded-full transition-all ${
+                      i === activeTestimonial ? "bg-white w-6" : "bg-white/30 w-1.5"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Desktop: Grid */}
+            <div className="hidden lg:grid grid-cols-3 gap-6">
+              {testimonials.map((testimonial) => (
+                <div
+                  key={testimonial.name}
+                  className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:bg-white/15 transition-all duration-300"
+                >
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#1e1839] font-semibold">
+                      {testimonial.initial}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white">{testimonial.name}</p>
+                      <div className="flex gap-0.5">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-white/70 leading-relaxed">"{testimonial.text}"</p>
+                  <div className="flex items-center gap-2 mt-6 pt-6 border-t border-white/10">
+                    <div className="w-5 h-5 bg-white rounded flex items-center justify-center">
+                      <span className="text-[10px] font-bold text-blue-600">G</span>
+                    </div>
+                    <span className="text-xs text-white/50">Geverifieerde Google review</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* View all button */}
+            <div className="text-center mt-12">
+              <Button
+                asChild
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white hover:text-[#1e1839] rounded-full px-8 bg-transparent"
+              >
+                <Link
+                  href="https://www.google.com/maps/place/Evotion+Coaching/@52.0711063,4.2838,17z/data=!4m8!3m7!1s0x1c82c13b3859e3f7:0xfacee9e3e6614d8b!8m2!3d52.0711063!4d4.2838!9m1!1b1!16s%2Fg%2F11wh6mbrgw?entry=ttu"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Bekijk alle reviews op Google
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* RESULTATEN DETAIL - Wit */}
+        <section className="py-20 lg:py-28 bg-white">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-12 lg:mb-16">
+              <p className="text-xs font-semibold text-[#1e1839]/50 tracking-widest uppercase mb-3">Resultaten in detail</p>
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-[#1e1839] mb-4">
+                Wat onze cliënten bereiken
+              </h2>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {[
+                { icon: TrendingUp, title: "Gewichtsverlies", desc: "Gemiddeld 8-10kg in de eerste 12 weken met duurzame aanpak." },
+                { icon: Award, title: "Krachtstoename", desc: "Tot verdubbeling van kracht op compound oefeningen." },
+                { icon: CheckCircle, title: "Gezonde Gewoontes", desc: "Structurele verandering in voeding, slaap en beweging." },
+                { icon: Star, title: "Mentale Groei", desc: "Meer zelfvertrouwen, discipline en focus in het dagelijks leven." },
+                { icon: Clock, title: "Duurzame Resultaten", desc: "Geen crash diëten maar resultaten die blijven." },
+                { icon: TrendingUp, title: "Lichaamscompositie", desc: "Vetmassa omzetten naar spiermassa voor een gezonder lichaam." },
+              ].map((item) => {
+                const Icon = item.icon
+                return (
+                  <div
+                    key={item.title}
+                    className="bg-gray-50 rounded-2xl p-6 hover:bg-[#1e1839] group transition-all duration-300 cursor-default"
+                  >
+                    <div className="w-12 h-12 bg-[#1e1839] group-hover:bg-white rounded-xl flex items-center justify-center mb-4 transition-colors">
+                      <Icon className="w-6 h-6 text-white group-hover:text-[#1e1839] transition-colors" />
+                    </div>
+                    <h3 className="text-lg font-bold text-[#1e1839] group-hover:text-white mb-2 transition-colors">{item.title}</h3>
+                    <p className="text-sm text-gray-600 group-hover:text-white/70 leading-relaxed transition-colors">{item.desc}</p>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA - Paurs */}
+        <section className="py-20 lg:py-28 bg-[#1e1839]">
+          <div className="container mx-auto px-6">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+                Jouw transformatie begint hier
+              </h2>
+              <p className="text-lg text-white/80 mb-10 leading-relaxed">
+                Sluit je aan bij onze succesvolle cliënten en start jouw eigen reis. Persoonlijke begeleiding, bewezen resultaten.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
                   asChild
                   size="lg"
-                  className="bg-white text-evotion-primary hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-lg"
+                  className="bg-white text-[#1e1839] hover:bg-gray-100 rounded-full px-8 h-14 text-base font-semibold"
                 >
-                  <Link href="#contact">Start Gratis Gesprek</Link>
+                  <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
+                    Gratis Kennismaking
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Link>
                 </Button>
                 <Button
                   asChild
                   size="lg"
                   variant="outline"
-                  className="border-white text-white hover:bg-white hover:text-evotion-primary px-8 py-4 text-lg font-semibold bg-transparent"
+                  className="border-white/30 text-white hover:bg-white hover:text-[#1e1839] rounded-full px-8 h-14 text-base font-semibold bg-transparent"
                 >
-                  <Link href="/over-ons/coaches">Ontmoet Onze Coaches</Link>
+                  <Link href="/online-coaching">
+                    Bekijk programma's
+                  </Link>
                 </Button>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Contact Section */}
-        <section id="contact" className="py-16 md:py-20 bg-gray-50">
-          <div className="container mx-auto px-4 md:px-6 max-w-6xl">
-            <div className="text-center space-y-6 mb-12">
-              <Badge className="bg-evotion-primary/10 text-evotion-primary border border-evotion-primary/20 text-sm px-4 py-2">
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Contact
-              </Badge>
-              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-                Klaar om te <span className="text-evotion-primary">Beginnen</span>?
-              </h2>
-              <p className="text-base md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Neem contact met ons op voor een gratis kennismakingsgesprek. We bespreken jouw doelen en maken een plan
-                op maat.
-              </p>
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-12">
-              {/* Contact Options */}
-              <div className="space-y-8">
-                <div className="space-y-6">
-                  <h3 className="text-xl md:text-3xl font-bold text-gray-900">Neem Direct Contact Op</h3>
-                  <p className="text-base md:text-lg text-gray-600 leading-relaxed">
-                    We staan klaar om al je vragen te beantwoorden en je te helpen bij het kiezen van het juiste
-                    programma.
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4 bg-white rounded-xl p-6 shadow-sm border hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 bg-evotion-primary/10 rounded-lg flex items-center justify-center">
-                      <Phone className="w-6 h-6 text-evotion-primary" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold text-gray-900">Bel Ons Direct</h4>
-                      <p className="text-gray-600">+31 6 10935077</p>
-                      <p className="text-sm text-gray-500">Ma-Vr: 9:00-18:00</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 bg-white rounded-xl p-6 shadow-sm border hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 bg-evotion-primary/10 rounded-lg flex items-center justify-center">
-                      <MessageCircle className="w-6 h-6 text-evotion-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-2">WhatsApp</h4>
-                      <a
-                        href="https://wa.me/31610935077?text=Hoi%20Martin%2C%20ik%20heb%20interesse%20in%20jullie%20coaching%20programma%27s.%20Kunnen%20we%20een%20kennismakingsgesprek%20inplannen%3F"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 bg-evotion-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-evotion-primary/90 transition-colors"
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                        Begin Chat
-                      </a>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 bg-white rounded-xl p-6 shadow-sm border hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 bg-evotion-primary/10 rounded-lg flex items-center justify-center">
-                      <Mail className="w-6 h-6 text-evotion-primary" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold text-gray-900">Email</h4>
-                      <p className="text-gray-600">info@evotion-coaching.nl</p>
-                      <p className="text-sm text-gray-500">Reactie binnen 24 uur</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Contact Form */}
-              <Card className="shadow-lg border-0">
-                <CardContent className="p-8">
-                  <div className="space-y-6">
-                    <div className="text-center space-y-3">
-                      <h3 className="text-2xl font-bold text-gray-900">Stuur ons een Bericht</h3>
-                      <p className="text-gray-600">Vul het formulier in en we nemen binnen 24 uur contact met je op.</p>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                            Voornaam *
-                          </label>
-                          <Input
-                            type="text"
-                            id="firstName"
-                            name="firstName"
-                            value={formData.firstName}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                            Achternaam *
-                          </label>
-                          <Input
-                            type="text"
-                            id="lastName"
-                            name="lastName"
-                            value={formData.lastName}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                          Email *
-                        </label>
-                        <Input
-                          type="email"
-                          id="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full"
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                          Telefoonnummer
-                        </label>
-                        <Input
-                          type="tel"
-                          id="phone"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          className="w-full"
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor="goal" className="block text-sm font-medium text-gray-700 mb-2">
-                          Wat is je doel?
-                        </label>
-                        <select
-                          id="goal"
-                          name="goal"
-                          value={formData.goal}
-                          onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-evotion-primary focus:border-transparent"
-                        >
-                          <option value="">Selecteer je doel</option>
-                          <option value="gewichtsverlies">Gewichtsverlies</option>
-                          <option value="spieropbouw">Spieropbouw</option>
-                          <option value="fitter-worden">Fitter worden</option>
-                          <option value="lifestyle-coaching">Lifestyle coaching</option>
-                          <option value="anders">Anders</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                          Bericht
-                        </label>
-                        <Textarea
-                          id="message"
-                          name="message"
-                          value={formData.message}
-                          onChange={handleInputChange}
-                          rows={4}
-                          className="w-full resize-none"
-                          placeholder="Vertel ons meer over je doelen en verwachtingen..."
-                        />
-                      </div>
-
-                      <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full bg-evotion-primary hover:bg-evotion-primary/90 text-white py-3 text-lg font-semibold disabled:opacity-50"
-                      >
-                        {isSubmitting ? (
-                          <span className="flex items-center gap-2">
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            Versturen...
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-2">
-                            Verstuur Bericht
-                            <ArrowRight className="w-4 h-4" />
-                          </span>
-                        )}
-                      </Button>
-
-                      {submitMessage && (
-                        <div
-                          className={`p-4 rounded-lg text-center font-medium ${
-                            submitMessage.type === "success"
-                              ? "bg-green-50 text-green-800 border border-green-200"
-                              : "bg-red-50 text-red-800 border border-red-200"
-                          }`}
-                        >
-                          {submitMessage.text}
-                        </div>
-                      )}
-                    </form>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
       </main>
       <Footer />
     </>
