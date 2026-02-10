@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: BlogArticlePageProps): Promis
       type: "article",
       url: `https://evotioncoaching.nl/blog/${article.category.slug}/${article.slug}`,
       publishedTime: article.publishedAt,
-      authors: [article.author.name],
+      authors: ["Evotion Coaches"],
       tags: article.tags,
     },
     twitter: {

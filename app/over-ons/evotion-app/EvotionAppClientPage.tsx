@@ -1,440 +1,373 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { motion } from "framer-motion"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import {
   Crown,
-  Play,
-  Lock,
   CheckCircle,
-  Users,
-  Star,
   Dumbbell,
-  Heart,
   Smartphone,
   MessageCircle,
-  Calendar,
   TrendingUp,
-  Zap,
-  Target,
-  Clock,
-  Award,
+  Utensils,
+  BookOpen,
+  ArrowRight,
+  Heart,
 } from "lucide-react"
-import { DeviceMockup } from "./device-mockup"
 
-const APP_SCREENS = [
-  { src: "/images/app-screenshots/evotion-welkom.jpg", alt: "Welkom scherm" },
-  { src: "/images/app-screenshots/evotion-dashboard.jpg", alt: "Dashboard overzicht" },
-  { src: "/images/app-screenshots/evotion-workout.jpg", alt: "Workout interface" },
-  { src: "/images/app-screenshots/evotion-voeding.jpg", alt: "Voeding tracker" },
-  { src: "/images/app-screenshots/evotion-coach-chat.jpg", alt: "Coach chat" },
-  { src: "/images/app-screenshots/evotion-extra.jpg", alt: "Extra features" },
-]
-
-const FEATURES = [
+const features = [
   {
-    title: "Persoonlijke Workouts",
-    description: "Trainingsschema's op maat, aangepast aan jouw niveau en doelen. Elke oefening met video-instructies.",
+    title: "Persoonlijk Trainingsschema",
+    desc: "Op maat gemaakte trainingsschema's, afgestemd op jouw doelen, niveau en beschikbaarheid.",
     icon: Dumbbell,
-    screenIndex: 2,
-    highlights: ["Video instructies", "Progressie tracking", "RPE monitoring"],
   },
   {
-    title: "Voeding & Macro's",
-    description: "Houd je voeding bij met slimme macro-tracking. Inclusief recepten en maaltijdplannen.",
-    icon: Target,
-    screenIndex: 3,
-    highlights: ["Macro berekening", "Recepten database", "Voortgang grafieken"],
+    title: "Voedingsplan & Macro's",
+    desc: "Gestructureerd voedingsplan met macro-tracking en een voedingsvervanger voor flexibiliteit.",
+    icon: Utensils,
   },
   {
-    title: "Directe Coach Contact",
-    description: "Chat rechtstreeks met je coach. Stel vragen, deel foto's en ontvang persoonlijke feedback.",
+    title: "Direct Contact met Coach",
+    desc: "Chat rechtstreeks met je coach voor vragen, feedback en persoonlijke begeleiding.",
     icon: MessageCircle,
-    screenIndex: 4,
-    highlights: ["Real-time chat", "Foto's delen", "Snelle feedback"],
   },
   {
-    title: "Voortgang Inzichten",
-    description: "Gedetailleerde analytics van je prestaties. Zie je vooruitgang in grafieken en statistieken.",
+    title: "Voortgang & Inzichten",
+    desc: "Houd je progressie bij met check-ins, foto's en gedetailleerde statistieken.",
     icon: TrendingUp,
-    screenIndex: 1,
-    highlights: ["Prestatie grafieken", "Doelen tracking", "Wekelijkse rapporten"],
+  },
+  {
+    title: "E-learning Modules",
+    desc: "Leer over voeding, training en mindset via onze educatieve content in de app.",
+    icon: BookOpen,
+  },
+  {
+    title: "Supplementenadvies",
+    desc: "Persoonlijk advies over supplementen die passen bij jouw doelen en situatie.",
+    icon: Heart,
   },
 ]
 
-const fadeIn = (delay = 0) => ({
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-50px" },
-  transition: { duration: 0.6, delay, ease: "easeOut" },
-})
+const howItWorks = [
+  { step: "01", title: "Kies een programma", desc: "Selecteer het coaching programma dat bij je past." },
+  { step: "02", title: "Download de app", desc: "Ontvang je inloggegevens en download de Evotion App." },
+  { step: "03", title: "Start je traject", desc: "Alles staat klaar: trainingsschema, voedingsplan en coach support." },
+]
 
 export default function EvotionAppClientPage() {
+  const [isLoaded, setIsLoaded] = useState(false)
   const [activeFeature, setActiveFeature] = useState(0)
-  const featureRefs = useRef<(HTMLDivElement | null)[]>([])
 
-  // Auto-cycle through features
+  useEffect(() => {
+    setIsLoaded(true)
+  }, [])
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveFeature((prev) => (prev + 1) % FEATURES.length)
-    }, 5000)
+      setActiveFeature((prev) => (prev + 1) % features.length)
+    }, 4000)
     return () => clearInterval(interval)
   }, [])
-
-  // Intersection observer for features
-  useEffect(() => {
-    const observers = featureRefs.current.map((ref, index) => {
-      if (!ref) return null
-
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setActiveFeature(index)
-          }
-        },
-        { threshold: 0.6, rootMargin: "-20% 0px" },
-      )
-
-      observer.observe(ref)
-      return observer
-    })
-
-    return () => {
-      observers.forEach((observer) => observer?.disconnect())
-    }
-  }, [])
-
-  const heroScreens = useMemo(() => APP_SCREENS.slice(0, 3), [])
-  const featureScreens = useMemo(() => FEATURES.map((f) => APP_SCREENS[f.screenIndex]).filter(Boolean), [])
 
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gray-50">
-        {/* HERO SECTION */}
-        <section className="relative py-16 lg:py-24 overflow-hidden bg-white">
-          <div className="container mx-auto max-w-7xl px-4 sm:px-6 relative">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              {/* Left: Content */}
-              <motion.div
-                className="space-y-8"
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
-              >
-                <div className="space-y-4">
-                  <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-[#1e1839]/20 px-4 py-2">
-                    <Crown className="w-4 h-4 mr-2" />
-                    Exclusief voor coaching klanten
-                  </Badge>
+      <main className="min-h-screen">
 
-                  <h1 className="text-3xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                    De Evotion
-                    <span className="text-[#1e1839] block">Coaching App</span>
-                  </h1>
+        {/* HERO - Paars */}
+        <section className="relative bg-[#1e1839] pt-28 pb-20 lg:pt-40 lg:pb-28 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent" />
+          <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-10 right-10 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
 
-                  <p className="text-lg lg:text-xl text-gray-600 leading-relaxed max-w-xl">
-                    Jouw personal trainer altijd binnen handbereik. Persoonlijke workouts, voedingsadvies,
-                    voortgangstracking en directe coaching — alles in één krachtige app.
-                  </p>
-                </div>
+          <div className="container mx-auto px-6 relative z-10">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+              {/* Content */}
+              <div className={`transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                <Badge className="bg-white/10 text-white border-white/20 backdrop-blur-sm px-4 py-2 mb-6">
+                  <Crown className="w-4 h-4 mr-2" />
+                  Exclusief voor coaching klanten
+                </Badge>
 
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Link href="/online-coaching">
-                    <Button
-                      size="lg"
-                      className="bg-[#1e1839] hover:bg-[#1e1839]/90 text-white px-8 py-4 text-lg rounded-xl shadow-lg"
-                    >
-                      <Crown className="w-5 h-5 mr-2" />
+                <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
+                  De Evotion
+                  <span className="block text-white/80">Coaching App</span>
+                </h1>
+
+                <p className="text-base md:text-lg text-white/70 leading-relaxed mb-8 max-w-lg">
+                  Jouw personal trainer altijd binnen handbereik. Training, voeding, voortgang en directe coaching — alles in een app.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                  <Button
+                    className="bg-white text-[#1e1839] hover:bg-white/90 rounded-xl h-12 px-6 text-base font-semibold"
+                    asChild
+                  >
+                    <Link href="/online-coaching">
                       Start met Coaching
-                    </Button>
-                  </Link>
-
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        size="lg"
-                        variant="outline"
-                        className="border-2 border-[#1e1839] text-[#1e1839] hover:bg-[#1e1839] hover:text-white px-8 py-4 text-lg rounded-xl bg-transparent"
-                      >
-                        <Play className="w-5 h-5 mr-2" />
-                        Bekijk Demo
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl">
-                      <DialogHeader>
-                        <DialogTitle>Evotion App Demo</DialogTitle>
-                      </DialogHeader>
-                      <div className="relative w-full pt-[56.25%] rounded-xl overflow-hidden bg-gray-100">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <p className="text-gray-500">Demo video wordt binnenkort toegevoegd</p>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-white/30 text-white hover:bg-white/10 rounded-xl h-12 px-6 text-base bg-transparent"
+                    asChild
+                  >
+                    <Link href="/contact">
+                      Gratis Kennismaking
+                    </Link>
+                  </Button>
                 </div>
 
-                <div className="flex items-center gap-8 text-sm text-gray-600">
+                <div className="flex items-center gap-6 text-sm text-white/60">
                   <div className="flex items-center gap-2">
-                    <Smartphone className="w-5 h-5" />
+                    <Smartphone className="w-4 h-4" />
                     <span>iOS & Android</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    ))}
-                    <span className="ml-2">5.0 sterren</span>
-                  </div>
                   <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    <span>500+ gebruikers</span>
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Inbegrepen bij coaching</span>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
-              {/* Right: Mockup */}
-              <motion.div
-                className="flex justify-center lg:justify-end"
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-              >
-                <div className="relative">
-                  <DeviceMockup images={heroScreens} />
+              {/* Phone Mockup */}
+              <div className={`flex justify-center transition-all duration-700 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                <div className="relative w-56 md:w-64 lg:w-72">
+                  <div className="absolute -inset-8 bg-purple-500/20 rounded-full blur-3xl" />
+                  <div className="relative bg-gray-900 rounded-[3rem] p-3 shadow-2xl">
+                    <div className="bg-white rounded-[2.5rem] overflow-hidden aspect-[9/19] relative">
+                      <Image
+                        src="/images/evotion-logo-mockup-desktop.png"
+                        alt="Evotion App"
+                        fill
+                        className="object-contain p-6"
+                        priority
+                      />
+                    </div>
+                  </div>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ACCESS INFO */}
-        <section className="py-12 bg-white">
-          <div className="container mx-auto max-w-7xl px-4 sm:px-6">
-            <motion.div
-              className="bg-gradient-to-r from-[#1e1839]/5 to-[#1e1839]/10 rounded-3xl p-8 border border-[#1e1839]/20"
-              {...fadeIn()}
-            >
-              <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-[#1e1839] rounded-2xl flex items-center justify-center shadow-lg">
-                  <Lock className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3">
-                    App toegang inbegrepen bij alle coaching programma's
-                  </h3>
-                  <p className="text-sm md:text-base text-gray-600 mb-6">
-                    Krijg direct toegang tot de Evotion App wanneer je start met een van onze coaching programma's.
-                  </p>
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {["Online Coaching", "Premium Coaching", "12-Weken Vetverlies", "Personal Training"].map(
-                      (program) => (
-                        <div key={program} className="flex items-center gap-3 bg-white rounded-xl p-4 shadow-sm">
-                          <CheckCircle className="w-5 h-5 text-[#1e1839] flex-shrink-0" />
-                          <span className="font-medium text-gray-900">{program}</span>
-                        </div>
-                      ),
-                    )}
-                  </div>
-                </div>
+        {/* FEATURES - Wit */}
+        <section className="py-20 lg:py-28 bg-white">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-12 lg:mb-16">
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-[#1e1839] mb-4">
+                Alles in een app
+              </h2>
+              <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
+                Van trainingsschema tot voedingsplan, van check-ins tot directe coaching — alles wat je nodig hebt.
+              </p>
+            </div>
+
+            {/* Mobile: Fade Carousel */}
+            <div className="lg:hidden">
+              <div className="relative h-52 mb-4">
+                {features.map((feature, index) => {
+                  const Icon = feature.icon
+                  return (
+                    <div
+                      key={feature.title}
+                      className={`absolute inset-0 bg-gray-50 rounded-2xl p-6 transition-all duration-500 ${
+                        index === activeFeature ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                      }`}
+                    >
+                      <div className="w-12 h-12 bg-[#1e1839] rounded-xl flex items-center justify-center mb-4">
+                        <Icon className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="text-lg font-bold text-[#1e1839] mb-2">{feature.title}</h3>
+                      <p className="text-sm text-gray-600 leading-relaxed">{feature.desc}</p>
+                    </div>
+                  )
+                })}
               </div>
-            </motion.div>
+              {/* Progress dots */}
+              <div className="flex justify-center gap-2">
+                {features.map((_, i) => (
+                  <button
+                    type="button"
+                    key={i}
+                    onClick={() => setActiveFeature(i)}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      i === activeFeature ? 'bg-[#1e1839] w-8' : 'bg-gray-300 w-2'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Desktop: Grid */}
+            <div className="hidden lg:grid grid-cols-3 gap-6">
+              {features.map((feature, index) => {
+                const Icon = feature.icon
+                return (
+                  <div
+                    key={feature.title}
+                    className="group bg-gray-50 rounded-2xl p-8 hover:bg-[#1e1839] transition-all duration-300 cursor-default"
+                  >
+                    <div className="w-14 h-14 bg-[#1e1839] group-hover:bg-white rounded-xl flex items-center justify-center mb-5 transition-colors">
+                      <Icon className="w-7 h-7 text-white group-hover:text-[#1e1839] transition-colors" />
+                    </div>
+                    <h3 className="text-xl font-bold text-[#1e1839] group-hover:text-white mb-3 transition-colors">{feature.title}</h3>
+                    <p className="text-gray-600 group-hover:text-white/80 leading-relaxed transition-colors">{feature.desc}</p>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </section>
 
-        {/* FEATURES SECTION */}
-        <section className="py-20 bg-gray-50">
-          <div className="container mx-auto max-w-7xl px-4 sm:px-6">
-            <motion.div className="text-center mb-16" {...fadeIn()}>
-              <h2 className="text-3xl lg:text-5xl font-bold text-gray-900 mb-6">Alles wat je nodig hebt voor succes</h2>
-              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                De Evotion App combineert alle essentiële tools voor jouw fitness journey in één intuïtieve interface.
+        {/* HOW IT WORKS - Paars */}
+        <section className="py-20 lg:py-28 bg-[#1e1839]">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-12 lg:mb-16">
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+                Hoe het werkt
+              </h2>
+              <p className="text-base md:text-lg text-white/70 max-w-2xl mx-auto">
+                In drie stappen aan de slag met de Evotion App.
               </p>
-            </motion.div>
+            </div>
 
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              {/* Left: Sticky Mockup */}
-              <div className="lg:sticky lg:top-24">
-                <motion.div
-                  className="bg-white rounded-3xl p-8 shadow-2xl border border-gray-200"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <DeviceMockup images={featureScreens} activeIndex={activeFeature} autoRotateMs={5000} />
-                </motion.div>
-              </div>
-
-              {/* Right: Features */}
-              <div className="space-y-8">
-                {FEATURES.map((feature, index) => (
-                  <motion.div
-                    key={feature.title}
-                    ref={(el) => (featureRefs.current[index] = el)}
-                    className={`rounded-3xl p-8 transition-all duration-500 ${
-                      activeFeature === index
-                        ? "bg-white shadow-xl border-2 border-[#1e1839]/20"
-                        : "bg-white/50 hover:bg-white hover:shadow-lg border border-gray-200"
-                    }`}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                  >
-                    <div className="flex items-start gap-6">
-                      <div
-                        className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
-                          activeFeature === index
-                            ? "bg-[#1e1839] text-white shadow-lg"
-                            : "bg-[#1e1839]/10 text-[#1e1839]"
-                        }`}
-                      >
-                        <feature.icon className="w-7 h-7" />
-                      </div>
-
-                      <div className="flex-1">
-                        <h3 className="text-2xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                        <p className="text-gray-600 text-lg mb-4 leading-relaxed">{feature.description}</p>
-                        <div className="flex flex-wrap gap-2">
-                          {feature.highlights.map((highlight) => (
-                            <span
-                              key={highlight}
-                              className="bg-[#1e1839]/10 text-[#1e1839] px-3 py-1 rounded-full text-sm font-medium"
-                            >
-                              {highlight}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
+            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+              {howItWorks.map((item, index) => (
+                <div key={item.step} className="text-center">
+                  <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-5 border border-white/20">
+                    <span className="text-2xl font-bold text-white">{item.step}</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">{item.title}</h3>
+                  <p className="text-white/60 text-sm leading-relaxed">{item.desc}</p>
+                  {index < howItWorks.length - 1 && (
+                    <div className="hidden md:block absolute">
+                      
                     </div>
-                  </motion.div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* BESCHIKBAARHEID - Wit */}
+        <section className="py-20 lg:py-28 bg-white">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-12 lg:mb-16">
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-[#1e1839] mb-4">
+                Hoe krijg je toegang?
+              </h2>
+              <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
+                De Evotion App is standaard inbegrepen bij onze Online Coaching en optioneel beschikbaar bij Personal Training.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              {/* Online Coaching */}
+              <Link
+                href="/online-coaching"
+                className="group bg-[#1e1839] rounded-2xl p-8 hover:scale-[1.02] transition-all duration-300"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
+                    <Smartphone className="w-6 h-6 text-white" />
+                  </div>
+                  <Badge className="bg-white/20 text-white border-0 text-xs">Inbegrepen</Badge>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Online Coaching</h3>
+                <p className="text-white/70 text-sm leading-relaxed mb-4">
+                  Volledige toegang tot de app met trainingsschema, voedingsplan, coach chat en meer.
+                </p>
+                <div className="flex items-center text-white/60 text-sm group-hover:text-white transition-colors">
+                  Bekijk programma
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+
+              {/* Personal Training */}
+              <Link
+                href="/personal-training"
+                className="group bg-gray-50 rounded-2xl p-8 hover:bg-gray-100 transition-all duration-300"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-[#1e1839]/10 rounded-xl flex items-center justify-center">
+                    <Dumbbell className="w-6 h-6 text-[#1e1839]" />
+                  </div>
+                  <Badge className="bg-[#1e1839]/10 text-[#1e1839] border-0 text-xs">Optioneel</Badge>
+                </div>
+                <h3 className="text-xl font-bold text-[#1e1839] mb-2">Personal Training</h3>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  Optioneel bij te kopen als aanvulling op je personal training sessies.
+                </p>
+                <div className="flex items-center text-gray-400 text-sm group-hover:text-[#1e1839] transition-colors">
+                  Bekijk programma
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            </div>
+
+            {/* Features checklist */}
+            <div className="mt-12 max-w-2xl mx-auto">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  "Trainingsschema op maat",
+                  "Persoonlijk voedingsplan",
+                  "Direct contact met coach",
+                  "Wekelijkse check-ins",
+                  "Voortgang bijhouden",
+                  "E-learning modules",
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-2 text-sm text-gray-600">
+                    <CheckCircle className="w-4 h-4 text-[#1e1839] flex-shrink-0" />
+                    {item}
+                  </div>
                 ))}
               </div>
             </div>
           </div>
         </section>
 
-        {/* STATS */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-              {[
-                { number: "500+", label: "Actieve Gebruikers", icon: Users },
-                { number: "5.0", label: "App Store Rating", icon: Star },
-                { number: "10k+", label: "Workouts Voltooid", icon: Dumbbell },
-                { number: "98%", label: "Tevredenheid", icon: Heart },
-              ].map((stat, index) => (
-                <motion.div
-                  key={stat.label}
-                  className="text-center p-6 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors"
-                  {...fadeIn(index * 0.1)}
+        {/* CTA - Paars */}
+        <section className="py-20 lg:py-28 bg-[#1e1839]">
+          <div className="container mx-auto px-6">
+            <div className="max-w-2xl mx-auto text-center">
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+                Klaar om te beginnen?
+              </h2>
+              <p className="text-base md:text-lg text-white/70 mb-10 leading-relaxed">
+                Kies een coaching programma en krijg direct toegang tot de Evotion App met alle premium functies.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  className="bg-white text-[#1e1839] hover:bg-white/90 rounded-xl h-12 px-8 text-base font-semibold"
+                  asChild
                 >
-                  <div className="w-12 h-12 bg-[#1e1839]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <stat.icon className="w-6 h-6 text-[#1e1839]" />
-                  </div>
-                  <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
-                  <div className="text-gray-600 font-medium">{stat.label}</div>
-                </motion.div>
-              ))}
+                  <Link href="/online-coaching">
+                    Bekijk Programma's
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/10 rounded-xl h-12 px-8 text-base bg-transparent"
+                  asChild
+                >
+                  <Link href="/contact">
+                    Neem Contact Op
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* SCREENSHOTS GALLERY */}
-        <section className="py-20 bg-gray-50">
-          <div className="container mx-auto max-w-7xl px-4 sm:px-6">
-            <motion.div className="text-center mb-12" {...fadeIn()}>
-              <h2 className="text-2xl lg:text-4xl font-bold text-gray-900 mb-4">Bekijk de app in actie</h2>
-              <p className="text-base md:text-lg text-gray-600">
-                Een overzicht van alle belangrijke functies en schermen in de Evotion App.
-              </p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {APP_SCREENS.map((screen, index) => (
-                <motion.div key={screen.alt} className="group" {...fadeIn(index * 0.1)}>
-                  <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                    <CardContent className="p-0">
-                      <div className="relative aspect-[9/16] bg-gray-100">
-                        <Image
-                          src={screen.src || "/placeholder.svg"}
-                          alt={screen.alt}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold text-gray-900 text-center">{screen.alt}</h3>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA SECTION */}
-        <section className="py-24 bg-gradient-to-br from-[#1e1839] to-[#1e1839]/90 text-white relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('/images/pattern.svg')] opacity-10" />
-
-          <div className="container mx-auto max-w-7xl px-4 sm:px-6 relative">
-            <motion.div className="text-center max-w-4xl mx-auto" {...fadeIn()}>
-              <h2 className="text-3xl lg:text-6xl font-bold mb-6">Start vandaag met de Evotion App</h2>
-              <p className="text-lg md:text-xl text-white/90 mb-10 leading-relaxed">
-                Kies een coaching programma en krijg direct toegang tot alle premium functies. Jouw transformatie begint
-                nu.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <Link href="/online-coaching">
-                  <Button
-                    size="lg"
-                    variant="secondary"
-                    className="bg-white text-[#1e1839] hover:bg-gray-100 px-10 py-5 text-xl font-bold rounded-2xl shadow-xl"
-                  >
-                    <Calendar className="w-6 h-6 mr-3" />
-                    Bekijk Coaching Opties
-                  </Button>
-                </Link>
-
-                <Link href="/contact">
-                  <Button
-                    size="lg"
-                    className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-[#1e1839] px-10 py-5 text-xl font-bold rounded-2xl"
-                  >
-                    <Clock className="w-6 h-6 mr-3" />
-                    Gratis Kennismaking
-                  </Button>
-                </Link>
-              </div>
-
-              <div className="mt-12 flex items-center justify-center gap-8 text-white/80">
-                <div className="flex items-center gap-2">
-                  <Zap className="w-5 h-5" />
-                  <span>Direct toegang</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5" />
-                  <span>Geen setup kosten</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Award className="w-5 h-5" />
-                  <span>Premium support</span>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
       </main>
       <Footer />
     </>

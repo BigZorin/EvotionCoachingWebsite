@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,16 +16,16 @@ import {
   Send,
   CheckCircle,
   AlertCircle,
-  Sparkles,
-  User,
-  AtSign,
+  ArrowRight,
 } from "lucide-react"
 import { sendContactEmail } from "@/app/actions/contact"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { logContactSubmission } from "@/utils/cookie-utils"
+import Link from "next/link"
 
 export default function ContactClientPage() {
+  const [isLoaded, setIsLoaded] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -39,6 +38,10 @@ export default function ContactClientPage() {
     type: "success" | "error" | null
     message: string
   }>({ type: null, message: "" })
+
+  useEffect(() => {
+    setIsLoaded(true)
+  }, [])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -58,7 +61,6 @@ export default function ContactClientPage() {
           message: result.message || "Bedankt voor je bericht! We nemen binnen 24 uur contact met je op.",
         })
 
-        // Log contact form submission
         logContactSubmission("contact", {
           name: formData.name,
           email: formData.email,
@@ -66,7 +68,6 @@ export default function ContactClientPage() {
           message: formData.message,
         })
 
-        // Reset form
         setFormData({
           name: "",
           email: "",
@@ -90,131 +91,103 @@ export default function ContactClientPage() {
     }
   }
 
+  const contactMethods = [
+    {
+      icon: Phone,
+      title: "Bellen",
+      desc: "Direct persoonlijk contact",
+      action: "06 10 93 50 77",
+      href: "tel:0610935077",
+      color: "bg-[#1e1839]",
+    },
+    {
+      icon: MessageCircle,
+      title: "WhatsApp",
+      desc: "Snel en gemakkelijk chatten",
+      action: "Start Chat",
+      href: "https://wa.me/31610935077",
+      color: "bg-green-600",
+    },
+    {
+      icon: Mail,
+      title: "Email",
+      desc: "info@evotion-coaching.nl",
+      action: "Stuur Email",
+      href: "mailto:info@evotion-coaching.nl",
+      color: "bg-[#1e1839]",
+    },
+  ]
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-[#bad4e1]/10">
+    <div className="min-h-screen bg-white">
       <Header />
 
-      <div className="container mx-auto px-4 py-12 md:py-20">
-        <div className="relative mb-16 md:mb-20">
-          {/* Decorative background elements */}
-          <div className="absolute inset-0 -z-10 overflow-hidden">
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#bad4e1]/20 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#1e1839]/5 rounded-full blur-3xl"></div>
-          </div>
-
-          <div className="text-center max-w-4xl mx-auto">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#1e1839] to-[#2d1b69] text-white mb-6 shadow-lg">
-              <Sparkles className="w-4 h-4" />
-              <span className="text-sm font-semibold">CONTACT</span>
-              <Sparkles className="w-4 h-4" />
-            </div>
-
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-[#1e1839] via-[#2d1b69] to-[#1e1839] bg-clip-text text-transparent">
-                Laten We Kennismaken
-              </span>
+      {/* HERO - Paars */}
+      <section className="relative bg-[#1e1839] py-20 lg:py-28 overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/images/pattern-grid.svg')] opacity-5" />
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className={`text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6 transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              Neem Contact Op
             </h1>
-            <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
-              Klaar om jouw transformatie te starten? Kies hieronder hoe je{" "}
-              <span className="font-semibold text-[#1e1839]">contact</span> met ons wilt opnemen.
+            <p className={`text-lg md:text-xl text-white/70 max-w-2xl mx-auto leading-relaxed transition-all duration-700 delay-150 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              Klaar om te starten of heb je een vraag? We helpen je graag verder.
             </p>
           </div>
         </div>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 md:mb-20">
-          {/* Phone Contact */}
-          <div className="ev-gradient-border bg-white/80 backdrop-blur-sm border-transparent rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 group">
-            <div className="p-8 text-center">
-              <div className="relative w-20 h-20 mx-auto mb-6">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#1e1839] to-[#2d1b69] rounded-2xl group-hover:scale-110 transition-transform duration-300"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Phone className="w-10 h-10 text-white" />
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold mb-3 text-[#1e1839]">Direct Bellen</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed">Voor urgente vragen of een persoonlijk gesprek</p>
-              <Button
-                asChild
-                className="w-full bg-gradient-to-r from-[#1e1839] to-[#2d1b69] hover:opacity-90 text-white shadow-lg"
-              >
-                <a href="tel:0610935077">
-                  <Phone className="w-4 h-4 mr-2" />
-                  06 10 93 50 77
+      {/* CONTACT METHODS - Wit */}
+      <section className="py-16 lg:py-24 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16 lg:mb-20">
+            {contactMethods.map((method, index) => {
+              const Icon = method.icon
+              return (
+                <a
+                  key={method.title}
+                  href={method.href}
+                  target={method.href.startsWith("http") ? "_blank" : undefined}
+                  rel={method.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                  className={`group bg-gray-50 rounded-2xl p-6 lg:p-8 text-center hover:bg-[#1e1839] transition-all duration-300 hover:shadow-xl ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+                  style={{ transitionDelay: `${index * 100 + 200}ms` }}
+                >
+                  <div className={`w-14 h-14 ${method.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white/20 transition-colors`}>
+                    <Icon className="w-7 h-7 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-[#1e1839] group-hover:text-white mb-1 transition-colors">
+                    {method.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 group-hover:text-white/60 mb-4 transition-colors">
+                    {method.desc}
+                  </p>
+                  <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#1e1839] group-hover:text-white transition-colors">
+                    {method.action}
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
                 </a>
-              </Button>
+              )
+            })}
+          </div>
+
+          {/* FORM */}
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-4xl font-bold text-[#1e1839] mb-3">
+                Stuur ons een bericht
+              </h2>
+              <p className="text-gray-600">
+                We reageren binnen 24 uur op je bericht.
+              </p>
             </div>
-          </div>
 
-          {/* WhatsApp Contact */}
-          <div className="ev-gradient-border bg-white/80 backdrop-blur-sm border-transparent rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 group">
-            <div className="p-8 text-center">
-              <div className="relative w-20 h-20 mx-auto mb-6">
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl group-hover:scale-110 transition-transform duration-300"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <MessageCircle className="w-10 h-10 text-white" />
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold mb-3 text-[#1e1839]">WhatsApp Chat</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed">Snel en gemakkelijk chatten via WhatsApp</p>
-              <Button
-                asChild
-                className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:opacity-90 text-white shadow-lg"
-              >
-                <a href="https://wa.me/31610935077" target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Start Chat
-                </a>
-              </Button>
-            </div>
-          </div>
-
-          {/* Email Contact */}
-          <div className="ev-gradient-border bg-white/80 backdrop-blur-sm border-transparent rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 group">
-            <div className="p-8 text-center">
-              <div className="relative w-20 h-20 mx-auto mb-6">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#bad4e1] to-[#8ab4c9] rounded-2xl group-hover:scale-110 transition-transform duration-300"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Mail className="w-10 h-10 text-white" />
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold mb-3 text-[#1e1839]">Email Sturen</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed">Stuur direct een email naar ons team</p>
-              <Button
-                asChild
-                className="w-full bg-gradient-to-r from-[#bad4e1] to-[#8ab4c9] hover:opacity-90 text-white shadow-lg"
-              >
-                <a href="mailto:info@evotion-coaching.nl">
-                  <Mail className="w-4 h-4 mr-2" />
-                  info@evotion-coaching.nl
-                </a>
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-4xl mx-auto mb-16">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-4">Of vul het contactformulier in</h2>
-            <p className="text-gray-600 text-lg">
-              Liever uitgebreid je verhaal vertellen? Vul onderstaand formulier in en we nemen binnen{" "}
-              <span className="font-semibold text-[#1e1839]">24 uur</span> contact met je op.
-            </p>
-          </div>
-
-          <div className="ev-gradient-border bg-white/90 backdrop-blur-sm border-transparent rounded-2xl overflow-hidden shadow-xl">
-            <div className="p-8 md:p-10">
-              <div className="mb-8">
-                <h3 className="text-2xl font-bold text-[#1e1839] mb-2">Contactformulier</h3>
-                <p className="text-gray-600">Vertel ons over jouw doelen en hoe we je kunnen helpen.</p>
-              </div>
-
+            <div className="bg-gray-50 rounded-2xl p-6 md:p-10">
               {submitStatus.type && (
                 <div
                   className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${
                     submitStatus.type === "success"
-                      ? "bg-green-50 text-green-800 border-2 border-green-200"
-                      : "bg-red-50 text-red-800 border-2 border-red-200"
+                      ? "bg-green-50 text-green-800 border border-green-200"
+                      : "bg-red-50 text-red-800 border border-red-200"
                   }`}
                 >
                   {submitStatus.type === "success" ? (
@@ -222,15 +195,14 @@ export default function ContactClientPage() {
                   ) : (
                     <AlertCircle className="w-5 h-5 flex-shrink-0" />
                   )}
-                  <p>{submitStatus.message}</p>
+                  <p className="text-sm">{submitStatus.message}</p>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
-                    <Label htmlFor="name" className="text-[#1e1839] font-semibold mb-2 flex items-center gap-2">
-                      <User className="w-4 h-4" />
+                    <Label htmlFor="name" className="text-[#1e1839] font-medium text-sm mb-1.5 block">
                       Naam *
                     </Label>
                     <Input
@@ -239,13 +211,12 @@ export default function ContactClientPage() {
                       value={formData.name}
                       onChange={(e) => handleInputChange("name", e.target.value)}
                       required
-                      className="mt-1 border-2 focus:border-[#1e1839] rounded-xl"
-                      placeholder="Jouw volledige naam"
+                      className="border-gray-200 focus:border-[#1e1839] rounded-xl bg-white"
+                      placeholder="Jouw naam"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="email" className="text-[#1e1839] font-semibold mb-2 flex items-center gap-2">
-                      <AtSign className="w-4 h-4" />
+                    <Label htmlFor="email" className="text-[#1e1839] font-medium text-sm mb-1.5 block">
                       Email *
                     </Label>
                     <Input
@@ -254,16 +225,15 @@ export default function ContactClientPage() {
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
                       required
-                      className="mt-1 border-2 focus:border-[#1e1839] rounded-xl"
+                      className="border-gray-200 focus:border-[#1e1839] rounded-xl bg-white"
                       placeholder="jouw@email.nl"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
-                    <Label htmlFor="phone" className="text-[#1e1839] font-semibold mb-2 flex items-center gap-2">
-                      <Phone className="w-4 h-4" />
+                    <Label htmlFor="phone" className="text-[#1e1839] font-medium text-sm mb-1.5 block">
                       Telefoonnummer
                     </Label>
                     <Input
@@ -271,26 +241,23 @@ export default function ContactClientPage() {
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => handleInputChange("phone", e.target.value)}
-                      className="mt-1 border-2 focus:border-[#1e1839] rounded-xl"
+                      className="border-gray-200 focus:border-[#1e1839] rounded-xl bg-white"
                       placeholder="06 12 34 56 78"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="subject" className="text-[#1e1839] font-semibold mb-2 flex items-center gap-2">
-                      <Mail className="w-4 h-4" />
+                    <Label htmlFor="subject" className="text-[#1e1839] font-medium text-sm mb-1.5 block">
                       Onderwerp *
                     </Label>
                     <Select value={formData.subject} onValueChange={(value) => handleInputChange("subject", value)}>
-                      <SelectTrigger className="mt-1 border-2 focus:border-[#1e1839] rounded-xl">
+                      <SelectTrigger className="border-gray-200 focus:border-[#1e1839] rounded-xl bg-white">
                         <SelectValue placeholder="Kies een onderwerp" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="online-coaching">Online Coaching</SelectItem>
-                        <SelectItem value="premium-coaching">Premium Coaching</SelectItem>
                         <SelectItem value="personal-training">Personal Training</SelectItem>
-                        <SelectItem value="12-weken-programma">12 Weken Vetverlies Programma</SelectItem>
-                        <SelectItem value="voeding">Voeding & Dieet</SelectItem>
-                        <SelectItem value="training">Training & Workout</SelectItem>
+                        <SelectItem value="voeding">Voeding</SelectItem>
+                        <SelectItem value="training">Training</SelectItem>
                         <SelectItem value="algemeen">Algemene Vraag</SelectItem>
                         <SelectItem value="anders">Anders</SelectItem>
                       </SelectContent>
@@ -299,8 +266,7 @@ export default function ContactClientPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="message" className="text-[#1e1839] font-semibold mb-2 flex items-center gap-2">
-                    <MessageCircle className="w-4 h-4" />
+                  <Label htmlFor="message" className="text-[#1e1839] font-medium text-sm mb-1.5 block">
                     Bericht *
                   </Label>
                   <Textarea
@@ -308,19 +274,19 @@ export default function ContactClientPage() {
                     value={formData.message}
                     onChange={(e) => handleInputChange("message", e.target.value)}
                     required
-                    className="mt-1 min-h-[150px] border-2 focus:border-[#1e1839] rounded-xl"
-                    placeholder="Vertel ons over jouw doelen, ervaring en hoe we je kunnen helpen. Hoe meer details, hoe beter we je kunnen adviseren!"
+                    className="min-h-[130px] border-gray-200 focus:border-[#1e1839] rounded-xl bg-white"
+                    placeholder="Vertel ons over jouw doelen en hoe we je kunnen helpen..."
                   />
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-[#1e1839] to-[#2d1b69] hover:opacity-90 text-white py-6 text-lg font-semibold rounded-xl shadow-lg"
+                  className="w-full bg-[#1e1839] hover:bg-[#1e1839]/90 text-white py-6 text-base font-semibold rounded-xl"
                   disabled={isSubmitting || !formData.name || !formData.email || !formData.subject || !formData.message}
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
                       Versturen...
                     </>
                   ) : (
@@ -334,67 +300,74 @@ export default function ContactClientPage() {
             </div>
           </div>
         </div>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          <div className="ev-gradient-border bg-white/80 backdrop-blur-sm border-transparent rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-500">
-            <div className="p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-[#1e1839] to-[#2d1b69] rounded-xl flex items-center justify-center">
-                  <MapPin className="w-6 h-6 text-white" />
+      {/* INFO - Paars */}
+      <section className="py-16 lg:py-24 bg-[#1e1839]">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {/* Locatie */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 lg:p-8 border border-white/10">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
+                  <MapPin className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-[#1e1839]">Locatie & Bereikbaarheid</h3>
+                <h3 className="text-lg font-bold text-white">Locatie</h3>
               </div>
-              <div className="space-y-3">
-                <p className="text-gray-700 font-medium">📍 Friesland, Nederland</p>
-                <p className="text-sm text-gray-600">Online coaching beschikbaar in heel Nederland</p>
-                <div className="mt-4 space-y-2 text-sm bg-gray-50 rounded-xl p-4">
-                  <p className="flex items-start gap-2">
-                    <span className="font-semibold text-[#1e1839] min-w-[140px]">Personal Training:</span>
-                    <span className="text-gray-600">Op locatie in Friesland</span>
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <span className="font-semibold text-[#1e1839] min-w-[140px]">Online Coaching:</span>
-                    <span className="text-gray-600">Overal in Nederland</span>
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <span className="font-semibold text-[#1e1839] min-w-[140px]">Premium Coaching:</span>
-                    <span className="text-gray-600">Hybride mogelijk</span>
-                  </p>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-start gap-3">
+                  <span className="text-white/50 min-w-[120px]">Personal Training</span>
+                  <span className="text-white/80">Op locatie in Friesland</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-white/50 min-w-[120px]">Online Coaching</span>
+                  <span className="text-white/80">Heel Nederland</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bereikbaarheid */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 lg:p-8 border border-white/10">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Bereikbaarheid</h3>
+              </div>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-start gap-3">
+                  <span className="text-white/50 min-w-[120px]">Telefoon</span>
+                  <span className="text-white/80">Ma - Vr, 9:00 - 18:00</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-white/50 min-w-[120px]">WhatsApp</span>
+                  <span className="text-white/80">Ma - Zo, 8:00 - 22:00</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-white/50 min-w-[120px]">Email</span>
+                  <span className="text-white/80">Binnen 24 uur reactie</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="ev-gradient-border bg-white/80 backdrop-blur-sm border-transparent rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-500">
-            <div className="p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-[#bad4e1] to-[#8ab4c9] rounded-xl flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-[#1e1839]">Reactietijd & Beschikbaarheid</h3>
-              </div>
-              <div className="space-y-3">
-                <p className="text-gray-700 font-medium">⚡ Binnen 24 uur reactie</p>
-                <p className="text-sm text-gray-600">Voor urgente vragen, bel direct!</p>
-                <div className="mt-4 space-y-2 text-sm bg-gray-50 rounded-xl p-4">
-                  <p className="flex items-start gap-2">
-                    <span className="font-semibold text-[#1e1839] min-w-[100px]">Telefoon:</span>
-                    <span className="text-gray-600">Ma-Vr 9:00-18:00</span>
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <span className="font-semibold text-[#1e1839] min-w-[100px]">WhatsApp:</span>
-                    <span className="text-gray-600">Ma-Zo 8:00-22:00</span>
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <span className="font-semibold text-[#1e1839] min-w-[100px]">Email:</span>
-                    <span className="text-gray-600">Binnen 24 uur</span>
-                  </p>
-                </div>
-              </div>
+          {/* Quick links */}
+          <div className="mt-12 text-center">
+            <p className="text-white/50 text-sm mb-4">Wil je eerst meer weten?</p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 rounded-xl bg-transparent" asChild>
+                <Link href="/online-coaching">Online Coaching</Link>
+              </Button>
+              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 rounded-xl bg-transparent" asChild>
+                <Link href="/personal-training">Personal Training</Link>
+              </Button>
+              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 rounded-xl bg-transparent" asChild>
+                <Link href="/resultaten">Resultaten</Link>
+              </Button>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <Footer />
     </div>

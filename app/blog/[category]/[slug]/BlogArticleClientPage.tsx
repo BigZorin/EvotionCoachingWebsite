@@ -1,23 +1,35 @@
 "use client"
 
+import React from "react"
+
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, Clock, User, Share2, MessageCircle } from "lucide-react"
+import { ArrowLeft, Clock, Share2, MessageCircle, ChevronRight, ArrowRight, Utensils, Dumbbell, Brain, Moon, CalendarClock, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { blogArticles, blogAuthors, type BlogArticle } from "@/data/blog-articles"
+import { blogArticles, type BlogArticle } from "@/data/blog-articles"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+
+const categoryIcons: Record<string, React.ElementType> = {
+  voeding: Utensils,
+  training: Dumbbell,
+  mindset: Brain,
+  herstel: Moon,
+  structuur: CalendarClock,
+  verantwoordelijkheid: Shield,
+}
 
 interface BlogArticleClientPageProps {
   article: BlogArticle
 }
 
 export function BlogArticleClientPage({ article }: BlogArticleClientPageProps) {
-  const author = blogAuthors.find((a) => a.slug === article.author.slug)
+  const [isLoaded, setIsLoaded] = useState(false)
+  useEffect(() => { setIsLoaded(true) }, [])
 
-  // Get related articles from same category
+  const Icon = categoryIcons[article.category.icon] || Shield
+
   const relatedArticles = blogArticles
     .filter((a) => a.category.slug === article.category.slug && a.slug !== article.slug)
     .slice(0, 3)
@@ -25,88 +37,41 @@ export function BlogArticleClientPage({ article }: BlogArticleClientPageProps) {
   const handleShare = (platform: string) => {
     const url = encodeURIComponent(window.location.href)
     const title = encodeURIComponent(article.title)
-
     let shareUrl = ""
-
     switch (platform) {
-      case "whatsapp":
-        shareUrl = `https://wa.me/?text=${title} ${url}`
-        break
-      case "facebook":
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`
-        break
-      case "twitter":
-        shareUrl = `https://twitter.com/intent/tweet?text=${title}&url=${url}`
-        break
-      case "linkedin":
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`
-        break
+      case "whatsapp": shareUrl = `https://wa.me/?text=${title} ${url}`; break
+      case "facebook": shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`; break
+      case "linkedin": shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`; break
     }
-
-    if (shareUrl) {
-      window.open(shareUrl, "_blank", "width=600,height=400")
-    }
+    if (shareUrl) window.open(shareUrl, "_blank", "width=600,height=400")
   }
 
   const createTableOfContents = (content: string) => {
     const headings = content.match(/^## (.+)$/gm)
     if (!headings) return []
-
     return headings.map((heading) => {
       const title = heading.replace(/^## /, "")
-      const id = title
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/^-|-$/g, "")
+      const id = title.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/^-|-$/g, "")
       return { title, id }
     })
   }
 
   const formatContent = (content: string) => {
-    return (
-      content
-        // Headers with proper anchor IDs - smaller mobile sizes
-        .replace(/^## (.+)$/gm, (match, title) => {
-          const id = title
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, "")
-            .replace(/\s+/g, "-")
-            .replace(/^-|-$/g, "")
-          return `<h2 id="${id}" class="text-base md:text-2xl font-semibold mt-4 md:mt-8 mb-2 md:mb-4 text-gray-800 scroll-mt-20">${title}</h2>`
-        })
-        .replace(/^### (.+)$/gm, (match, title) => {
-          const id = title
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, "")
-            .replace(/\s+/g, "-")
-            .replace(/^-|-$/g, "")
-          return `<h3 id="${id}" class="text-sm md:text-xl font-medium mt-3 md:mt-6 mb-2 md:mb-3 text-gray-700 scroll-mt-20">${title}</h3>`
-        })
-        // Bold and italic
-        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-        // Lists
-        .replace(/^- (.*$)/gm, '<li class="ml-4 mb-2 text-gray-700 list-disc">$1</li>')
-        // Blockquotes
-        .replace(
-          /^> \*\*(.+?):\*\* (.+)$/gm,
-          '<div class="border-l-4 border-blue-500 bg-blue-50 p-3 md:p-4 my-4 md:my-6 rounded-r"><p class="text-xs md:text-base text-gray-800"><strong class="font-semibold text-blue-800">$1:</strong> $2</p></div>',
-        )
-        // Internal links
-        .replace(
-          /\[([^\]]+)\]$$\/([^)]+)$$/g,
-          '<a href="/$2" class="text-blue-600 hover:text-blue-800 underline font-medium">$1</a>',
-        )
-        // External links
-        .replace(
-          /\[([^\]]+)\]$$(https?:\/\/[^)]+)$$/g,
-          '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline inline-flex items-center gap-1">$1 <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></a>',
-        )
-        // Line breaks and paragraphs
-        .replace(/\n\n/g, "</p><p class='mb-2 md:mb-4 text-xs md:text-base text-gray-700 leading-relaxed'>")
-        .replace(/\n/g, "<br>")
-    )
+    return content
+      .replace(/^## (.+)$/gm, (_, title) => {
+        const id = title.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/^-|-$/g, "")
+        return `<h2 id="${id}" class="text-xl md:text-2xl font-bold mt-10 mb-4 text-[#1e1839] scroll-mt-24">${title}</h2>`
+      })
+      .replace(/^### (.+)$/gm, (_, title) => {
+        const id = title.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/^-|-$/g, "")
+        return `<h3 id="${id}" class="text-lg md:text-xl font-semibold mt-8 mb-3 text-[#1e1839]/90 scroll-mt-24">${title}</h3>`
+      })
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-[#1e1839]">$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/^- (.*$)/gm, '<li class="ml-5 mb-2 text-gray-700 list-disc leading-relaxed">$1</li>')
+      .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-[#1e1839] bg-gray-50 p-4 my-6 rounded-r-xl text-gray-700 leading-relaxed">$1</blockquote>')
+      .replace(/\n\n/g, "</p><p class='mb-4 text-base text-gray-700 leading-relaxed'>")
+      .replace(/\n/g, "<br>")
   }
 
   const tableOfContents = createTableOfContents(article.content)
@@ -115,242 +80,161 @@ export function BlogArticleClientPage({ article }: BlogArticleClientPageProps) {
     <div className="min-h-screen bg-white">
       <Header />
 
-      {/* Navigation - Mobile Optimized */}
-      <div className="container mx-auto px-4 py-4 md:py-6 pt-16 md:pt-20">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-2 text-xs md:text-sm text-gray-500 mb-4 md:mb-6">
-            <Link href="/blog" className="hover:text-gray-700">
-              Blog
-            </Link>
-            <span>/</span>
-            <Link href={`/blog/${article.category.slug}`} className="hover:text-gray-700">
-              {article.category.name}
-            </Link>
-            <span>/</span>
-            <span className="text-gray-900">Laadfase Creatine</span>
-          </div>
+      {/* HERO - Paars */}
+      <section className="relative pt-32 pb-16 lg:pt-40 lg:pb-20 bg-[#1e1839] overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent" />
+        
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-3xl mx-auto">
+            {/* Breadcrumb */}
+            <div className={`flex items-center gap-2 text-sm text-white/50 mb-8 transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+              <Link href="/blog" className="hover:text-white/80 transition-colors">Blog</Link>
+              <ChevronRight className="w-3 h-3" />
+              <Link href={`/blog/${article.category.slug}`} className="hover:text-white/80 transition-colors">{article.category.name}</Link>
+            </div>
 
-          <Link
-            href={`/blog/${article.category.slug}`}
-            className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4 md:mb-6 transition-colors"
-          >
-            <ArrowLeft className="h-3 md:h-4 w-3 md:w-4 mr-2" />
-            <span className="text-sm md:text-base">Terug naar {article.category.name}</span>
-          </Link>
-        </div>
-      </div>
+            <div className={`flex items-center gap-3 mb-6 transition-all duration-700 delay-100 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <div className={`w-10 h-10 ${article.category.color} rounded-lg flex items-center justify-center`}>
+                <Icon className="w-5 h-5 text-white" />
+              </div>
+              <Badge className={`${article.category.color} text-white border-0`}>
+                {article.category.name}
+              </Badge>
+            </div>
 
-      <article className="container mx-auto px-4 pb-8 md:pb-12">
-        <div className="max-w-4xl mx-auto">
-          {/* Article Header - Mobile Optimized */}
-          <header className="mb-6 md:mb-8">
-            <Badge className={`${article.category.color} text-white mb-3 md:mb-4 text-xs md:text-sm`}>
-              <span className="mr-1 md:mr-2">{article.category.icon}</span>
-              {article.category.name}
-            </Badge>
-
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-4 md:mb-6 leading-tight text-gray-900">
+            <h1 className={`text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight transition-all duration-700 delay-200 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               {article.title}
             </h1>
 
-            <p className="text-sm md:text-xl text-gray-600 mb-6 md:mb-8 leading-relaxed">{article.description}</p>
+            <p className={`text-base md:text-lg text-white/70 leading-relaxed mb-8 transition-all duration-700 delay-300 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              {article.description}
+            </p>
 
-            {/* Article Meta - Mobile Optimized */}
-            <div className="flex flex-wrap items-center gap-3 md:gap-6 text-xs md:text-sm text-gray-500 mb-4 md:mb-6">
-              <div className="flex items-center gap-1 md:gap-2">
-                <User className="h-3 md:h-4 w-3 md:w-4" />
-                <span>{author?.name}</span>
+            <div className={`flex flex-wrap items-center gap-4 text-sm text-white/50 transition-all duration-700 delay-400 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                {article.readingTime} min leestijd
               </div>
-              <div className="flex items-center gap-1 md:gap-2">
-                <Clock className="h-3 md:h-4 w-3 md:w-4" />
-                <span>{article.readingTime} min leestijd</span>
-              </div>
-              <div className="flex items-center gap-1 md:gap-2">
-                <span>📅</span>
-                <span>
-                  {new Date(article.publishedAt).toLocaleDateString("nl-NL", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </span>
-              </div>
+              <span>|</span>
+              <span>
+                {new Date(article.publishedAt).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" })}
+              </span>
             </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Tags - Mobile Optimized */}
-            <div className="flex flex-wrap gap-1 md:gap-2 mb-6 md:mb-8">
-              {article.tags.map((tag) => (
-                <Badge key={tag} variant="outline" className="text-xs text-gray-600">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-
-            {/* Share Buttons - Mobile Optimized */}
-            <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-6 md:mb-8">
-              <span className="text-xs md:text-sm text-gray-600">Delen:</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleShare("whatsapp")}
-                className="text-green-600 hover:text-green-700 text-xs md:text-sm px-2 md:px-3 py-1 md:py-2"
-              >
-                <MessageCircle className="h-3 md:h-4 w-3 md:w-4 mr-1" />
-                WhatsApp
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleShare("facebook")}
-                className="text-blue-600 hover:text-blue-700 text-xs md:text-sm px-2 md:px-3 py-1 md:py-2"
-              >
-                <Share2 className="h-3 md:h-4 w-3 md:w-4 mr-1" />
-                Facebook
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleShare("linkedin")}
-                className="text-blue-700 hover:text-blue-800 text-xs md:text-sm px-2 md:px-3 py-1 md:py-2"
-              >
-                <Share2 className="h-3 md:h-4 w-3 md:w-4 mr-1" />
-                LinkedIn
-              </Button>
-            </div>
-          </header>
-
-          {/* Table of Contents - Mobile Optimized */}
-          {tableOfContents.length > 0 && (
-            <Card className="mb-6 md:mb-8 bg-gray-50">
-              <CardHeader className="pb-3 md:pb-4">
-                <h3 className="text-base md:text-lg font-semibold">Inhoudsopgave</h3>
-              </CardHeader>
-              <CardContent>
-                <ol className="space-y-1 md:space-y-2">
+      {/* CONTENT - Wit */}
+      <section className="py-12 lg:py-20 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="max-w-3xl mx-auto">
+            
+            {/* Table of Contents */}
+            {tableOfContents.length > 0 && (
+              <div className="bg-gray-50 rounded-2xl p-6 mb-12 border border-gray-100">
+                <h3 className="text-base font-bold text-[#1e1839] mb-4">Inhoudsopgave</h3>
+                <ol className="space-y-2">
                   {tableOfContents.map((item, index) => (
                     <li key={item.id}>
-                      <a
-                        href={`#${item.id}`}
-                        className="text-blue-600 hover:text-blue-800 hover:underline transition-colors text-sm md:text-base"
-                      >
+                      <a href={`#${item.id}`} className="text-sm text-gray-600 hover:text-[#1e1839] transition-colors leading-relaxed">
                         {index + 1}. {item.title}
                       </a>
                     </li>
                   ))}
                 </ol>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            )}
 
-          {/* Article Content - Mobile Optimized */}
-          <div className="prose prose-sm md:prose-lg max-w-none mb-8 md:mb-12">
+            {/* Article Content */}
             <div
-              className="article-content text-gray-700 leading-relaxed"
+              className="prose max-w-none"
               dangerouslySetInnerHTML={{
-                __html: `<p class='mb-2 md:mb-4 text-xs md:text-base text-gray-700 leading-relaxed'>${formatContent(article.content)}</p>`,
+                __html: `<p class='mb-4 text-base text-gray-700 leading-relaxed'>${formatContent(article.content)}</p>`,
               }}
             />
+
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2 mt-12 pt-8 border-t border-gray-100">
+              {article.tags.map((tag) => (
+                <span key={tag} className="text-xs bg-gray-100 text-gray-500 px-3 py-1.5 rounded-lg">
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            {/* Share */}
+            <div className="flex flex-wrap items-center gap-3 mt-8 pt-8 border-t border-gray-100">
+              <span className="text-sm text-gray-500 font-medium">Deel dit artikel:</span>
+              <Button variant="outline" size="sm" onClick={() => handleShare("whatsapp")} className="text-xs rounded-lg border-gray-200">
+                <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
+                WhatsApp
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleShare("facebook")} className="text-xs rounded-lg border-gray-200">
+                <Share2 className="w-3.5 h-3.5 mr-1.5" />
+                Facebook
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleShare("linkedin")} className="text-xs rounded-lg border-gray-200">
+                <Share2 className="w-3.5 h-3.5 mr-1.5" />
+                LinkedIn
+              </Button>
+            </div>
           </div>
+        </div>
+      </section>
 
-          <Separator className="my-8 md:my-12" />
-
-          {/* Author Bio - Mobile Optimized */}
-          {author && (
-            <Card className="mb-8 md:mb-12 bg-gray-50">
-              <CardHeader className="pb-3 md:pb-4">
-                <h3 className="text-lg md:text-xl font-semibold">Over de auteur</h3>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-start gap-3 md:gap-4">
-                  <div className="w-12 md:w-16 h-12 md:h-16 bg-gray-800 rounded-full flex items-center justify-center text-white font-bold text-base md:text-xl flex-shrink-0">
-                    {author.name.charAt(0)}
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-base md:text-lg mb-2">{author.name}</h4>
-                    <p className="text-sm md:text-base text-gray-600 mb-3">{author.bio}</p>
-                    <div className="flex flex-wrap gap-1 md:gap-2">
-                      {author.expertise.map((skill) => (
-                        <Badge key={skill} variant="secondary" className="text-xs">
-                          {skill}
-                        </Badge>
-                      ))}
+      {/* GERELATEERD - Paars */}
+      {relatedArticles.length > 0 && (
+        <section className="py-20 lg:py-28 bg-[#1e1839]">
+          <div className="container mx-auto px-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-10 text-center">
+              Meer over {article.category.name}
+            </h2>
+            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {relatedArticles.map((related) => (
+                <Link key={related.slug} href={`/blog/${related.category.slug}/${related.slug}`} className="group">
+                  <div className="bg-white rounded-2xl p-6 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+                    <h3 className="text-base font-bold text-[#1e1839] mb-3 group-hover:text-[#1e1839]/70 transition-colors leading-tight line-clamp-2">
+                      {related.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-4 flex-grow">{related.description}</p>
+                    <div className="flex items-center text-sm font-medium text-[#1e1839] group-hover:gap-2 gap-1 transition-all">
+                      Lees meer
+                      <ChevronRight className="w-4 h-4" />
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
-          {/* Related Articles - Mobile Optimized */}
-          {relatedArticles.length > 0 && (
-            <section className="mb-8 md:mb-12">
-              <h3 className="text-xl md:text-2xl font-semibold mb-4 md:mb-6">Gerelateerde Artikelen</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                {relatedArticles.map((relatedArticle) => {
-                  const relatedAuthor = blogAuthors.find((a) => a.slug === relatedArticle.author.slug)
-                  return (
-                    <Card key={relatedArticle.slug} className="hover:shadow-lg transition-shadow">
-                      <CardHeader className="pb-3 md:pb-4">
-                        <h4 className="font-semibold leading-tight text-sm md:text-base">
-                          <Link
-                            href={`/blog/${relatedArticle.category.slug}/${relatedArticle.slug}`}
-                            className="hover:text-blue-600 transition-colors"
-                          >
-                            {relatedArticle.title}
-                          </Link>
-                        </h4>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-gray-600 text-xs md:text-sm mb-3 line-clamp-2">
-                          {relatedArticle.description}
-                        </p>
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>{relatedAuthor?.name}</span>
-                          <span>{relatedArticle.readingTime} min</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* CTA Section - Mobile Optimized */}
-          <section className="mt-12 md:mt-16 bg-gray-900 rounded-lg p-6 md:p-8 text-white text-center">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-3 md:mb-4">
-              Klaar om te Starten met Creatine?
+      {/* CTA - Wit */}
+      <section className="py-20 lg:py-28 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="max-w-2xl mx-auto bg-[#1e1839] rounded-2xl p-8 lg:p-12 text-center">
+            <h2 className="text-xl md:text-3xl font-bold text-white mb-4">
+              Persoonlijk advies nodig?
             </h2>
-            <p className="text-base md:text-xl mb-4 md:mb-6 text-gray-300">
-              Ontdek onze hoogwaardige creatine of krijg persoonlijk advies van onze experts.
+            <p className="text-white/70 mb-8 leading-relaxed">
+              Onze coaches helpen je om deze kennis toe te passen in een plan dat bij jou past.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-              <Link href="/supplementen/creatine">
-                <Button size="lg" variant="secondary" className="w-full sm:w-auto text-sm md:text-base">
-                  Bekijk Creatine Supplementen
-                </Button>
-              </Link>
-              <Link href="/contact">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full sm:w-auto text-white border-white hover:bg-white hover:text-gray-900 bg-transparent text-sm md:text-base"
-                >
-                  Plan Gratis Intake
-                </Button>
-              </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button className="bg-white text-[#1e1839] hover:bg-gray-100 rounded-xl h-12 px-8 font-semibold" asChild>
+                <Link href="https://calendly.com/evotion/evotion-coaching" target="_blank" rel="noopener noreferrer">
+                  Gratis Adviesgesprek
+                </Link>
+              </Button>
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent rounded-xl h-12 px-8 font-semibold" asChild>
+                <Link href="/blog">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Terug naar Blog
+                </Link>
+              </Button>
             </div>
-            <div className="mt-3 md:mt-4">
-              <Link
-                href="/12-weken-vetverlies"
-                className="text-gray-300 hover:text-white underline text-sm md:text-base"
-              >
-                Of ontdek ons complete 12-weken transformatieprogramma →
-              </Link>
-            </div>
-          </section>
+          </div>
         </div>
-      </article>
+      </section>
 
       <Footer />
     </div>
