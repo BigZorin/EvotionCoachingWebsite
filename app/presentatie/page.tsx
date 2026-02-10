@@ -3,7 +3,7 @@ import PresentatieClientPage from "./PresentatieClientPage"
 
 export const metadata: Metadata = {
   title: "Klantenpresentatie | Evotion Coaching",
-  description: "Ontdek het modulaire 5-fasen coachingprogramma van Evotion Coaching",
+  description: "Ontdek het coachingprogramma van Evotion Coaching met de 6-pijlers aanpak",
   robots: {
     index: false,
     follow: false,

@@ -6,12 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/admin/", "/_next/", "/private/", "*.json$", "/actions/"],
-      },
-      {
-        userAgent: "Googlebot",
-        allow: "/",
-        disallow: ["/api/", "/admin/", "/actions/"],
+        disallow: ["/api/", "/admin/", "/_next/", "/actions/", "/bedankt/", "/presentatie/", "/martin-socials/"],
       },
     ],
     sitemap: "https://evotion-coaching.nl/sitemap.xml",

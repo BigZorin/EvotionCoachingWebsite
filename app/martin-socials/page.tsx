@@ -29,9 +29,9 @@ export default function MartinSocialsPage() {
       icon: Globe,
     },
     {
-      title: "Premium Coaching",
-      description: "Ontdek ons premium coaching programma",
-      href: "https://www.evotion-coaching.nl/premium-coaching",
+      title: "Online Coaching",
+      description: "Persoonlijke begeleiding op afstand",
+      href: "https://www.evotion-coaching.nl/online-coaching",
       icon: Globe,
     },
     {

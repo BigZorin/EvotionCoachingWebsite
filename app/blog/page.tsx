@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Blog | Evotion Coaching",
     description: "Evidence-based artikelen over voeding, training, mindset en meer.",
-    url: "https://evotioncoaching.nl/blog",
+    url: "https://evotion-coaching.nl/blog",
     siteName: "Evotion Coaching",
     locale: "nl_NL",
     type: "website",

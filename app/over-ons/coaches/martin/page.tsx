@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       "Ontmoet Martin Langenberg, personal trainer met 25+ jaar ervaring in krachttraining en coaching voor drukke professionals.",
     type: "profile",
-    url: "https://evotioncoaching.nl/over-ons/coaches/martin",
+    url: "https://evotion-coaching.nl/over-ons/coaches/martin",
   },
   twitter: {
     card: "summary_large_image",
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     description: "25+ jaar ervaring in krachttraining en coaching voor drukke professionals.",
   },
   alternates: {
-    canonical: "https://evotioncoaching.nl/over-ons/coaches/martin",
+    canonical: "https://evotion-coaching.nl/over-ons/coaches/martin",
   },
 }
 
@@ -38,7 +38,7 @@ export default function MartinProfilePage() {
             worksFor: {
               "@type": "Organization",
               name: "Evotion Coaching",
-              url: "https://evotioncoaching.nl",
+              url: "https://evotion-coaching.nl",
             },
             description:
               "Personal trainer met 25+ jaar ervaring, gespecialiseerd in duurzame transformaties voor drukke ondernemers en ouders.",

@@ -5,7 +5,7 @@ import Script from "next/script"
 export const metadata: Metadata = {
   title: "Evotion - Fitness & Coaching Brand uit Sneek | Personal Training & Online Coaching",
   description:
-    "Evotion - Dé fitness en coaching brand uit Sneek, Friesland. Personal Training, Duo Training en Online Coaching met de unieke Evotion app en het modulaire 5-fasen programma. Evolution + Motion = Evotion.",
+    "Evotion - Fitness en coaching brand uit Sneek, Friesland. Personal Training en Online Coaching met de unieke Evotion app en een bewezen aanpak rondom 6 pijlers. Evolution + Motion = Evotion.",
   keywords: [
     "evotion",
     "evotion coaching",

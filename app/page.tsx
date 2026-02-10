@@ -3,33 +3,25 @@ import EvotionCoachingClient from "./EvotionCoachingClient"
 import Script from "next/script"
 
 export const metadata: Metadata = {
-  title: "Evotion Coaching - Personal Training & Online Coaching Nederland",
+  title: "Evotion Coaching | Personal Training & Online Coaching Friesland",
   description:
-    "Bereik jouw droomlichaam met Evotion Coaching! Personal training, duo training & online coaching door ervaren coaches Martin & Zorin. Bewezen resultaten, persoonlijke begeleiding, app toegang & voedingsadvies. Start vandaag je transformatie!",
+    "Personal training en online coaching door ervaren coaches Martin & Zorin. Bewezen resultaten met gemiddeld 10kg gewichtsverlies. Persoonlijke begeleiding vanuit Sneek, Friesland.",
   keywords: [
     "personal training sneek",
     "personal training friesland",
-    "duo training",
     "online coaching",
     "fitness coach friesland",
     "evotion coaching",
-    "evotion",
     "Martin Langenberg",
     "Zorin Wijnands",
-    "body transformation",
-    "powerlifting coach",
-    "afvallen",
-    "vet verliezen",
-    "fitness app nederland",
-    "voedingsschema afvallen",
-    "krachttraining begeleiding",
-    "personal trainer",
+    "afvallen begeleiding",
+    "personal trainer sneek",
     "online begeleiding fitness",
   ],
   openGraph: {
-    title: "Evotion Coaching - Personal Training & Online Coaching Nederland",
+    title: "Evotion Coaching | Personal Training & Online Coaching Friesland",
     description:
-      "Bereik jouw droomlichaam met Evotion Coaching! Personal training, duo training & online coaching door ervaren coaches Martin & Zorin. Bewezen resultaten en persoonlijke begeleiding.",
+      "Personal training en online coaching door ervaren coaches. Bewezen resultaten met persoonlijke begeleiding vanuit Friesland.",
     url: "https://evotion-coaching.nl",
     siteName: "Evotion Coaching",
     images: [
@@ -37,8 +29,7 @@ export const metadata: Metadata = {
         url: "https://evotion-coaching.nl/images/evotion-logo.png",
         width: 1200,
         height: 630,
-        alt: "Evotion Coaching - Personal Training & Online Coaching Nederland",
-        type: "image/png",
+        alt: "Evotion Coaching",
       },
     ],
     locale: "nl_NL",
@@ -46,9 +37,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    site: "@evotioncoaching",
-    title: "Evotion Coaching - Personal Training & Online Coaching Nederland",
-    description: "Bereik jouw droomlichaam met Evotion Coaching! Bewezen resultaten door ervaren coaches.",
+    title: "Evotion Coaching | Personal Training & Online Coaching Friesland",
+    description: "Personal training en online coaching met bewezen resultaten door ervaren coaches.",
     images: ["https://evotion-coaching.nl/images/evotion-logo.png"],
   },
   alternates: {
@@ -75,7 +65,7 @@ export default function EvotionCoaching() {
               width: 1200,
               height: 630,
             },
-            description: "Personal Training, Duo Training & Online Coaching voor jouw droomlichaam",
+            description: "Personal training, duo training en online coaching met persoonlijke begeleiding vanuit Friesland",
             foundingDate: "2020",
             address: {
               "@type": "PostalAddress",
@@ -197,7 +187,7 @@ export default function EvotionCoaching() {
                   itemOffered: {
                     "@type": "Service",
                     name: "Online Coaching",
-                    description: "Modulair 5-fasen programma met persoonlijke begeleiding via app",
+                    description: "Persoonlijke begeleiding op afstand met 6-pijlers aanpak via de Evotion app",
                     provider: {
                       "@type": "Organization",
                       name: "Evotion Coaching",
@@ -224,16 +214,8 @@ export default function EvotionCoaching() {
             "@type": "WebSite",
             name: "Evotion Coaching",
             url: "https://evotion-coaching.nl",
-            description: "Personal Training, Duo Training & Online Coaching voor jouw droomlichaam",
+            description: "Personal training, duo training en online coaching met persoonlijke begeleiding vanuit Friesland",
             inLanguage: "nl-NL",
-            potentialAction: {
-              "@type": "SearchAction",
-              target: {
-                "@type": "EntryPoint",
-                urlTemplate: "https://evotion-coaching.nl/search?q={search_term_string}",
-              },
-              "query-input": "required name=search_term_string",
-            },
             mainEntity: {
               "@type": "ItemList",
               itemListElement: [

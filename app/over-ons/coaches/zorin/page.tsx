@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     type: "profile",
   },
   alternates: {
-    canonical: "https://evotioncoaching.nl/over-ons/coaches/zorin",
+    canonical: "https://evotion-coaching.nl/over-ons/coaches/zorin",
   },
 }
 

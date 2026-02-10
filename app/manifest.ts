@@ -4,11 +4,11 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Evotion Coaching",
     short_name: "Evotion",
-    description: "Personal Training & Online Coaching voor jouw droomlichaam",
+    description: "Personal Training & Online Coaching - Duurzame resultaten door persoonlijke begeleiding",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
-    theme_color: "#0f172a",
+    theme_color: "#1e1839",
     icons: [
       {
         src: "/images/evotion-favicon.png",

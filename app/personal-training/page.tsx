@@ -3,46 +3,25 @@ import PersonalTrainingClientPage from "./PersonalTrainingClientPage"
 import Script from "next/script"
 
 export const metadata: Metadata = {
-  title: "Personal Training - 1-op-1 Begeleiding | Evotion Coaching",
+  title: "Personal Training | Evotion Coaching",
   description:
-    "Personal Training bij Evotion Coaching - 1-op-1 begeleiding door ervaren trainers. Persoonlijke schema's, voedingsadvies en bewezen resultaten. Vanaf €60 per sessie. Neem contact op via WhatsApp.",
+    "1-op-1 personal training bij Evotion Coaching. Persoonlijke schema's, voedingsadvies en bewezen resultaten door ervaren trainers. Vanaf 60 euro per sessie.",
   keywords: [
     "personal training",
     "personal trainer",
-    "fitness coach",
     "1-op-1 training",
     "fitness begeleiding",
-    "krachttraining coach",
-    "afvallen personal trainer",
-    "spieropbouw",
-    "personal training sessie",
+    "personal training sneek",
     "fitness coaching",
-    "body transformation",
-    "vetverlies coaching",
   ],
   openGraph: {
-    title: "Personal Training - 1-op-1 Begeleiding | Evotion Coaching",
+    title: "Personal Training | Evotion Coaching",
     description:
-      "Personal Training bij Evotion Coaching - 1-op-1 begeleiding door ervaren trainers. Persoonlijke schema's, voedingsadvies en professionele coaching.",
+      "1-op-1 personal training met persoonlijke schema's, voedingsadvies en bewezen resultaten.",
     url: "https://evotion-coaching.nl/personal-training",
     siteName: "Evotion Coaching",
-    images: [
-      {
-        url: "https://evotion-coaching.nl/images/personal-training-session.jpeg",
-        width: 1200,
-        height: 630,
-        alt: "Personal Training sessie bij Evotion Coaching",
-        type: "image/jpeg",
-      },
-    ],
     locale: "nl_NL",
     type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Personal Training - 1-op-1 Begeleiding | Evotion Coaching",
-    description: "Personal Training bij Evotion Coaching - 1-op-1 begeleiding door ervaren trainers.",
-    images: ["https://evotion-coaching.nl/images/personal-training-session.jpeg"],
   },
   alternates: {
     canonical: "https://evotion-coaching.nl/personal-training",

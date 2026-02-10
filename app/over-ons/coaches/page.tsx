@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: "Onze Coaches | Martin & Zorin | Evotion Coaching",
     description: "Ontmoet Martin Langenberg en Zorin Wijnands, de ervaren coaches achter Evotion Coaching.",
     type: "website",
-    url: "https://evotioncoaching.nl/over-ons/coaches",
+    url: "https://evotion-coaching.nl/over-ons/coaches",
   },
   twitter: {
     card: "summary_large_image",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     description: "Ontmoet Martin Langenberg en Zorin Wijnands, de ervaren coaches achter Evotion Coaching.",
   },
   alternates: {
-    canonical: "https://evotioncoaching.nl/over-ons/coaches",
+    canonical: "https://evotion-coaching.nl/over-ons/coaches",
   },
   robots: {
     index: true,
