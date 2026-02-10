@@ -115,7 +115,7 @@ export function BlogClientPage() {
                       setActivePillar(index)
                       setSelectedCategory(cat.slug === selectedCategory ? null : cat.slug)
                     }}
-                    className={`absolute inset-0 bg-white rounded-2xl p-6 border transition-all duration-500 text-left ${
+                    className={`absolute inset-0 bg-white rounded-2xl p-6 border transition-all duration-500 text-left py-0 ${
                       index === activePillar ? 'opacity-100 scale-100 border-[#1e1839]/20 shadow-lg' : 'opacity-0 scale-95 pointer-events-none border-transparent'
                     } ${selectedCategory === cat.slug ? 'ring-2 ring-[#1e1839]' : ''}`}
                   >
