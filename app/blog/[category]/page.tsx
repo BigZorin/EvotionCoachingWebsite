@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: BlogCategoryPageProps): Promi
       title: `${categoryData.name} Artikelen | Evotion Coaching`,
       description: categoryData.description,
       type: "website",
-      url: `https://evotioncoaching.nl/blog/${categoryData.slug}`,
+      url: `https://evotion-coaching.nl/blog/${categoryData.slug}`,
     },
   }
 }

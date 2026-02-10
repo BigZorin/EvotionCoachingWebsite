@@ -1,59 +1,112 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { Star, Users, CheckCircle, ArrowRight, MapPin, Award, HelpCircle, Smartphone, Dumbbell } from "lucide-react"
+import {
+  Star,
+  Users,
+  Smartphone,
+  Dumbbell,
+  ArrowRight,
+  MapPin,
+  ChevronDown,
+  Utensils,
+  Brain,
+  Moon,
+  Clock,
+  ShieldCheck,
+  UserPlus,
+  Wifi,
+} from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 export default function EvotionBrandClientPage() {
-  const [isVisible, setIsVisible] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
 
   useEffect(() => {
-    setIsVisible(true)
+    setIsLoaded(true)
   }, [])
 
   const stats = [
-    { number: "5.0", label: "Google Review Score", icon: Star },
-    { number: "100%", label: "Persoonlijke Aandacht", icon: Users },
+    { number: "5.0", label: "Google Score", icon: Star },
+    { number: "100%", label: "Persoonlijk", icon: Users },
     { number: "3", label: "Coaching Opties", icon: Dumbbell },
-    { number: "1", label: "Unieke App", icon: Smartphone },
+    { number: "1", label: "Eigen App", icon: Smartphone },
   ]
 
-  const uniquePoints = [
-    "Unieke Evotion App met persoonlijke coaching",
-    "Modulair 5-fasen programma voor duurzame resultaten",
-    "Directe toegang tot je persoonlijke Evotion coach",
-    "Exclusieve Evotion Community",
-    "Wetenschappelijk onderbouwde trainings- en voedingsschema's",
-    "Flexibele trajecten van 6 tot 12 maanden",
+  const pillars = [
+    { title: "Voeding", desc: "Op maat gemaakte voedingsplannen", icon: Utensils },
+    { title: "Training", desc: "Gepersonaliseerde trainingsschema's", icon: Dumbbell },
+    { title: "Mindset", desc: "Mentale begeleiding en motivatie", icon: Brain },
+    { title: "Herstel & Rust", desc: "Optimaal herstel voor groei", icon: Moon },
+    { title: "Ritme & Structuur", desc: "Consistentie in je routine", icon: Clock },
+    { title: "Verantwoordelijkheid", desc: "Accountability en support", icon: ShieldCheck },
   ]
 
-  const locationHighlights = [
-    "Personal Training Sneek - 1-op-1 begeleiding",
-    "Duo Training - Samen trainen, samen groeien",
-    "Online Coaching - Flexibel door heel Nederland",
-    "Evotion App - 24/7 toegang tot je programma",
+  const services = [
+    {
+      title: "Personal Training",
+      subtitle: "1-op-1 in Sneek",
+      description: "Persoonlijke begeleiding in de gym met je eigen coach. Maximale aandacht, maximale resultaten.",
+      features: ["Eigen Evotion trainer", "Voedings- en trainingsplan", "Evotion App toegang"],
+      href: "/personal-training",
+      icon: Dumbbell,
+    },
+    {
+      title: "Duo Training",
+      subtitle: "Samen trainen in Sneek",
+      description: "Train samen met een partner onder begeleiding. Extra motivatie, gedeelde kosten.",
+      features: ["Train met een partner", "App voor beiden", "Extra motivatie & support"],
+      href: "/duo-training",
+      icon: UserPlus,
+    },
+    {
+      title: "Online Coaching",
+      subtitle: "Door heel Nederland",
+      description: "Flexibele coaching via de Evotion App. Persoonlijk programma, overal beschikbaar.",
+      features: ["Evotion App premium", "Direct coach contact", "Wekelijkse check-ins"],
+      href: "/online-coaching",
+      icon: Wifi,
+    },
+  ]
+
+  const coaches = [
+    {
+      name: "Martin Langenberg",
+      role: "Head Coach & Online Coaching",
+      description:
+        "Specialist in online coaching en body transformations. Martin begeleidt je via de Evotion App met het modulaire programma naar duurzame resultaten.",
+      image: "/images/martin-langenberg.png",
+      href: "/over-ons/coaches/martin",
+    },
+    {
+      name: "Zorin Wijnands",
+      role: "Personal Training & Duo Training",
+      description:
+        "Expert in krachttraining en personal training. Zorin begeleidt je in de gym met 1-op-1 of duo sessies voor maximale resultaten.",
+      image: "/images/zorin-foto.png",
+      href: "/over-ons/coaches/zorin",
+    },
   ]
 
   const faqs = [
     {
       question: "Wat is Evotion?",
       answer:
-        "Evotion is een fitness en coaching brand uit Sneek, Friesland. De naam ontstond uit de combinatie van Evolution en Motion. Wij helpen mensen hun fitnessdoelen te bereiken door middel van persoonlijke coaching, een unieke app en het modulaire 5-fasen programma.",
+        "Evotion is een fitness en coaching brand uit Sneek, Friesland. De naam ontstond uit de combinatie van Evolution en Motion. Wij helpen mensen hun fitnessdoelen te bereiken door middel van persoonlijke coaching, een unieke app en een bewezen aanpak rondom 6 pijlers.",
     },
     {
       question: "Wat maakt Evotion uniek?",
       answer:
-        "Evotion combineert persoonlijke coaching met een eigen app. We bieden directe toegang tot je coach, gepersonaliseerde trainingsschema's, voedingsbegeleiding en een exclusieve community. Ons modulaire programma met 5 fases zorgt voor duurzame resultaten.",
+        "Evotion combineert persoonlijke coaching met een eigen app. We bieden directe toegang tot je coach, gepersonaliseerde trainingsschema's, voedingsbegeleiding en een exclusieve community. Onze aanpak rondom 6 pijlers zorgt voor duurzame resultaten.",
     },
     {
       question: "Waar is Evotion gevestigd?",
       answer:
-        "Evotion biedt Personal Training en Duo Training in Sneek, Friesland. Daarnaast bieden we Online Coaching aan door heel Nederland via de Evotion app.",
+        "Evotion biedt Personal Training en Duo Training in Sneek, Friesland. Daarnaast bieden we Online Coaching aan door heel Nederland via de Evotion App.",
     },
     {
       question: "Welke services biedt Evotion aan?",
@@ -61,9 +114,9 @@ export default function EvotionBrandClientPage() {
         "Evotion biedt drie hoofdservices: Personal Training met 1-op-1 begeleiding in Sneek, Duo Training om samen met een partner te trainen, en Online Coaching met trajecten van 6 of 12 maanden inclusief volledige app toegang.",
     },
     {
-      question: "Hoe werkt het modulaire programma?",
+      question: "Hoe werkt de Evotion aanpak?",
       answer:
-        "Ons programma bestaat uit 5 fases: Fundament (gewoontes en mindset), Voeding (macro's en maaltijdplanning), Training (gepersonaliseerde schema's), Optimalisatie (verfijning en aanpassing) en Lifestyle (duurzame integratie). Elke fase bouwt voort op de vorige.",
+        "Onze aanpak is gebaseerd op 6 pijlers: Voeding, Training, Mindset, Herstel & Rust, Ritme & Structuur en Verantwoordelijkheid. Door al deze gebieden aan te pakken, bereiken we duurzame verandering in plaats van tijdelijke resultaten.",
     },
   ]
 
@@ -72,478 +125,366 @@ export default function EvotionBrandClientPage() {
       <Header />
 
       <article>
-        {/* Hero Section */}
-        <section className="relative pt-32 pb-24 px-4 bg-gradient-to-b from-gray-50 to-white">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-20">
-              <Badge className="mb-8 bg-[#1e1839] text-white px-8 py-3 text-lg">Fitness & Coaching Sneek</Badge>
-              <h1
-                className={`text-5xl md:text-7xl font-bold mb-10 text-[#1e1839] transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
-              >
+        {/* Hero - Paars */}
+        <section className="relative pt-28 pb-20 px-6 bg-[#1e1839] overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-10 right-10 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+          </div>
+
+          <div className="relative max-w-5xl mx-auto text-center">
+            <div
+              className={`transition-all duration-700 ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+            >
+              <div className="flex items-center justify-center gap-3 mb-6">
+                <MapPin className="w-4 h-4 text-white/60" />
+                <span className="text-white/60 text-sm tracking-wider uppercase">
+                  Fitness & Coaching uit Sneek
+                </span>
+              </div>
+
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 tracking-tight">
                 EVOTION
               </h1>
-              <div className="text-2xl md:text-3xl font-semibold text-gray-700 mb-8">
-                <span className="text-[#1e1839]">Evolution</span> + <span className="text-[#1e1839]">Motion</span> ={" "}
-                <span className="text-gray-900">Evotion</span>
+
+              <div className="text-lg md:text-xl text-white/70 mb-4">
+                <span className="text-white font-medium">Evolution</span>
+                {" + "}
+                <span className="text-white font-medium">Motion</span>
+                {" = "}
+                <span className="text-[#bad4e1] font-semibold">Evotion</span>
               </div>
-              <p className="text-xl text-[#1e1839] font-semibold mb-10 leading-relaxed">
+
+              <p className="text-white/50 italic text-base md:text-lg mb-10">
                 It is time to bring your evolution in motion
               </p>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12 leading-loose">
-                Ontdek <strong>Evotion</strong> - dé fitness en coaching brand uit Sneek. Van onze revolutionaire{" "}
-                <strong>Evotion app</strong> tot het bewezen <strong>modulaire 5-fasen programma</strong> - wij helpen
-                jou je fitnessdoelen bereiken.
+
+              <p className="text-white/80 text-base md:text-lg max-w-2xl mx-auto mb-12 leading-relaxed">
+                Ontdek Evotion - de fitness en coaching brand uit Sneek.
+                Van onze eigen Evotion App tot de bewezen aanpak rondom 6 pijlers -
+                wij helpen jou je fitnessdoelen bereiken.
               </p>
 
-              <div className="flex items-center justify-center gap-8 mb-14 text-gray-600 flex-wrap">
-                <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-[#1e1839]" />
-                  <span className="font-medium text-base">Personal Training Sneek</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Award className="h-5 w-5 text-[#1e1839]" />
-                  <span className="font-medium text-base">Fitness Coach Friesland</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/contact">
-                  <Button size="lg" className="bg-[#1e1839] hover:bg-[#2a2147] text-white px-10 py-6 text-lg">
-                    Start Je Evotion Journey
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
+                  <button
+                    type="button"
+                    className="w-full sm:w-auto px-8 py-3.5 bg-white text-[#1e1839] font-semibold rounded-xl hover:bg-[#bad4e1] transition-colors flex items-center justify-center gap-2"
+                  >
+                    Start je journey
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
                 </Link>
                 <Link href="/over-ons/coaches">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="border-2 border-[#1e1839] text-[#1e1839] hover:bg-[#1e1839] hover:text-white px-10 py-6 text-lg bg-transparent"
+                  <button
+                    type="button"
+                    className="w-full sm:w-auto px-8 py-3.5 border border-white/30 text-white font-medium rounded-xl hover:bg-white/10 transition-colors"
                   >
-                    Ontmoet De Evotion Coaches
-                  </Button>
+                    Ontmoet de coaches
+                  </button>
                 </Link>
               </div>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20">
-              {stats.map((stat, index) => (
-                <Card
-                  key={index}
-                  className="text-center p-8 hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#1e1839] bg-white"
-                >
-                  <CardContent className="p-0">
-                    {stat.icon && <stat.icon className="h-10 w-10 mx-auto mb-5 text-[#1e1839]" />}
-                    <div className="text-4xl font-bold text-gray-900 mb-3">{stat.number}</div>
-                    <div className="text-gray-600 font-medium">{stat.label}</div>
-                  </CardContent>
-                </Card>
+            <div
+              className={`grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 transition-all duration-700 delay-300 ${isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+            >
+              {stats.map((stat) => (
+                <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-5 border border-white/10">
+                  <stat.icon className="w-5 h-5 text-[#bad4e1] mb-3 mx-auto" />
+                  <div className="text-2xl md:text-3xl font-bold text-white">{stat.number}</div>
+                  <div className="text-white/50 text-xs mt-1">{stat.label}</div>
+                </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* What is Evotion Section */}
-        <section className="py-24 px-4 bg-white">
+        {/* Wat is Evotion - Wit */}
+        <section className="py-20 px-6 bg-white">
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
-                Wat is <span className="text-[#1e1839]">Evotion</span>?
+            <div className="text-center mb-14">
+              <h2 className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-4">
+                Wat is Evotion?
               </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Evotion is meer dan een fitness brand - het is een filosofie, een beweging voor transformatie, een
-                manier van leven.
+              <p className="text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Meer dan een fitness brand - een filosofie voor duurzame transformatie.
               </p>
             </div>
 
-            <div className="mb-24 bg-gray-50 p-12 md:p-16 rounded-2xl">
-              <h3 className="text-3xl font-bold text-gray-900 mb-8 text-center">De Evotion Filosofie</h3>
-              <div className="max-w-3xl mx-auto space-y-8">
-                <p className="text-lg text-gray-600 leading-loose">
-                  <strong>Evotion</strong> ontstond uit de combinatie van twee krachtige concepten:
-                  <span className="text-[#1e1839] font-semibold"> Evolution</span> en
-                  <span className="text-[#1e1839] font-semibold"> Motion</span>.
-                </p>
-                <p className="text-lg text-gray-600 leading-loose">
-                  Wij geloven dat echte <strong>transformatie</strong> ontstaat wanneer je jezelf continu ontwikkelt
-                  (evolution) en deze ontwikkeling in beweging brengt (motion). Deze <strong>Evotion mindset</strong>{" "}
-                  vormt de basis van al onze coaching programma's en de unieke <strong>Evotion app</strong>.
-                </p>
-                <p className="text-lg text-gray-600 leading-loose">
-                  <strong>It is time to bring your evolution in motion</strong> - dit is onze kernboodschap. Vanuit
-                  Sneek, Friesland helpen we mensen hun droomlichaam te bereiken met het bewezen{" "}
-                  <strong>modulaire 5-fasen programma</strong>. Van <strong>personal training</strong> tot{" "}
-                  <strong>online coaching</strong> - wij maken het verschil in jouw fitness journey.
-                </p>
-              </div>
-            </div>
-
-            {/* Location Highlights */}
-            <div className="mb-24">
-              <h3 className="text-3xl font-bold text-gray-900 mb-10 text-center">Evotion Services</h3>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {locationHighlights.map((highlight, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start space-x-4 p-6 bg-white border-2 border-gray-100 hover:border-[#1e1839] rounded-xl transition-all duration-300"
-                  >
-                    <CheckCircle className="h-6 w-6 text-[#1e1839] mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700 font-medium leading-relaxed">{highlight}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Evotion Values */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <Card className="p-8 text-center hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#1e1839] bg-white">
-                <CardContent className="p-0">
-                  <h4 className="text-xl font-bold text-gray-900 mb-4">Evolution</h4>
-                  <p className="text-gray-600 leading-relaxed">
-                    Voortdurende groei en ontwikkeling in alles wat we doen
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="p-8 text-center hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#1e1839] bg-white">
-                <CardContent className="p-0">
-                  <h4 className="text-xl font-bold text-gray-900 mb-4">Motion</h4>
-                  <p className="text-gray-600 leading-relaxed">
-                    Je ontwikkeling in beweging brengen voor echte verandering
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="p-8 text-center hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#1e1839] bg-white">
-                <CardContent className="p-0">
-                  <h4 className="text-xl font-bold text-gray-900 mb-4">Innovatie</h4>
-                  <p className="text-gray-600 leading-relaxed">
-                    Cutting-edge methodes en technologie via de Evotion app
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="p-8 text-center hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#1e1839] bg-white">
-                <CardContent className="p-0">
-                  <h4 className="text-xl font-bold text-gray-900 mb-4">Integriteit</h4>
-                  <p className="text-gray-600 leading-relaxed">
-                    Eerlijkheid en transparantie in al onze coaching relaties
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Why Choose Evotion */}
-        <section className="py-24 px-4 bg-gray-50">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
-                Waarom Kiezen Voor <span className="text-[#1e1839]">Evotion</span>?
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Ontdek wat Evotion uniek maakt in de Nederlandse fitness en coaching wereld.
+            <div className="max-w-3xl mx-auto space-y-6 mb-16">
+              <p className="text-gray-700 leading-relaxed">
+                <strong className="text-[#1e1839]">Evotion</strong> ontstond uit de combinatie van twee krachtige concepten:
+                <span className="font-semibold text-[#1e1839]"> Evolution</span> en
+                <span className="font-semibold text-[#1e1839]"> Motion</span>.
+                Wij geloven dat echte transformatie ontstaat wanneer je jezelf continu ontwikkelt en deze ontwikkeling in beweging brengt.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                Vanuit Sneek, Friesland helpen we mensen hun doelen te bereiken met een bewezen aanpak rondom 6 pijlers. Van personal training tot online coaching - wij maken het verschil in jouw fitness journey.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-              {uniquePoints.map((point, index) => (
+            {/* 4 Values */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { title: "Evolution", desc: "Voortdurende groei en ontwikkeling" },
+                { title: "Motion", desc: "Ontwikkeling in beweging brengen" },
+                { title: "Innovatie", desc: "Methodes en technologie via de app" },
+                { title: "Integriteit", desc: "Eerlijkheid in coaching relaties" },
+              ].map((value) => (
                 <div
-                  key={index}
-                  className="flex items-start space-x-4 p-8 bg-white rounded-xl border-2 border-gray-100 hover:border-[#1e1839] transition-all duration-300"
+                  key={value.title}
+                  className="bg-gray-50 rounded-xl p-5 text-center border border-gray-100 hover:border-[#1e1839]/20 transition-colors"
                 >
-                  <CheckCircle className="h-6 w-6 text-green-600 mt-1 flex-shrink-0" />
-                  <span className="text-gray-700 font-medium leading-relaxed">{point}</span>
+                  <h4 className="font-bold text-[#1e1839] mb-1.5 text-sm">{value.title}</h4>
+                  <p className="text-gray-500 text-xs leading-relaxed">{value.desc}</p>
                 </div>
               ))}
             </div>
+          </div>
+        </section>
 
-            {/* Evotion App Showcase */}
-            <Card className="p-12 bg-white border-2 border-gray-100 hover:border-[#1e1839] transition-all duration-300">
-              <div className="text-center">
-                <Badge className="mb-6 bg-[#1e1839] text-white px-6 py-2 text-base">Exclusief</Badge>
-                <h3 className="text-3xl font-bold text-gray-900 mb-8">De Evotion App</h3>
-                <p className="text-lg text-gray-600 mb-10 leading-loose max-w-2xl mx-auto">
-                  Onze <strong>Evotion app</strong> combineert technologie met persoonlijke coaching. Krijg toegang tot:
-                </p>
-                <div className="grid md:grid-cols-2 gap-6 mb-10 max-w-2xl mx-auto">
-                  <div className="flex items-center space-x-3 text-left">
-                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
-                    <span className="leading-relaxed">Gepersonaliseerde Evotion trainingsschema's</span>
-                  </div>
-                  <div className="flex items-center space-x-3 text-left">
-                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
-                    <span className="leading-relaxed">Evotion voedingsbegeleiding op maat</span>
-                  </div>
-                  <div className="flex items-center space-x-3 text-left">
-                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
-                    <span className="leading-relaxed">Direct contact met je Evotion coach</span>
-                  </div>
-                  <div className="flex items-center space-x-3 text-left">
-                    <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
-                    <span className="leading-relaxed">Exclusieve Evotion community</span>
+        {/* 6 Pijlers - Paurs */}
+        <section className="py-20 px-6 bg-[#1e1839]">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-14">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                De 6 Pijlers van Evotion
+              </h2>
+              <p className="text-white/60 max-w-2xl mx-auto leading-relaxed">
+                Onze aanpak gaat verder dan alleen training en voeding.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {pillars.map((pillar) => (
+                <div
+                  key={pillar.title}
+                  className="bg-white/5 backdrop-blur-sm rounded-xl p-5 border border-white/10 hover:border-white/20 transition-colors"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <pillar.icon className="w-4 h-4 text-[#bad4e1]" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-white text-sm mb-0.5">{pillar.title}</h3>
+                      <p className="text-white/50 text-xs leading-relaxed">{pillar.desc}</p>
+                    </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Services - Wit */}
+        <section className="py-20 px-6 bg-white">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-14">
+              <h2 className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-4">
+                Evotion Services
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Drie coaching opties voor elk doel en elke locatie.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {services.map((service) => (
+                <Link key={service.title} href={service.href} className="group block">
+                  <div className="h-full bg-gray-50 rounded-2xl p-6 border border-gray-100 group-hover:border-[#1e1839]/20 group-hover:shadow-lg transition-all">
+                    <div className="w-11 h-11 bg-[#1e1839] rounded-xl flex items-center justify-center mb-4">
+                      <service.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-[#1e1839] mb-1">{service.title}</h3>
+                    <p className="text-xs text-gray-400 mb-3">{service.subtitle}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed mb-5">{service.description}</p>
+                    <ul className="space-y-2">
+                      {service.features.map((feature) => (
+                        <li key={feature} className="flex items-center gap-2 text-sm text-gray-500">
+                          <div className="w-1 h-1 bg-[#1e1839] rounded-full flex-shrink-0" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-5 flex items-center gap-1 text-[#1e1839] text-sm font-medium group-hover:gap-2 transition-all">
+                      Meer info
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Evotion App - Paurs */}
+        <section className="py-20 px-6 bg-[#1e1839]">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div>
+                <span className="text-[#bad4e1] text-sm font-medium tracking-wider uppercase mb-4 block">
+                  Exclusief
+                </span>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                  De Evotion App
+                </h2>
+                <p className="text-white/70 leading-relaxed mb-8">
+                  Onze eigen app combineert technologie met persoonlijke coaching.
+                  Alles wat je nodig hebt voor je transformatie, altijd bij de hand.
+                </p>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    "Gepersonaliseerde trainingsschema's",
+                    "Voedingsbegeleiding op maat",
+                    "Direct contact met je coach",
+                    "Voortgang bijhouden",
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-3 text-white/80 text-sm">
+                      <div className="w-1.5 h-1.5 bg-[#bad4e1] rounded-full flex-shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
                 <Link href="/over-ons/evotion-app">
-                  <Button size="lg" className="bg-[#1e1839] hover:bg-[#2a2147] text-white px-8 py-4">
-                    Ontdek De Evotion App
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
+                  <button
+                    type="button"
+                    className="px-6 py-3 bg-white text-[#1e1839] font-semibold rounded-xl hover:bg-[#bad4e1] transition-colors flex items-center gap-2 text-sm"
+                  >
+                    Ontdek de app
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
                 </Link>
               </div>
-            </Card>
-          </div>
-        </section>
-
-        {/* Evotion Services - CHANGED: Removed 12 weken, added Duo Training */}
-        <section className="py-24 px-4 bg-white">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
-                <span className="text-[#1e1839]">Evotion</span> Services
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Ontdek alle Evotion coaching programma's en vind de perfecte match voor jouw doelen.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              <Card className="p-8 hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#1e1839] bg-white">
-                <CardContent className="p-0">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 leading-snug">Evotion Personal Training</h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed">1-op-1 Evotion coaching in Sneek</p>
-                  <ul className="space-y-3 mb-8">
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-gray-600">Persoonlijke Evotion trainer</span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-gray-600">Evotion app toegang</span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-gray-600">Voedingsschema op maat</span>
-                    </li>
-                  </ul>
-                  <Link href="/personal-training">
-                    <Button className="w-full bg-[#1e1839] hover:bg-[#2a2147] text-white">Meer Info</Button>
-                  </Link>
-                </CardContent>
-              </Card>
-
-              <Card className="p-8 hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#1e1839] bg-white">
-                <CardContent className="p-0">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 leading-snug">Evotion Duo Training</h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed">Samen trainen, samen groeien</p>
-                  <ul className="space-y-3 mb-8">
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-gray-600">Train met een partner</span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-gray-600">Evotion app voor beiden</span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-gray-600">Extra motivatie en support</span>
-                    </li>
-                  </ul>
-                  <Link href="/duo-training">
-                    <Button className="w-full bg-[#1e1839] hover:bg-[#2a2147] text-white">Meer Info</Button>
-                  </Link>
-                </CardContent>
-              </Card>
-
-              <Card className="p-8 hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#1e1839] bg-white">
-                <CardContent className="p-0">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 leading-snug">Evotion Online Coaching</h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed">Flexibele Evotion begeleiding online</p>
-                  <ul className="space-y-3 mb-8">
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-gray-600">Evotion app premium</span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-gray-600">Direct coach contact</span>
-                    </li>
-                    <li className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                      <span className="text-gray-600">Wekelijkse check-ins</span>
-                    </li>
-                  </ul>
-                  <Link href="/online-coaching">
-                    <Button className="w-full bg-[#1e1839] hover:bg-[#2a2147] text-white">Meer Info</Button>
-                  </Link>
-                </CardContent>
-              </Card>
+              <div className="flex justify-center">
+                <div className="relative w-56 md:w-64">
+                  <Image
+                    src="/images/evotion-app-mockup-angled.png"
+                    alt="Evotion App mockup"
+                    width={300}
+                    height={600}
+                    className="rounded-2xl"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Modulair Programma Section - NEW */}
-        <section className="py-24 px-4 bg-gray-50">
+        {/* Coaches - Wit */}
+        <section className="py-20 px-6 bg-white">
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
-                Het <span className="text-[#1e1839]">Evotion</span> Modulaire Programma
+            <div className="text-center mb-14">
+              <h2 className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-4">
+                De Evotion Coaches
               </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Ons bewezen 5-fasen programma voor duurzame resultaten.
+              <p className="text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Leer kennen wie jou gaat begeleiden.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-5 gap-6">
-              {[
-                { fase: "1", title: "Fundament", desc: "Gewoontes & Mindset" },
-                { fase: "2", title: "Voeding", desc: "Macro's & Planning" },
-                { fase: "3", title: "Training", desc: "Gepersonaliseerde Schema's" },
-                { fase: "4", title: "Optimalisatie", desc: "Verfijning & Aanpassing" },
-                { fase: "5", title: "Lifestyle", desc: "Duurzame Integratie" },
-              ].map((item, index) => (
-                <Card
-                  key={index}
-                  className="p-6 text-center hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#1e1839] bg-white"
-                >
-                  <CardContent className="p-0">
-                    <div className="w-12 h-12 bg-[#1e1839] text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                      {item.fase}
+            <div className="grid md:grid-cols-2 gap-6">
+              {coaches.map((coach) => (
+                <Link key={coach.name} href={coach.href} className="group block">
+                  <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 group-hover:border-[#1e1839]/20 group-hover:shadow-lg transition-all">
+                    <div className="flex items-start gap-5">
+                      <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-200">
+                        <Image
+                          src={coach.image || "/placeholder.svg"}
+                          alt={coach.name}
+                          width={64}
+                          height={64}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-[#1e1839] mb-0.5">{coach.name}</h3>
+                        <p className="text-xs text-gray-400 mb-3">{coach.role}</p>
+                        <p className="text-sm text-gray-600 leading-relaxed">{coach.description}</p>
+                        <div className="mt-4 flex items-center gap-1 text-[#1e1839] text-sm font-medium group-hover:gap-2 transition-all">
+                          Leer kennen
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </div>
+                      </div>
                     </div>
-                    <h4 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h4>
-                    <p className="text-gray-600 text-sm leading-relaxed">{item.desc}</p>
-                  </CardContent>
-                </Card>
+                  </div>
+                </Link>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Coaches Section */}
-        <section className="py-24 px-4 bg-white">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
-                Ontmoet De <span className="text-[#1e1839]">Evotion</span> Coaches
+        {/* FAQ - Paurs */}
+        <section className="py-20 px-6 bg-[#1e1839]">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-14">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                Veelgestelde vragen
               </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Leer kennen wie jou gaat begeleiden in jouw fitness journey.
+              <p className="text-white/60 leading-relaxed">
+                Alles wat je wilt weten over Evotion.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-10">
-              <Card className="p-10 hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#1e1839] bg-white">
-                <CardContent className="p-0 text-center">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">Martin Langenberg</h3>
-                  <p className="text-[#1e1839] font-semibold mb-6 leading-relaxed">Head Coach & Online Coaching</p>
-                  <p className="text-gray-600 mb-8 leading-loose">
-                    Specialist in online coaching en body transformations. Martin begeleidt je via de Evotion app met
-                    het modulaire 5-fasen programma naar duurzame resultaten.
-                  </p>
-                  <Link href="/over-ons/coaches/martin">
-                    <Button
-                      variant="outline"
-                      className="border-[#1e1839] text-[#1e1839] hover:bg-[#bad4e1] bg-transparent"
-                    >
-                      Leer Martin Kennen
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-
-              <Card className="p-10 hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#1e1839] bg-white">
-                <CardContent className="p-0 text-center">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">Zorin Wijnands</h3>
-                  <p className="text-[#1e1839] font-semibold mb-6 leading-relaxed">
-                    Personal Training & Duo Training Sneek
-                  </p>
-                  <p className="text-gray-600 mb-8 leading-loose">
-                    Expert in krachttraining en personal training. Zorin begeleidt je in de gym met 1-op-1 of duo
-                    sessies voor maximale resultaten.
-                  </p>
-                  <Link href="/over-ons/coaches/zorin">
-                    <Button
-                      variant="outline"
-                      className="border-[#1e1839] text-[#1e1839] hover:bg-[#bad4e1] bg-transparent"
-                    >
-                      Leer Zorin Kennen
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ Section */}
-        <section className="py-24 px-4 bg-gray-50">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-20">
-              <HelpCircle className="h-14 w-14 mx-auto mb-6 text-[#1e1839]" />
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
-                Veelgestelde Vragen Over <span className="text-[#1e1839]">Evotion</span>
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Alles wat je wilt weten over Evotion coaching.
-              </p>
-            </div>
-
-            <div className="space-y-8">
+            <div className="space-y-3">
               {faqs.map((faq, index) => (
-                <Card
-                  key={index}
-                  className="p-8 hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#1e1839] bg-white"
+                <div
+                  key={faq.question}
+                  className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden"
                 >
-                  <CardContent className="p-0">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">{faq.question}</h3>
-                    <p className="text-gray-600 leading-loose">{faq.answer}</p>
-                  </CardContent>
-                </Card>
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                    className="w-full flex items-center justify-between p-5 text-left"
+                  >
+                    <h3 className="font-semibold text-white text-sm pr-4">{faq.question}</h3>
+                    <ChevronDown
+                      className={`w-4 h-4 text-white/50 flex-shrink-0 transition-transform duration-300 ${
+                        openFaq === index ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ${
+                      openFaq === index ? "max-h-60 pb-5" : "max-h-0"
+                    }`}
+                  >
+                    <p className="px-5 text-white/60 text-sm leading-relaxed">{faq.answer}</p>
+                  </div>
+                </div>
               ))}
-            </div>
-
-            <div className="text-center mt-16">
-              <p className="text-gray-600 mb-8 text-lg leading-relaxed">Heb je nog meer vragen over Evotion?</p>
-              <Link href="/contact">
-                <Button size="lg" className="bg-[#1e1839] hover:bg-[#2a2147] text-white px-10 py-6">
-                  Neem Contact Op
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-24 px-4 bg-[#1e1839] text-white">
-          <div className="max-w-5xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-8">
-              Klaar Voor Jouw <span className="text-[#bad4e1]">Evotion</span> Journey?
+        {/* CTA - Wit */}
+        <section className="py-20 px-6 bg-white">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1e1839] mb-4">
+              Klaar voor jouw Evotion journey?
             </h2>
-            <p className="text-xl mb-6 opacity-90 leading-relaxed">
-              <strong>It is time to bring your evolution in motion</strong>
+            <p className="text-gray-500 italic mb-3">It is time to bring your evolution in motion</p>
+            <p className="text-gray-600 mb-10 leading-relaxed max-w-xl mx-auto">
+              Van personal training in Sneek tot online coaching door heel Nederland.
             </p>
-            <p className="text-lg mb-12 opacity-90 leading-loose max-w-3xl mx-auto">
-              Sluit je aan bij Evotion en start vandaag nog je transformatie. Van personal training in Sneek tot online
-              coaching door heel Nederland - evolution en motion wachten op jou.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contact">
-                <Button
-                  size="lg"
-                  className="bg-white text-[#1e1839] hover:bg-[#bad4e1] px-10 py-6 text-lg font-semibold"
+                <button
+                  type="button"
+                  className="w-full sm:w-auto px-8 py-3.5 bg-[#1e1839] text-white font-semibold rounded-xl hover:bg-[#2a1f4d] transition-colors flex items-center justify-center gap-2"
                 >
-                  Start Nu Met Evotion
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
+                  Start nu
+                  <ArrowRight className="w-4 h-4" />
+                </button>
               </Link>
               <Link href="/gratis/caloriebehoefte">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-2 border-white text-white hover:bg-white hover:text-[#1e1839] px-10 py-6 text-lg bg-transparent"
+                <button
+                  type="button"
+                  className="w-full sm:w-auto px-8 py-3.5 border border-[#1e1839]/20 text-[#1e1839] font-medium rounded-xl hover:bg-gray-50 transition-colors"
                 >
-                  Gratis Evotion Calculator
-                </Button>
+                  Gratis caloriecalculator
+                </button>
               </Link>
             </div>
           </div>

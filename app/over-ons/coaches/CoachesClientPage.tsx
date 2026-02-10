@@ -37,8 +37,8 @@ export default function CoachesClientPage() {
           name: "Martin Langenberg",
           jobTitle: "Personal Trainer & Coach",
           description: "25+ jaar ervaring in krachttraining en coaching",
-          url: "https://evotioncoaching.nl/over-ons/coaches/martin",
-          image: "https://evotioncoaching.nl/images/martin-foto.avif",
+          url: "https://evotion-coaching.nl/over-ons/coaches/martin",
+          image: "https://evotion-coaching.nl/images/martin-foto.avif",
           worksFor: {
             "@type": "Organization",
             name: "Evotion Coaching",
@@ -49,8 +49,8 @@ export default function CoachesClientPage() {
           name: "Zorin Wijnands",
           jobTitle: "Powerlifting Coach & Mental Coach",
           description: "6-voudig Nederlands kampioen powerlifting",
-          url: "https://evotioncoaching.nl/over-ons/coaches/zorin",
-          image: "https://evotioncoaching.nl/images/zorin-foto.png",
+          url: "https://evotion-coaching.nl/over-ons/coaches/zorin",
+          image: "https://evotion-coaching.nl/images/zorin-foto.png",
           award: "6x Nederlands Kampioen Powerlifting",
           worksFor: {
             "@type": "Organization",

@@ -414,7 +414,7 @@ export default function EvotionCoachingDesktop() {
                       Online Coaching
                     </h3>
                     <p className="text-gray-600 leading-relaxed">
-                      Modulair 5-fasen programma met persoonlijke begeleiding via onze app, waar en wanneer jij wilt.
+                      Persoonlijke begeleiding op basis van 6 pijlers via onze app, waar en wanneer jij wilt.
                     </p>
                   </div>
 
@@ -912,9 +912,9 @@ export default function EvotionCoachingDesktop() {
                   { 
                     icon: Mail, 
                     title: "Email", 
-                    desc: "info@evotioncoaching.nl",
+                    desc: "info@evotion-coaching.nl",
                     hint: "Reactie binnen 24 uur",
-                    href: "mailto:info@evotioncoaching.nl"
+                    href: "mailto:info@evotion-coaching.nl"
                   },
                 ].map((contact) => (
                   <a

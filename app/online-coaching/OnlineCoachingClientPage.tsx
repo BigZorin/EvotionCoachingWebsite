@@ -134,7 +134,7 @@ export default function OnlineCoachingClientPage() {
       subtitle: "Complete Transformatie",
       duration: "24 weken begeleiding",
       features: [
-        "Volledige 5-fasen doorloop",
+        "Volledige 6-pijlers aanpak",
         "Evotion Coaching App",
         "E-learning portal",
         "Klanten support portal",

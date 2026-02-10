@@ -609,7 +609,7 @@ export default function EvotionCoachingMobile() {
               <span className="text-xs font-medium text-green-400">WhatsApp</span>
             </a>
             <a
-              href="mailto:info@evotioncoaching.nl"
+              href="mailto:info@evotion-coaching.nl"
               className="flex flex-col items-center gap-2 p-4 bg-white/10 rounded-2xl hover:bg-white/15 transition-colors"
             >
               <div className="w-11 h-11 bg-white rounded-xl flex items-center justify-center shadow-sm">

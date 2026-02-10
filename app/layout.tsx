@@ -16,11 +16,22 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "Evotion Coaching - Jouw Partner in Gezonde Gewichtsbeheersing",
+  title: {
+    default: "Evotion Coaching | Personal Training & Online Coaching",
+    template: "%s | Evotion Coaching",
+  },
   description:
-    "Professionele coaching voor duurzame gewichtsbeheersing en een gezonde levensstijl. Personal training, online coaching en premium begeleiding.",
-  keywords:
-    "gewichtsbeheersing, personal training, online coaching, gezonde levensstijl, fitness coaching, voedingsadvies",
+    "Personal training en online coaching voor duurzame resultaten. Persoonlijke begeleiding door ervaren coaches Martin & Zorin vanuit Sneek, Friesland.",
+  keywords: [
+    "personal training",
+    "online coaching",
+    "fitness coaching",
+    "voedingsbegeleiding",
+    "personal trainer Friesland",
+    "online personal trainer",
+    "gewichtsverlies begeleiding",
+    "fitness Sneek",
+  ],
   authors: [{ name: "Evotion Coaching" }],
   creator: "Evotion Coaching",
   publisher: "Evotion Coaching",
@@ -34,8 +45,8 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "Evotion Coaching - Jouw Partner in Gezonde Gewichtsbeheersing",
-    description: "Professionele coaching voor duurzame gewichtsbeheersing en een gezonde levensstijl.",
+    title: "Evotion Coaching | Personal Training & Online Coaching",
+    description: "Personal training en online coaching voor duurzame resultaten. Persoonlijke begeleiding door ervaren coaches.",
     url: "https://evotion-coaching.nl",
     siteName: "Evotion Coaching",
     images: [
@@ -43,7 +54,7 @@ export const metadata: Metadata = {
         url: "/images/evotion-logo.png",
         width: 1200,
         height: 630,
-        alt: "Evotion Coaching Logo",
+        alt: "Evotion Coaching",
       },
     ],
     locale: "nl_NL",
@@ -51,8 +62,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Evotion Coaching - Jouw Partner in Gezonde Gewichtsbeheersing",
-    description: "Professionele coaching voor duurzame gewichtsbeheersing en een gezonde levensstijl.",
+    title: "Evotion Coaching | Personal Training & Online Coaching",
+    description: "Personal training en online coaching voor duurzame resultaten door ervaren coaches.",
     images: ["/images/evotion-logo.png"],
   },
   robots: {
@@ -66,10 +77,7 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  verification: {
-    google: "your-google-verification-code",
-  },
-    generator: 'v0.app'
+  generator: "v0.app",
 }
 
 export default function RootLayout({
