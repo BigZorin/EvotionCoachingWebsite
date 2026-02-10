@@ -171,44 +171,24 @@ export function VisieEnMissieClientPage() {
             </p>
           </div>
 
-          {/* Mobile: Fade Carousel */}
-          <div className="lg:hidden">
-            <div className="relative h-56 mb-4">
-              {pillars.map((pillar, index) => (
-                <button
-                  type="button"
-                  key={index}
-                  onClick={() => setActivePillar(index)}
-                  className={`absolute inset-0 w-full bg-gray-50 rounded-2xl p-6 text-left transition-all duration-500 border border-gray-100 ${
-                    index === activePillar ? "opacity-100 scale-100 z-10" : "opacity-0 scale-95 z-0"
-                  }`}
-                >
-                  <div className="w-12 h-12 bg-[#1e1839] rounded-xl flex items-center justify-center mb-4">
-                    <pillar.icon className="w-6 h-6 text-white" />
+          {/* Mobile: Scrollable list */}
+          <div className="lg:hidden space-y-4">
+            {pillars.map((pillar, index) => (
+              <div
+                key={index}
+                className="bg-gray-50 rounded-2xl p-5 border border-gray-100"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-11 h-11 bg-[#1e1839] rounded-xl flex items-center justify-center flex-shrink-0">
+                    <pillar.icon className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="text-lg font-bold text-[#1e1839] mb-2">{pillar.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{pillar.description}</p>
-                </button>
-              ))}
-            </div>
-
-            {/* Progress bar */}
-            <div className="flex gap-1.5">
-              {pillars.map((_, i) => (
-                <button
-                  type="button"
-                  key={i}
-                  onClick={() => setActivePillar(i)}
-                  className="flex-1 h-1 rounded-full bg-gray-200 overflow-hidden"
-                >
-                  <div
-                    className={`h-full rounded-full transition-all duration-300 ${
-                      i === activePillar ? "bg-[#1e1839] w-full" : i < activePillar ? "bg-[#1e1839]/40 w-full" : "w-0"
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
+                  <div>
+                    <h3 className="text-base font-bold text-[#1e1839] mb-1">{pillar.title}</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">{pillar.description}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Desktop: 3-koloms grid */}

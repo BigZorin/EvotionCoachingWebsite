@@ -269,54 +269,31 @@ export function ResultatenClientPage() {
               </div>
             </div>
 
-            {/* Mobile: Single testimonial carousel */}
-            <div className="lg:hidden">
-              <div className="relative h-52 mb-4">
-                {testimonials.map((testimonial, index) => (
-                  <div
-                    key={testimonial.name}
-                    className={`absolute inset-0 transition-opacity duration-500 ${
-                      index === activeTestimonial ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                    }`}
-                  >
-                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 h-full flex flex-col justify-between">
-                      <div>
-                        <Quote className="w-5 h-5 text-white/30 mb-3" />
-                        <p className="text-white/80 text-sm leading-relaxed">
-                          {testimonial.text}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3 mt-4">
-                        <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#1e1839] font-semibold text-sm">
-                          {testimonial.initial}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-white text-sm">{testimonial.name}</p>
-                          <div className="flex gap-0.5">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
-                            ))}
-                          </div>
-                        </div>
+            {/* Mobile: Scrollable list */}
+            <div className="lg:hidden space-y-4">
+              {testimonials.map((testimonial) => (
+                <div
+                  key={testimonial.name}
+                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10"
+                >
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#1e1839] font-semibold text-sm flex-shrink-0">
+                      {testimonial.initial}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white text-sm">{testimonial.name}</p>
+                      <div className="flex gap-0.5">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
+                        ))}
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-
-              {/* Dots */}
-              <div className="flex justify-center gap-2 mt-4">
-                {testimonials.map((_, i) => (
-                  <button
-                    type="button"
-                    key={i}
-                    onClick={() => setActiveTestimonial(i)}
-                    className={`h-1.5 rounded-full transition-all ${
-                      i === activeTestimonial ? "bg-white w-6" : "bg-white/30 w-1.5"
-                    }`}
-                  />
-                ))}
-              </div>
+                  <p className="text-white/80 text-sm leading-relaxed">
+                    {testimonial.text}
+                  </p>
+                </div>
+              ))}
             </div>
 
             {/* Desktop: Grid */}
