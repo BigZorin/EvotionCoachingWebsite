@@ -5,7 +5,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from app.api.router import api_router
 from app.config import settings
@@ -87,6 +87,7 @@ async def auth_middleware(request: Request, call_next):
     if (
         not settings.auth_enabled
         or not settings.auth_token
+        or path in ("/", "")
         or path.startswith("/ui")
         or path in PUBLIC_PATHS
     ):
@@ -118,6 +119,11 @@ async def verify_token(request: Request):
     if not hmac.compare_digest(token, settings.auth_token):
         return JSONResponse(status_code=401, content={"detail": "Invalid token"})
     return {"authenticated": True}
+
+
+@app.get("/")
+async def root_redirect():
+    return RedirectResponse(url="/ui/")
 
 
 app.include_router(api_router, prefix="/api/v1")
