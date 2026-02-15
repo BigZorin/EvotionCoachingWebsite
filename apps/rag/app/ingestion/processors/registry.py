@@ -8,6 +8,7 @@ from app.ingestion.processors.spreadsheet import SpreadsheetProcessor
 from app.ingestion.processors.json_proc import JSONProcessor
 from app.ingestion.processors.code import CodeProcessor
 from app.ingestion.processors.image import ImageProcessor
+from app.ingestion.processors.audio import AudioProcessor
 
 
 class UnsupportedFileType(Exception):
@@ -24,6 +25,7 @@ class ProcessorRegistry:
             JSONProcessor(),
             CodeProcessor(),
             ImageProcessor(),
+            AudioProcessor(),
         ]
         self._extension_map: dict[str, BaseProcessor] = {}
         for processor in self._processors:
