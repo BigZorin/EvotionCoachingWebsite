@@ -1,0 +1,61 @@
+# ============================================================
+# Evotion RAG — Docker Compose (VPS Deployment)
+# Services: Ollama (embeddings) + RAG App + Caddy (reverse proxy)
+# ============================================================
+
+services:
+  # --- Ollama: Local embeddings & fallback LLM ---
+  ollama:
+    image: ollama/ollama:latest
+    container_name: evotion-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 5
+
+  # --- RAG Application ---
+  rag:
+    build: .
+    container_name: evotion-rag
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - rag_data:/app/data
+    depends_on:
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+
+  # --- Caddy: Reverse proxy + auto HTTPS ---
+  caddy:
+    image: caddy:2-alpine
+    container_name: evotion-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      rag:
+        condition: service_healthy
+
+volumes:
+  ollama_data:
+  rag_data:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,14 @@
+# Evotion RAG — Caddy Reverse Proxy
+#
+# HTTP-only (IP access):
+#   Just works as-is with :80
+#
+# HTTPS with domain (later):
+#   Replace :80 with your domain, e.g.:
+#   rag.evotion.nl {
+#       reverse_proxy rag:8000
+#   }
+
+:80 {
+    reverse_proxy rag:8000
+}
