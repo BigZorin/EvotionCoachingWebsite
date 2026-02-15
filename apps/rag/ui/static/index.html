@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="/ui/static/style.css?v=7">
+  <link rel="stylesheet" href="/ui/static/style.css?v=8">
 </head>
 <body>
   <!-- ===== LOGIN SCREEN ===== -->
@@ -235,6 +235,16 @@
                 Upload &amp; Verwerk
               </button>
             </div>
+            <div class="upload-progress" id="upload-progress">
+              <div class="upload-progress-header">
+                <span class="upload-progress-label" id="upload-progress-label">Uploaden...</span>
+                <span class="upload-progress-pct" id="upload-progress-pct">0%</span>
+              </div>
+              <div class="upload-progress-track">
+                <div class="upload-progress-bar" id="upload-progress-bar"></div>
+              </div>
+              <div class="upload-progress-files" id="upload-progress-files"></div>
+            </div>
             <div class="upload-status" id="upload-status"></div>
           </div>
 
@@ -440,6 +450,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-  <script src="/ui/static/app.js?v=7"></script>
+  <script src="/ui/static/app.js?v=8"></script>
 </body>
 </html>

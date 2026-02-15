@@ -949,10 +949,54 @@ function renderDocuments(docs, collectionName) {
   });
 }
 
+function uploadFileWithProgress(file, collection, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('collection', collection);
+
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable) {
+        onProgress('uploading', Math.round((e.loaded / e.total) * 100));
+      }
+    });
+
+    xhr.upload.addEventListener('load', () => {
+      onProgress('processing', 100);
+    });
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status === 401) { handleUnauthorized(); reject(new Error('Unauthorized')); return; }
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try { resolve(JSON.parse(xhr.responseText)); } catch { resolve({}); }
+      } else {
+        try {
+          const err = JSON.parse(xhr.responseText);
+          reject(new Error(err.detail || `${xhr.status} ${xhr.statusText}`));
+        } catch { reject(new Error(`${xhr.status} ${xhr.statusText}`)); }
+      }
+    });
+
+    xhr.addEventListener('error', () => reject(new Error('Netwerkfout')));
+    xhr.addEventListener('abort', () => reject(new Error('Upload geannuleerd')));
+
+    xhr.open('POST', `${API}/documents/upload`);
+    const token = getAuthToken();
+    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    xhr.send(formData);
+  });
+}
+
 async function uploadFiles(files) {
   const collection = document.getElementById('upload-collection').value || 'default';
   const statusEl = document.getElementById('upload-status');
   const uploadBtn = document.getElementById('upload-btn');
+  const progressEl = document.getElementById('upload-progress');
+  const progressLabel = document.getElementById('upload-progress-label');
+  const progressPct = document.getElementById('upload-progress-pct');
+  const progressBar = document.getElementById('upload-progress-bar');
+  const progressFiles = document.getElementById('upload-progress-files');
 
   if (!files || !files.length) {
     statusEl.textContent = 'Geen bestanden geselecteerd.';
@@ -960,33 +1004,120 @@ async function uploadFiles(files) {
     return;
   }
 
+  // Reset & show progress UI
   uploadBtn.disabled = true;
-  statusEl.textContent = `Uploaden van ${files.length} bestand(en)...`;
+  statusEl.textContent = '';
   statusEl.className = 'upload-status';
+  progressEl.classList.add('active');
+  progressBar.style.width = '0%';
+  progressBar.classList.remove('processing');
+  progressPct.textContent = '0%';
+  progressLabel.textContent = `Uploaden (0/${files.length})...`;
+
+  // Build file list UI
+  progressFiles.innerHTML = '';
+  const fileEls = [];
+  for (let i = 0; i < files.length; i++) {
+    const row = document.createElement('div');
+    row.className = 'upload-file-item';
+    row.innerHTML = `
+      <span class="upload-file-icon pending">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+        </svg>
+      </span>
+      <span class="upload-file-name">${escapeHtml(files[i].name)}</span>
+      <span class="upload-file-status">Wachtend</span>
+    `;
+    progressFiles.appendChild(row);
+    fileEls.push(row);
+  }
 
   let totalChunks = 0;
+  let completedFiles = 0;
   const results = [];
+
+  const iconSvg = {
+    uploading: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
+    processing: '<div class="spinner-sm"></div>',
+    done: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    error: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  };
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    statusEl.textContent = `Bezig met ${file.name} (${i + 1}/${files.length})...`;
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('collection', collection);
+    const row = fileEls[i];
+    const iconEl = row.querySelector('.upload-file-icon');
+    const statusSpan = row.querySelector('.upload-file-status');
 
-      const response = await apiPostForm('/documents/upload', formData);
+    // Mark as uploading
+    iconEl.className = 'upload-file-icon uploading';
+    iconEl.innerHTML = iconSvg.uploading;
+    statusSpan.textContent = 'Uploaden...';
+    progressLabel.textContent = `Uploaden (${i + 1}/${files.length})...`;
+
+    try {
+      const response = await uploadFileWithProgress(file, collection, (phase, pct) => {
+        if (phase === 'uploading') {
+          // Per-file upload progress → map to overall
+          const fileWeight = 1 / files.length;
+          const overallPct = Math.round((completedFiles * fileWeight + (pct / 100) * fileWeight * 0.5) * 100);
+          progressBar.style.width = overallPct + '%';
+          progressPct.textContent = overallPct + '%';
+          statusSpan.textContent = `Uploaden ${pct}%`;
+        } else if (phase === 'processing') {
+          // Upload done, server is processing
+          iconEl.className = 'upload-file-icon processing';
+          iconEl.innerHTML = iconSvg.processing;
+          statusSpan.textContent = 'Verwerken & embedden...';
+          progressLabel.textContent = `Verwerken ${file.name}...`;
+          progressBar.classList.add('processing');
+        }
+      });
+
+      progressBar.classList.remove('processing');
       const chunks = response.chunks_created || 0;
       totalChunks += chunks;
-      results.push(`  + ${file.name} - ${chunks} chunks`);
+      completedFiles++;
+      results.push(`${file.name} — ${chunks} chunks`);
+
+      // Mark done
+      row.className = 'upload-file-item done';
+      iconEl.className = 'upload-file-icon done';
+      iconEl.innerHTML = iconSvg.done;
+      statusSpan.textContent = `${chunks} chunks`;
+
+      // Update overall progress
+      const overallPct = Math.round((completedFiles / files.length) * 100);
+      progressBar.style.width = overallPct + '%';
+      progressPct.textContent = overallPct + '%';
+
     } catch (e) {
-      results.push(`  x ${file.name}: ${e.message}`);
+      progressBar.classList.remove('processing');
+      completedFiles++;
+      results.push(`${file.name} — fout: ${e.message}`);
+
+      row.className = 'upload-file-item error';
+      iconEl.className = 'upload-file-icon error';
+      iconEl.innerHTML = iconSvg.error;
+      statusSpan.textContent = e.message;
+
+      const overallPct = Math.round((completedFiles / files.length) * 100);
+      progressBar.style.width = overallPct + '%';
+      progressPct.textContent = overallPct + '%';
     }
   }
 
-  statusEl.innerHTML = `<strong>Upload klaar:</strong> ${files.length} bestanden, ${totalChunks} chunks\n${results.join('\n')}`;
-  statusEl.className = 'upload-status success';
+  // Final state
+  progressBar.style.width = '100%';
+  progressPct.textContent = '100%';
+  progressLabel.textContent = `Klaar — ${files.length} bestanden, ${totalChunks} chunks`;
   uploadBtn.disabled = false;
+
+  // Hide progress after 8 seconds
+  setTimeout(() => {
+    progressEl.classList.remove('active');
+  }, 8000);
 
   const browseCol = document.getElementById('browse-collection').value;
   if (browseCol) loadDocuments(browseCol);
