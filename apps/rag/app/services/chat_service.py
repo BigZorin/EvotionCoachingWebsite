@@ -10,6 +10,8 @@ from app.core.database import (
     get_messages,
     get_recent_context,
     update_session_title,
+    get_session_metadata,
+    update_session_metadata,
 )
 from app.core.llm import generate, generate_stream, get_active_provider
 from app.retrieval.retriever import retrieve
@@ -329,6 +331,8 @@ def _build_history_section(messages: list[dict], session_id: str) -> str:
     """
     Build the history section for the prompt.
     For long conversations, summarizes older messages and keeps recent ones verbatim.
+    Summary is CACHED in session metadata to avoid regenerating on every message.
+    Only re-summarizes every 10 new messages.
     """
     if not messages:
         return "CONVERSATION: (first question in this conversation)"
@@ -345,8 +349,22 @@ def _build_history_section(messages: list[dict], session_id: str) -> str:
     older_messages = messages[:split_point]
     recent_messages = messages[split_point:]
 
-    # Summarize older messages
-    summary = _summarize_conversation(older_messages)
+    # Check for cached summary — only regenerate every 10 new messages
+    meta = get_session_metadata(session_id)
+    cached_summary = meta.get("summary")
+    summary_at_count = meta.get("summary_at_count", 0)
+
+    if cached_summary and (total - summary_at_count) < 10:
+        # Use cached summary (no LLM call)
+        summary = cached_summary
+    else:
+        # Generate new summary and cache it
+        summary = _summarize_conversation(older_messages)
+        update_session_metadata(session_id, {
+            "summary": summary,
+            "summary_at_count": total,
+        })
+
     recent_text = _format_messages(recent_messages)
 
     return (

@@ -15,12 +15,11 @@ class Settings(BaseSettings):
     openrouter_model: str = "meta-llama/llama-3.3-70b-instruct:free"
     openrouter_timeout: int = 60
 
-    # Ollama (embeddings + local fallback LLM)
+    # Ollama (embeddings only — generation is handled by cloud providers)
     ollama_base_url: str = "http://localhost:11434"
     embedding_model: str = "nomic-embed-text"
-    ollama_generation_model: str = "llama3.1:8b"
 
-    # LLM provider: "groq" or "ollama"
+    # LLM provider: "groq" (primary)
     llm_provider: str = "groq"
 
     # ChromaDB

@@ -181,7 +181,7 @@ def _openrouter_generate_stream(
 
 
 # ============================================================
-# Ollama (Local fallback - last resort)
+# Ollama client (embeddings + model listing only — NOT used for generation)
 # ============================================================
 
 _ollama_client = None
@@ -198,44 +198,8 @@ def _get_ollama_client():
     return _ollama_client
 
 
-def _ollama_generate(prompt: str, system: str | None = None, temperature: float = 0.7) -> str:
-    client = _get_ollama_client()
-    messages = []
-    if system:
-        messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": prompt})
-
-    response = client.chat(
-        model=settings.ollama_generation_model,
-        messages=messages,
-        options={"temperature": temperature},
-    )
-    return response["message"]["content"]
-
-
-def _ollama_generate_stream(
-    prompt: str, system: str | None = None, temperature: float = 0.7
-) -> Generator[str, None, None]:
-    client = _get_ollama_client()
-    messages = []
-    if system:
-        messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": prompt})
-
-    stream = client.chat(
-        model=settings.ollama_generation_model,
-        messages=messages,
-        options={"temperature": temperature},
-        stream=True,
-    )
-    for chunk in stream:
-        token = chunk["message"]["content"]
-        if token:
-            yield token
-
-
 # ============================================================
-# Public API — Fallback chain: Groq → OpenRouter (no local Ollama for generation)
+# Public API — Fallback chain: Groq → OpenRouter
 # ============================================================
 
 def generate(prompt: str, system: str | None = None, temperature: float = 0.7) -> str:
@@ -319,17 +283,6 @@ def get_active_provider() -> str:
 # ============================================================
 # Health checks (no inference cost)
 # ============================================================
-
-def check_ollama_generation() -> bool:
-    """Check if Ollama generation model is available without running inference."""
-    try:
-        client = _get_ollama_client()
-        response = client.list()
-        available = [m.model for m in response.models]
-        return settings.ollama_generation_model in available
-    except Exception:
-        return False
-
 
 def check_groq() -> bool:
     """Check Groq availability without consuming a chat request."""

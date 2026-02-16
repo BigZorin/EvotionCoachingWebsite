@@ -135,6 +135,36 @@ def update_session_title(session_id: str, title: str):
         conn.commit()
 
 
+def get_session_metadata(session_id: str) -> dict:
+    """Get parsed metadata dict for a session."""
+    with _conn() as conn:
+        row = conn.execute("SELECT metadata FROM sessions WHERE id = ?", (session_id,)).fetchone()
+        if not row:
+            return {}
+        try:
+            return json.loads(row["metadata"] or "{}")
+        except (json.JSONDecodeError, TypeError):
+            return {}
+
+
+def update_session_metadata(session_id: str, metadata: dict):
+    """Update session metadata (merges with existing)."""
+    with _conn() as conn:
+        existing = {}
+        row = conn.execute("SELECT metadata FROM sessions WHERE id = ?", (session_id,)).fetchone()
+        if row:
+            try:
+                existing = json.loads(row["metadata"] or "{}")
+            except (json.JSONDecodeError, TypeError):
+                pass
+        existing.update(metadata)
+        conn.execute(
+            "UPDATE sessions SET metadata = ? WHERE id = ?",
+            (json.dumps(existing), session_id),
+        )
+        conn.commit()
+
+
 def delete_session(session_id: str):
     with _conn() as conn:
         conn.execute("DELETE FROM messages WHERE session_id = ?", (session_id,))

@@ -1,8 +1,11 @@
 import json
+import logging
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 from app.core.database import (
     list_sessions,
@@ -112,12 +115,10 @@ def send_message_stream(session_id: str, body: ChatRequest):
             yield f"event: error\ndata: {json.dumps({'detail': str(e)})}\n\n"
         except RuntimeError as e:
             # LLM provider errors (rate limit, all providers down) — pass message to user
-            import logging
-            logging.getLogger(__name__).warning(f"LLM provider error: {e}")
+            logger.warning(f"LLM provider error: {e}")
             yield f"event: error\ndata: {json.dumps({'detail': str(e)}, ensure_ascii=False)}\n\n"
         except Exception as e:
-            import logging
-            logging.getLogger(__name__).error(f"Chat streaming failed: {e}", exc_info=True)
+            logger.error(f"Chat streaming failed: {e}", exc_info=True)
             yield f"event: error\ndata: {json.dumps({'detail': 'Er is een fout opgetreden bij het genereren van het antwoord.'})}\n\n"
 
     return StreamingResponse(

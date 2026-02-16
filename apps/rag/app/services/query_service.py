@@ -17,6 +17,7 @@ def execute_query(request: QueryRequest) -> QueryResponse:
         query=request.question,
         collection_name=request.collection,
         top_k=request.top_k,
+        use_multi_query=False,
     )
 
     if not chunks:
@@ -62,6 +63,7 @@ def execute_query_stream(request: QueryRequest) -> Generator[str, None, None]:
         query=request.question,
         collection_name=request.collection,
         top_k=request.top_k,
+        use_multi_query=False,
     )
 
     if not chunks:

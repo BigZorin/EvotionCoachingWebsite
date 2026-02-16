@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.core.embeddings import check_ollama_embeddings
-from app.core.llm import check_ollama_generation, check_groq, check_openrouter, list_available_models, get_active_provider
+from app.core.llm import check_groq, check_openrouter, list_available_models, get_active_provider
 from app.config import settings
 
 router = APIRouter(tags=["health"])
@@ -99,19 +99,22 @@ def system_info():
                 {"name": "Inline bronverwijzingen", "description": "Elk antwoord bevat [1], [2] etc. citaties die verwijzen naar specifieke bronpassages"},
                 {"name": "Anti-hallucinatie regels", "description": "Expliciete instructies om ontbrekende informatie te benoemen i.p.v. te verzinnen"},
                 {"name": "Temperatuur 0.3", "description": "Lage temperatuur voor feitelijke, consistente antwoorden (configureerbaar per agent)"},
-                {"name": "Gespreksgeheugen", "description": f"Chat-modus onthoudt eerdere berichten, met automatische samenvatting na {settings.summarize_after_messages} berichten"},
+                {"name": "Gespreksgeheugen", "description": f"Chat-modus onthoudt eerdere berichten, met gecachte samenvatting na {settings.summarize_after_messages} berichten (hergebruikt cache, alleen elke 10 berichten opnieuw samengevat)"},
                 {"name": "Follow-up suggesties", "description": "Elk antwoord eindigt met 3 relevante vervolgvragen"},
             ],
         },
         "chat": {
             "title": "Chat Functies",
             "features": [
-                {"name": "Sessie Management", "description": "Meerdere gesprekken opslaan en laden, automatische titels"},
-                {"name": "Smart History", "description": f"Laatste 6 berichten worden volledig meegestuurd, oudere berichten worden samengevat (na {settings.summarize_after_messages} berichten)"},
-                {"name": "Agent Modus", "description": "Gespecialiseerde AI-assistenten met eigen system prompt, collecties en instellingen"},
+                {"name": "Sessie Management", "description": "Meerdere gesprekken opslaan en laden, automatische titels via LLM (eerste bericht → 6-woorden titel)"},
+                {"name": "Smart History", "description": f"Laatste 6 berichten worden volledig meegestuurd, oudere berichten worden samengevat (na {settings.summarize_after_messages} berichten). Samenvatting wordt gecacht en alleen elke 10 nieuwe berichten vernieuwd — bespaart ~90% tokens bij lange gesprekken"},
+                {"name": "Agent Modus", "description": "Gespecialiseerde AI-assistenten met eigen system prompt, collectie-scoping, temperatuur en top_k instellingen"},
                 {"name": "Streaming", "description": "Real-time token-voor-token antwoorden via Server-Sent Events (SSE)"},
                 {"name": "Feedback", "description": "Duim omhoog/omlaag per antwoord voor kwaliteitstracking"},
                 {"name": "Export", "description": "Gesprekken exporteren als Markdown bestand"},
+                {"name": "Analytics Dashboard", "description": "Gebruiksstatistieken: totaal sessies/berichten, feedback-scores, dagelijks gebruik, top-vragen, agent-gebruik en LLM kosten-tracking"},
+                {"name": "YouTube Transcripties", "description": "YouTube URLs worden verwerkt via de YouTube Transcript API (niet via Whisper) — sneller en gratis"},
+                {"name": "Collection Cleanup", "description": "Micro-chunks (< 50 tekens) kunnen per collectie worden opgeruimd via de cleanup endpoint"},
             ],
         },
         "stability": {
@@ -137,6 +140,8 @@ def system_info():
                 {"name": "RRF Score Blending", "description": "Reciprocal Rank Fusion gebruikt gewogen gemiddelde (40% origineel + 60% RRF positie) voor nauwkeurigere relevantie-scores"},
                 {"name": "SSRF Redirect Validatie", "description": "Na HTTP-redirects wordt het eindpunt opnieuw gevalideerd tegen private IP-adressen — voorkomt SSRF bypass via open-redirect chains"},
                 {"name": "Chat History Truncatie", "description": "Lange assistant-antwoorden in gesprekshistorie worden afgekapt op 800 tekens — gebalanceerde kwaliteit vs. efficiëntie (volledige document-context blijft ongewijzigd op 15 chunks × 1000 chars)"},
+                {"name": "Gecachte Samenvatting", "description": "Conversatie-samenvattingen worden opgeslagen in session metadata en pas elke 10 nieuwe berichten vernieuwd — bespaart ~90% tokens bij lange gesprekken (voorheen: elke bericht opnieuw samengevat)"},
+                {"name": "Rate Limit Memory Cleanup", "description": "Verlopen IP-entries worden automatisch opgeruimd uit de rate limit store — voorkomt geheugengroei bij langdurige uptime"},
                 {"name": "XSS Sanitatie", "description": "Alle LLM-gegenereerde markdown wordt gesaniteerd met DOMPurify voordat het in de DOM wordt geplaatst — voorkomt XSS via geïnjecteerde HTML/scripts in documenten"},
                 {"name": "SSE Foutbestendigheid", "description": "JSON.parse in de SSE-streamlezer is gewrapped in try/catch — malformed events worden overgeslagen i.p.v. de hele UI te crashen"},
                 {"name": "Auth Bypass Preventie", "description": "Bij onbereikbare server wordt de login-scherm getoond met foutmelding i.p.v. de app zonder authenticatie te tonen"},
@@ -157,8 +162,7 @@ def system_info():
                 "LLM Provider (Primair)": settings.llm_provider,
                 "Groq Model": settings.groq_model,
                 "OpenRouter Model (Fallback)": settings.openrouter_model,
-                "Ollama (Embeddings Only)": settings.embedding_model,
-                "Embedding Model": settings.embedding_model,
+                "Embedding Model": f"{settings.embedding_model} (768-dim via Ollama)",
                 "Chunk Size": f"{settings.chunk_size} tekens",
                 "Chunk Overlap": f"{settings.chunk_overlap} tekens",
                 "Top K (standaard)": settings.top_k,
@@ -169,8 +173,8 @@ def system_info():
                 "Max Upload Size": f"{settings.max_file_size_mb} MB",
                 "Groq Timeout": "60 seconden",
                 "OpenRouter Timeout": f"{settings.openrouter_timeout} seconden",
-                "Ollama Generation Timeout": "120 seconden",
                 "Ollama Embedding Timeout": "30 seconden",
+                "Max Output Tokens": "2048",
                 "BM25 Max Documents": "10.000",
             },
         },

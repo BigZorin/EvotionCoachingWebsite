@@ -28,8 +28,13 @@ def _check_rate_limit(key: str, max_requests: int) -> bool:
     now = time.monotonic()
     window_start = now - RATE_LIMIT_WINDOW
     # Clean old entries
-    _rate_limit_store[key] = [t for t in _rate_limit_store[key] if t > window_start]
-    if len(_rate_limit_store[key]) >= max_requests:
+    timestamps = [t for t in _rate_limit_store[key] if t > window_start]
+    if not timestamps:
+        # Clean up stale key to prevent memory leak from old IPs
+        _rate_limit_store.pop(key, None)
+    else:
+        _rate_limit_store[key] = timestamps
+    if len(timestamps) >= max_requests:
         return False
     _rate_limit_store[key].append(now)
     return True
