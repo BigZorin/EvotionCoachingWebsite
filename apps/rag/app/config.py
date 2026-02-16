@@ -10,7 +10,12 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
 
-    # Ollama (embeddings + fallback LLM)
+    # OpenRouter (secondary cloud fallback)
+    openrouter_api_key: str = ""
+    openrouter_model: str = "meta-llama/llama-3.1-8b-instruct:free"
+    openrouter_timeout: int = 60
+
+    # Ollama (embeddings + local fallback LLM)
     ollama_base_url: str = "http://localhost:11434"
     embedding_model: str = "nomic-embed-text"
     ollama_generation_model: str = "llama3.1:8b"

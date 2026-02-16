@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.core.embeddings import check_ollama_embeddings
-from app.core.llm import check_ollama_generation, check_groq, list_available_models, get_active_provider
+from app.core.llm import check_ollama_generation, check_groq, check_openrouter, list_available_models, get_active_provider
 from app.config import settings
 
 router = APIRouter(tags=["health"])
@@ -11,15 +11,17 @@ router = APIRouter(tags=["health"])
 def health_check():
     ollama_embed = check_ollama_embeddings()
     groq_ok = check_groq()
+    openrouter_ok = check_openrouter()
     ollama_gen = check_ollama_generation()
 
     # System is OK if embeddings work AND at least one LLM is available
-    llm_ok = groq_ok or ollama_gen
+    llm_ok = groq_ok or openrouter_ok or ollama_gen
 
     return {
         "status": "ok" if (ollama_embed and llm_ok) else "degraded",
         "ollama_embeddings": ollama_embed,
         "groq": groq_ok,
+        "openrouter": openrouter_ok,
         "ollama_generation": ollama_gen,
         "active_provider": get_active_provider(),
         "chroma": True,
@@ -44,7 +46,9 @@ def system_info():
             "title": "Systeem Architectuur",
             "components": [
                 {"name": "FastAPI Backend", "description": "REST API server die alle verzoeken afhandelt", "status": "active"},
-                {"name": "Groq LLM", "description": f"Cloud LLM ({settings.groq_model}) voor snelle antwoordgeneratie", "model": settings.groq_model},
+                {"name": "Groq LLM (Primair)", "description": f"Cloud LLM ({settings.groq_model}) voor snelle antwoordgeneratie", "model": settings.groq_model},
+                {"name": "OpenRouter (Fallback)", "description": f"Cloud LLM fallback ({settings.openrouter_model}) — automatisch actief als Groq faalt", "model": settings.openrouter_model},
+                {"name": "Ollama LLM (Lokaal)", "description": f"Lokale LLM fallback ({settings.ollama_generation_model}) — laatste redmiddel als beide cloud providers falen", "model": settings.ollama_generation_model},
                 {"name": "Ollama Embeddings", "description": f"Lokale embedding-engine ({settings.embedding_model}) voor vectorisatie", "model": settings.embedding_model},
                 {"name": "ChromaDB", "description": "Lokale vector database voor opslag en zoeken van document-chunks"},
                 {"name": "Cross-Encoder", "description": "Re-ranking model (ms-marco-MiniLM-L-6-v2) voor nauwkeurigere resultaten"},
@@ -118,26 +122,27 @@ def system_info():
             "features": [
                 {"name": "SSRF Bescherming", "description": "URL-ingestion blokkeert private IP-adressen (RFC 1918), loopback, link-local en cloud metadata endpoints. DNS-resolutie wordt gevalideerd vóór het opvragen."},
                 {"name": "Upload Limiet", "description": f"Bestanden groter dan {settings.max_file_size_mb} MB worden geweigerd vóór verwerking om geheugen- en opslagmisbruik te voorkomen"},
-                {"name": "CORS Restrictie", "description": "Alleen verzoeken van rag.evotiondata.com en localhost worden geaccepteerd met beperkte HTTP-methoden en headers"},
+                {"name": "CORS Restrictie", "description": "Alleen verzoeken van rag.evotiondata.com en localhost worden geaccepteerd met beperkte HTTP-methoden (GET/POST/DELETE/OPTIONS) en headers (Content-Type/Authorization)"},
                 {"name": "Embedding Dimensie-check", "description": "Fallback naar sentence-transformers (384-dim) wordt geblokkeerd als de collectie 768-dim vectors verwacht — voorkomt ChromaDB-fouten"},
-                {"name": "Dual-Provider Foutafhandeling", "description": "Als zowel Groq als Ollama falen, krijgt de client een duidelijke foutmelding in plaats van een crash"},
-                {"name": "Collectienaam Validatie", "description": "Alle collectie-endpoints valideren namen op alfanumerieke tekens, streepjes en underscores (1-64 chars)"},
+                {"name": "Triple-Provider Failover", "description": "Automatische fallback-keten: Groq → OpenRouter → Ollama. Als alle drie falen, krijgt de client een duidelijke foutmelding"},
+                {"name": "Collectienaam Validatie", "description": "Alle collectie-endpoints valideren namen op alfanumerieke tekens, streepjes en underscores (1-64 chars, moet starten met alfanumeriek)"},
                 {"name": "Auth Startup Check", "description": "Server weigert te starten als AUTH_ENABLED=true maar AUTH_TOKEN leeg is — voorkomt onbeveiligde API"},
-                {"name": "API Timeouts", "description": "Groq: 60s timeout, Ollama generatie: 120s, Ollama embeddings: 30s — voorkomt hangende requests"},
+                {"name": "API Timeouts", "description": f"Groq: 60s, OpenRouter: {settings.openrouter_timeout}s, Ollama generatie: 120s, Ollama embeddings: 30s — voorkomt hangende requests"},
                 {"name": "Database Connection Management", "description": "Context managers (with-statement) garanderen dat SQLite-connecties altijd worden gesloten, ook bij fouten"},
                 {"name": "BM25 Memory Cap", "description": "Maximum 10.000 documenten per BM25-zoekopdracht om geheugenoverloop te voorkomen bij grote collecties"},
                 {"name": "SSE Error Handling", "description": "Streaming responses sturen een error-event naar de client bij onverwachte fouten in plaats van stil te crashen"},
-                {"name": "LLM Failover", "description": "Automatische fallback van Groq naar Ollama bij API-fouten of timeouts"},
+                {"name": "Zero-Cost Health Checks", "description": "Health checks gebruiken models.list() in plaats van chat completions — kost geen API-quota (voorheen ~2880 Groq-requests/dag)"},
                 {"name": "Chat History Truncatie", "description": "Lange assistant-antwoorden in gesprekshistorie worden afgekapt op 2000 tekens om prompt-overflow te voorkomen"},
             ],
         },
         "config": {
             "title": "Huidige Configuratie",
             "values": {
-                "LLM Provider": settings.llm_provider,
+                "LLM Provider (Primair)": settings.llm_provider,
                 "Groq Model": settings.groq_model,
+                "OpenRouter Model (Fallback)": settings.openrouter_model,
+                "Ollama Generation Model (Lokaal)": settings.ollama_generation_model,
                 "Embedding Model": settings.embedding_model,
-                "Ollama Generation Model": settings.ollama_generation_model,
                 "Chunk Size": f"{settings.chunk_size} tekens",
                 "Chunk Overlap": f"{settings.chunk_overlap} tekens",
                 "Top K (standaard)": settings.top_k,
@@ -147,6 +152,7 @@ def system_info():
                 "Summarize After": f"{settings.summarize_after_messages} berichten",
                 "Max Upload Size": f"{settings.max_file_size_mb} MB",
                 "Groq Timeout": "60 seconden",
+                "OpenRouter Timeout": f"{settings.openrouter_timeout} seconden",
                 "Ollama Generation Timeout": "120 seconden",
                 "Ollama Embedding Timeout": "30 seconden",
                 "BM25 Max Documents": "10.000",
