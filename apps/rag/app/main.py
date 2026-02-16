@@ -142,6 +142,13 @@ async def security_headers_middleware(request: Request, call_next):
 async def auth_middleware(request: Request, call_next):
     path = request.url.path
 
+    # Rate limit auth endpoint BEFORE skipping public paths (brute-force protection)
+    if path == "/api/v1/auth/verify":
+        client_ip = request.client.host if request.client else "unknown"
+        if not _check_rate_limit(f"auth:{client_ip}", RATE_LIMIT_AUTH):
+            logger.warning(f"Auth rate limit exceeded for {client_ip}")
+            return JSONResponse(status_code=429, content={"detail": "Too many attempts. Try again later."})
+
     # Skip auth for: UI pages, static files, public API paths
     if (
         not settings.auth_enabled
