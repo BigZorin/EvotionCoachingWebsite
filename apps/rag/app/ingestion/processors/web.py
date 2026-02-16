@@ -7,6 +7,7 @@ Pipeline: fetch HTML → extract text with BeautifulSoup → TextBlocks
 
 import logging
 import re
+import ssl
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -44,10 +45,12 @@ def is_youtube_url(url: str) -> bool:
 
 def fetch_url(url: str) -> tuple[str, str]:
     """Fetch URL content. Returns (html_content, final_url)."""
+    ssl_context = ssl.create_default_context()
     with httpx.Client(
         follow_redirects=True,
         timeout=TIMEOUT,
         headers={"User-Agent": USER_AGENT},
+        verify=ssl_context,
     ) as client:
         response = client.get(url)
         response.raise_for_status()
