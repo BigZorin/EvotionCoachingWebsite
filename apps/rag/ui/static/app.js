@@ -864,6 +864,7 @@ async function loadCollectionDropdowns() {
       document.getElementById('upload-collection'),
       document.getElementById('browse-collection'),
       $chatCollection,
+      document.getElementById('url-collection'),
     ];
 
     selects.forEach((sel, i) => {
@@ -925,6 +926,12 @@ function renderDocuments(docs, collectionName) {
         <div class="doc-name">${escapeHtml(doc.filename || 'onbekend')}</div>
         <div class="doc-meta">${doc.total_chunks || 0} chunks</div>
       </div>
+      <button class="doc-preview-btn" title="Bekijk chunks" data-doc-id="${escapeHtml(doc.document_id)}" data-doc-name="${escapeHtml(doc.filename || 'onbekend')}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
       <button class="doc-delete" title="Verwijder document">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="3 6 5 6 21 6"/>
@@ -932,6 +939,10 @@ function renderDocuments(docs, collectionName) {
         </svg>
       </button>
     `;
+
+    el.querySelector('.doc-preview-btn').addEventListener('click', () => {
+      openDocPreview(collectionName, doc.document_id, doc.filename || 'onbekend');
+    });
 
     el.querySelector('.doc-delete').addEventListener('click', async () => {
       const ok = await showConfirm('Document verwijderen', `'${doc.filename}' verwijderen uit ${collectionName}?`);
@@ -1122,6 +1133,189 @@ async function uploadFiles(files) {
   const browseCol = document.getElementById('browse-collection').value;
   if (browseCol) loadDocuments(browseCol);
   loadCollectionDropdowns();
+}
+
+// ============================================================
+// URL Upload
+// ============================================================
+
+async function uploadUrl() {
+  const urlInput = document.getElementById('url-input');
+  const collection = document.getElementById('url-collection').value || 'default';
+  const statusEl = document.getElementById('url-upload-status');
+  const btn = document.getElementById('url-upload-btn');
+  const url = urlInput.value.trim();
+
+  if (!url) {
+    statusEl.textContent = 'Voer een URL in.';
+    statusEl.className = 'url-upload-status error';
+    return;
+  }
+
+  btn.disabled = true;
+  const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+  statusEl.textContent = isYouTube ? 'YouTube transcript ophalen...' : 'Webpagina ophalen & verwerken...';
+  statusEl.className = 'url-upload-status loading';
+
+  try {
+    const result = await apiPost('/documents/upload-url', { url, collection });
+    if (result.status === 'success') {
+      statusEl.textContent = `${result.filename} — ${result.chunks_created} chunks aangemaakt`;
+      statusEl.className = 'url-upload-status success';
+      urlInput.value = '';
+      const browseCol = document.getElementById('browse-collection').value;
+      if (browseCol) loadDocuments(browseCol);
+      loadCollectionDropdowns();
+    } else {
+      statusEl.textContent = `Fout: ${result.filename || url}`;
+      statusEl.className = 'url-upload-status error';
+    }
+  } catch (e) {
+    statusEl.textContent = `Fout: ${e.message || 'URL kon niet worden verwerkt'}`;
+    statusEl.className = 'url-upload-status error';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ============================================================
+// Document Preview
+// ============================================================
+
+async function openDocPreview(collectionName, documentId, filename) {
+  const modal = document.getElementById('doc-preview-modal');
+  const title = document.getElementById('doc-preview-title');
+  const body = document.getElementById('doc-preview-body');
+
+  title.textContent = filename;
+  body.innerHTML = '<div class="loading-state"><div class="spinner"></div><span>Chunks laden...</span></div>';
+  modal.style.display = 'flex';
+
+  try {
+    const data = await apiGet(`/collections/${collectionName}/documents/${documentId}/chunks`);
+    const chunks = data.chunks || [];
+
+    if (!chunks.length) {
+      body.innerHTML = '<div class="empty-docs">Geen chunks gevonden voor dit document</div>';
+      return;
+    }
+
+    body.innerHTML = `<div style="margin-bottom:12px;font-size:12px;color:var(--text-muted)">${chunks.length} chunks in collectie "${escapeHtml(collectionName)}"</div>`;
+
+    chunks.forEach((chunk, i) => {
+      const div = document.createElement('div');
+      div.className = 'chunk-item';
+
+      const meta = chunk.metadata || {};
+      const metaParts = [];
+      if (meta.page) metaParts.push(`Pagina ${meta.page}`);
+      if (meta.section) metaParts.push(meta.section);
+      if (meta.source_url) metaParts.push(meta.source_url);
+
+      div.innerHTML = `
+        <div class="chunk-item-header">
+          <span class="chunk-idx">Chunk ${chunk.chunk_index + 1}</span>
+          <span>${metaParts.join(' · ') || ''}</span>
+        </div>
+        <div>${escapeHtml(chunk.content)}</div>
+      `;
+      body.appendChild(div);
+    });
+  } catch (e) {
+    body.innerHTML = `<div class="empty-docs">Fout bij laden: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+// ============================================================
+// Groq Usage
+// ============================================================
+
+async function loadGroqUsage() {
+  try {
+    const data = await apiGet('/usage');
+    return data;
+  } catch (e) {
+    console.error('Failed to load usage:', e);
+    return null;
+  }
+}
+
+function renderGroqUsageSection(usage) {
+  if (!usage) return '';
+
+  const today = usage.today || {};
+  const month = usage.this_month || {};
+  const models = usage.by_model || [];
+
+  function fmtCost(v) { return '$' + (v || 0).toFixed(4); }
+  function fmtNum(v) { return (v || 0).toLocaleString(); }
+  function fmtAudio(s) {
+    if (!s) return '0s';
+    if (s < 60) return Math.round(s) + 's';
+    return Math.round(s / 60) + 'min';
+  }
+
+  let modelRows = '';
+  if (models.length) {
+    modelRows = models.map(m => `
+      <tr>
+        <td>${escapeHtml(m.model)}</td>
+        <td>${m.type}</td>
+        <td>${fmtNum(m.requests)}</td>
+        <td>${fmtNum(m.tokens)}</td>
+        <td>${fmtAudio(m.audio_seconds)}</td>
+        <td>${fmtCost(m.cost)}</td>
+      </tr>
+    `).join('');
+  }
+
+  return `
+    <div class="usage-section">
+      <h3>Groq API Gebruik</h3>
+      <div class="usage-stats">
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtNum(today.requests)}</div>
+          <div class="usage-stat-label">Requests vandaag</div>
+        </div>
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtNum(today.total_tokens)}</div>
+          <div class="usage-stat-label">Tokens vandaag</div>
+        </div>
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtAudio(today.audio_seconds)}</div>
+          <div class="usage-stat-label">Audio vandaag</div>
+        </div>
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtCost(today.estimated_cost)}</div>
+          <div class="usage-stat-label">Kosten vandaag</div>
+        </div>
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtNum(month.requests)}</div>
+          <div class="usage-stat-label">Requests deze maand</div>
+        </div>
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtNum(month.total_tokens)}</div>
+          <div class="usage-stat-label">Tokens deze maand</div>
+        </div>
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtAudio(month.audio_seconds)}</div>
+          <div class="usage-stat-label">Audio deze maand</div>
+        </div>
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtCost(month.estimated_cost)}</div>
+          <div class="usage-stat-label">Kosten deze maand</div>
+        </div>
+      </div>
+      ${models.length ? `
+        <table class="usage-model-table">
+          <thead>
+            <tr><th>Model</th><th>Type</th><th>Requests</th><th>Tokens</th><th>Audio</th><th>Kosten</th></tr>
+          </thead>
+          <tbody>${modelRows}</tbody>
+        </table>
+      ` : ''}
+    </div>
+  `;
 }
 
 // ============================================================
@@ -1488,14 +1682,17 @@ async function loadAnalytics() {
   showLoadingIn(container, 'Analytics laden...');
 
   try {
-    const data = await apiGet('/chat/analytics');
-    renderAnalytics(data, container);
+    const [data, usage] = await Promise.all([
+      apiGet('/chat/analytics'),
+      loadGroqUsage(),
+    ]);
+    renderAnalytics(data, container, usage);
   } catch (e) {
     container.innerHTML = `<div class="empty-docs">Fout bij laden analytics: ${escapeHtml(e.message)}</div>`;
   }
 }
 
-function renderAnalytics(data, container) {
+function renderAnalytics(data, container, usage) {
   const totals = data.totals || {};
   const feedback = data.feedback || {};
   const messagesPerDay = data.messages_per_day || [];
@@ -1602,7 +1799,15 @@ function renderAnalytics(data, container) {
         `).join('') : '<div class="empty-docs">Nog geen feedback</div>'}
       </div>
     </div>
+
+    <div id="groq-usage-section"></div>
   `;
+
+  // Render Groq usage section separately
+  const usageContainer = container.querySelector('#groq-usage-section');
+  if (usageContainer && usage) {
+    usageContainer.innerHTML = renderGroqUsageSection(usage);
+  }
 }
 
 // ============================================================
@@ -1777,6 +1982,18 @@ function init() {
   dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); uploadFiles(e.dataTransfer.files); });
   fileInput.addEventListener('change', () => { uploadFiles(fileInput.files); fileInput.value = ''; });
   document.getElementById('upload-btn').addEventListener('click', () => fileInput.click());
+
+  // --- URL Upload ---
+  document.getElementById('url-upload-btn').addEventListener('click', uploadUrl);
+  document.getElementById('url-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') uploadUrl(); });
+
+  // --- Document Preview Modal ---
+  document.getElementById('doc-preview-close').addEventListener('click', () => {
+    document.getElementById('doc-preview-modal').style.display = 'none';
+  });
+  document.getElementById('doc-preview-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) e.currentTarget.style.display = 'none';
+  });
 
   // --- Document browser ---
   document.getElementById('browse-collection').addEventListener('change', (e) => loadDocuments(e.target.value));

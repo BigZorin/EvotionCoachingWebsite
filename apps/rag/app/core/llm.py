@@ -33,6 +33,21 @@ def _groq_generate(prompt: str, system: str | None = None, temperature: float = 
         temperature=temperature,
         max_tokens=4096,
     )
+
+    # Track usage
+    try:
+        from app.core.usage_tracker import log_llm_usage
+        usage = response.usage
+        if usage:
+            log_llm_usage(
+                model=settings.groq_model,
+                input_tokens=usage.prompt_tokens or 0,
+                output_tokens=usage.completion_tokens or 0,
+                total_tokens=usage.total_tokens or 0,
+            )
+    except Exception as e:
+        logger.debug(f"Usage tracking failed: {e}")
+
     return response.choices[0].message.content
 
 
@@ -51,11 +66,27 @@ def _groq_generate_stream(
         temperature=temperature,
         max_tokens=4096,
         stream=True,
+        stream_options={"include_usage": True},
     )
+    usage_data = None
     for chunk in stream:
-        token = chunk.choices[0].delta.content
-        if token:
-            yield token
+        if chunk.usage:
+            usage_data = chunk.usage
+        if chunk.choices and chunk.choices[0].delta.content:
+            yield chunk.choices[0].delta.content
+
+    # Track usage after stream completes
+    if usage_data:
+        try:
+            from app.core.usage_tracker import log_llm_usage
+            log_llm_usage(
+                model=settings.groq_model,
+                input_tokens=usage_data.prompt_tokens or 0,
+                output_tokens=usage_data.completion_tokens or 0,
+                total_tokens=usage_data.total_tokens or 0,
+            )
+        except Exception as e:
+            logger.debug(f"Usage tracking failed: {e}")
 
 
 # ============================================================

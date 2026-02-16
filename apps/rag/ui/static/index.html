@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="/ui/static/style.css?v=8">
+  <link rel="stylesheet" href="/ui/static/style.css?v=9">
 </head>
 <body>
   <!-- ===== LOGIN SCREEN ===== -->
@@ -248,6 +248,25 @@
             <div class="upload-status" id="upload-status"></div>
           </div>
 
+          <!-- URL Upload section -->
+          <div class="card upload-card">
+            <h3>URL toevoegen</h3>
+            <p class="card-desc">Voeg een webpagina of YouTube video toe als kennisbron.</p>
+            <div class="url-upload-form">
+              <input type="text" id="url-input" class="text-input" placeholder="https://example.com of YouTube URL...">
+              <select id="url-collection" class="select-input"></select>
+              <button class="btn primary" id="url-upload-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="2" y1="12" x2="22" y2="12"/>
+                  <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+                </svg>
+                Ophalen &amp; Verwerk
+              </button>
+            </div>
+            <div class="url-upload-status" id="url-upload-status"></div>
+          </div>
+
           <!-- Document browser -->
           <div class="card docs-browser-card">
             <div class="docs-browser-header">
@@ -448,8 +467,25 @@
     </main>
   </div>
 
+  <!-- Document Preview Modal -->
+  <div class="modal-overlay" id="doc-preview-modal" style="display:none;">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3 id="doc-preview-title">Document Preview</h3>
+        <button class="icon-btn" id="doc-preview-close" title="Sluiten">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" id="doc-preview-body">
+        <div class="loading-state"><div class="spinner"></div><span>Chunks laden...</span></div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-  <script src="/ui/static/app.js?v=8"></script>
+  <script src="/ui/static/app.js?v=9"></script>
 </body>
 </html>

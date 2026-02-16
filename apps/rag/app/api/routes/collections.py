@@ -58,6 +58,43 @@ def delete_collection_endpoint(name: str):
     return result
 
 
+@router.get("/{name}/documents/{document_id}/chunks")
+def get_document_chunks(name: str, document_id: str, limit: int = 100):
+    """Get all chunks for a specific document — used for document preview."""
+    from app.core.vectorstore import get_or_create_collection
+
+    try:
+        collection = get_or_create_collection(name)
+        results = collection.get(
+            where={"document_id": document_id},
+            include=["documents", "metadatas"],
+            limit=limit,
+        )
+
+        chunks = []
+        if results and results["ids"]:
+            for i, chunk_id in enumerate(results["ids"]):
+                meta = results["metadatas"][i] if results["metadatas"] else {}
+                chunks.append({
+                    "id": chunk_id,
+                    "content": results["documents"][i] if results["documents"] else "",
+                    "chunk_index": meta.get("chunk_index", i),
+                    "metadata": meta,
+                })
+
+        # Sort by chunk_index
+        chunks.sort(key=lambda c: c.get("chunk_index", 0))
+
+        return {
+            "document_id": document_id,
+            "collection": name,
+            "total_chunks": len(chunks),
+            "chunks": chunks,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
 @router.delete("/{name}/documents/{document_id}")
 def delete_document_endpoint(name: str, document_id: str):
     chunks_removed = delete_document(name, document_id)

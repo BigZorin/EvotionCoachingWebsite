@@ -159,12 +159,22 @@ class AudioProcessor(BaseProcessor):
 
         client = Groq(api_key=settings.groq_api_key)
 
+        # Get audio duration for usage tracking
+        audio_duration = self._get_duration(audio_path)
+
         with open(audio_path, "rb") as f:
             transcription = client.audio.transcriptions.create(
                 file=(audio_path.name, f),
                 model=WHISPER_MODEL,
                 response_format="verbose_json",
             )
+
+        # Track Whisper usage
+        try:
+            from app.core.usage_tracker import log_whisper_usage
+            log_whisper_usage(WHISPER_MODEL, audio_duration)
+        except Exception as e:
+            logger.debug(f"Usage tracking failed: {e}")
 
         # verbose_json returns segments with timestamps
         if hasattr(transcription, "segments") and transcription.segments:

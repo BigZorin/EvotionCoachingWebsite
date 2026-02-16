@@ -36,6 +36,11 @@ async def lifespan(app: FastAPI):
     init_db()
     logger.info("Chat database initialized")
 
+    # Initialize usage tracking
+    from app.core.usage_tracker import init_usage_table
+    init_usage_table()
+    logger.info("Usage tracking initialized")
+
     # Check LLM connectivity
     from app.core.embeddings import check_ollama_embeddings
     from app.core.llm import check_ollama_generation, check_groq, get_active_provider

@@ -109,6 +109,86 @@ def ingest_file(
     }
 
 
+def ingest_text_blocks(
+    text_blocks: list,
+    source_name: str,
+    collection_name: str = "default",
+    extra_metadata: dict | None = None,
+) -> dict:
+    """
+    Ingest pre-extracted TextBlocks directly (for URLs, YouTube, etc.).
+    Skips the file-based processor step.
+    """
+    extra_metadata = extra_metadata or {}
+    document_id = str(uuid.uuid4())
+    content_hash = hashlib.sha256(
+        "".join(b.content for b in text_blocks).encode()
+    ).hexdigest()
+
+    logger.info(f"Ingesting {source_name} -> collection '{collection_name}'")
+
+    # Chunk each text block
+    all_chunks: list[Chunk] = []
+    for block in text_blocks:
+        file_type = block.metadata.get("file_type", "text")
+        chunker = get_chunker(file_type)
+        chunks = chunker.chunk(block.content, base_metadata=block.metadata)
+        all_chunks.extend(chunks)
+
+    if not all_chunks:
+        logger.warning(f"No chunks created from {source_name}")
+        return {
+            "document_id": document_id,
+            "filename": source_name,
+            "chunks_created": 0,
+            "collection": collection_name,
+            "status": "empty",
+        }
+
+    logger.info(f"Created {len(all_chunks)} chunks from {source_name}")
+
+    # Generate embeddings
+    texts = [chunk.content for chunk in all_chunks]
+    embeddings = embed_batch(texts)
+    logger.info(f"Generated {len(embeddings)} embeddings")
+
+    # Store in ChromaDB
+    collection = get_or_create_collection(collection_name)
+    ids = [f"{document_id}_chunk_{i}" for i in range(len(all_chunks))]
+    metadatas = []
+    for i, chunk in enumerate(all_chunks):
+        meta = {
+            **chunk.metadata,
+            **extra_metadata,
+            "document_id": document_id,
+            "source_file": source_name,
+            "content_hash": content_hash,
+            "chunk_index": i,
+            "total_chunks": len(all_chunks),
+        }
+        meta = {k: _sanitize_meta_value(v) for k, v in meta.items()}
+        metadatas.append(meta)
+
+    collection.add(
+        ids=ids,
+        documents=texts,
+        embeddings=embeddings,
+        metadatas=metadatas,
+    )
+
+    logger.info(f"Stored {len(all_chunks)} chunks in collection '{collection_name}'")
+
+    return {
+        "document_id": document_id,
+        "filename": source_name,
+        "file_type": "url",
+        "chunks_created": len(all_chunks),
+        "collection": collection_name,
+        "content_hash": content_hash,
+        "status": "success",
+    }
+
+
 def ingest_batch(
     file_paths: list[Path],
     collection_name: str = "default",

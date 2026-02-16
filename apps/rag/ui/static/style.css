@@ -2485,3 +2485,181 @@ pre:hover .code-copy-btn {
 .logout-btn:hover {
   color: var(--danger) !important;
 }
+
+/* ============================================================
+   URL Upload
+   ============================================================ */
+
+.card-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.url-upload-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.url-upload-form .text-input {
+  flex: 1;
+  min-width: 200px;
+}
+.url-upload-form .select-input {
+  flex: 0 0 auto;
+  min-width: 120px;
+}
+.url-upload-status {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.url-upload-status.success { color: #4ade80; }
+.url-upload-status.error { color: var(--danger); }
+.url-upload-status.loading { color: #a78bfa; }
+
+/* ============================================================
+   Document Preview Modal
+   ============================================================ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.modal-content {
+  background: var(--main-bg);
+  border-radius: var(--radius);
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 700px;
+  border: 1px solid var(--border-light);
+}
+.modal-large {
+  max-width: 800px;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-light);
+}
+.modal-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+.chunk-item {
+  padding: 12px 14px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.chunk-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.chunk-item-header .chunk-idx {
+  font-weight: 600;
+  color: var(--text-faint);
+}
+
+/* ============================================================
+   Groq Usage Section (Analytics)
+   ============================================================ */
+
+.usage-section {
+  margin-top: 24px;
+}
+.usage-section h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+.usage-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.usage-stat-card {
+  padding: 14px 16px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+.usage-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.usage-stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.usage-model-table {
+  width: 100%;
+  font-size: 13px;
+  border-collapse: collapse;
+}
+.usage-model-table th,
+.usage-model-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+}
+.usage-model-table th {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.usage-model-table td {
+  color: var(--text-secondary);
+}
+
+/* Doc preview button in doc list */
+.doc-preview-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+.doc-preview-btn:hover {
+  color: var(--text-primary);
+  background: var(--surface);
+}

@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.routes import health, documents, query, collections, chat, agents
+from app.api.routes import health, documents, query, collections, chat, agents, usage
 
 api_router = APIRouter()
 api_router.include_router(health.router)
@@ -9,3 +9,4 @@ api_router.include_router(query.router)
 api_router.include_router(collections.router)
 api_router.include_router(chat.router)
 api_router.include_router(agents.router)
+api_router.include_router(usage.router)
