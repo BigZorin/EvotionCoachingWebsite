@@ -960,6 +960,27 @@ function renderDocuments(docs, collectionName) {
   });
 }
 
+// Recursively collect files from drag-dropped directory entries
+async function collectFilesFromEntries(entries) {
+  const files = [];
+  async function readEntry(entry) {
+    if (entry.isFile) {
+      const file = await new Promise(resolve => entry.file(resolve));
+      // Skip hidden files and system files
+      if (!file.name.startsWith('.') && file.size > 0) files.push(file);
+    } else if (entry.isDirectory) {
+      const reader = entry.createReader();
+      let batch;
+      do {
+        batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject));
+        for (const child of batch) await readEntry(child);
+      } while (batch.length > 0);
+    }
+  }
+  for (const entry of entries) await readEntry(entry);
+  return files;
+}
+
 function uploadFileWithProgress(file, collection, onProgress) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -999,7 +1020,9 @@ function uploadFileWithProgress(file, collection, onProgress) {
   });
 }
 
-async function uploadFiles(files) {
+async function uploadFiles(fileListOrArray) {
+  // Accept both FileList and Array of Files
+  const files = Array.from(fileListOrArray);
   const collection = document.getElementById('upload-collection').value || 'default';
   const statusEl = document.getElementById('upload-status');
   const uploadBtn = document.getElementById('upload-btn');
@@ -1016,7 +1039,9 @@ async function uploadFiles(files) {
   }
 
   // Reset & show progress UI
+  const folderBtn = document.getElementById('folder-upload-btn');
   uploadBtn.disabled = true;
+  folderBtn.disabled = true;
   statusEl.textContent = '';
   statusEl.className = 'upload-status';
   progressEl.classList.add('active');
@@ -1124,6 +1149,7 @@ async function uploadFiles(files) {
   progressPct.textContent = '100%';
   progressLabel.textContent = `Klaar — ${files.length} bestanden, ${totalChunks} chunks`;
   uploadBtn.disabled = false;
+  folderBtn.disabled = false;
 
   // Hide progress after 8 seconds
   setTimeout(() => {
@@ -1976,12 +2002,34 @@ function init() {
   // --- File upload ---
   const dropZone = document.getElementById('drop-zone');
   const fileInput = document.getElementById('file-input');
+  const folderInput = document.getElementById('folder-input');
   dropZone.addEventListener('click', () => fileInput.click());
   dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-  dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); uploadFiles(e.dataTransfer.files); });
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    // Handle folder drops via DataTransferItem.webkitGetAsEntry()
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      const entries = [];
+      for (const item of e.dataTransfer.items) {
+        const entry = item.webkitGetAsEntry && item.webkitGetAsEntry();
+        if (entry) entries.push(entry);
+      }
+      const hasFolder = entries.some(e => e.isDirectory);
+      if (hasFolder) {
+        collectFilesFromEntries(entries).then(files => {
+          if (files.length > 0) uploadFiles(files);
+        });
+        return;
+      }
+    }
+    uploadFiles(e.dataTransfer.files);
+  });
   fileInput.addEventListener('change', () => { uploadFiles(fileInput.files); fileInput.value = ''; });
+  folderInput.addEventListener('change', () => { uploadFiles(folderInput.files); folderInput.value = ''; });
   document.getElementById('upload-btn').addEventListener('click', () => fileInput.click());
+  document.getElementById('folder-upload-btn').addEventListener('click', () => folderInput.click());
 
   // --- URL Upload ---
   document.getElementById('url-upload-btn').addEventListener('click', uploadUrl);

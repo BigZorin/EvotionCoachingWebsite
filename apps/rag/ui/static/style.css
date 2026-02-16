@@ -729,6 +729,23 @@ a:hover { text-decoration: underline; }
   gap: 8px;
   margin-top: 16px;
 }
+.upload-buttons {
+  display: flex;
+  gap: 6px;
+}
+.upload-buttons .btn {
+  white-space: nowrap;
+  font-size: 0.8rem;
+  padding: 8px 14px;
+}
+.btn.secondary {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+}
+.btn.secondary:hover {
+  background: var(--border-light);
+}
 
 .select-input {
   flex: 1;

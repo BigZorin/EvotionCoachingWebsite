@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="/ui/static/style.css?v=9">
+  <link rel="stylesheet" href="/ui/static/style.css?v=10">
 </head>
 <body>
   <!-- ===== LOGIN SCREEN ===== -->
@@ -220,20 +220,29 @@
                 <polyline points="17 8 12 3 7 8"/>
                 <line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
-              <p>Sleep bestanden hierheen</p>
+              <p>Sleep bestanden of mappen hierheen</p>
               <span class="drop-hint">of klik om te selecteren</span>
               <input type="file" id="file-input" multiple hidden>
+              <input type="file" id="folder-input" webkitdirectory hidden>
             </div>
             <div class="upload-controls">
               <select id="upload-collection" class="select-input"></select>
-              <button class="btn primary" id="upload-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                  <polyline points="17 8 12 3 7 8"/>
-                  <line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-                Upload &amp; Verwerk
-              </button>
+              <div class="upload-buttons">
+                <button class="btn primary" id="upload-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  Bestanden
+                </button>
+                <button class="btn secondary" id="folder-upload-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                  </svg>
+                  Map selecteren
+                </button>
+              </div>
             </div>
             <div class="upload-progress" id="upload-progress">
               <div class="upload-progress-header">
@@ -486,6 +495,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-  <script src="/ui/static/app.js?v=9"></script>
+  <script src="/ui/static/app.js?v=10"></script>
 </body>
 </html>
