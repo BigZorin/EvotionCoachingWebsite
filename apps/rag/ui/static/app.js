@@ -2357,15 +2357,37 @@ async function loadSupportedExtensions() {
 
 async function checkConnectionStatus() {
   const indicator = document.getElementById('connection-status');
+  const providerLabel = document.getElementById('active-provider-label');
   if (!indicator) return;
   try {
     const data = await apiGet('/health');
     indicator.className = 'connection-dot online';
     indicator.title = `Online — ${data.active_provider || 'verbonden'}`;
+    if (providerLabel) {
+      providerLabel.textContent = _formatProviderLabel(data.active_provider);
+    }
   } catch {
     indicator.className = 'connection-dot offline';
     indicator.title = 'Offline — server niet bereikbaar';
+    if (providerLabel) providerLabel.textContent = 'Offline';
   }
+}
+
+function _formatProviderLabel(raw) {
+  // "groq (llama-3.3-70b-versatile)" → "Groq · Llama 3.3 70B"
+  if (!raw) return 'Onbekend';
+  const match = raw.match(/^(\w+)\s*\((.+)\)$/);
+  if (!match) return raw;
+  const provider = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+  let model = match[2]
+    .replace('meta-llama/', '')
+    .replace(/-/g, ' ')
+    .replace(':free', '')
+    .replace(/\b(\d+)b\b/gi, '$1B')
+    .replace('versatile', '70B');
+  // Capitalize first letter of each word
+  model = model.replace(/\b\w/g, c => c.toUpperCase());
+  return `${provider} · ${model}`;
 }
 
 // ============================================================
