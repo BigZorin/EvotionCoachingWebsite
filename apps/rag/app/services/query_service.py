@@ -2,7 +2,7 @@ import logging
 from collections.abc import Generator
 
 from app.config import settings
-from app.core.llm import generate, generate_stream
+from app.core.llm import generate, generate_stream, get_active_provider
 from app.models.schemas import QueryRequest, QueryResponse, SourceReference
 from app.retrieval.prompt_builder import build_rag_prompt
 from app.retrieval.retriever import retrieve
@@ -24,7 +24,7 @@ def execute_query(request: QueryRequest) -> QueryResponse:
             answer="Ik kon geen relevante informatie vinden in de documenten. "
                    "Controleer of er documenten zijn geupload in de juiste collectie.",
             sources=[],
-            model_used=settings.generation_model,
+            model_used=get_active_provider(),
         )
 
     # 2. Build RAG prompt
@@ -51,7 +51,7 @@ def execute_query(request: QueryRequest) -> QueryResponse:
     return QueryResponse(
         answer=answer,
         sources=sources,
-        model_used=settings.generation_model,
+        model_used=get_active_provider(),
     )
 
 

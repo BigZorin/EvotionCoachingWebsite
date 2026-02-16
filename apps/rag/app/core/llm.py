@@ -16,7 +16,7 @@ def _get_groq_client():
     global _groq_client
     if _groq_client is None:
         from groq import Groq
-        _groq_client = Groq(api_key=settings.groq_api_key)
+        _groq_client = Groq(api_key=settings.groq_api_key, timeout=60.0)
     return _groq_client
 
 
@@ -100,7 +100,7 @@ def _get_ollama_client():
     global _ollama_client
     if _ollama_client is None:
         from ollama import Client as OllamaClient
-        _ollama_client = OllamaClient(host=settings.ollama_base_url)
+        _ollama_client = OllamaClient(host=settings.ollama_base_url, timeout=120.0)
     return _ollama_client
 
 

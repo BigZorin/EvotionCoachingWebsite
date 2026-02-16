@@ -12,7 +12,7 @@ _st_model = None
 def _get_ollama_client() -> OllamaClient:
     global _ollama_client
     if _ollama_client is None:
-        _ollama_client = OllamaClient(host=settings.ollama_base_url)
+        _ollama_client = OllamaClient(host=settings.ollama_base_url, timeout=30.0)
     return _ollama_client
 
 

@@ -48,7 +48,7 @@ def system_info():
                 {"name": "Ollama Embeddings", "description": f"Lokale embedding-engine ({settings.embedding_model}) voor vectorisatie", "model": settings.embedding_model},
                 {"name": "ChromaDB", "description": "Lokale vector database voor opslag en zoeken van document-chunks"},
                 {"name": "Cross-Encoder", "description": "Re-ranking model (ms-marco-MiniLM-L-6-v2) voor nauwkeurigere resultaten"},
-                {"name": "BM25", "description": "Keyword-gebaseerde zoekindex voor hybride retrieval"},
+                {"name": "BM25", "description": "Keyword-gebaseerde zoekindex voor hybride retrieval (max 10.000 docs per zoekopdracht)"},
             ],
         },
         "ingestion": {
@@ -78,7 +78,7 @@ def system_info():
             "steps": [
                 {"step": 1, "name": "Multi-Query Expansie", "description": "LLM genereert 3 alternatieve formuleringen van de vraag voor bredere dekking"},
                 {"step": 2, "name": "Semantisch Zoeken", "description": f"Vector similarity search in ChromaDB over alle query-varianten (top {settings.max_context_chunks} per query)"},
-                {"step": 3, "name": "BM25 Keyword Search", "description": "Parallelle keyword-matching met BM25Okapi algoritme"},
+                {"step": 3, "name": "BM25 Keyword Search", "description": "Parallelle keyword-matching met BM25Okapi algoritme (max 10.000 documenten per zoekopdracht)"},
                 {"step": 4, "name": "Reciprocal Rank Fusion (RRF)", "description": "Samenvoegen van semantische en keyword-resultaten met RRF (k=60) — documenten die in beide methoden hoog scoren worden geprioriteerd"},
                 {"step": 5, "name": "Cross-Encoder Re-ranking", "description": "Top-30 resultaten worden opnieuw gerankt met cross-encoder model (ms-marco-MiniLM-L-6-v2) voor 10-20% betere precisie"},
                 {"step": 6, "name": "Threshold Filtering", "description": f"Alleen chunks met cosine distance <= {settings.similarity_threshold} worden behouden. Fallback: top 3 als niets de drempel haalt"},
@@ -113,6 +113,16 @@ def system_info():
                 {"name": "Export", "description": "Gesprekken exporteren als Markdown bestand"},
             ],
         },
+        "stability": {
+            "title": "Stabiliteit & Beveiliging",
+            "features": [
+                {"name": "API Timeouts", "description": "Groq: 60s timeout, Ollama generatie: 120s, Ollama embeddings: 30s — voorkomt hangende requests"},
+                {"name": "Database Connection Management", "description": "Context managers (with-statement) garanderen dat SQLite-connecties altijd worden gesloten, ook bij fouten"},
+                {"name": "BM25 Memory Cap", "description": "Maximum 10.000 documenten per BM25-zoekopdracht om geheugenoverloop te voorkomen bij grote collecties"},
+                {"name": "SSE Error Handling", "description": "Streaming responses sturen een error-event naar de client bij onverwachte fouten in plaats van stil te crashen"},
+                {"name": "LLM Failover", "description": "Automatische fallback van Groq naar Ollama bij API-fouten of timeouts"},
+            ],
+        },
         "config": {
             "title": "Huidige Configuratie",
             "values": {
@@ -128,6 +138,10 @@ def system_info():
                 "Max History Messages": settings.max_history_messages,
                 "Summarize After": f"{settings.summarize_after_messages} berichten",
                 "Max Upload Size": f"{settings.max_file_size_mb} MB",
+                "Groq Timeout": "60 seconden",
+                "Ollama Generation Timeout": "120 seconden",
+                "Ollama Embedding Timeout": "30 seconden",
+                "BM25 Max Documents": "10.000",
             },
         },
     }

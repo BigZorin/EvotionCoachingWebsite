@@ -169,6 +169,8 @@ def _bm25_search(
     top_k: int,
 ) -> list[RetrievedChunk]:
     """Keyword search using BM25 over collection documents."""
+    BM25_MAX_DOCS = 10_000  # Cap to prevent OOM on large collections
+
     try:
         # Gather all documents from target collections
         target_collections = []
@@ -185,13 +187,17 @@ def _bm25_search(
         all_collection_names = []
 
         for col_name in target_collections:
+            if len(all_docs) >= BM25_MAX_DOCS:
+                logger.warning(f"BM25: hit {BM25_MAX_DOCS} doc cap, skipping remaining collections")
+                break
             try:
                 col = get_or_create_collection(col_name)
                 count = col.count()
                 if count == 0:
                     continue
-                # Get all documents from collection
-                result = col.get(include=["documents", "metadatas"], limit=count)
+                # Get documents from collection (capped to prevent OOM)
+                fetch_limit = min(count, BM25_MAX_DOCS - len(all_docs))
+                result = col.get(include=["documents", "metadatas"], limit=fetch_limit)
                 if result["documents"]:
                     all_docs.extend(result["documents"])
                     all_metadatas.extend(result["metadatas"] or [{}] * len(result["documents"]))

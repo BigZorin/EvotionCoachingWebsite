@@ -1899,6 +1899,22 @@ function renderSystemInfo(data, container) {
     );
   }
 
+  // Stability
+  if (data.stability) {
+    const features = data.stability.features.map(f =>
+      `<div class="sys-feature">
+        <div class="sys-feature-name">${escapeHtml(f.name)}</div>
+        <div class="sys-feature-desc">${escapeHtml(f.description)}</div>
+      </div>`
+    ).join('');
+    sections.push(`
+      <div class="sys-section">
+        <h3>${escapeHtml(data.stability.title)}</h3>
+        <div class="sys-features">${features}</div>
+      </div>`
+    );
+  }
+
   // Configuration
   if (data.config) {
     const items = Object.entries(data.config.values).map(([k, v]) =>
