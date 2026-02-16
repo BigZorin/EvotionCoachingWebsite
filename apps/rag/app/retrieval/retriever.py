@@ -279,9 +279,10 @@ def _reciprocal_rank_fusion(
     results = []
     for i, key in enumerate(sorted_keys):
         chunk = chunk_map[key]
-        # Use RRF rank position as the relevance score (lower = better)
-        # Map to 0-1 range based on position
-        chunk.relevance_score = min(chunk.relevance_score, i / max(len(sorted_keys), 1))
+        # Blend original score with RRF rank position (lower = better)
+        # Weighted average: 40% original score + 60% RRF rank position
+        rrf_position_score = i / max(len(sorted_keys), 1)
+        chunk.relevance_score = 0.4 * chunk.relevance_score + 0.6 * rrf_position_score
         results.append(chunk)
 
     return results

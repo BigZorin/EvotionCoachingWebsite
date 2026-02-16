@@ -91,7 +91,7 @@ def chat(
         if agent:
             top_k = agent.get("top_k", top_k)
             temperature = agent.get("temperature", temperature)
-            logger.info(f"Using agent '{agent['name']}' (collections: {agent.get('collections', [])})")
+            logger.info(f"Using agent '{agent.get('name', 'unknown')}' (collections: {agent.get('collections', [])})")
 
     # 1. Get conversation history with smart context management
     all_messages = get_messages(session_id, limit=200)
