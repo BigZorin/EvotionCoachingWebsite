@@ -18,7 +18,7 @@ let supportedExtensions = []; // Loaded from server on init
 // --- DOM refs (set in init) ---
 let $sidebar, $overlay, $sessionsEl, $chatScroll, $emptyState, $messagesEl;
 let $chatInput, $sendBtn, $chatCollection, $agentSelect;
-let $docsView, $collectionsView, $chatView, $agentsView, $analyticsView;
+let $docsView, $collectionsView, $chatView, $agentsView, $analyticsView, $systemView;
 let $uploadStatus, $docsList, $collectionsList, $agentsList;
 
 // ============================================================
@@ -356,11 +356,13 @@ function switchView(view) {
   $collectionsView.classList.toggle('active', view === 'collections');
   $agentsView.classList.toggle('active', view === 'agents');
   $analyticsView.classList.toggle('active', view === 'analytics');
+  $systemView.classList.toggle('active', view === 'system');
 
   document.getElementById('nav-docs').classList.toggle('active', view === 'documents');
   document.getElementById('nav-collections').classList.toggle('active', view === 'collections');
   document.getElementById('nav-agents').classList.toggle('active', view === 'agents');
   document.getElementById('nav-analytics').classList.toggle('active', view === 'analytics');
+  document.getElementById('nav-system').classList.toggle('active', view === 'system');
 
   closeSidebar();
 
@@ -375,6 +377,8 @@ function switchView(view) {
     loadAgentFormCollections();
   } else if (view === 'analytics') {
     loadAnalytics();
+  } else if (view === 'system') {
+    loadSystemInfo();
   }
 }
 
@@ -1754,6 +1758,164 @@ function updateToggleBtn(isHidden) {
 // Analytics Dashboard
 // ============================================================
 
+// ============================================================
+// System Documentation
+// ============================================================
+
+async function loadSystemInfo() {
+  const container = document.getElementById('system-content');
+  showLoadingIn(container, 'Systeem informatie laden...');
+
+  try {
+    const data = await apiGet('/health/system-info');
+    renderSystemInfo(data, container);
+  } catch (e) {
+    container.innerHTML = `<div class="empty-docs">Fout bij laden systeem info: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+function renderSystemInfo(data, container) {
+  const sections = [];
+
+  // Architecture
+  if (data.architecture) {
+    const comps = data.architecture.components.map(c =>
+      `<div class="sys-component">
+        <div class="sys-comp-name">${escapeHtml(c.name)}</div>
+        <div class="sys-comp-desc">${escapeHtml(c.description)}</div>
+        ${c.model ? `<span class="sys-badge">${escapeHtml(c.model)}</span>` : ''}
+      </div>`
+    ).join('');
+    sections.push(`
+      <div class="sys-section">
+        <h3>${escapeHtml(data.architecture.title)}</h3>
+        <div class="sys-flow">
+          <div class="sys-flow-diagram">
+            <div class="sys-flow-box">Gebruiker</div>
+            <div class="sys-flow-arrow">&rarr;</div>
+            <div class="sys-flow-box">FastAPI</div>
+            <div class="sys-flow-arrow">&rarr;</div>
+            <div class="sys-flow-box">Retrieval Pipeline</div>
+            <div class="sys-flow-arrow">&rarr;</div>
+            <div class="sys-flow-box">Groq LLM</div>
+            <div class="sys-flow-arrow">&rarr;</div>
+            <div class="sys-flow-box">Antwoord</div>
+          </div>
+        </div>
+        <div class="sys-components">${comps}</div>
+      </div>`
+    );
+  }
+
+  // Ingestion Pipeline
+  if (data.ingestion) {
+    const steps = data.ingestion.steps.map(s =>
+      `<div class="sys-step">
+        <div class="sys-step-num">${s.step}</div>
+        <div class="sys-step-body">
+          <div class="sys-step-name">${escapeHtml(s.name)}</div>
+          <div class="sys-step-desc">${escapeHtml(s.description)}</div>
+        </div>
+      </div>`
+    ).join('');
+
+    const types = data.ingestion.supported_types.map(t =>
+      `<tr>
+        <td><strong>${escapeHtml(t.type)}</strong></td>
+        <td><code>${t.extensions.map(e => escapeHtml(e)).join(', ') || 'URL'}</code></td>
+        <td>${escapeHtml(t.processor)}</td>
+      </tr>`
+    ).join('');
+
+    sections.push(`
+      <div class="sys-section">
+        <h3>${escapeHtml(data.ingestion.title)}</h3>
+        <div class="sys-steps">${steps}</div>
+        <h4 style="margin-top:20px;color:var(--text-secondary);">Ondersteunde Bestandstypes</h4>
+        <div class="sys-table-wrap">
+          <table class="sys-table">
+            <thead><tr><th>Type</th><th>Extensies</th><th>Processor</th></tr></thead>
+            <tbody>${types}</tbody>
+          </table>
+        </div>
+      </div>`
+    );
+  }
+
+  // Retrieval Pipeline
+  if (data.retrieval) {
+    const steps = data.retrieval.steps.map(s =>
+      `<div class="sys-step">
+        <div class="sys-step-num">${s.step}</div>
+        <div class="sys-step-body">
+          <div class="sys-step-name">${escapeHtml(s.name)}</div>
+          <div class="sys-step-desc">${escapeHtml(s.description)}</div>
+        </div>
+      </div>`
+    ).join('');
+
+    const settings = Object.entries(data.retrieval.settings).map(([k, v]) =>
+      `<div class="sys-config-item"><span class="sys-config-key">${escapeHtml(k)}</span><span class="sys-config-val">${v}</span></div>`
+    ).join('');
+
+    sections.push(`
+      <div class="sys-section">
+        <h3>${escapeHtml(data.retrieval.title)}</h3>
+        <div class="sys-steps">${steps}</div>
+        <div class="sys-config-grid" style="margin-top:16px;">${settings}</div>
+      </div>`
+    );
+  }
+
+  // Generation
+  if (data.generation) {
+    const features = data.generation.features.map(f =>
+      `<div class="sys-feature">
+        <div class="sys-feature-name">${escapeHtml(f.name)}</div>
+        <div class="sys-feature-desc">${escapeHtml(f.description)}</div>
+      </div>`
+    ).join('');
+    sections.push(`
+      <div class="sys-section">
+        <h3>${escapeHtml(data.generation.title)}</h3>
+        <div class="sys-features">${features}</div>
+      </div>`
+    );
+  }
+
+  // Chat Features
+  if (data.chat) {
+    const features = data.chat.features.map(f =>
+      `<div class="sys-feature">
+        <div class="sys-feature-name">${escapeHtml(f.name)}</div>
+        <div class="sys-feature-desc">${escapeHtml(f.description)}</div>
+      </div>`
+    ).join('');
+    sections.push(`
+      <div class="sys-section">
+        <h3>${escapeHtml(data.chat.title)}</h3>
+        <div class="sys-features">${features}</div>
+      </div>`
+    );
+  }
+
+  // Configuration
+  if (data.config) {
+    const items = Object.entries(data.config.values).map(([k, v]) =>
+      `<div class="sys-config-item"><span class="sys-config-key">${escapeHtml(k)}</span><span class="sys-config-val">${v}</span></div>`
+    ).join('');
+    sections.push(`
+      <div class="sys-section">
+        <h3>${escapeHtml(data.config.title)}</h3>
+        <div class="sys-config-grid">${items}</div>
+      </div>`
+    );
+  }
+
+  container.innerHTML = sections.join('');
+}
+
+
 async function loadAnalytics() {
   const container = document.getElementById('analytics-content');
   showLoadingIn(container, 'Analytics laden...');
@@ -1998,6 +2160,7 @@ function init() {
   $collectionsView = document.getElementById('collections-view');
   $agentsView = document.getElementById('agents-view');
   $analyticsView = document.getElementById('analytics-view');
+  $systemView = document.getElementById('system-view');
   $docsList = document.getElementById('docs-list');
   $collectionsList = document.getElementById('collections-list');
   $agentsList = document.getElementById('agents-list');
@@ -2018,10 +2181,12 @@ function init() {
   document.getElementById('nav-collections').addEventListener('click', () => switchView('collections'));
   document.getElementById('nav-agents').addEventListener('click', () => switchView('agents'));
   document.getElementById('nav-analytics').addEventListener('click', () => switchView('analytics'));
+  document.getElementById('nav-system').addEventListener('click', () => switchView('system'));
   document.getElementById('docs-back').addEventListener('click', () => switchView('chat'));
   document.getElementById('cols-back').addEventListener('click', () => switchView('chat'));
   document.getElementById('agents-back').addEventListener('click', () => switchView('chat'));
   document.getElementById('analytics-back').addEventListener('click', () => switchView('chat'));
+  document.getElementById('system-back').addEventListener('click', () => switchView('chat'));
 
   // --- Session search ---
   const sessionSearchInput = document.getElementById('session-search');

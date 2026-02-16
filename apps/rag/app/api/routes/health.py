@@ -34,3 +34,100 @@ def list_models():
         "active_provider": get_active_provider(),
         "available_models": available,
     }
+
+
+@router.get("/health/system-info")
+def system_info():
+    """Return comprehensive system documentation for the UI docs page."""
+    return {
+        "architecture": {
+            "title": "Systeem Architectuur",
+            "components": [
+                {"name": "FastAPI Backend", "description": "REST API server die alle verzoeken afhandelt", "status": "active"},
+                {"name": "Groq LLM", "description": f"Cloud LLM ({settings.groq_model}) voor snelle antwoordgeneratie", "model": settings.groq_model},
+                {"name": "Ollama Embeddings", "description": f"Lokale embedding-engine ({settings.embedding_model}) voor vectorisatie", "model": settings.embedding_model},
+                {"name": "ChromaDB", "description": "Lokale vector database voor opslag en zoeken van document-chunks"},
+                {"name": "Cross-Encoder", "description": "Re-ranking model (ms-marco-MiniLM-L-6-v2) voor nauwkeurigere resultaten"},
+                {"name": "BM25", "description": "Keyword-gebaseerde zoekindex voor hybride retrieval"},
+            ],
+        },
+        "ingestion": {
+            "title": "Document Verwerking (Ingestion Pipeline)",
+            "steps": [
+                {"step": 1, "name": "Bestandsdetectie", "description": "Automatische herkenning van bestandstype via extensie en MIME-type"},
+                {"step": 2, "name": "Tekst Extractie", "description": "Processor-specifieke extractie: PyMuPDF (PDF), python-docx (DOCX), Pandas (CSV/XLSX), EasyOCR (afbeeldingen), Whisper/Groq (audio/video)"},
+                {"step": 3, "name": "Chunking", "description": f"Tekst wordt opgesplitst in chunks van ~{settings.chunk_size} tekens met {settings.chunk_overlap} overlap. Sentence-aware overlap zorgt voor schone breekpunten"},
+                {"step": 4, "name": "Contextual Headers", "description": "Elke chunk krijgt een verrijkte versie met bron + sectie header voor betere embeddings"},
+                {"step": 5, "name": "Embedding", "description": f"Verrijkte tekst wordt gevectoriseerd met {settings.embedding_model} via Ollama (768 dimensies)"},
+                {"step": 6, "name": "Opslag", "description": "Platte tekst + vector + metadata worden opgeslagen in ChromaDB"},
+            ],
+            "supported_types": [
+                {"type": "PDF", "extensions": [".pdf"], "processor": "PyMuPDF — alle pagina's samengevoegd voor betere chunking"},
+                {"type": "Word", "extensions": [".docx"], "processor": "python-docx — secties en headers als metadata"},
+                {"type": "Tekst", "extensions": [".txt", ".md"], "processor": "Direct lezen, markdown headers als sectie-metadata"},
+                {"type": "Spreadsheets", "extensions": [".csv", ".xlsx"], "processor": "Pandas — rij-gebaseerde chunks (20 rijen per chunk)"},
+                {"type": "JSON", "extensions": [".json"], "processor": "Recursief flattenen naar leesbare tekst"},
+                {"type": "Code", "extensions": [".py", ".ts", ".js", ".java", ".go"], "processor": "Functie/class-level splitting (1500 char chunks)"},
+                {"type": "Afbeeldingen", "extensions": [".png", ".jpg", ".jpeg"], "processor": "EasyOCR tekst extractie (optioneel)"},
+                {"type": "Audio/Video", "extensions": [".mp3", ".mp4", ".wav", ".m4a", ".webm"], "processor": "Groq Whisper transcriptie"},
+                {"type": "URLs", "extensions": [], "processor": "Web scraping (BeautifulSoup) of YouTube transcript API"},
+            ],
+        },
+        "retrieval": {
+            "title": "Zoek & Retrieval Pipeline",
+            "steps": [
+                {"step": 1, "name": "Multi-Query Expansie", "description": "LLM genereert 3 alternatieve formuleringen van de vraag voor bredere dekking"},
+                {"step": 2, "name": "Semantisch Zoeken", "description": f"Vector similarity search in ChromaDB over alle query-varianten (top {settings.max_context_chunks} per query)"},
+                {"step": 3, "name": "BM25 Keyword Search", "description": "Parallelle keyword-matching met BM25Okapi algoritme"},
+                {"step": 4, "name": "Reciprocal Rank Fusion (RRF)", "description": "Samenvoegen van semantische en keyword-resultaten met RRF (k=60) — documenten die in beide methoden hoog scoren worden geprioriteerd"},
+                {"step": 5, "name": "Cross-Encoder Re-ranking", "description": "Top-30 resultaten worden opnieuw gerankt met cross-encoder model (ms-marco-MiniLM-L-6-v2) voor 10-20% betere precisie"},
+                {"step": 6, "name": "Threshold Filtering", "description": f"Alleen chunks met cosine distance <= {settings.similarity_threshold} worden behouden. Fallback: top 3 als niets de drempel haalt"},
+                {"step": 7, "name": "Neighbor Expansion", "description": "Top 5 chunks worden uitgebreid met aangrenzende chunks (±1) uit hetzelfde document voor bredere context"},
+            ],
+            "settings": {
+                "top_k": settings.top_k,
+                "max_top_k": settings.max_top_k,
+                "similarity_threshold": settings.similarity_threshold,
+                "max_context_chunks": settings.max_context_chunks,
+            },
+        },
+        "generation": {
+            "title": "Antwoord Generatie",
+            "features": [
+                {"name": "Strikte context-binding", "description": "LLM mag ALLEEN feiten uit de aangeleverde documenten gebruiken — geen eigen kennis"},
+                {"name": "Inline bronverwijzingen", "description": "Elk antwoord bevat [1], [2] etc. citaties die verwijzen naar specifieke bronpassages"},
+                {"name": "Anti-hallucinatie regels", "description": "Expliciete instructies om ontbrekende informatie te benoemen i.p.v. te verzinnen"},
+                {"name": "Temperatuur 0.3", "description": "Lage temperatuur voor feitelijke, consistente antwoorden (configureerbaar per agent)"},
+                {"name": "Gespreksgeheugen", "description": "Chat-modus onthoudt eerdere berichten, met automatische samenvatting na 10 berichten"},
+                {"name": "Follow-up suggesties", "description": "Elk antwoord eindigt met 3 relevante vervolgvragen"},
+            ],
+        },
+        "chat": {
+            "title": "Chat Functies",
+            "features": [
+                {"name": "Sessie Management", "description": "Meerdere gesprekken opslaan en laden, automatische titels"},
+                {"name": "Smart History", "description": f"Laatste 6 berichten worden volledig meegestuurd, oudere berichten worden samengevat (na {settings.summarize_after_messages} berichten)"},
+                {"name": "Agent Modus", "description": "Gespecialiseerde AI-assistenten met eigen system prompt, collecties en instellingen"},
+                {"name": "Streaming", "description": "Real-time token-voor-token antwoorden via Server-Sent Events (SSE)"},
+                {"name": "Feedback", "description": "Duim omhoog/omlaag per antwoord voor kwaliteitstracking"},
+                {"name": "Export", "description": "Gesprekken exporteren als Markdown bestand"},
+            ],
+        },
+        "config": {
+            "title": "Huidige Configuratie",
+            "values": {
+                "LLM Provider": settings.llm_provider,
+                "Groq Model": settings.groq_model,
+                "Embedding Model": settings.embedding_model,
+                "Ollama Generation Model": settings.ollama_generation_model,
+                "Chunk Size": f"{settings.chunk_size} tekens",
+                "Chunk Overlap": f"{settings.chunk_overlap} tekens",
+                "Top K (standaard)": settings.top_k,
+                "Similarity Threshold": settings.similarity_threshold,
+                "Max Context Chunks": settings.max_context_chunks,
+                "Max History Messages": settings.max_history_messages,
+                "Summarize After": f"{settings.summarize_after_messages} berichten",
+                "Max Upload Size": f"{settings.max_file_size_mb} MB",
+            },
+        },
+    }

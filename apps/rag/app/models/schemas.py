@@ -38,7 +38,7 @@ class QueryRequest(BaseModel):
     collection: str | None = None
     top_k: int = Field(default=15, ge=1, le=50)
     include_sources: bool = True
-    temperature: float = Field(default=0.7, ge=0.0, le=2.0)
+    temperature: float = Field(default=0.3, ge=0.0, le=2.0)
 
 
 class SourceReference(BaseModel):

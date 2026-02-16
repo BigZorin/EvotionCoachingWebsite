@@ -11,6 +11,21 @@ from app.core.llm import generate
 
 logger = logging.getLogger(__name__)
 
+_cross_encoder = None
+
+
+def _get_cross_encoder():
+    """Lazy-load cross-encoder model (singleton)."""
+    global _cross_encoder
+    if _cross_encoder is None:
+        try:
+            from sentence_transformers import CrossEncoder
+            _cross_encoder = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+            logger.info("Loaded cross-encoder model: ms-marco-MiniLM-L-6-v2")
+        except Exception as e:
+            logger.warning(f"Failed to load cross-encoder: {e}")
+    return _cross_encoder
+
 
 @dataclass
 class RetrievedChunk:
@@ -100,6 +115,10 @@ def retrieve(
     if not relevant and fused:
         relevant = fused[:3]
 
+    # Cross-encoder re-ranking for better precision
+    if len(relevant) > 1:
+        relevant = _cross_encoder_rerank(query, relevant)
+
     result = relevant[:top_k]
 
     # Expand top results with surrounding chunks for richer context
@@ -107,6 +126,40 @@ def retrieve(
 
     logger.info(f"Retrieved {len(result)} chunks (threshold={threshold})")
     return result
+
+
+def _cross_encoder_rerank(
+    query: str,
+    chunks: list[RetrievedChunk],
+    max_candidates: int = 30,
+) -> list[RetrievedChunk]:
+    """Re-rank chunks using a cross-encoder for better precision.
+
+    Cross-encoders score (query, passage) pairs jointly, which is much
+    more accurate than bi-encoder similarity alone.  We re-rank the top
+    candidates and return them sorted by cross-encoder score.
+    """
+    reranker = _get_cross_encoder()
+    if reranker is None:
+        return chunks  # fallback: keep original order
+
+    candidates = chunks[:max_candidates]
+    rest = chunks[max_candidates:]
+
+    try:
+        pairs = [(query, c.content[:512]) for c in candidates]
+        scores = reranker.predict(pairs)
+
+        for chunk, score in zip(candidates, scores):
+            # Normalize cross-encoder logit to 0-1 range (lower = better to match cosine distance convention)
+            chunk.relevance_score = max(0.0, 1.0 - (float(score) + 10) / 20.0)
+
+        candidates.sort(key=lambda c: c.relevance_score)
+        logger.info(f"Cross-encoder re-ranked {len(candidates)} chunks")
+        return candidates + rest
+    except Exception as e:
+        logger.warning(f"Cross-encoder re-ranking failed: {e}")
+        return chunks
 
 
 def _bm25_search(

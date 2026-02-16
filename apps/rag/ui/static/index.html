@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="/ui/static/style.css?v=11">
+  <link rel="stylesheet" href="/ui/static/style.css?v=12">
 </head>
 <body>
   <!-- ===== LOGIN SCREEN ===== -->
@@ -97,6 +97,13 @@
             <line x1="6" y1="20" x2="6" y2="14"/>
           </svg>
           Analytics
+        </button>
+        <button class="sidebar-nav-btn" id="nav-system">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          Systeem
         </button>
         <button class="sidebar-nav-btn logout-btn" id="nav-logout" style="display: none;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -473,6 +480,25 @@
         </div>
       </div>
 
+      <!-- ===== SYSTEM DOCS VIEW ===== -->
+      <div class="view" id="system-view">
+        <div class="view-header">
+          <button class="back-btn" id="system-back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"/>
+              <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Terug naar chat
+          </button>
+          <h2>Systeem Documentatie</h2>
+          <p class="view-subtitle">Compleet overzicht van alle functies, componenten en instellingen van het RAG-systeem.</p>
+        </div>
+
+        <div class="system-content" id="system-content">
+          <div class="loading-state"><div class="spinner"></div><span>Systeem informatie laden...</span></div>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -495,6 +521,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-  <script src="/ui/static/app.js?v=11"></script>
+  <script src="/ui/static/app.js?v=12"></script>
 </body>
 </html>

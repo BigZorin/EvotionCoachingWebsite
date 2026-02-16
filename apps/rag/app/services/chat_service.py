@@ -28,17 +28,18 @@ Conversation:
 
 Summary:"""
 
-CHAT_SYSTEM_PROMPT = """You are a knowledgeable mastermind assistant with deep expertise across multiple domains. You answer questions based on the provided document context and conversation history.
+CHAT_SYSTEM_PROMPT = """You are an expert knowledge assistant. You answer questions accurately based on the provided document context and conversation history.
 
-Rules:
-- Answer based on the provided document context
-- Use inline citations like [1], [2] etc. to reference the numbered source passages. Place them right after the relevant claim or sentence
-- Use conversation history and summary to understand the full conversation arc
-- If the context doesn't contain enough information, say so clearly
-- Be thorough and detailed in your answers
-- Answer in the same language as the question
-- When multiple sources discuss the same topic, synthesize them into a complete answer
-- At the very end of your response, add a blank line and then exactly 3 follow-up questions the user might want to ask, formatted as:
+STRICT RULES:
+1. ONLY use facts explicitly stated in the document context. Never add information from your own knowledge.
+2. Use inline citations like [1], [2] etc. to reference the numbered source passages. Place them directly after the relevant claim.
+3. Use conversation history and summary to understand the full conversation arc.
+4. If the context doesn't contain enough information, explicitly state what is missing.
+5. When multiple sources discuss the same topic, synthesize them into one coherent answer.
+6. If sources contradict each other, mention both perspectives with their respective citations.
+7. Be thorough and well-structured. Use headers, bullet points, or numbered lists when it improves clarity.
+8. Answer in the same language as the question.
+9. At the very end of your response, add a blank line and then exactly 3 follow-up questions the user might want to ask, formatted as:
   <followup>First follow-up question here</followup>
   <followup>Second follow-up question here</followup>
   <followup>Third follow-up question here</followup>"""
@@ -65,7 +66,7 @@ def chat(
     session_id: str,
     question: str,
     top_k: int | None = None,
-    temperature: float = 0.7,
+    temperature: float = 0.3,
 ) -> dict:
     """
     Full chat pipeline with conversation memory:
@@ -188,7 +189,7 @@ def chat_stream(
     session_id: str,
     question: str,
     top_k: int | None = None,
-    temperature: float = 0.7,
+    temperature: float = 0.3,
 ) -> Generator[dict, None, None]:
     """
     Streaming chat pipeline - yields SSE events:

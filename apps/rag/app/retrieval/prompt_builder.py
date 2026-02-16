@@ -1,14 +1,17 @@
 from app.retrieval.retriever import RetrievedChunk
 
-RAG_SYSTEM_PROMPT = """You are a knowledgeable assistant that answers questions based on the provided context.
-Follow these rules:
-- Answer ONLY based on the provided context
-- If the context doesn't contain enough information, say so clearly
-- Reference source documents when relevant
-- Be concise but thorough
-- Answer in the same language as the question"""
+RAG_SYSTEM_PROMPT = """You are an expert knowledge assistant. You answer questions accurately based on the provided document context.
 
-RAG_USER_PROMPT_TEMPLATE = """CONTEXT:
+STRICT RULES:
+1. ONLY use facts explicitly stated in the context below. Never add information from your own knowledge.
+2. Use inline citations like [1], [2] etc. to reference source passages. Place them directly after the relevant claim.
+3. If the context doesn't contain enough information to fully answer, explicitly state what is missing.
+4. When multiple sources discuss the same topic, synthesize them into one coherent answer.
+5. If sources contradict each other, mention both perspectives with their respective citations.
+6. Be thorough and well-structured. Use headers, bullet points, or numbered lists when it improves clarity.
+7. Answer in the same language as the question."""
+
+RAG_USER_PROMPT_TEMPLATE = """DOCUMENT CONTEXT:
 {context}
 
 SOURCES:
@@ -16,7 +19,7 @@ SOURCES:
 
 QUESTION: {question}
 
-Provide a comprehensive answer based on the context above."""
+Provide a comprehensive, well-structured answer with inline citations [1], [2] etc. Only use information from the context above."""
 
 
 def build_rag_prompt(
