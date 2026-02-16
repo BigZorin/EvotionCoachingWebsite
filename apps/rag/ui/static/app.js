@@ -577,6 +577,7 @@ async function streamResponse(sessionId, message) {
   let fullText = '';
   let sources = [];
   let messageId = null;
+  let modelUsed = null;
 
   const res = await fetch(`${API}/chat/sessions/${sessionId}/messages/stream`, {
     method: 'POST',
@@ -625,6 +626,7 @@ async function streamResponse(sessionId, message) {
           scrollToBottom();
         } else if (eventType === 'done') {
           messageId = data.message_id || null;
+          modelUsed = data.model_used || null;
         } else if (eventType === 'error') {
           statusEl.style.display = 'none';
           streamingText.innerHTML = `<p class="error-text">Fout: ${escapeHtml(data.detail || 'Onbekende fout')}</p>`;
@@ -643,6 +645,7 @@ async function streamResponse(sessionId, message) {
   const sourcesHtml = buildSourcesHtml(sources);
   const followupsHtml = buildFollowupsHtml(followups);
 
+  const providerLabelHtml = modelUsed ? `<span class="provider-label">${escapeHtml(_formatProviderLabel(modelUsed))}</span>` : '';
   const feedbackHtml = `<div class="message-actions">
     <div class="message-feedback" data-feedback="none"${messageId ? ` data-message-id="${messageId}"` : ''}>
       <button class="feedback-btn thumbs-up" title="Goed antwoord">
@@ -661,6 +664,7 @@ async function streamResponse(sessionId, message) {
         <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
       </svg>
     </button>
+    ${providerLabelHtml}
   </div>`;
 
   contentEl.innerHTML = `
@@ -2381,11 +2385,12 @@ function _formatProviderLabel(raw) {
   const provider = match[1].charAt(0).toUpperCase() + match[1].slice(1);
   let model = match[2]
     .replace('meta-llama/', '')
-    .replace(/-/g, ' ')
     .replace(':free', '')
-    .replace(/\b(\d+)b\b/gi, '$1B')
-    .replace('versatile', '70B');
-  // Capitalize first letter of each word
+    .replace(/-/g, ' ')
+    .replace(/\b(versatile|instruct)\b/gi, '')   // strip noise words
+    .replace(/\b(\d+)b\b/gi, '$1B')              // 70b → 70B
+    .replace(/\s{2,}/g, ' ')                       // collapse double spaces
+    .trim();
   model = model.replace(/\b\w/g, c => c.toUpperCase());
   return `${provider} · ${model}`;
 }

@@ -292,7 +292,11 @@ def chat_stream(
 
     # 4. Stream the answer
     full_answer = []
-    for token in generate_stream(prompt=user_prompt, system=system_prompt, temperature=temperature):
+    provider_info = {"name": "unknown"}
+    for token in generate_stream(
+        prompt=user_prompt, system=system_prompt,
+        temperature=temperature, provider_info=provider_info,
+    ):
         full_answer.append(token)
         yield {"event": "token", "data": token}
 
@@ -309,7 +313,7 @@ def chat_stream(
     yield {"event": "done", "data": {
         "session_id": session_id,
         "message_id": assistant_msg["id"],
-        "model_used": get_active_provider(),
+        "model_used": provider_info["name"],
     }}
 
 

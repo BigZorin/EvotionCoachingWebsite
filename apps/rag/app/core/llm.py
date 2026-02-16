@@ -73,27 +73,10 @@ def _groq_generate_stream(
         temperature=temperature,
         max_tokens=4096,
         stream=True,
-        stream_options={"include_usage": True},
     )
-    usage_data = None
     for chunk in stream:
-        if chunk.usage:
-            usage_data = chunk.usage
         if chunk.choices and chunk.choices[0].delta.content:
             yield chunk.choices[0].delta.content
-
-    # Track usage after stream completes
-    if usage_data:
-        try:
-            from app.core.usage_tracker import log_llm_usage
-            log_llm_usage(
-                model=settings.groq_model,
-                input_tokens=usage_data.prompt_tokens or 0,
-                output_tokens=usage_data.completion_tokens or 0,
-                total_tokens=usage_data.total_tokens or 0,
-            )
-        except Exception as e:
-            logger.debug(f"Usage tracking failed: {e}")
 
 
 # ============================================================
@@ -288,12 +271,19 @@ def generate(prompt: str, system: str | None = None, temperature: float = 0.7) -
 
 
 def generate_stream(
-    prompt: str, system: str | None = None, temperature: float = 0.7
+    prompt: str, system: str | None = None, temperature: float = 0.7,
+    provider_info: dict | None = None,
 ) -> Generator[str, None, None]:
-    """Stream a response. Groq → OpenRouter → Ollama fallback chain."""
+    """Stream a response. Groq → OpenRouter → Ollama fallback chain.
+
+    If *provider_info* dict is passed, it will be updated with the key
+    ``"name"`` set to the provider that actually handled the request.
+    """
     # 1. Try Groq (primary)
     if settings.llm_provider == "groq" and settings.groq_api_key:
         try:
+            if provider_info is not None:
+                provider_info["name"] = f"groq ({settings.groq_model})"
             yield from _groq_generate_stream(prompt, system, temperature)
             return
         except Exception as e:
@@ -302,6 +292,8 @@ def generate_stream(
     # 2. Try OpenRouter (secondary cloud)
     if settings.openrouter_api_key:
         try:
+            if provider_info is not None:
+                provider_info["name"] = f"openrouter ({settings.openrouter_model})"
             yield from _openrouter_generate_stream(prompt, system, temperature)
             return
         except Exception as e:
@@ -309,6 +301,8 @@ def generate_stream(
 
     # 3. Try Ollama (local last resort)
     try:
+        if provider_info is not None:
+            provider_info["name"] = f"ollama ({settings.ollama_generation_model})"
         yield from _ollama_generate_stream(prompt, system, temperature)
     except Exception as e:
         logger.error(

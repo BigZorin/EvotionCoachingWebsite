@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     # OpenRouter (secondary cloud fallback)
     openrouter_api_key: str = ""
-    openrouter_model: str = "meta-llama/llama-3.1-8b-instruct:free"
+    openrouter_model: str = "meta-llama/llama-3.3-70b-instruct:free"
     openrouter_timeout: int = 60
 
     # Ollama (embeddings + local fallback LLM)
