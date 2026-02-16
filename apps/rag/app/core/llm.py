@@ -38,7 +38,7 @@ def _groq_generate(prompt: str, system: str | None = None, temperature: float = 
         model=settings.groq_model,
         messages=messages,
         temperature=temperature,
-        max_tokens=4096,
+        max_tokens=1536,
     )
 
     # Track usage
@@ -71,7 +71,7 @@ def _groq_generate_stream(
         model=settings.groq_model,
         messages=messages,
         temperature=temperature,
-        max_tokens=4096,
+        max_tokens=1536,
         stream=True,
     )
     for chunk in stream:
@@ -116,7 +116,7 @@ def _openrouter_generate(prompt: str, system: str | None = None, temperature: fl
             "model": settings.openrouter_model,
             "messages": messages,
             "temperature": temperature,
-            "max_tokens": 4096,
+            "max_tokens": 1536,
         },
     )
     response.raise_for_status()
@@ -158,7 +158,7 @@ def _openrouter_generate_stream(
             "model": settings.openrouter_model,
             "messages": messages,
             "temperature": temperature,
-            "max_tokens": 4096,
+            "max_tokens": 1536,
             "stream": True,
         },
         timeout=float(settings.openrouter_timeout),
@@ -235,16 +235,19 @@ def _ollama_generate_stream(
 
 
 # ============================================================
-# Public API — Fallback chain: Groq → OpenRouter → Ollama
+# Public API — Fallback chain: Groq → OpenRouter (no local Ollama for generation)
 # ============================================================
 
 def generate(prompt: str, system: str | None = None, temperature: float = 0.7) -> str:
-    """Generate a response. Groq → OpenRouter → Ollama fallback chain."""
+    """Generate a response. Groq → OpenRouter fallback chain (no local Ollama — too slow on CPU)."""
+    errors = []
+
     # 1. Try Groq (primary)
     if settings.llm_provider == "groq" and settings.groq_api_key:
         try:
             return _groq_generate(prompt, system, temperature)
         except Exception as e:
+            errors.append(f"Groq: {e}")
             logger.warning(f"Groq failed: {e}")
 
     # 2. Try OpenRouter (secondary cloud)
@@ -252,33 +255,28 @@ def generate(prompt: str, system: str | None = None, temperature: float = 0.7) -
         try:
             return _openrouter_generate(prompt, system, temperature)
         except Exception as e:
+            errors.append(f"OpenRouter: {e}")
             logger.warning(f"OpenRouter failed: {e}")
 
-    # 3. Try Ollama (local last resort)
-    try:
-        return _ollama_generate(prompt, system, temperature)
-    except Exception as e:
-        logger.error(
-            f"All LLM providers failed. "
-            f"Groq: configured={bool(settings.groq_api_key)}, "
-            f"OpenRouter: configured={bool(settings.openrouter_api_key)}, "
-            f"Ollama: {e}"
-        )
-        raise RuntimeError(
-            "All LLM providers are unavailable. Groq, OpenRouter and Ollama all failed. "
-            "Please check that at least one provider is running."
-        ) from e
+    # No Ollama fallback for generation — too slow on CPU VPS
+    logger.error(f"All cloud LLM providers failed: {'; '.join(errors)}")
+    raise RuntimeError(
+        "Alle LLM-providers zijn tijdelijk niet beschikbaar (rate limit of storing). "
+        "Probeer het over een minuut opnieuw."
+    )
 
 
 def generate_stream(
     prompt: str, system: str | None = None, temperature: float = 0.7,
     provider_info: dict | None = None,
 ) -> Generator[str, None, None]:
-    """Stream a response. Groq → OpenRouter → Ollama fallback chain.
+    """Stream a response. Groq → OpenRouter fallback chain (no local Ollama — too slow on CPU).
 
     If *provider_info* dict is passed, it will be updated with the key
     ``"name"`` set to the provider that actually handled the request.
     """
+    errors = []
+
     # 1. Try Groq (primary)
     if settings.llm_provider == "groq" and settings.groq_api_key:
         try:
@@ -287,6 +285,7 @@ def generate_stream(
             yield from _groq_generate_stream(prompt, system, temperature)
             return
         except Exception as e:
+            errors.append(f"Groq: {e}")
             logger.warning(f"Groq streaming failed: {e}")
 
     # 2. Try OpenRouter (secondary cloud)
@@ -297,24 +296,15 @@ def generate_stream(
             yield from _openrouter_generate_stream(prompt, system, temperature)
             return
         except Exception as e:
+            errors.append(f"OpenRouter: {e}")
             logger.warning(f"OpenRouter streaming failed: {e}")
 
-    # 3. Try Ollama (local last resort)
-    try:
-        if provider_info is not None:
-            provider_info["name"] = f"ollama ({settings.ollama_generation_model})"
-        yield from _ollama_generate_stream(prompt, system, temperature)
-    except Exception as e:
-        logger.error(
-            f"All LLM providers failed (stream). "
-            f"Groq: configured={bool(settings.groq_api_key)}, "
-            f"OpenRouter: configured={bool(settings.openrouter_api_key)}, "
-            f"Ollama: {e}"
-        )
-        raise RuntimeError(
-            "All LLM providers are unavailable. Groq, OpenRouter and Ollama all failed. "
-            "Please check that at least one provider is running."
-        ) from e
+    # No Ollama fallback for generation — too slow on CPU VPS
+    logger.error(f"All cloud LLM providers failed (stream): {'; '.join(errors)}")
+    raise RuntimeError(
+        "Alle LLM-providers zijn tijdelijk niet beschikbaar (rate limit of storing). "
+        "Probeer het over een minuut opnieuw."
+    )
 
 
 def get_active_provider() -> str:
@@ -323,7 +313,7 @@ def get_active_provider() -> str:
         return f"groq ({settings.groq_model})"
     if settings.openrouter_api_key:
         return f"openrouter ({settings.openrouter_model})"
-    return f"ollama ({settings.ollama_generation_model})"
+    return "none (no cloud LLM configured)"
 
 
 # ============================================================

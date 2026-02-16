@@ -42,10 +42,16 @@ function authHeaders() {
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 }
 
-function showLoginScreen() {
+function showLoginScreen(errorMsg) {
   document.getElementById('login-overlay').style.display = 'flex';
   document.querySelector('.app').style.display = 'none';
-  document.getElementById('login-error').style.display = 'none';
+  const errorEl = document.getElementById('login-error');
+  if (errorMsg) {
+    errorEl.textContent = errorMsg;
+    errorEl.style.display = 'block';
+  } else {
+    errorEl.style.display = 'none';
+  }
   document.getElementById('login-token').value = '';
   document.getElementById('login-token').focus();
 }
@@ -80,9 +86,10 @@ async function checkAuth() {
       }
     }
   } catch {
-    // Server unreachable, show app anyway (offline mode)
-    hideLoginScreen();
-    return true;
+    // Server unreachable — do NOT bypass auth
+    console.warn('Auth check failed: server unreachable');
+    showLoginScreen('Server niet bereikbaar. Probeer het later opnieuw.');
+    return false;
   }
   showLoginScreen();
   return false;
@@ -218,7 +225,11 @@ function renderMarkdown(text, sources) {
         return code;
       },
     });
-    html = marked.parse(text);
+    const rawHtml = marked.parse(text);
+    // SECURITY: refuse to render HTML if DOMPurify is not loaded
+    html = typeof DOMPurify !== 'undefined'
+      ? DOMPurify.sanitize(rawHtml)
+      : rawHtml.replace(/</g, '&lt;').replace(/>/g, '&gt;');
   } else {
     html = text
       .replace(/&/g, '&amp;')
@@ -609,7 +620,13 @@ async function streamResponse(sessionId, message) {
       if (line.startsWith('event: ')) {
         eventType = line.slice(7).trim();
       } else if (line.startsWith('data: ') && eventType) {
-        const data = JSON.parse(line.slice(6));
+        let data;
+        try {
+          data = JSON.parse(line.slice(6));
+        } catch {
+          console.warn('SSE: malformed JSON, skipping line', line);
+          continue;
+        }
 
         if (eventType === 'status') {
           statusEl.querySelector('span').textContent = data;
@@ -629,7 +646,9 @@ async function streamResponse(sessionId, message) {
           modelUsed = data.model_used || null;
         } else if (eventType === 'error') {
           statusEl.style.display = 'none';
-          streamingText.innerHTML = `<p class="error-text">Fout: ${escapeHtml(data.detail || 'Onbekende fout')}</p>`;
+          streamingText.innerHTML = `<p class="error-text">⚠️ ${escapeHtml(data.detail || 'Onbekende fout')}</p>`;
+          done = true;
+          break;
         }
         eventType = null;
       }

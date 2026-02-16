@@ -102,8 +102,10 @@ done
 echo "  Pulling nomic-embed-text (embeddings, ~274MB)..."
 docker compose exec -T ollama ollama pull nomic-embed-text
 
-echo "  Pulling llama3.1:8b (fallback LLM, ~4.7GB)..."
-docker compose exec -T ollama ollama pull llama3.1:8b
+# llama3.1:8b no longer used for generation (too slow on CPU)
+# Uncomment below if you want local LLM for testing:
+# echo "  Pulling llama3.1:8b (local LLM, ~4.7GB)..."
+# docker compose exec -T ollama ollama pull llama3.1:8b
 
 # --- 9. Restart RAG to pick up Ollama ---
 echo ""

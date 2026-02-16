@@ -1,4 +1,6 @@
-from fastapi import APIRouter, File, Form, UploadFile
+import re
+
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 
 from app.models.schemas import DocumentUploadResponse, BatchUploadResponse
@@ -6,12 +8,18 @@ from app.services.ingestion_service import process_upload, process_batch_upload,
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
+# Must match collections.py validation
+_COLLECTION_NAME_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$")
+MAX_BATCH_FILES = 20
+
 
 @router.post("/upload", response_model=DocumentUploadResponse)
 async def upload_document(
     file: UploadFile = File(...),
     collection: str = Form(default="default"),
 ):
+    if not _COLLECTION_NAME_RE.match(collection):
+        raise HTTPException(status_code=400, detail="Invalid collection name (alphanumeric, hyphens, underscores, 1-64 chars)")
     result = await process_upload(file, collection)
     return DocumentUploadResponse(
         document_id=result.get("document_id", ""),
@@ -29,6 +37,10 @@ async def upload_batch(
     files: list[UploadFile] = File(...),
     collection: str = Form(default="default"),
 ):
+    if not _COLLECTION_NAME_RE.match(collection):
+        raise HTTPException(status_code=400, detail="Invalid collection name")
+    if len(files) > MAX_BATCH_FILES:
+        raise HTTPException(status_code=400, detail=f"Too many files (max {MAX_BATCH_FILES} per batch)")
     results = await process_batch_upload(files, collection)
     documents = [
         DocumentUploadResponse(

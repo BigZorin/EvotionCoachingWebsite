@@ -43,10 +43,21 @@ async def process_upload(
 
     # Save file to disk
     try:
+        # Check Content-Length header before reading body (avoids loading huge files into memory)
+        max_bytes = settings.max_file_size_mb * 1024 * 1024
+        if file.size and file.size > max_bytes:
+            return {
+                "filename": filename,
+                "status": "error",
+                "error": f"File too large: {file.size / 1024 / 1024:.1f}MB (max {settings.max_file_size_mb}MB)",
+                "document_id": "",
+                "chunks_created": 0,
+                "collection": collection,
+            }
+
         content = await file.read()
 
-        # Enforce file size limit
-        max_bytes = settings.max_file_size_mb * 1024 * 1024
+        # Double-check actual size after read (Content-Length can be missing or wrong)
         if len(content) > max_bytes:
             return {
                 "filename": filename,

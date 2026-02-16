@@ -85,7 +85,9 @@ class AudioProcessor(BaseProcessor):
         if file_path.suffix.lower() in (".mp3", ".wav", ".flac", ".ogg"):
             return file_path
 
-        output = Path(tempfile.mktemp(suffix=".mp3"))
+        tmp = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False)
+        tmp.close()
+        output = Path(tmp.name)
         cmd = [
             "ffmpeg", "-i", str(file_path),
             "-vn",                    # no video
@@ -119,7 +121,9 @@ class AudioProcessor(BaseProcessor):
 
         for i in range(num_segments):
             start = i * segment_seconds
-            output = Path(tempfile.mktemp(suffix=f"_seg{i}.mp3"))
+            tmp = tempfile.NamedTemporaryFile(suffix=f"_seg{i}.mp3", delete=False)
+            tmp.close()
+            output = Path(tmp.name)
             cmd = [
                 "ffmpeg", "-i", str(audio_path),
                 "-ss", str(start),

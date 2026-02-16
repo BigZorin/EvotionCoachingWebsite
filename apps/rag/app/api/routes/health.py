@@ -12,17 +12,15 @@ def health_check():
     ollama_embed = check_ollama_embeddings()
     groq_ok = check_groq()
     openrouter_ok = check_openrouter()
-    ollama_gen = check_ollama_generation()
 
-    # System is OK if embeddings work AND at least one LLM is available
-    llm_ok = groq_ok or openrouter_ok or ollama_gen
+    # System is OK if embeddings work AND at least one cloud LLM is available
+    llm_ok = groq_ok or openrouter_ok
 
     return {
         "status": "ok" if (ollama_embed and llm_ok) else "degraded",
         "ollama_embeddings": ollama_embed,
         "groq": groq_ok,
         "openrouter": openrouter_ok,
-        "ollama_generation": ollama_gen,
         "active_provider": get_active_provider(),
         "chroma": True,
     }
@@ -48,7 +46,7 @@ def system_info():
                 {"name": "FastAPI Backend", "description": "REST API server die alle verzoeken afhandelt", "status": "active"},
                 {"name": "Groq LLM (Primair)", "description": f"Cloud LLM ({settings.groq_model}) voor snelle antwoordgeneratie", "model": settings.groq_model},
                 {"name": "OpenRouter (Fallback)", "description": f"Cloud LLM fallback ({settings.openrouter_model}) — automatisch actief als Groq faalt", "model": settings.openrouter_model},
-                {"name": "Ollama LLM (Lokaal)", "description": f"Lokale LLM fallback ({settings.ollama_generation_model}) — laatste redmiddel als beide cloud providers falen", "model": settings.ollama_generation_model},
+                {"name": "Ollama (Embeddings Only)", "description": f"Lokale Ollama wordt alleen gebruikt voor embeddings — niet voor LLM generatie (te traag op CPU)"},
                 {"name": "Ollama Embeddings", "description": f"Lokale embedding-engine ({settings.embedding_model}) voor vectorisatie", "model": settings.embedding_model},
                 {"name": "ChromaDB", "description": "Lokale vector database voor opslag en zoeken van document-chunks"},
                 {"name": "Cross-Encoder", "description": "Re-ranking model (ms-marco-MiniLM-L-6-v2) voor nauwkeurigere resultaten"},
@@ -121,12 +119,12 @@ def system_info():
             "features": [
                 {"name": "SSRF Bescherming", "description": "URL-ingestion blokkeert private IP-adressen (RFC 1918), loopback, link-local en cloud metadata endpoints. DNS-resolutie wordt gevalideerd vóór het opvragen."},
                 {"name": "Upload Limiet", "description": f"Bestanden groter dan {settings.max_file_size_mb} MB worden geweigerd vóór verwerking om geheugen- en opslagmisbruik te voorkomen"},
-                {"name": "CORS Restrictie", "description": "Alleen verzoeken van rag.evotiondata.com en localhost worden geaccepteerd met beperkte HTTP-methoden (GET/POST/DELETE/OPTIONS) en headers (Content-Type/Authorization)"},
+                {"name": "CORS Restrictie", "description": "Alleen verzoeken van rag.evotiondata.com en localhost worden geaccepteerd met beperkte HTTP-methoden (GET/POST/PUT/DELETE/OPTIONS) en headers (Content-Type/Authorization)"},
                 {"name": "Embedding Dimensie-check", "description": "Fallback naar sentence-transformers (384-dim) wordt geblokkeerd als de collectie 768-dim vectors verwacht — voorkomt ChromaDB-fouten"},
-                {"name": "Triple-Provider Failover", "description": "Automatische fallback-keten: Groq → OpenRouter → Ollama. Als alle drie falen, krijgt de client een duidelijke foutmelding"},
+                {"name": "Dual-Provider Failover", "description": "Automatische fallback: Groq → OpenRouter. Als beide cloud-providers falen (rate limit), krijgt de gebruiker een duidelijke foutmelding i.p.v. een eindeloos wachtende Ollama-request"},
                 {"name": "Collectienaam Validatie", "description": "Alle collectie-endpoints valideren namen op alfanumerieke tekens, streepjes en underscores (1-64 chars, moet starten met alfanumeriek)"},
                 {"name": "Auth Startup Check", "description": "Server weigert te starten als AUTH_ENABLED=true maar AUTH_TOKEN leeg is — voorkomt onbeveiligde API"},
-                {"name": "API Timeouts", "description": f"Groq: 60s, OpenRouter: {settings.openrouter_timeout}s, Ollama generatie: 120s, Ollama embeddings: 30s — voorkomt hangende requests"},
+                {"name": "API Timeouts", "description": f"Groq: 60s, OpenRouter: {settings.openrouter_timeout}s, Ollama embeddings: 30s — voorkomt hangende requests"},
                 {"name": "Database Connection Management", "description": "Context managers (with-statement) garanderen dat SQLite-connecties altijd worden gesloten, ook bij fouten"},
                 {"name": "BM25 Memory Cap", "description": "Maximum 10.000 documenten per BM25-zoekopdracht om geheugenoverloop te voorkomen bij grote collecties"},
                 {"name": "SSE Error Handling", "description": "Streaming responses sturen een error-event naar de client bij onverwachte fouten in plaats van stil te crashen"},
@@ -138,8 +136,19 @@ def system_info():
                 {"name": "Per-Response Provider Tracking", "description": "Elke streaming response bevat in het 'done' event de daadwerkelijk gebruikte LLM provider — UI toont dit als label onder elk antwoord"},
                 {"name": "RRF Score Blending", "description": "Reciprocal Rank Fusion gebruikt gewogen gemiddelde (40% origineel + 60% RRF positie) voor nauwkeurigere relevantie-scores"},
                 {"name": "SSRF Redirect Validatie", "description": "Na HTTP-redirects wordt het eindpunt opnieuw gevalideerd tegen private IP-adressen — voorkomt SSRF bypass via open-redirect chains"},
-                {"name": "Chat History Truncatie", "description": "Lange assistant-antwoorden in gesprekshistorie worden afgekapt op 2000 tekens om prompt-overflow te voorkomen"},
+                {"name": "Chat History Truncatie", "description": "Lange assistant-antwoorden in gesprekshistorie worden afgekapt op 500 tekens — bespaart ~70% tokens op gesprekscontext"},
+                {"name": "XSS Sanitatie", "description": "Alle LLM-gegenereerde markdown wordt gesaniteerd met DOMPurify voordat het in de DOM wordt geplaatst — voorkomt XSS via geïnjecteerde HTML/scripts in documenten"},
+                {"name": "SSE Foutbestendigheid", "description": "JSON.parse in de SSE-streamlezer is gewrapped in try/catch — malformed events worden overgeslagen i.p.v. de hele UI te crashen"},
+                {"name": "Auth Bypass Preventie", "description": "Bij onbereikbare server wordt de login-scherm getoond met foutmelding i.p.v. de app zonder authenticatie te tonen"},
+                {"name": "Upload Pre-Check", "description": "Bestandsgrootte wordt gecontroleerd via Content-Length header vóór het inlezen in geheugen — voorkomt OOM bij grote uploads"},
+                {"name": "Graceful OCR Degradatie", "description": "ImageProcessor wordt alleen geregistreerd als easyocr daadwerkelijk geïnstalleerd is — geen crash bij ontbrekende dependency"},
                 {"name": "Performance-Optimized Pipeline", "description": "Multi-query expansie standaard uit (bespaart 1-2s LLM call), cross-encoder beperkt tot top 10 (i.p.v. 30), neighbor expansion beperkt tot top 3 (i.p.v. 5), context chunks verlaagd naar 15 — samen ~50% snellere response tijd"},
+                {"name": "API Docs Uitgeschakeld", "description": "Swagger UI (/docs), ReDoc (/redoc) en OpenAPI schema (/openapi.json) zijn uitgeschakeld in productie — voorkomt volledige API-reconnaissance door aanvallers"},
+                {"name": "Security Headers", "description": "Alle responses bevatten X-Content-Type-Options: nosniff, X-Frame-Options: DENY, Referrer-Policy, Permissions-Policy, X-XSS-Protection en HSTS (op HTTPS) — beschermt tegen clickjacking, MIME-sniffing en token-lekkage"},
+                {"name": "Rate Limiting", "description": "In-memory rate limiter: auth endpoint max 5 pogingen/minuut per IP, API endpoints max 60 requests/minuut per IP — voorkomt brute-force en API-misbruik"},
+                {"name": "SRI Integrity Hashes", "description": "Alle externe CDN-scripts (marked, DOMPurify, highlight.js) laden met Subresource Integrity hashes en gepinde versies — voorkomt supply-chain aanvallen via gecompromitteerde CDN's"},
+                {"name": "Batch Upload Limiet", "description": "Maximaal 20 bestanden per batch-upload, met collectienaam-validatie op alle upload-endpoints — voorkomt resource exhaustion"},
+                {"name": "Veilige Temp-Bestanden", "description": "Audio/video processing gebruikt NamedTemporaryFile i.p.v. het onveilige mktemp — voorkomt race conditions bij tijdelijke bestanden"},
             ],
         },
         "config": {
@@ -148,7 +157,7 @@ def system_info():
                 "LLM Provider (Primair)": settings.llm_provider,
                 "Groq Model": settings.groq_model,
                 "OpenRouter Model (Fallback)": settings.openrouter_model,
-                "Ollama Generation Model (Lokaal)": settings.ollama_generation_model,
+                "Ollama (Embeddings Only)": settings.embedding_model,
                 "Embedding Model": settings.embedding_model,
                 "Chunk Size": f"{settings.chunk_size} tekens",
                 "Chunk Overlap": f"{settings.chunk_overlap} tekens",

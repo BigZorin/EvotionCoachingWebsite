@@ -378,8 +378,8 @@ def _format_messages(messages: list[dict]) -> str:
         role = "User" if msg["role"] == "user" else "Assistant"
         content = msg["content"]
         # Truncate very long assistant responses in history
-        if role == "Assistant" and len(content) > 2000:
-            content = content[:2000] + "..."
+        if role == "Assistant" and len(content) > 500:
+            content = content[:500] + "..."
         lines.append(f"{role}: {content}")
     return "\n".join(lines)
 

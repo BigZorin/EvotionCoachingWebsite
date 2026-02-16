@@ -1,5 +1,7 @@
 import hmac
 import logging
+import time
+from collections import defaultdict
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -13,6 +15,24 @@ from app.core.vectorstore import get_chroma_client
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# --- Simple in-memory rate limiter ---
+_rate_limit_store: dict[str, list[float]] = defaultdict(list)
+RATE_LIMIT_WINDOW = 60  # seconds
+RATE_LIMIT_AUTH = 5      # max auth attempts per window
+RATE_LIMIT_API = 60      # max API requests per window
+
+
+def _check_rate_limit(key: str, max_requests: int) -> bool:
+    """Returns True if request is allowed, False if rate-limited."""
+    now = time.monotonic()
+    window_start = now - RATE_LIMIT_WINDOW
+    # Clean old entries
+    _rate_limit_store[key] = [t for t in _rate_limit_store[key] if t > window_start]
+    if len(_rate_limit_store[key]) >= max_requests:
+        return False
+    _rate_limit_store[key].append(now)
+    return True
 
 # Paths that don't require authentication
 PUBLIC_PATHS = {"/api/v1/health", "/api/v1/auth/verify"}
@@ -43,7 +63,7 @@ async def lifespan(app: FastAPI):
 
     # Check LLM connectivity
     from app.core.embeddings import check_ollama_embeddings
-    from app.core.llm import check_ollama_generation, check_groq, get_active_provider
+    from app.core.llm import check_groq, check_openrouter, get_active_provider
 
     if check_ollama_embeddings():
         logger.info(f"Ollama embeddings ready ({settings.embedding_model})")
@@ -55,8 +75,10 @@ async def lifespan(app: FastAPI):
     elif settings.groq_api_key:
         logger.warning("Groq API key set but connection failed")
 
-    if check_ollama_generation():
-        logger.info(f"Ollama generation ready ({settings.ollama_generation_model})")
+    if settings.openrouter_api_key and check_openrouter():
+        logger.info(f"OpenRouter ready ({settings.openrouter_model})")
+    elif settings.openrouter_api_key:
+        logger.warning("OpenRouter API key set but connection failed")
 
     logger.info(f"Active LLM provider: {get_active_provider()}")
 
@@ -80,6 +102,10 @@ app = FastAPI(
     description="Local RAG system for document processing and intelligent Q&A",
     version="1.0.0",
     lifespan=lifespan,
+    # Disable public API docs — prevents full API schema reconnaissance
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
 )
 
 # CORS: restrict to our own domain (Caddy proxies from this origin)
@@ -95,6 +121,20 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
 )
+
+
+# --- Security headers middleware ---
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    if request.url.scheme == "https":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
 
 
 # --- Authentication middleware ---
@@ -114,6 +154,17 @@ async def auth_middleware(request: Request, call_next):
 
     # All other /api/ routes require auth
     if path.startswith("/api/"):
+        client_ip = request.client.host if request.client else "unknown"
+
+        # Rate limit: stricter for auth, looser for regular API
+        if path == "/api/v1/auth/verify":
+            if not _check_rate_limit(f"auth:{client_ip}", RATE_LIMIT_AUTH):
+                logger.warning(f"Auth rate limit exceeded for {client_ip}")
+                return JSONResponse(status_code=429, content={"detail": "Too many attempts. Try again later."})
+        else:
+            if not _check_rate_limit(f"api:{client_ip}", RATE_LIMIT_API):
+                return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded. Try again later."})
+
         auth_header = request.headers.get("authorization", "")
         if not auth_header.startswith("Bearer "):
             return JSONResponse(status_code=401, content={"detail": "Authentication required"})
