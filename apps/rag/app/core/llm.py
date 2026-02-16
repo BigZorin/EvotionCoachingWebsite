@@ -151,8 +151,14 @@ def generate(prompt: str, system: str | None = None, temperature: float = 0.7) -
             return _groq_generate(prompt, system, temperature)
         except Exception as e:
             logger.warning(f"Groq failed, falling back to Ollama: {e}")
-            return _ollama_generate(prompt, system, temperature)
-    return _ollama_generate(prompt, system, temperature)
+    try:
+        return _ollama_generate(prompt, system, temperature)
+    except Exception as e:
+        logger.error(f"Both LLM providers failed. Groq: configured={bool(settings.groq_api_key)}, Ollama: {e}")
+        raise RuntimeError(
+            "All LLM providers are unavailable. Both Groq and Ollama failed to generate a response. "
+            "Please check that at least one provider is running."
+        ) from e
 
 
 def generate_stream(
@@ -165,7 +171,14 @@ def generate_stream(
             return
         except Exception as e:
             logger.warning(f"Groq streaming failed, falling back to Ollama: {e}")
-    yield from _ollama_generate_stream(prompt, system, temperature)
+    try:
+        yield from _ollama_generate_stream(prompt, system, temperature)
+    except Exception as e:
+        logger.error(f"Both LLM providers failed (stream). Groq: configured={bool(settings.groq_api_key)}, Ollama: {e}")
+        raise RuntimeError(
+            "All LLM providers are unavailable. Both Groq and Ollama failed to stream a response. "
+            "Please check that at least one provider is running."
+        ) from e
 
 
 def get_active_provider() -> str:

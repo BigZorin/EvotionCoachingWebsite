@@ -1,3 +1,5 @@
+import re
+
 from fastapi import APIRouter, HTTPException
 
 from app.core.database import list_agents
@@ -20,8 +22,17 @@ def list_all_collections():
     return CollectionListResponse(collections=collections)
 
 
+# Only allow safe collection names: alphanumeric, dash, underscore, 1-64 chars
+_COLLECTION_NAME_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$")
+
+
 @router.post("", response_model=CollectionInfo)
 def create_new_collection(body: CollectionCreate):
+    if not _COLLECTION_NAME_RE.match(body.name):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid collection name. Use only letters, numbers, dashes and underscores (1-64 chars, must start with alphanumeric).",
+        )
     return create_collection(body.name)
 
 

@@ -59,7 +59,15 @@ async def lifespan(app: FastAPI):
         logger.info(f"Ollama generation ready ({settings.ollama_generation_model})")
 
     logger.info(f"Active LLM provider: {get_active_provider()}")
-    logger.info(f"Authentication: {'enabled' if settings.auth_enabled and settings.auth_token else 'disabled'}")
+
+    # Auth safety: if auth is enabled but no token is set, refuse to start unprotected
+    if settings.auth_enabled and not settings.auth_token:
+        logger.critical(
+            "AUTH_ENABLED=true but AUTH_TOKEN is empty! "
+            "API is UNPROTECTED. Set AUTH_TOKEN in .env or disable auth with AUTH_ENABLED=false."
+        )
+        raise SystemExit("Refusing to start: AUTH_ENABLED=true but AUTH_TOKEN is not set.")
+    logger.info(f"Authentication: {'enabled' if settings.auth_enabled else 'disabled'}")
 
     yield
 
@@ -74,9 +82,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# CORS: restrict to our own domain (Caddy proxies from this origin)
+_allowed_origins = [
+    "https://rag.evotiondata.com",
+    "http://localhost:8000",   # local development
+    "http://127.0.0.1:8000",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

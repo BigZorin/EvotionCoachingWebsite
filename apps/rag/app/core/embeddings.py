@@ -25,6 +25,13 @@ def _get_sentence_transformer():
     return _st_model
 
 
+# Ollama nomic-embed-text produces 768-dim vectors; sentence-transformers fallback
+# produces 384-dim. ChromaDB rejects mismatched dimensions, so we must NEVER
+# silently switch between the two once a collection exists.
+OLLAMA_EMBEDDING_DIM = 768
+FALLBACK_EMBEDDING_DIM = 384
+
+
 def embed_text(text: str) -> list[float]:
     try:
         client = _get_ollama_client()
@@ -34,10 +41,16 @@ def embed_text(text: str) -> list[float]:
         )
         return response["embedding"]
     except Exception as e:
-        logger.warning(f"Ollama embedding failed, using sentence-transformers fallback: {e}")
-        model = _get_sentence_transformer()
-        embedding = model.encode(text)
-        return embedding.tolist()
+        logger.error(
+            f"Ollama embedding failed: {e}. "
+            f"Sentence-transformers fallback produces {FALLBACK_EMBEDDING_DIM}-dim vectors "
+            f"which are INCOMPATIBLE with existing {OLLAMA_EMBEDDING_DIM}-dim collections. "
+            "Refusing to fall back to avoid dimension mismatch."
+        )
+        raise RuntimeError(
+            f"Embedding service unavailable. Ollama ({settings.embedding_model}) is down "
+            "and fallback model has incompatible dimensions."
+        ) from e
 
 
 def embed_batch(texts: list[str]) -> list[list[float]]:
@@ -52,10 +65,14 @@ def embed_batch(texts: list[str]) -> list[list[float]]:
             embeddings.append(response["embedding"])
         return embeddings
     except Exception as e:
-        logger.warning(f"Ollama batch embedding failed, using sentence-transformers fallback: {e}")
-        model = _get_sentence_transformer()
-        embeddings = model.encode(texts)
-        return [emb.tolist() for emb in embeddings]
+        logger.error(
+            f"Ollama batch embedding failed: {e}. "
+            "Refusing fallback to avoid dimension mismatch in ChromaDB."
+        )
+        raise RuntimeError(
+            f"Embedding service unavailable. Ollama ({settings.embedding_model}) is down "
+            "and fallback model has incompatible dimensions."
+        ) from e
 
 
 def check_ollama_embeddings() -> bool:

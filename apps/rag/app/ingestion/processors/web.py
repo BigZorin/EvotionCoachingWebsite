@@ -5,8 +5,10 @@ Supports: any HTTP/HTTPS URL
 Pipeline: fetch HTML → extract text with BeautifulSoup → TextBlocks
 """
 
+import ipaddress
 import logging
 import re
+import socket
 import ssl
 from pathlib import Path
 from urllib.parse import urlparse
@@ -26,12 +28,51 @@ TIMEOUT = 30
 MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB max
 USER_AGENT = "EvotionRAG/1.0 (knowledge-base crawler)"
 
+# Hostnames that are always blocked (SSRF protection)
+_BLOCKED_HOSTNAMES = {"localhost", "0.0.0.0", "metadata.google.internal"}
+
+
+def _is_private_ip(hostname: str) -> bool:
+    """Check if a hostname resolves to a private/reserved IP address."""
+    # Check literal IP first
+    try:
+        ip = ipaddress.ip_address(hostname)
+        return ip.is_private or ip.is_loopback or ip.is_reserved or ip.is_link_local
+    except ValueError:
+        pass  # Not a literal IP, try DNS resolution
+
+    # Resolve hostname and check the resulting IP
+    try:
+        resolved = socket.getaddrinfo(hostname, None, socket.AF_UNSPEC, socket.SOCK_STREAM)
+        for _, _, _, _, sockaddr in resolved:
+            ip = ipaddress.ip_address(sockaddr[0])
+            if ip.is_private or ip.is_loopback or ip.is_reserved or ip.is_link_local:
+                return True
+    except (socket.gaierror, OSError):
+        pass
+
+    return False
+
 
 def is_valid_url(url: str) -> bool:
-    """Check if string is a valid HTTP(S) URL."""
+    """Check if string is a valid HTTP(S) URL that doesn't target internal resources."""
     try:
         parsed = urlparse(url)
-        return parsed.scheme in ("http", "https") and bool(parsed.netloc)
+        if parsed.scheme not in ("http", "https") or not parsed.netloc:
+            return False
+
+        hostname = parsed.hostname or ""
+
+        # Block known dangerous hostnames
+        if hostname.lower() in _BLOCKED_HOSTNAMES:
+            return False
+
+        # Block private/internal IPs (SSRF protection)
+        if _is_private_ip(hostname):
+            logger.warning(f"SSRF blocked: {hostname} resolves to private/internal IP")
+            return False
+
+        return True
     except Exception:
         return False
 

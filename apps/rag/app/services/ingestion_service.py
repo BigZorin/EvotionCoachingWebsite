@@ -44,6 +44,19 @@ async def process_upload(
     # Save file to disk
     try:
         content = await file.read()
+
+        # Enforce file size limit
+        max_bytes = settings.max_file_size_mb * 1024 * 1024
+        if len(content) > max_bytes:
+            return {
+                "filename": filename,
+                "status": "error",
+                "error": f"File too large: {len(content) / 1024 / 1024:.1f}MB (max {settings.max_file_size_mb}MB)",
+                "document_id": "",
+                "chunks_created": 0,
+                "collection": collection,
+            }
+
         file_path.write_bytes(content)
     except Exception as e:
         logger.error(f"Failed to save file {filename}: {e}")
