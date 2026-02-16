@@ -189,28 +189,25 @@ def get_active_provider() -> str:
 
 
 def check_ollama_generation() -> bool:
+    """Check if Ollama generation model is available without running inference."""
     try:
         client = _get_ollama_client()
-        client.chat(
-            model=settings.ollama_generation_model,
-            messages=[{"role": "user", "content": "hi"}],
-            options={"num_predict": 1},
-        )
-        return True
+        # Just check if the model exists — don't run a full chat
+        models = client.list()
+        available = [m["name"] for m in models.get("models", [])]
+        return settings.ollama_generation_model in available
     except Exception:
         return False
 
 
 def check_groq() -> bool:
+    """Check Groq availability without consuming a chat request."""
     if not settings.groq_api_key:
         return False
     try:
         client = _get_groq_client()
-        client.chat.completions.create(
-            model=settings.groq_model,
-            messages=[{"role": "user", "content": "hi"}],
-            max_tokens=1,
-        )
+        # Use models.list() instead of chat — doesn't count toward RPD limit
+        client.models.list()
         return True
     except Exception:
         return False
