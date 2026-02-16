@@ -85,7 +85,11 @@ def is_youtube_url(url: str) -> bool:
 
 
 def fetch_url(url: str) -> tuple[str, str]:
-    """Fetch URL content. Returns (html_content, final_url)."""
+    """Fetch URL content. Returns (html_content, final_url).
+
+    Validates the final URL after redirects to prevent SSRF bypass via
+    open-redirect chains (e.g. public URL → 302 → internal IP).
+    """
     ssl_context = ssl.create_default_context()
     with httpx.Client(
         follow_redirects=True,
@@ -96,6 +100,11 @@ def fetch_url(url: str) -> tuple[str, str]:
         response = client.get(url)
         response.raise_for_status()
 
+        # SSRF: re-validate the final URL after redirects
+        final_url = str(response.url)
+        if final_url != url and not is_valid_url(final_url):
+            raise ValueError(f"Redirect target blocked by SSRF protection: {final_url}")
+
         content_length = len(response.content)
         if content_length > MAX_CONTENT_LENGTH:
             raise ValueError(f"Content too large: {content_length / 1024 / 1024:.1f}MB (max {MAX_CONTENT_LENGTH / 1024 / 1024}MB)")
@@ -104,7 +113,7 @@ def fetch_url(url: str) -> tuple[str, str]:
         if "text/html" not in content_type and "text/plain" not in content_type:
             raise ValueError(f"Unsupported content type: {content_type}")
 
-        return response.text, str(response.url)
+        return response.text, final_url
 
 
 def extract_text_from_html(html: str, url: str) -> tuple[str, str]:

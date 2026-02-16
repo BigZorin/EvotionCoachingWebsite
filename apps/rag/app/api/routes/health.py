@@ -138,6 +138,7 @@ def system_info():
                 {"name": "Zero-Cost Health Checks", "description": "Health checks gebruiken models.list() in plaats van chat completions — kost geen API-quota (voorheen ~2880 Groq-requests/dag)"},
                 {"name": "Per-Response Provider Tracking", "description": "Elke streaming response bevat in het 'done' event de daadwerkelijk gebruikte LLM provider — UI toont dit als label onder elk antwoord"},
                 {"name": "RRF Score Blending", "description": "Reciprocal Rank Fusion gebruikt gewogen gemiddelde (40% origineel + 60% RRF positie) voor nauwkeurigere relevantie-scores"},
+                {"name": "SSRF Redirect Validatie", "description": "Na HTTP-redirects wordt het eindpunt opnieuw gevalideerd tegen private IP-adressen — voorkomt SSRF bypass via open-redirect chains"},
                 {"name": "Chat History Truncatie", "description": "Lange assistant-antwoorden in gesprekshistorie worden afgekapt op 2000 tekens om prompt-overflow te voorkomen"},
             ],
         },

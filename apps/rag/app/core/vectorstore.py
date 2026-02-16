@@ -1,17 +1,22 @@
+import threading
+
 import chromadb
 from pathlib import Path
 
 from app.config import settings
 
 _client: chromadb.ClientAPI | None = None
+_client_lock = threading.Lock()
 
 
 def get_chroma_client() -> chromadb.ClientAPI:
     global _client
     if _client is None:
-        persist_dir = Path(settings.chroma_persist_dir)
-        persist_dir.mkdir(parents=True, exist_ok=True)
-        _client = chromadb.PersistentClient(path=str(persist_dir))
+        with _client_lock:
+            if _client is None:
+                persist_dir = Path(settings.chroma_persist_dir)
+                persist_dir.mkdir(parents=True, exist_ok=True)
+                _client = chromadb.PersistentClient(path=str(persist_dir))
     return _client
 
 

@@ -1570,7 +1570,7 @@ a:hover { text-decoration: underline; }
   width: 24px;
   height: 24px;
   border: 3px solid var(--border);
-  border-top-color: var(--accent);
+  border-top-color: var(--evotion-accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   flex-shrink: 0;

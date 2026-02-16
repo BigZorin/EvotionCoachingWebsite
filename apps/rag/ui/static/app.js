@@ -2350,7 +2350,7 @@ function init() {
 
 async function loadSupportedExtensions() {
   try {
-    const resp = await apiFetch('/documents/supported-types');
+    const resp = await apiGet('/documents/supported-types');
     supportedExtensions = resp.extensions || [];
   } catch { /* fallback: accept all files, let server decide */ }
 }
