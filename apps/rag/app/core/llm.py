@@ -193,8 +193,8 @@ def check_ollama_generation() -> bool:
     try:
         client = _get_ollama_client()
         # Just check if the model exists — don't run a full chat
-        models = client.list()
-        available = [m["name"] for m in models.get("models", [])]
+        response = client.list()
+        available = [m.model for m in response.models]
         return settings.ollama_generation_model in available
     except Exception:
         return False
