@@ -917,13 +917,23 @@ function renderDocuments(docs, collectionName) {
 
   $docsList.innerHTML = '';
   docs.forEach(doc => {
-    const ext = (doc.file_type || doc.filename?.split('.').pop() || '?').toUpperCase();
+    const fileType = doc.file_type || '';
+    const ext = (fileType || doc.filename?.split('.').pop() || '?').toUpperCase();
+    // Determine badge for special document types
+    let badge = '';
+    if (fileType === 'audio') {
+      badge = '<span class="doc-badge badge-transcribed">Getranscribeerd</span>';
+    } else if (fileType === 'web') {
+      badge = '<span class="doc-badge badge-web">Webpagina</span>';
+    } else if (fileType === 'youtube') {
+      badge = '<span class="doc-badge badge-youtube">YouTube</span>';
+    }
     const el = document.createElement('div');
     el.className = 'doc-item';
     el.innerHTML = `
       <div class="doc-icon">${escapeHtml(ext.substring(0, 4))}</div>
       <div class="doc-info">
-        <div class="doc-name">${escapeHtml(doc.filename || 'onbekend')}</div>
+        <div class="doc-name">${escapeHtml(doc.filename || 'onbekend')}${badge}</div>
         <div class="doc-meta">${doc.total_chunks || 0} chunks</div>
       </div>
       <button class="doc-preview-btn" title="Bekijk chunks" data-doc-id="${escapeHtml(doc.document_id)}" data-doc-name="${escapeHtml(doc.filename || 'onbekend')}">

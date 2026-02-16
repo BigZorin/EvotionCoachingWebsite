@@ -950,6 +950,34 @@ a:hover { text-decoration: underline; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.doc-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.badge-transcribed {
+  background: #7c3aed22;
+  color: #a78bfa;
+  border: 1px solid #7c3aed44;
+}
+.badge-web {
+  background: #0ea5e922;
+  color: #67e8f9;
+  border: 1px solid #0ea5e944;
+}
+.badge-youtube {
+  background: #ef444422;
+  color: #fca5a5;
+  border: 1px solid #ef444444;
 }
 .doc-meta {
   font-size: 12px;
