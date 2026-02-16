@@ -87,6 +87,46 @@ def get_collection_documents(name: str) -> list[dict]:
         return []
 
 
+def cleanup_micro_chunks(collection_name: str, min_chars: int = 50) -> dict:
+    """Remove junk micro-chunks (page numbers, headers, etc.) below min_chars.
+
+    Returns summary with count of removed chunks.
+    """
+    client = get_chroma_client()
+    try:
+        collection = client.get_collection(collection_name)
+        all_data = collection.get(include=["documents", "metadatas"])
+
+        if not all_data["ids"]:
+            return {"collection": collection_name, "removed": 0, "remaining": 0}
+
+        ids_to_delete = []
+        for i, doc in enumerate(all_data["documents"]):
+            if not doc or len(doc.strip()) < min_chars:
+                ids_to_delete.append(all_data["ids"][i])
+
+        if ids_to_delete:
+            # ChromaDB delete has a batch limit, process in chunks of 500
+            for batch_start in range(0, len(ids_to_delete), 500):
+                batch = ids_to_delete[batch_start:batch_start + 500]
+                collection.delete(ids=batch)
+
+        remaining = collection.count()
+        logger.info(
+            f"Cleanup '{collection_name}': removed {len(ids_to_delete)} "
+            f"micro-chunks (<{min_chars} chars), {remaining} remaining"
+        )
+
+        return {
+            "collection": collection_name,
+            "removed": len(ids_to_delete),
+            "remaining": remaining,
+        }
+    except Exception as e:
+        logger.error(f"Cleanup failed for '{collection_name}': {e}")
+        return {"collection": collection_name, "error": str(e)}
+
+
 def delete_document(collection_name: str, document_id: str) -> int:
     """Delete all chunks belonging to a document. Returns chunks removed."""
     client = get_chroma_client()

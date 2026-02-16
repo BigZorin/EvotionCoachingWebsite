@@ -8,6 +8,7 @@ from app.services.collection_service import (
     remove_collection,
     get_collection_documents,
     delete_document,
+    cleanup_micro_chunks,
 )
 
 router = APIRouter(prefix="/collections", tags=["collections"])
@@ -93,6 +94,12 @@ def get_document_chunks(name: str, document_id: str, limit: int = 100):
         }
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post("/{name}/cleanup")
+def cleanup_collection_endpoint(name: str, min_chars: int = 50):
+    """Remove junk micro-chunks below min_chars threshold."""
+    return cleanup_micro_chunks(name, min_chars)
 
 
 @router.delete("/{name}/documents/{document_id}")

@@ -71,8 +71,7 @@ class RecursiveCharacterChunker:
             else:
                 if current:
                     chunks.append(current)
-                    # Create overlap from end of current chunk
-                    overlap = current[-self.chunk_overlap:] if len(current) > self.chunk_overlap else current
+                    overlap = self._sentence_aware_overlap(current)
                     current = f"{overlap} {piece}".strip()
                 else:
                     current = piece
@@ -81,6 +80,38 @@ class RecursiveCharacterChunker:
             chunks.append(current)
 
         return chunks
+
+    def _sentence_aware_overlap(self, text: str) -> str:
+        """Extract overlap that starts at a sentence boundary.
+
+        Instead of blindly taking the last N characters (which can cut
+        mid-word), look for the last sentence-ending punctuation within
+        the overlap zone and start from the sentence after it.
+        """
+        if len(text) <= self.chunk_overlap:
+            return text
+
+        # Take the raw overlap zone from the end of the chunk
+        zone = text[-self.chunk_overlap:]
+
+        # Try to find a sentence boundary (. ! ? followed by space/newline)
+        # Search from the START of the zone so we keep as many full
+        # sentences as possible.
+        best = -1
+        for i in range(len(zone) - 1):
+            if zone[i] in ".!?" and (zone[i + 1] in " \n\t"):
+                best = i + 2  # start after the punctuation + space
+
+        if best > 0 and best < len(zone) - 10:
+            return zone[best:].strip()
+
+        # Fallback: try splitting on newline
+        nl = zone.find("\n")
+        if 0 < nl < len(zone) - 10:
+            return zone[nl + 1:].strip()
+
+        # Last resort: raw character overlap (original behavior)
+        return zone.strip()
 
 
 class MarkdownChunker:
