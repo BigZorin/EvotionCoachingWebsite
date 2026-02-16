@@ -557,10 +557,10 @@ async function streamResponse(sessionId, message) {
   const el = document.createElement('div');
   el.className = 'message assistant';
 
-  let avatar = 'E';
+  let avatar = '<img src="/ui/static/evotion-icon.png" alt="E" width="20" height="20">';
   if (currentAgentId) {
     const agent = agentsCache.find(a => a.id === currentAgentId);
-    if (agent) avatar = agent.icon || 'E';
+    if (agent && agent.icon) avatar = agent.icon;
   }
 
   el.innerHTML = `
@@ -764,10 +764,10 @@ function appendMessage(role, content, isMarkdown = false, sources = [], messageI
   el.setAttribute('aria-label', role === 'user' ? 'Gebruiker bericht' : 'Assistent antwoord');
   if (messageId) el.dataset.messageId = messageId;
 
-  let avatar = role === 'user' ? 'U' : 'E';
+  let avatar = role === 'user' ? 'U' : '<img src="/ui/static/evotion-icon.png" alt="E" width="20" height="20">';
   if (role === 'assistant' && currentAgentId) {
     const agent = agentsCache.find(a => a.id === currentAgentId);
-    if (agent) avatar = agent.icon || 'E';
+    if (agent && agent.icon) avatar = agent.icon;
   }
   const renderedContent = role === 'assistant' || isMarkdown
     ? renderMarkdown(content, sources)

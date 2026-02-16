@@ -2,25 +2,28 @@
    Evotion RAG — ChatGPT-inspired Dark Theme
    ============================================================ */
 
-/* --- Variables --- */
+/* --- Variables (Evotion Branding) --- */
 :root {
-  --sidebar-bg: #171717;
-  --sidebar-hover: #212121;
-  --sidebar-active: #2a2a2a;
-  --main-bg: #212121;
-  --surface: #2f2f2f;
-  --surface-hover: #353535;
-  --border: #2e2e2e;
-  --border-light: #424242;
+  --evotion-purple: #1e1839;
+  --evotion-accent: #7c3aed;
+  --evotion-accent-light: #a78bfa;
+  --sidebar-bg: #14111f;
+  --sidebar-hover: #1e1a2e;
+  --sidebar-active: #2a2540;
+  --main-bg: #1a1726;
+  --surface: #252038;
+  --surface-hover: #2e2845;
+  --border: #2d2840;
+  --border-light: #3d3655;
   --text-primary: #ececec;
   --text-secondary: #b4b4b4;
   --text-muted: #8e8e8e;
   --text-faint: #666;
   --danger: #ef4444;
   --danger-hover: #dc2626;
-  --code-bg: #1a1a1a;
-  --input-bg: #2f2f2f;
-  --input-border: #424242;
+  --code-bg: #120f1c;
+  --input-bg: #252038;
+  --input-border: #3d3655;
   --send-bg: #ffffff;
   --send-color: #000000;
   --send-disabled: #676767;
@@ -337,8 +340,8 @@ a:hover { text-decoration: underline; }
 .empty-logo {
   width: 56px;
   height: 56px;
-  border-radius: 50%;
-  background: var(--surface);
+  border-radius: 16px;
+  background: var(--evotion-purple);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -425,12 +428,12 @@ a:hover { text-decoration: underline; }
 }
 
 .message.user .message-avatar {
-  background: #7c3aed;
+  background: var(--evotion-accent);
   color: #fff;
 }
 
 .message.assistant .message-avatar {
-  background: var(--surface);
+  background: var(--evotion-purple);
   color: var(--text-primary);
 }
 
@@ -2687,7 +2690,7 @@ pre:hover .code-copy-btn {
   width: 64px;
   height: 64px;
   margin: 0 auto 20px;
-  background: var(--surface);
+  background: var(--evotion-purple);
   border-radius: 16px;
   display: flex;
   align-items: center;

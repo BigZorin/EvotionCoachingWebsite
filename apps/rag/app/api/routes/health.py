@@ -118,10 +118,10 @@ def system_info():
             "features": [
                 {"name": "SSRF Bescherming", "description": "URL-ingestion blokkeert private IP-adressen (RFC 1918), loopback, link-local en cloud metadata endpoints. DNS-resolutie wordt gevalideerd vóór het opvragen."},
                 {"name": "Upload Limiet", "description": f"Bestanden groter dan {settings.max_file_size_mb} MB worden geweigerd vóór verwerking om geheugen- en opslagmisbruik te voorkomen"},
-                {"name": "CORS Restrictie", "description": "Alleen verzoeken van rag.evotiondata.com en localhost worden geaccepteerd (geen wildcard origins)"},
+                {"name": "CORS Restrictie", "description": "Alleen verzoeken van rag.evotiondata.com en localhost worden geaccepteerd met beperkte HTTP-methoden en headers"},
                 {"name": "Embedding Dimensie-check", "description": "Fallback naar sentence-transformers (384-dim) wordt geblokkeerd als de collectie 768-dim vectors verwacht — voorkomt ChromaDB-fouten"},
                 {"name": "Dual-Provider Foutafhandeling", "description": "Als zowel Groq als Ollama falen, krijgt de client een duidelijke foutmelding in plaats van een crash"},
-                {"name": "Collectienaam Validatie", "description": "Alleen alfanumerieke tekens, streepjes en underscores (1-64 chars) zijn toegestaan als collectienaam"},
+                {"name": "Collectienaam Validatie", "description": "Alle collectie-endpoints valideren namen op alfanumerieke tekens, streepjes en underscores (1-64 chars)"},
                 {"name": "Auth Startup Check", "description": "Server weigert te starten als AUTH_ENABLED=true maar AUTH_TOKEN leeg is — voorkomt onbeveiligde API"},
                 {"name": "API Timeouts", "description": "Groq: 60s timeout, Ollama generatie: 120s, Ollama embeddings: 30s — voorkomt hangende requests"},
                 {"name": "Database Connection Management", "description": "Context managers (with-statement) garanderen dat SQLite-connecties altijd worden gesloten, ook bij fouten"},

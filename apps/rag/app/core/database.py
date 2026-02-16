@@ -1,11 +1,14 @@
-import sqlite3
 import json
+import logging
+import sqlite3
 import uuid
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 DB_PATH = Path(settings.chroma_persist_dir).parent / "chat.db"
 
@@ -219,6 +222,16 @@ def create_agent(
         }
 
 
+def _safe_parse_collections(raw: str) -> list[str]:
+    """Safely parse the collections JSON field with fallback to empty list."""
+    try:
+        result = json.loads(raw or "[]")
+        return result if isinstance(result, list) else []
+    except (json.JSONDecodeError, TypeError):
+        logger.warning(f"Malformed collections JSON: {raw!r}, defaulting to empty list")
+        return []
+
+
 def list_agents() -> list[dict]:
     with _conn() as conn:
         rows = conn.execute("SELECT * FROM agents ORDER BY created_at ASC").fetchall()
@@ -226,7 +239,7 @@ def list_agents() -> list[dict]:
     agents = []
     for r in rows:
         agent = dict(r)
-        agent["collections"] = json.loads(agent.get("collections", "[]"))
+        agent["collections"] = _safe_parse_collections(agent.get("collections", "[]"))
         agents.append(agent)
     return agents
 
@@ -237,7 +250,7 @@ def get_agent(agent_id: str) -> dict | None:
         if not row:
             return None
         agent = dict(row)
-        agent["collections"] = json.loads(agent.get("collections", "[]"))
+        agent["collections"] = _safe_parse_collections(agent.get("collections", "[]"))
         return agent
 
 
