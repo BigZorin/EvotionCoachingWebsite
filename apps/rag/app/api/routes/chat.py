@@ -43,12 +43,14 @@ def create_chat_session(body: NewSessionRequest | None = None):
 
 @router.get("/sessions")
 def list_chat_sessions(limit: int = 50):
+    limit = min(max(limit, 1), 500)
     sessions = list_sessions(limit=limit)
     return {"sessions": sessions}
 
 
 @router.get("/sessions/search")
 def search_chat_sessions(q: str = "", limit: int = 50):
+    limit = min(max(limit, 1), 500)
     if not q.strip():
         return {"sessions": list_sessions(limit=limit)}
     sessions = search_sessions(q.strip(), limit=limit)
@@ -109,7 +111,9 @@ def send_message_stream(session_id: str, body: ChatRequest):
         except ValueError as e:
             yield f"event: error\ndata: {json.dumps({'detail': str(e)})}\n\n"
         except Exception as e:
-            yield f"event: error\ndata: {json.dumps({'detail': str(e)})}\n\n"
+            import logging
+            logging.getLogger(__name__).error(f"Chat streaming failed: {e}", exc_info=True)
+            yield f"event: error\ndata: {json.dumps({'detail': 'Er is een fout opgetreden bij het genereren van het antwoord.'})}\n\n"
 
     return StreamingResponse(
         event_generator(),

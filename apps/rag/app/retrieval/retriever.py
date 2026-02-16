@@ -1,5 +1,6 @@
 import logging
 import re
+import threading
 from dataclasses import dataclass
 
 from rank_bm25 import BM25Okapi
@@ -12,18 +13,21 @@ from app.core.llm import generate
 logger = logging.getLogger(__name__)
 
 _cross_encoder = None
+_cross_encoder_lock = threading.Lock()
 
 
 def _get_cross_encoder():
     """Lazy-load cross-encoder model (singleton)."""
     global _cross_encoder
     if _cross_encoder is None:
-        try:
-            from sentence_transformers import CrossEncoder
-            _cross_encoder = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
-            logger.info("Loaded cross-encoder model: ms-marco-MiniLM-L-6-v2")
-        except Exception as e:
-            logger.warning(f"Failed to load cross-encoder: {e}")
+        with _cross_encoder_lock:
+            if _cross_encoder is None:
+                try:
+                    from sentence_transformers import CrossEncoder
+                    _cross_encoder = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+                    logger.info("Loaded cross-encoder model: ms-marco-MiniLM-L-6-v2")
+                except Exception as e:
+                    logger.warning(f"Failed to load cross-encoder: {e}")
     return _cross_encoder
 
 

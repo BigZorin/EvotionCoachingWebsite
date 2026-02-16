@@ -1,4 +1,6 @@
 import logging
+import threading
+
 from ollama import Client as OllamaClient
 
 from app.config import settings
@@ -6,22 +8,28 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 _ollama_client: OllamaClient | None = None
+_ollama_lock = threading.Lock()
 _st_model = None
+_st_lock = threading.Lock()
 
 
 def _get_ollama_client() -> OllamaClient:
     global _ollama_client
     if _ollama_client is None:
-        _ollama_client = OllamaClient(host=settings.ollama_base_url, timeout=30.0)
+        with _ollama_lock:
+            if _ollama_client is None:
+                _ollama_client = OllamaClient(host=settings.ollama_base_url, timeout=30.0)
     return _ollama_client
 
 
 def _get_sentence_transformer():
     global _st_model
     if _st_model is None:
-        from sentence_transformers import SentenceTransformer
-        _st_model = SentenceTransformer("all-MiniLM-L6-v2")
-        logger.info("Loaded sentence-transformers fallback model: all-MiniLM-L6-v2")
+        with _st_lock:
+            if _st_model is None:
+                from sentence_transformers import SentenceTransformer
+                _st_model = SentenceTransformer("all-MiniLM-L6-v2")
+                logger.info("Loaded sentence-transformers fallback model: all-MiniLM-L6-v2")
     return _st_model
 
 

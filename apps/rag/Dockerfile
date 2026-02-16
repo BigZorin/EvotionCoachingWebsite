@@ -47,8 +47,10 @@ RUN apt-get update && \
 COPY --from=base /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=base /usr/local/bin /usr/local/bin
 
-# Create data directories
-RUN mkdir -p /app/data/chroma_db /app/data/uploads
+# Create non-root user and data directories
+RUN useradd -m -u 1000 appuser && \
+    mkdir -p /app/data/chroma_db /app/data/uploads && \
+    chown -R appuser:appuser /app/data
 
 # Copy application code
 COPY app/ ./app/
@@ -63,6 +65,9 @@ ENV CHROMA_PERSIST_DIR=/app/data/chroma_db \
 
 # Expose port
 EXPOSE 8000
+
+# Run as non-root user
+USER appuser
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \

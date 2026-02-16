@@ -24,8 +24,8 @@ def query_documents_stream(request: QueryRequest):
                 yield f"data: {token}\n\n"
             yield "data: [DONE]\n\n"
         except Exception as e:
-            logger.error(f"Stream error: {e}")
-            yield f"event: error\ndata: {json.dumps({'detail': str(e)})}\n\n"
+            logger.error(f"Query stream error: {e}", exc_info=True)
+            yield f"event: error\ndata: {json.dumps({'detail': 'Er is een fout opgetreden bij het verwerken van de zoekopdracht.'})}\n\n"
 
     return StreamingResponse(
         event_stream(),

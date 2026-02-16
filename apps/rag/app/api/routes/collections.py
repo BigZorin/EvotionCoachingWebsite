@@ -81,6 +81,7 @@ def delete_collection_endpoint(name: str):
 def get_document_chunks(name: str, document_id: str, limit: int = 100):
     """Get all chunks for a specific document — used for document preview."""
     _validate_collection_name(name)
+    limit = min(max(limit, 1), 500)
     from app.core.vectorstore import get_or_create_collection
 
     try:
@@ -119,6 +120,7 @@ def get_document_chunks(name: str, document_id: str, limit: int = 100):
 def cleanup_collection_endpoint(name: str, min_chars: int = 50):
     """Remove junk micro-chunks below min_chars threshold."""
     _validate_collection_name(name)
+    min_chars = min(max(min_chars, 0), 10000)
     return cleanup_micro_chunks(name, min_chars)
 
 
