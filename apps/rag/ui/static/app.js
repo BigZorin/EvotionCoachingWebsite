@@ -13,6 +13,7 @@ let isLoading = false;
 let agentsCache = [];
 let editingAgentId = null;
 let searchDebounce = null;
+let supportedExtensions = []; // Loaded from server on init
 
 // --- DOM refs (set in init) ---
 let $sidebar, $overlay, $sessionsEl, $chatScroll, $emptyState, $messagesEl;
@@ -991,12 +992,23 @@ async function collectFilesFromEntries(entries) {
   return files;
 }
 
+// Audio/video extensions that need server-side transcription (long processing)
+const MEDIA_EXTENSIONS = ['.mp4', '.mp3', '.wav', '.m4a', '.webm', '.ogg', '.flac'];
+
+function isMediaFile(file) {
+  const ext = '.' + file.name.split('.').pop().toLowerCase();
+  return MEDIA_EXTENSIONS.includes(ext);
+}
+
 function uploadFileWithProgress(file, collection, onProgress) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const formData = new FormData();
     formData.append('file', file);
     formData.append('collection', collection);
+
+    // 10 min timeout — audio/video transcription can take several minutes
+    xhr.timeout = 600_000;
 
     xhr.upload.addEventListener('progress', (e) => {
       if (e.lengthComputable) {
@@ -1005,7 +1017,8 @@ function uploadFileWithProgress(file, collection, onProgress) {
     });
 
     xhr.upload.addEventListener('load', () => {
-      onProgress('processing', 100);
+      // Upload done, server is now processing
+      onProgress(isMediaFile(file) ? 'transcribing' : 'processing', 100);
     });
 
     xhr.addEventListener('load', () => {
@@ -1022,6 +1035,7 @@ function uploadFileWithProgress(file, collection, onProgress) {
 
     xhr.addEventListener('error', () => reject(new Error('Netwerkfout')));
     xhr.addEventListener('abort', () => reject(new Error('Upload geannuleerd')));
+    xhr.addEventListener('timeout', () => reject(new Error('Timeout — bestand te groot of server te druk')));
 
     xhr.open('POST', `${API}/documents/upload`);
     const token = getAuthToken();
@@ -1032,7 +1046,7 @@ function uploadFileWithProgress(file, collection, onProgress) {
 
 async function uploadFiles(fileListOrArray) {
   // Accept both FileList and Array of Files
-  const files = Array.from(fileListOrArray);
+  const allFiles = Array.from(fileListOrArray);
   const collection = document.getElementById('upload-collection').value || 'default';
   const statusEl = document.getElementById('upload-status');
   const uploadBtn = document.getElementById('upload-btn');
@@ -1042,7 +1056,27 @@ async function uploadFiles(fileListOrArray) {
   const progressBar = document.getElementById('upload-progress-bar');
   const progressFiles = document.getElementById('upload-progress-files');
 
-  if (!files || !files.length) {
+  // Filter out unsupported file types (if we know supported extensions)
+  let files = allFiles;
+  let skipped = [];
+  if (supportedExtensions.length > 0) {
+    files = [];
+    for (const f of allFiles) {
+      const ext = '.' + f.name.split('.').pop().toLowerCase();
+      if (supportedExtensions.includes(ext)) {
+        files.push(f);
+      } else {
+        skipped.push(f.name);
+      }
+    }
+  }
+
+  if (!files.length && skipped.length) {
+    statusEl.textContent = `Geen ondersteunde bestanden gevonden. ${skipped.length} overgeslagen.`;
+    statusEl.className = 'upload-status error';
+    return;
+  }
+  if (!files.length) {
     statusEl.textContent = 'Geen bestanden geselecteerd.';
     statusEl.className = 'upload-status error';
     return;
@@ -1111,8 +1145,13 @@ async function uploadFiles(fileListOrArray) {
           progressBar.style.width = overallPct + '%';
           progressPct.textContent = overallPct + '%';
           statusSpan.textContent = `Uploaden ${pct}%`;
+        } else if (phase === 'transcribing') {
+          iconEl.className = 'upload-file-icon processing';
+          iconEl.innerHTML = iconSvg.processing;
+          statusSpan.textContent = 'Transcriberen...';
+          progressLabel.textContent = `Transcriberen ${file.name}...`;
+          progressBar.classList.add('processing');
         } else if (phase === 'processing') {
-          // Upload done, server is processing
           iconEl.className = 'upload-file-icon processing';
           iconEl.innerHTML = iconSvg.processing;
           statusSpan.textContent = 'Verwerken & embedden...';
@@ -1157,7 +1196,9 @@ async function uploadFiles(fileListOrArray) {
   // Final state
   progressBar.style.width = '100%';
   progressPct.textContent = '100%';
-  progressLabel.textContent = `Klaar — ${files.length} bestanden, ${totalChunks} chunks`;
+  let doneMsg = `Klaar — ${files.length} bestanden, ${totalChunks} chunks`;
+  if (skipped.length) doneMsg += ` (${skipped.length} niet-ondersteund overgeslagen)`;
+  progressLabel.textContent = doneMsg;
   uploadBtn.disabled = false;
   folderBtn.disabled = false;
 
@@ -2118,6 +2159,15 @@ function init() {
   loadSessions();
   loadCollectionDropdowns();
   loadAgents();
+  loadSupportedExtensions();
+}
+
+
+async function loadSupportedExtensions() {
+  try {
+    const resp = await apiFetch('/documents/supported-types');
+    supportedExtensions = resp.extensions || [];
+  } catch { /* fallback: accept all files, let server decide */ }
 }
 
 // ============================================================

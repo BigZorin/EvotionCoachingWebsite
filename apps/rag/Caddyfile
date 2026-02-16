@@ -1,14 +1,16 @@
-# Evotion RAG — Caddy Reverse Proxy
-#
-# HTTP-only (IP access):
-#   Just works as-is with :80
-#
-# HTTPS with domain (later):
-#   Replace :80 with your domain, e.g.:
-#   rag.evotion.nl {
-#       reverse_proxy rag:8000
-#   }
+# Evotion RAG — Caddy Reverse Proxy + Auto HTTPS
 
-:80 {
-    reverse_proxy rag:8000
+rag.evotiondata.com {
+    request_body {
+        max_size 500MB
+    }
+
+    reverse_proxy rag:8000 {
+        transport http {
+            # Allow long processing time for audio/video transcription
+            response_header_timeout 600s
+            read_timeout             600s
+            write_timeout            600s
+        }
+    }
 }
