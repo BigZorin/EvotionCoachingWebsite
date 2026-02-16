@@ -10,6 +10,9 @@ class Chunk:
     metadata: dict
 
 
+MIN_CHUNK_CHARS = 50  # Skip junk chunks (page numbers, headers, etc.)
+
+
 class RecursiveCharacterChunker:
     """Split text by trying progressively smaller separators."""
 
@@ -34,7 +37,7 @@ class RecursiveCharacterChunker:
                 metadata={**base_metadata, "chunk_index": i, "char_count": len(c)},
             )
             for i, c in enumerate(chunks)
-            if c.strip()
+            if c.strip() and len(c.strip()) >= MIN_CHUNK_CHARS
         ]
 
     def _split_recursive(self, text: str, separators: list[str]) -> list[str]:
