@@ -38,7 +38,7 @@ def _groq_generate(prompt: str, system: str | None = None, temperature: float = 
         model=settings.groq_model,
         messages=messages,
         temperature=temperature,
-        max_tokens=1536,
+        max_tokens=2048,
     )
 
     # Track usage
@@ -71,7 +71,7 @@ def _groq_generate_stream(
         model=settings.groq_model,
         messages=messages,
         temperature=temperature,
-        max_tokens=1536,
+        max_tokens=2048,
         stream=True,
     )
     for chunk in stream:
@@ -116,7 +116,7 @@ def _openrouter_generate(prompt: str, system: str | None = None, temperature: fl
             "model": settings.openrouter_model,
             "messages": messages,
             "temperature": temperature,
-            "max_tokens": 1536,
+            "max_tokens": 2048,
         },
     )
     response.raise_for_status()
@@ -158,7 +158,7 @@ def _openrouter_generate_stream(
             "model": settings.openrouter_model,
             "messages": messages,
             "temperature": temperature,
-            "max_tokens": 1536,
+            "max_tokens": 2048,
             "stream": True,
         },
         timeout=float(settings.openrouter_timeout),

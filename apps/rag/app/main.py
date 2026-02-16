@@ -163,14 +163,9 @@ async def auth_middleware(request: Request, call_next):
     if path.startswith("/api/"):
         client_ip = request.client.host if request.client else "unknown"
 
-        # Rate limit: stricter for auth, looser for regular API
-        if path == "/api/v1/auth/verify":
-            if not _check_rate_limit(f"auth:{client_ip}", RATE_LIMIT_AUTH):
-                logger.warning(f"Auth rate limit exceeded for {client_ip}")
-                return JSONResponse(status_code=429, content={"detail": "Too many attempts. Try again later."})
-        else:
-            if not _check_rate_limit(f"api:{client_ip}", RATE_LIMIT_API):
-                return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded. Try again later."})
+        # Rate limit regular API calls (auth/verify already handled above)
+        if not _check_rate_limit(f"api:{client_ip}", RATE_LIMIT_API):
+            return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded. Try again later."})
 
         auth_header = request.headers.get("authorization", "")
         if not auth_header.startswith("Bearer "):
