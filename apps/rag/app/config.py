@@ -40,9 +40,9 @@ class Settings(BaseSettings):
     similarity_threshold: float = 0.65
 
     # Chat
-    max_context_chunks: int = 30
+    max_context_chunks: int = 15
     max_history_messages: int = 20
-    summarize_after_messages: int = 10
+    summarize_after_messages: int = 20
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

@@ -80,13 +80,12 @@ def system_info():
         "retrieval": {
             "title": "Zoek & Retrieval Pipeline",
             "steps": [
-                {"step": 1, "name": "Multi-Query Expansie", "description": "LLM genereert 3 alternatieve formuleringen van de vraag voor bredere dekking"},
-                {"step": 2, "name": "Semantisch Zoeken", "description": f"Vector similarity search in ChromaDB over alle query-varianten (top {settings.max_context_chunks} per query)"},
-                {"step": 3, "name": "BM25 Keyword Search", "description": "Parallelle keyword-matching met BM25Okapi algoritme (max 10.000 documenten per zoekopdracht)"},
-                {"step": 4, "name": "Reciprocal Rank Fusion (RRF)", "description": "Samenvoegen van semantische en keyword-resultaten met RRF (k=60) — documenten die in beide methoden hoog scoren worden geprioriteerd"},
-                {"step": 5, "name": "Cross-Encoder Re-ranking", "description": "Top-30 resultaten worden opnieuw gerankt met cross-encoder model (ms-marco-MiniLM-L-6-v2) voor 10-20% betere precisie"},
-                {"step": 6, "name": "Threshold Filtering", "description": f"Alleen chunks met cosine distance <= {settings.similarity_threshold} worden behouden. Fallback: top 3 als niets de drempel haalt"},
-                {"step": 7, "name": "Neighbor Expansion", "description": "Top 5 chunks worden uitgebreid met aangrenzende chunks (±1) uit hetzelfde document voor bredere context"},
+                {"step": 1, "name": "Semantisch Zoeken", "description": f"Vector similarity search in ChromaDB (top {settings.max_context_chunks} resultaten). Multi-query expansie beschikbaar maar standaard uit voor snelheid"},
+                {"step": 2, "name": "BM25 Keyword Search", "description": "Parallelle keyword-matching met BM25Okapi algoritme (max 10.000 documenten per zoekopdracht)"},
+                {"step": 3, "name": "Reciprocal Rank Fusion (RRF)", "description": "Samenvoegen van semantische en keyword-resultaten met RRF (k=60) — documenten die in beide methoden hoog scoren worden geprioriteerd"},
+                {"step": 4, "name": "Cross-Encoder Re-ranking", "description": "Top-10 resultaten worden opnieuw gerankt met cross-encoder model (ms-marco-MiniLM-L-6-v2) voor betere precisie"},
+                {"step": 5, "name": "Threshold Filtering", "description": f"Alleen chunks met cosine distance <= {settings.similarity_threshold} worden behouden. Fallback: top 3 als niets de drempel haalt"},
+                {"step": 6, "name": "Neighbor Expansion", "description": "Top 3 chunks worden uitgebreid met aangrenzende chunks (±1) uit hetzelfde document voor bredere context"},
             ],
             "settings": {
                 "top_k": settings.top_k,
@@ -102,7 +101,7 @@ def system_info():
                 {"name": "Inline bronverwijzingen", "description": "Elk antwoord bevat [1], [2] etc. citaties die verwijzen naar specifieke bronpassages"},
                 {"name": "Anti-hallucinatie regels", "description": "Expliciete instructies om ontbrekende informatie te benoemen i.p.v. te verzinnen"},
                 {"name": "Temperatuur 0.3", "description": "Lage temperatuur voor feitelijke, consistente antwoorden (configureerbaar per agent)"},
-                {"name": "Gespreksgeheugen", "description": "Chat-modus onthoudt eerdere berichten, met automatische samenvatting na 10 berichten"},
+                {"name": "Gespreksgeheugen", "description": f"Chat-modus onthoudt eerdere berichten, met automatische samenvatting na {settings.summarize_after_messages} berichten"},
                 {"name": "Follow-up suggesties", "description": "Elk antwoord eindigt met 3 relevante vervolgvragen"},
             ],
         },
@@ -140,6 +139,7 @@ def system_info():
                 {"name": "RRF Score Blending", "description": "Reciprocal Rank Fusion gebruikt gewogen gemiddelde (40% origineel + 60% RRF positie) voor nauwkeurigere relevantie-scores"},
                 {"name": "SSRF Redirect Validatie", "description": "Na HTTP-redirects wordt het eindpunt opnieuw gevalideerd tegen private IP-adressen — voorkomt SSRF bypass via open-redirect chains"},
                 {"name": "Chat History Truncatie", "description": "Lange assistant-antwoorden in gesprekshistorie worden afgekapt op 2000 tekens om prompt-overflow te voorkomen"},
+                {"name": "Performance-Optimized Pipeline", "description": "Multi-query expansie standaard uit (bespaart 1-2s LLM call), cross-encoder beperkt tot top 10 (i.p.v. 30), neighbor expansion beperkt tot top 3 (i.p.v. 5), context chunks verlaagd naar 15 — samen ~50% snellere response tijd"},
             ],
         },
         "config": {

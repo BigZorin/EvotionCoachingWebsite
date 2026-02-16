@@ -135,7 +135,7 @@ def retrieve(
 def _cross_encoder_rerank(
     query: str,
     chunks: list[RetrievedChunk],
-    max_candidates: int = 30,
+    max_candidates: int = 10,
 ) -> list[RetrievedChunk]:
     """Re-rank chunks using a cross-encoder for better precision.
 
@@ -391,8 +391,8 @@ def _expand_with_neighbors(
     if not chunks:
         return chunks
 
-    # Only expand the top 5 most relevant chunks to avoid bloating context
-    MAX_EXPAND = 5
+    # Only expand the top 3 most relevant chunks to avoid bloating context
+    MAX_EXPAND = 3
     to_expand = chunks[:MAX_EXPAND]
     rest = chunks[MAX_EXPAND:]
 

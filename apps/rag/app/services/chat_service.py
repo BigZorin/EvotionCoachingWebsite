@@ -109,6 +109,7 @@ def chat(
         collection_name=collection if not agent_collections else None,
         collection_names=agent_collections if agent_collections else None,
         top_k=top_k,
+        use_multi_query=False,
     )
 
     # Fallback: if agent collections yielded nothing, try all collections
@@ -119,6 +120,7 @@ def chat(
             collection_name=None,
             collection_names=None,
             top_k=top_k,
+            use_multi_query=False,
         )
 
     # 3. Build prompt
@@ -230,11 +232,12 @@ def chat_stream(
         collection_name=collection if not agent_collections else None,
         collection_names=agent_collections if agent_collections else None,
         top_k=top_k,
+        use_multi_query=False,
     )
 
     # Fallback
     if not chunks and agent_collections:
-        chunks = retrieve(query=search_query, top_k=top_k)
+        chunks = retrieve(query=search_query, top_k=top_k, use_multi_query=False)
 
     # Build source references
     sources = []
