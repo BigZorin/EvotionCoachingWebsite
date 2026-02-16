@@ -101,6 +101,10 @@ def retrieve(
         relevant = fused[:3]
 
     result = relevant[:top_k]
+
+    # Expand top results with surrounding chunks for richer context
+    result = _expand_with_neighbors(result, collection_name, collection_names)
+
     logger.info(f"Retrieved {len(result)} chunks (threshold={threshold})")
     return result
 
@@ -305,3 +309,124 @@ def _deduplicate_chunks(chunks: list[RetrievedChunk]) -> list[RetrievedChunk]:
         if key not in seen or chunk.relevance_score < seen[key].relevance_score:
             seen[key] = chunk
     return list(seen.values())
+
+
+def _expand_with_neighbors(
+    chunks: list[RetrievedChunk],
+    collection_name: str | None,
+    collection_names: list[str] | None,
+    window: int = 1,
+) -> list[RetrievedChunk]:
+    """Expand top-ranked chunks with their neighboring chunks from the same document.
+
+    When a chunk matches, the surrounding chunks often contain important
+    context.  This fetches chunk_index ± window from the same document
+    and merges them into a single expanded chunk, giving the LLM a
+    wider view of the passage.
+    """
+    if not chunks:
+        return chunks
+
+    # Only expand the top 5 most relevant chunks to avoid bloating context
+    MAX_EXPAND = 5
+    to_expand = chunks[:MAX_EXPAND]
+    rest = chunks[MAX_EXPAND:]
+
+    # Group chunks by (collection_name_hint, document_id)
+    expand_requests: list[tuple[RetrievedChunk, str, int]] = []
+    for chunk in to_expand:
+        doc_id = chunk.metadata.get("document_id", "")
+        chunk_idx = chunk.metadata.get("chunk_index")
+        if doc_id and chunk_idx is not None:
+            expand_requests.append((chunk, doc_id, int(chunk_idx)))
+
+    if not expand_requests:
+        return chunks
+
+    # Determine which collections to search
+    target_collections = []
+    if collection_names:
+        target_collections = collection_names
+    elif collection_name:
+        target_collections = [collection_name]
+    else:
+        cols = list_collections()
+        target_collections = [c.name if hasattr(c, "name") else str(c) for c in cols]
+
+    # Build a cache of neighbor chunks per collection
+    neighbor_cache: dict[str, dict] = {}  # col_name -> {doc_id -> {chunk_idx -> content}}
+
+    needed_lookups: dict[str, set[tuple[str, int]]] = {}  # col -> set of (doc_id, idx)
+    for chunk, doc_id, chunk_idx in expand_requests:
+        for col in target_collections:
+            if col not in needed_lookups:
+                needed_lookups[col] = set()
+            for offset in range(-window, window + 1):
+                if offset != 0:
+                    needed_lookups[col].add((doc_id, chunk_idx + offset))
+
+    for col_name, lookups in needed_lookups.items():
+        if not lookups:
+            continue
+        try:
+            collection = get_or_create_collection(col_name)
+            # Group by document_id
+            doc_ids_needed = {doc_id for doc_id, _ in lookups}
+            for doc_id in doc_ids_needed:
+                indices_needed = {idx for d, idx in lookups if d == doc_id}
+                result = collection.get(
+                    where={"document_id": doc_id},
+                    include=["documents", "metadatas"],
+                )
+                if not result["ids"]:
+                    continue
+                if col_name not in neighbor_cache:
+                    neighbor_cache[col_name] = {}
+                if doc_id not in neighbor_cache[col_name]:
+                    neighbor_cache[col_name][doc_id] = {}
+                for i, meta in enumerate(result["metadatas"] or []):
+                    ci = meta.get("chunk_index")
+                    if ci is not None and int(ci) in indices_needed:
+                        neighbor_cache[col_name][doc_id][int(ci)] = result["documents"][i]
+        except Exception as e:
+            logger.debug(f"Neighbor lookup failed for '{col_name}': {e}")
+
+    # Merge neighbors into expanded chunks
+    expanded = []
+    seen_content = set()
+    for chunk, doc_id, chunk_idx in expand_requests:
+        parts = []
+        for col in target_collections:
+            cache = neighbor_cache.get(col, {}).get(doc_id, {})
+            # Previous chunk
+            for offset in range(-window, 0):
+                prev = cache.get(chunk_idx + offset)
+                if prev and prev[:100] not in seen_content:
+                    parts.append(prev)
+
+        parts.append(chunk.content)
+
+        for col in target_collections:
+            cache = neighbor_cache.get(col, {}).get(doc_id, {})
+            for offset in range(1, window + 1):
+                nxt = cache.get(chunk_idx + offset)
+                if nxt and nxt[:100] not in seen_content:
+                    parts.append(nxt)
+
+        merged_content = "\n\n".join(parts)
+        seen_content.add(merged_content[:100])
+
+        expanded.append(RetrievedChunk(
+            content=merged_content,
+            metadata=chunk.metadata,
+            relevance_score=chunk.relevance_score,
+            source_file=chunk.source_file,
+        ))
+
+    # Add non-expanded chunks, skipping duplicates
+    for chunk in rest:
+        if chunk.content[:100] not in seen_content:
+            expanded.append(chunk)
+            seen_content.add(chunk.content[:100])
+
+    return expanded

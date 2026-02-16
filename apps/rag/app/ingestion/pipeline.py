@@ -65,12 +65,19 @@ def ingest_file(
 
     logger.info(f"Created {len(all_chunks)} chunks from {file_path.name}")
 
-    # 3. Generate embeddings
-    texts = [chunk.content for chunk in all_chunks]
-    embeddings = embed_batch(texts)
+    # 3. Build enriched texts for embedding (with source context)
+    #    and plain texts for storage (clean, no header)
+    plain_texts = [chunk.content for chunk in all_chunks]
+    enriched_texts = [
+        _build_embedding_text(chunk.content, {**chunk.metadata, "source_file": file_path.name})
+        for chunk in all_chunks
+    ]
+
+    # 4. Generate embeddings from the enriched texts
+    embeddings = embed_batch(enriched_texts)
     logger.info(f"Generated {len(embeddings)} embeddings")
 
-    # 4. Store in ChromaDB
+    # 5. Store in ChromaDB (plain text as document, enriched used only for embedding)
     collection = get_or_create_collection(collection_name)
 
     ids = [f"{document_id}_chunk_{i}" for i in range(len(all_chunks))]
@@ -91,7 +98,7 @@ def ingest_file(
 
     collection.add(
         ids=ids,
-        documents=texts,
+        documents=plain_texts,
         embeddings=embeddings,
         metadatas=metadatas,
     )
@@ -147,9 +154,14 @@ def ingest_text_blocks(
 
     logger.info(f"Created {len(all_chunks)} chunks from {source_name}")
 
-    # Generate embeddings
-    texts = [chunk.content for chunk in all_chunks]
-    embeddings = embed_batch(texts)
+    # Build enriched texts for embedding, plain texts for storage
+    plain_texts = [chunk.content for chunk in all_chunks]
+    enriched_texts = [
+        _build_embedding_text(chunk.content, {**chunk.metadata, "source_file": source_name})
+        for chunk in all_chunks
+    ]
+
+    embeddings = embed_batch(enriched_texts)
     logger.info(f"Generated {len(embeddings)} embeddings")
 
     # Store in ChromaDB
@@ -171,7 +183,7 @@ def ingest_text_blocks(
 
     collection.add(
         ids=ids,
-        documents=texts,
+        documents=plain_texts,
         embeddings=embeddings,
         metadatas=metadatas,
     )
@@ -207,6 +219,33 @@ def ingest_batch(
                 "error": str(e),
             })
     return results
+
+
+def _build_embedding_text(content: str, metadata: dict) -> str:
+    """Build enriched text for embedding with source context.
+
+    Prepends a short header with the document name and section so the
+    embedding model understands *where* this chunk comes from.  The
+    plain text (without header) is stored in ChromaDB for display.
+    """
+    parts = []
+
+    source = metadata.get("source_file", "")
+    if source:
+        parts.append(f"Bron: {source}")
+
+    section = metadata.get("section_header", "")
+    if section:
+        parts.append(f"Sectie: {section}")
+
+    title = metadata.get("title", "")
+    if title and title != source:
+        parts.append(f"Titel: {title}")
+
+    if parts:
+        header = " | ".join(parts)
+        return f"{header}\n\n{content}"
+    return content
 
 
 def _sanitize_meta_value(value):
