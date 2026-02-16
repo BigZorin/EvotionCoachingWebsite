@@ -38,9 +38,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install ffmpeg for audio/video processing
+# Install ffmpeg for audio/video processing + CA certificates for HTTPS
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg && \
+    apt-get install -y --no-install-recommends ffmpeg ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy installed packages from build stage
