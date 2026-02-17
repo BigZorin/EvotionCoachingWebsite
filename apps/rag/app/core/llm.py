@@ -51,6 +51,7 @@ def _groq_generate(prompt: str, system: str | None = None, temperature: float = 
                 input_tokens=usage.prompt_tokens or 0,
                 output_tokens=usage.completion_tokens or 0,
                 total_tokens=usage.total_tokens or 0,
+                provider="groq",
             )
     except Exception as e:
         logger.debug(f"Usage tracking failed: {e}")
@@ -91,6 +92,7 @@ def _groq_generate_stream(
             input_tokens=input_chars // 4,
             output_tokens=output_chars // 4,
             total_tokens=(input_chars + output_chars) // 4,
+            provider="groq",
         )
     except Exception as e:
         logger.debug(f"Stream usage tracking failed: {e}")
@@ -149,6 +151,7 @@ def _cerebras_generate(prompt: str, system: str | None = None, temperature: floa
                 input_tokens=usage.get("prompt_tokens", 0),
                 output_tokens=usage.get("completion_tokens", 0),
                 total_tokens=usage.get("total_tokens", 0),
+                provider="cerebras",
             )
         except Exception as e:
             logger.debug(f"Usage tracking failed: {e}")
@@ -210,6 +213,7 @@ def _cerebras_generate_stream(
                 input_tokens=usage_data.get("prompt_tokens", 0),
                 output_tokens=usage_data.get("completion_tokens", 0),
                 total_tokens=usage_data.get("total_tokens", 0),
+                provider="cerebras",
             )
         elif output_parts:
             input_chars = len(prompt) + (len(system) if system else 0)
@@ -219,6 +223,7 @@ def _cerebras_generate_stream(
                 input_tokens=input_chars // 4,
                 output_tokens=output_chars // 4,
                 total_tokens=(input_chars + output_chars) // 4,
+                provider="cerebras",
             )
     except Exception as e:
         logger.debug(f"Stream usage tracking failed: {e}")
@@ -277,6 +282,7 @@ def _openrouter_generate(prompt: str, system: str | None = None, temperature: fl
                 input_tokens=usage.get("prompt_tokens", 0),
                 output_tokens=usage.get("completion_tokens", 0),
                 total_tokens=usage.get("total_tokens", 0),
+                provider="openrouter",
             )
         except Exception as e:
             logger.debug(f"Usage tracking failed: {e}")
@@ -339,6 +345,7 @@ def _openrouter_generate_stream(
                 input_tokens=usage_data.get("prompt_tokens", 0),
                 output_tokens=usage_data.get("completion_tokens", 0),
                 total_tokens=usage_data.get("total_tokens", 0),
+                provider="openrouter",
             )
         elif output_parts:
             input_chars = len(prompt) + (len(system) if system else 0)
@@ -348,6 +355,7 @@ def _openrouter_generate_stream(
                 input_tokens=input_chars // 4,
                 output_tokens=output_chars // 4,
                 total_tokens=(input_chars + output_chars) // 4,
+                provider="openrouter",
             )
     except Exception as e:
         logger.debug(f"Stream usage tracking failed: {e}")

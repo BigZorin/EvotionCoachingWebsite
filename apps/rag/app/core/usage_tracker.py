@@ -62,6 +62,12 @@ def init_usage_table():
             CREATE INDEX IF NOT EXISTS idx_usage_timestamp ON groq_usage(timestamp);
             CREATE INDEX IF NOT EXISTS idx_usage_date ON groq_usage(DATE(timestamp));
         """)
+        # Add provider column if it doesn't exist (migration for existing DBs)
+        try:
+            conn.execute("SELECT provider FROM groq_usage LIMIT 1")
+        except sqlite3.OperationalError:
+            conn.execute("ALTER TABLE groq_usage ADD COLUMN provider TEXT DEFAULT 'groq'")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_usage_provider ON groq_usage(provider)")
         conn.commit()
 
 
@@ -70,8 +76,9 @@ def log_llm_usage(
     input_tokens: int = 0,
     output_tokens: int = 0,
     total_tokens: int = 0,
+    provider: str = "groq",
 ):
-    """Log an LLM API call."""
+    """Log an LLM API call with provider info."""
     if model in FREE_MODELS:
         cost = 0.0
     else:
@@ -81,9 +88,9 @@ def log_llm_usage(
     with _conn() as conn:
         now = datetime.now(timezone.utc).isoformat()
         conn.execute(
-            "INSERT INTO groq_usage (timestamp, call_type, model, input_tokens, output_tokens, total_tokens, estimated_cost) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (now, "chat", model, input_tokens, output_tokens, total_tokens or (input_tokens + output_tokens), cost),
+            "INSERT INTO groq_usage (timestamp, call_type, model, input_tokens, output_tokens, total_tokens, estimated_cost, provider) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (now, "chat", model, input_tokens, output_tokens, total_tokens or (input_tokens + output_tokens), cost, provider),
         )
         conn.commit()
 
@@ -163,12 +170,54 @@ def get_usage_stats() -> dict:
             SELECT
                 model,
                 call_type,
+                COALESCE(provider, 'groq') as provider,
                 COUNT(*) as requests,
                 COALESCE(SUM(total_tokens), 0) as tokens,
                 COALESCE(SUM(audio_seconds), 0) as audio_seconds,
                 COALESCE(SUM(estimated_cost), 0) as cost
             FROM groq_usage
-            GROUP BY model, call_type
+            GROUP BY model, call_type, provider
+            ORDER BY requests DESC
+        """).fetchall()
+
+        # Usage by provider (aggregated)
+        provider_usage = conn.execute("""
+            SELECT
+                COALESCE(provider, 'groq') as provider,
+                COUNT(*) as requests,
+                COALESCE(SUM(input_tokens), 0) as input_tokens,
+                COALESCE(SUM(output_tokens), 0) as output_tokens,
+                COALESCE(SUM(total_tokens), 0) as total_tokens,
+                COALESCE(SUM(audio_seconds), 0) as audio_seconds,
+                COALESCE(SUM(estimated_cost), 0) as cost
+            FROM groq_usage
+            GROUP BY provider
+            ORDER BY requests DESC
+        """).fetchall()
+
+        # Today by provider
+        today_by_provider = conn.execute("""
+            SELECT
+                COALESCE(provider, 'groq') as provider,
+                COUNT(*) as requests,
+                COALESCE(SUM(total_tokens), 0) as total_tokens,
+                COALESCE(SUM(estimated_cost), 0) as cost
+            FROM groq_usage
+            WHERE DATE(timestamp) = DATE('now')
+            GROUP BY provider
+            ORDER BY requests DESC
+        """).fetchall()
+
+        # This month by provider
+        month_by_provider = conn.execute("""
+            SELECT
+                COALESCE(provider, 'groq') as provider,
+                COUNT(*) as requests,
+                COALESCE(SUM(total_tokens), 0) as total_tokens,
+                COALESCE(SUM(estimated_cost), 0) as cost
+            FROM groq_usage
+            WHERE strftime('%Y-%m', timestamp) = strftime('%Y-%m', 'now')
+            GROUP BY provider
             ORDER BY requests DESC
         """).fetchall()
 
@@ -200,11 +249,42 @@ def get_usage_stats() -> dict:
             {
                 "model": r["model"],
                 "type": r["call_type"],
+                "provider": r["provider"],
                 "requests": r["requests"],
                 "tokens": r["tokens"],
                 "audio_seconds": round(r["audio_seconds"], 1),
                 "cost": round(r["cost"], 4),
             }
             for r in model_usage
+        ],
+        "by_provider": [
+            {
+                "provider": r["provider"],
+                "requests": r["requests"],
+                "input_tokens": r["input_tokens"],
+                "output_tokens": r["output_tokens"],
+                "total_tokens": r["total_tokens"],
+                "audio_seconds": round(r["audio_seconds"], 1),
+                "estimated_cost": round(r["cost"], 4),
+            }
+            for r in provider_usage
+        ],
+        "today_by_provider": [
+            {
+                "provider": r["provider"],
+                "requests": r["requests"],
+                "total_tokens": r["total_tokens"],
+                "cost": round(r["cost"], 4),
+            }
+            for r in today_by_provider
+        ],
+        "month_by_provider": [
+            {
+                "provider": r["provider"],
+                "requests": r["requests"],
+                "total_tokens": r["total_tokens"],
+                "cost": round(r["cost"], 4),
+            }
+            for r in month_by_provider
         ],
     }

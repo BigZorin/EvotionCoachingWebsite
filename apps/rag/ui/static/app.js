@@ -1468,6 +1468,8 @@ function renderGroqUsageSection(usage) {
   const today = usage.today || {};
   const month = usage.this_month || {};
   const models = usage.by_model || [];
+  const todayByProvider = usage.today_by_provider || [];
+  const monthByProvider = usage.month_by_provider || [];
 
   function fmtCost(v) { return '$' + (v || 0).toFixed(4); }
   function fmtNum(v) { return (v || 0).toLocaleString(); }
@@ -1477,18 +1479,49 @@ function renderGroqUsageSection(usage) {
     return Math.round(s / 60) + 'min';
   }
 
+  const providerLabels = { groq: 'Groq', cerebras: 'Cerebras', openrouter: 'OpenRouter' };
+  const providerColors = { groq: '#f55036', cerebras: '#6366f1', openrouter: '#22c55e' };
+
+  // Provider mini-cards for today
+  let todayProviderCards = '';
+  if (todayByProvider.length) {
+    todayProviderCards = `<div class="provider-breakdown">${todayByProvider.map(p => `
+      <div class="provider-mini-card" style="border-left: 3px solid ${providerColors[p.provider] || '#888'}">
+        <span class="provider-mini-name">${escapeHtml(providerLabels[p.provider] || p.provider)}</span>
+        <span class="provider-mini-stat">${fmtNum(p.requests)} req</span>
+        <span class="provider-mini-stat">${fmtNum(p.total_tokens)} tok</span>
+        <span class="provider-mini-stat">${fmtCost(p.cost)}</span>
+      </div>
+    `).join('')}</div>`;
+  }
+
+  // Provider mini-cards for this month
+  let monthProviderCards = '';
+  if (monthByProvider.length) {
+    monthProviderCards = `<div class="provider-breakdown">${monthByProvider.map(p => `
+      <div class="provider-mini-card" style="border-left: 3px solid ${providerColors[p.provider] || '#888'}">
+        <span class="provider-mini-name">${escapeHtml(providerLabels[p.provider] || p.provider)}</span>
+        <span class="provider-mini-stat">${fmtNum(p.requests)} req</span>
+        <span class="provider-mini-stat">${fmtNum(p.total_tokens)} tok</span>
+        <span class="provider-mini-stat">${fmtCost(p.cost)}</span>
+      </div>
+    `).join('')}</div>`;
+  }
+
   let modelRows = '';
   if (models.length) {
-    modelRows = models.map(m => `
+    modelRows = models.map(m => {
+      const pColor = providerColors[m.provider] || '#888';
+      return `
       <tr>
+        <td><span class="provider-dot" style="background:${pColor}"></span>${escapeHtml(providerLabels[m.provider] || m.provider)}</td>
         <td>${escapeHtml(m.model)}</td>
-        <td>${m.type}</td>
         <td>${fmtNum(m.requests)}</td>
         <td>${fmtNum(m.tokens)}</td>
         <td>${fmtAudio(m.audio_seconds)}</td>
         <td>${fmtCost(m.cost)}</td>
       </tr>
-    `).join('');
+    `}).join('');
   }
 
   return `
@@ -1499,7 +1532,7 @@ function renderGroqUsageSection(usage) {
             <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
           </svg>
         </div>
-        <h3 style="margin:0">Groq API Gebruik</h3>
+        <h3 style="margin:0">LLM Gebruik</h3>
       </div>
       <div class="usage-row-label">Vandaag</div>
       <div class="usage-stats">
@@ -1520,6 +1553,7 @@ function renderGroqUsageSection(usage) {
           <div class="usage-stat-label">Kosten</div>
         </div>
       </div>
+      ${todayProviderCards}
       <div class="usage-row-label">Deze maand</div>
       <div class="usage-stats">
         <div class="usage-stat-card">
@@ -1539,10 +1573,11 @@ function renderGroqUsageSection(usage) {
           <div class="usage-stat-label">Kosten</div>
         </div>
       </div>
+      ${monthProviderCards}
       ${models.length ? `
         <table class="usage-model-table">
           <thead>
-            <tr><th>Model</th><th>Type</th><th>Requests</th><th>Tokens</th><th>Audio</th><th>Kosten</th></tr>
+            <tr><th>Provider</th><th>Model</th><th>Requests</th><th>Tokens</th><th>Audio</th><th>Kosten</th></tr>
           </thead>
           <tbody>${modelRows}</tbody>
         </table>
