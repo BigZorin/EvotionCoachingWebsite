@@ -150,13 +150,28 @@ def chat(
     recent = get_recent_context(session_id, max_messages=6)
     search_query = _build_search_query(question, recent)
 
-    # Determine collection search scope from agent
+    # Determine collection search scope from agent + attachments
     agent_collections = agent.get("collections", []) if agent else []
+    meta = get_session_metadata(session_id)
+    attachment_collection = meta.get("attachment_collection")
+
+    # Build collection scope, merging attachment collection if present
+    search_collection_name = collection if not agent_collections else None
+    search_collection_names = agent_collections if agent_collections else None
+
+    if attachment_collection:
+        if search_collection_names:
+            search_collection_names = list(search_collection_names) + [attachment_collection]
+        elif search_collection_name:
+            search_collection_names = [search_collection_name, attachment_collection]
+            search_collection_name = None
+        else:
+            search_collection_names = [attachment_collection]
 
     chunks = retrieve(
         query=search_query,
-        collection_name=collection if not agent_collections else None,
-        collection_names=agent_collections if agent_collections else None,
+        collection_name=search_collection_name,
+        collection_names=search_collection_names,
         top_k=top_k,
         use_multi_query=False,
     )
@@ -276,10 +291,26 @@ def chat_stream(
     search_query = _build_search_query(question, recent)
 
     agent_collections = agent.get("collections", []) if agent else []
+    meta = get_session_metadata(session_id)
+    attachment_collection = meta.get("attachment_collection")
+
+    # Build collection scope, merging attachment collection if present
+    search_collection_name = collection if not agent_collections else None
+    search_collection_names = agent_collections if agent_collections else None
+
+    if attachment_collection:
+        if search_collection_names:
+            search_collection_names = list(search_collection_names) + [attachment_collection]
+        elif search_collection_name:
+            search_collection_names = [search_collection_name, attachment_collection]
+            search_collection_name = None
+        else:
+            search_collection_names = [attachment_collection]
+
     chunks = retrieve(
         query=search_query,
-        collection_name=collection if not agent_collections else None,
-        collection_names=agent_collections if agent_collections else None,
+        collection_name=search_collection_name,
+        collection_names=search_collection_names,
         top_k=top_k,
         use_multi_query=False,
     )

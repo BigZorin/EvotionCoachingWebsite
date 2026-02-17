@@ -184,7 +184,11 @@ def _bm25_search(
             target_collections = [collection_name]
         else:
             collections = list_collections()
-            target_collections = [c.name if hasattr(c, "name") else str(c) for c in collections]
+            target_collections = [
+                c.name if hasattr(c, "name") else str(c)
+                for c in collections
+                if not (c.name if hasattr(c, "name") else str(c)).startswith("chatfiles-")
+            ]
 
         all_docs = []
         all_metadatas = []
@@ -320,6 +324,8 @@ def _search_all_collections(
     collections = list_collections()
     for col in collections:
         name = col.name if hasattr(col, "name") else str(col)
+        if name.startswith("chatfiles-"):
+            continue  # Skip session attachment collections in global search
         results = _search_collection(name, query_embedding, top_k)
         all_results.extend(results)
     return all_results

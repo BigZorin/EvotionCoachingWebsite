@@ -19,6 +19,8 @@ def get_all_collections() -> list[CollectionInfo]:
 
     for col in collections:
         name = col.name if hasattr(col, "name") else str(col)
+        if name.startswith("chatfiles-"):
+            continue  # Skip session attachment collections
         try:
             collection = client.get_collection(name)
             count = collection.count()

@@ -3,7 +3,7 @@
    Features: Streaming, Hybrid Search, Feedback, Analytics, Auth
    ============================================================ */
 
-const APP_VERSION = 'v34';
+const APP_VERSION = 'v35';
 const API = '/api/v1';
 
 // --- State ---
@@ -15,10 +15,12 @@ let agentsCache = [];
 let editingAgentId = null;
 let searchDebounce = null;
 let supportedExtensions = []; // Loaded from server on init
+let pendingAttachments = [];  // Files selected but not yet uploaded
+let uploadedAttachments = []; // Successfully uploaded attachment info
 
 // --- DOM refs (set in init) ---
 let $sidebar, $overlay, $sessionsEl, $chatScroll, $emptyState, $messagesEl;
-let $chatInput, $sendBtn, $chatCollection, $agentSelect;
+let $chatInput, $sendBtn, $chatCollection, $agentSelect, $attachBtn, $chatFileInput, $chatAttachments;
 let $docsView, $collectionsView, $chatView, $agentsView, $analyticsView, $systemView;
 let $uploadStatus, $docsList, $collectionsList, $agentsList;
 
@@ -577,6 +579,12 @@ async function loadSession(sessionId, agentId = null) {
     currentAgentId = agentId || data.session?.agent_id || null;
     const messages = data.messages || [];
 
+    // Restore attachment state from session metadata
+    pendingAttachments = [];
+    const meta = data.session?.metadata;
+    uploadedAttachments = (meta && meta.attachments) ? meta.attachments : [];
+    renderChatAttachments();
+
     $messagesEl.innerHTML = '';
     $emptyState.style.display = 'none';
 
@@ -597,10 +605,13 @@ async function loadSession(sessionId, agentId = null) {
 
 function newChat() {
   currentSessionId = null;
+  pendingAttachments = [];
+  uploadedAttachments = [];
   $messagesEl.innerHTML = '';
   $emptyState.style.display = '';
   $chatInput.value = '';
   $chatInput.style.height = 'auto';
+  renderChatAttachments();
   updateSendBtn();
   loadSessions();
 }
@@ -611,7 +622,8 @@ function newChat() {
 
 async function sendMessage() {
   const message = $chatInput.value.trim();
-  if (!message || isLoading) return;
+  const hasAttachments = pendingAttachments.length > 0;
+  if ((!message && !hasAttachments) || isLoading) return;
 
   isLoading = true;
   $chatInput.value = '';
@@ -619,7 +631,15 @@ async function sendMessage() {
   updateSendBtn();
 
   $emptyState.style.display = 'none';
-  appendMessage('user', message);
+
+  // Show user message with attachment filenames if any
+  const fileNames = pendingAttachments.map(f => f.name);
+  const displayMsg = hasAttachments && message
+    ? `${message}\n\n📎 ${fileNames.join(', ')}`
+    : hasAttachments
+      ? `📎 ${fileNames.join(', ')}`
+      : message;
+  appendMessage('user', displayMsg);
 
   try {
     if (!currentSessionId) {
@@ -630,7 +650,13 @@ async function sendMessage() {
       currentAgentId = agentId;
     }
 
-    await streamResponse(currentSessionId, message);
+    // Upload pending attachments before sending message
+    if (hasAttachments) {
+      await uploadChatAttachments(currentSessionId);
+    }
+
+    const questionText = message || 'Analyseer de bijgevoegde bestanden en geef een samenvatting.';
+    await streamResponse(currentSessionId, questionText);
     loadSessions();
   } catch (e) {
     appendMessage('assistant', `Er ging iets mis: ${e.message}`);
@@ -892,8 +918,14 @@ function buildSourcesHtml(sources) {
     const sc = s.relevance_score || 0;
     if (!unique[fn] || sc > unique[fn]) unique[fn] = sc;
   });
+  const attachedNames = new Set(uploadedAttachments.map(a => a.filename));
   const chips = Object.entries(unique)
-    .map(([fn, sc]) => `<span class="source-chip"><span class="source-name">${escapeHtml(fn)}</span> ${Math.round(sc * 100)}%</span>`)
+    .map(([fn, sc]) => {
+      const isAtt = attachedNames.has(fn);
+      const badge = isAtt ? '📎 ' : '';
+      const cls = isAtt ? ' source-attachment' : '';
+      return `<span class="source-chip${cls}">${badge}<span class="source-name">${escapeHtml(fn)}</span> ${Math.round(sc * 100)}%</span>`;
+    })
     .join('');
   return `<div class="sources">${chips}</div>`;
 }
@@ -988,13 +1020,113 @@ function scrollToBottom() {
 
 function updateSendBtn() {
   const hasText = $chatInput.value.trim().length > 0;
-  $sendBtn.disabled = !hasText || isLoading;
+  const hasFiles = pendingAttachments.length > 0;
+  $sendBtn.disabled = (!hasText && !hasFiles) || isLoading;
 }
 
 function autoResizeInput() {
   $chatInput.style.height = 'auto';
   $chatInput.style.height = Math.min($chatInput.scrollHeight, 200) + 'px';
   updateSendBtn();
+}
+
+// ============================================================
+// Chat Attachments
+// ============================================================
+
+function addChatAttachments(fileList) {
+  for (const file of Array.from(fileList)) {
+    if (supportedExtensions.length > 0) {
+      const ext = '.' + file.name.split('.').pop().toLowerCase();
+      if (!supportedExtensions.includes(ext)) {
+        showToast(`${file.name}: bestandstype niet ondersteund`, true);
+        continue;
+      }
+    }
+    pendingAttachments.push(file);
+  }
+  renderChatAttachments();
+  updateSendBtn();
+}
+
+function renderChatAttachments() {
+  if (!$chatAttachments) return;
+  const total = pendingAttachments.length + uploadedAttachments.length;
+  $chatAttachments.classList.toggle('has-files', total > 0);
+  $chatAttachments.innerHTML = '';
+
+  // Uploaded (done) chips
+  uploadedAttachments.forEach(att => {
+    const chip = document.createElement('span');
+    chip.className = 'attachment-chip done';
+    chip.innerHTML = `<span class="att-name">${escapeHtml(att.filename)}</span> <span style="opacity:0.5">${att.chunks_created} chunks</span>`;
+    $chatAttachments.appendChild(chip);
+  });
+
+  // Pending chips
+  pendingAttachments.forEach((file, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'attachment-chip';
+    chip.innerHTML = `<span class="att-name">${escapeHtml(file.name)}</span><button class="remove-att" title="Verwijderen">&times;</button>`;
+    chip.querySelector('.remove-att').addEventListener('click', () => {
+      pendingAttachments.splice(i, 1);
+      renderChatAttachments();
+      updateSendBtn();
+    });
+    $chatAttachments.appendChild(chip);
+  });
+}
+
+async function uploadChatAttachments(sessionId) {
+  for (let i = 0; i < pendingAttachments.length; i++) {
+    const file = pendingAttachments[i];
+    // Update chip to uploading state
+    const pendingChips = $chatAttachments.querySelectorAll('.attachment-chip:not(.done)');
+    if (pendingChips[0]) {
+      pendingChips[0].className = 'attachment-chip uploading';
+      pendingChips[0].innerHTML = `<div class="spinner-sm"></div> <span class="att-name">${escapeHtml(file.name)}</span>`;
+    }
+    try {
+      const result = await uploadChatFile(file, sessionId);
+      uploadedAttachments.push({
+        filename: result.filename || file.name,
+        document_id: result.document_id || '',
+        chunks_created: result.chunks_created || 0,
+      });
+    } catch (e) {
+      showToast(`${file.name}: ${e.message}`, true);
+    }
+    // Re-render after each file
+    pendingAttachments.splice(0, 1);
+    i--;
+    renderChatAttachments();
+  }
+}
+
+function uploadChatFile(file, sessionId) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append('file', file);
+    xhr.timeout = 600_000;
+    xhr.addEventListener('load', () => {
+      if (xhr.status === 401) { handleUnauthorized(); reject(new Error('Unauthorized')); return; }
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try { resolve(JSON.parse(xhr.responseText)); } catch { resolve({}); }
+      } else {
+        try {
+          const err = JSON.parse(xhr.responseText);
+          reject(new Error(err.detail || `Upload failed: ${xhr.status}`));
+        } catch { reject(new Error(`Upload failed: ${xhr.status}`)); }
+      }
+    });
+    xhr.addEventListener('error', () => reject(new Error('Netwerkfout')));
+    xhr.addEventListener('timeout', () => reject(new Error('Timeout')));
+    xhr.open('POST', `${API}/chat/sessions/${sessionId}/attachments`);
+    const token = getAuthToken();
+    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    xhr.send(formData);
+  });
 }
 
 // ============================================================
@@ -2470,6 +2602,9 @@ function init() {
   $agentsList = document.getElementById('agents-list');
   $agentSelect = document.getElementById('agent-select');
   $uploadStatus = document.getElementById('upload-status');
+  $attachBtn = document.getElementById('attach-btn');
+  $chatFileInput = document.getElementById('chat-file-input');
+  $chatAttachments = document.getElementById('chat-attachments');
 
   // --- Sidebar ---
   document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
@@ -2510,6 +2645,20 @@ function init() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
   $sendBtn.addEventListener('click', sendMessage);
+
+  // --- Chat file attachments ---
+  $attachBtn.addEventListener('click', () => $chatFileInput.click());
+  $chatFileInput.addEventListener('change', () => {
+    addChatAttachments($chatFileInput.files);
+    $chatFileInput.value = '';
+  });
+  // Drag-drop on chat scroll area
+  $chatScroll.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); });
+  $chatScroll.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.files.length > 0) addChatAttachments(e.dataTransfer.files);
+  });
 
   // --- Suggestions ---
   document.querySelectorAll('.suggestion').forEach(btn => {

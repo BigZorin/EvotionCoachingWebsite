@@ -130,6 +130,7 @@ def system_info():
                 {"name": "Analytics Dashboard", "description": "Gebruiksstatistieken: totaal sessies/berichten, feedback-scores, dagelijks gebruik, top-vragen, agent-gebruik en LLM kosten-tracking per provider (Groq/Cerebras/OpenRouter) inclusief streaming-calls"},
                 {"name": "YouTube Transcripties", "description": "YouTube URLs worden verwerkt via de YouTube Transcript API (niet via Whisper) — sneller en gratis"},
                 {"name": "Collection Cleanup", "description": "Micro-chunks (< 50 tekens) kunnen per collectie worden opgeruimd via de cleanup endpoint"},
+                {"name": "Chat Bestandsbijlagen", "description": "Bestanden bijvoegen in de chat via paperclip-knop of drag-and-drop (PDF, Word, afbeeldingen, CSV, audio, etc.). Bestanden worden verwerkt via de standaard ingestion pipeline en opgeslagen in een sessie-gebonden collectie (chatfiles-*). De AI doorzoekt zowel de bijlagen als de geselecteerde collectie voor antwoorden met bronverwijzingen. Bij verwijdering van een sessie wordt de bijlage-collectie automatisch opgeruimd uit ChromaDB."},
             ],
         },
         "stability": {

@@ -1,7 +1,7 @@
 import json
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
@@ -14,10 +14,19 @@ from app.core.database import (
     add_feedback,
     get_analytics,
     search_sessions,
+    get_session_metadata,
+    update_session_metadata,
 )
 from app.services.chat_service import start_session, chat, chat_stream, get_chat_history
+from app.services.collection_service import remove_collection
+from app.services.ingestion_service import process_upload
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+
+
+def _attachment_collection(session_id: str) -> str:
+    """Session-scoped ChromaDB collection for chat file attachments."""
+    return f"chatfiles-{session_id[:8]}"
 
 
 class ChatRequest(BaseModel):
@@ -65,6 +74,12 @@ def get_chat_session(session_id: str):
     session = get_session(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
+    # Parse metadata JSON string so frontend gets an object
+    if isinstance(session.get("metadata"), str):
+        try:
+            session["metadata"] = json.loads(session["metadata"])
+        except (json.JSONDecodeError, TypeError):
+            session["metadata"] = {}
     messages = get_chat_history(session_id)
     return {"session": session, "messages": messages}
 
@@ -74,6 +89,11 @@ def delete_chat_session(session_id: str):
     session = get_session(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
+    # Clean up attachment collection if it exists
+    try:
+        remove_collection(_attachment_collection(session_id))
+    except Exception:
+        pass  # Collection may not exist — that's fine
     delete_session(session_id)
     return {"deleted": True}
 
@@ -130,6 +150,45 @@ def send_message_stream(session_id: str, body: ChatRequest):
             "X-Accel-Buffering": "no",
         },
     )
+
+
+# ============================================================
+# File Attachments
+# ============================================================
+
+@router.post("/sessions/{session_id}/attachments")
+async def upload_chat_attachment(session_id: str, file: UploadFile = File(...)):
+    """Upload a file attachment in a chat session for the AI to analyze."""
+    session = get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    collection_name = _attachment_collection(session_id)
+    result = await process_upload(file, collection_name)
+
+    if result.get("status") == "error":
+        raise HTTPException(status_code=400, detail=result.get("error", "Upload failed"))
+
+    # Track attachment in session metadata
+    meta = get_session_metadata(session_id)
+    attachments = meta.get("attachments", [])
+    attachments.append({
+        "filename": result.get("filename", ""),
+        "document_id": result.get("document_id", ""),
+        "chunks_created": result.get("chunks_created", 0),
+    })
+    update_session_metadata(session_id, {
+        "attachments": attachments,
+        "attachment_collection": collection_name,
+    })
+
+    return {
+        "filename": result.get("filename", ""),
+        "document_id": result.get("document_id", ""),
+        "chunks_created": result.get("chunks_created", 0),
+        "collection": collection_name,
+        "status": "success",
+    }
 
 
 # ============================================================
