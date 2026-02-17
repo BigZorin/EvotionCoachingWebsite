@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     # Cerebras (secondary cloud fallback — fast & free)
     cerebras_api_key: str = ""
-    cerebras_model: str = "llama3.1-8b"
+    cerebras_model: str = "qwen-3-235b-a22b-instruct-2507"
     cerebras_timeout: int = 60
 
     # OpenRouter (tertiary cloud fallback)
