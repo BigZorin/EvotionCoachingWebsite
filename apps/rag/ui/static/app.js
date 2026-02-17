@@ -1,8 +1,9 @@
 /* ============================================================
-   Evotion RAG — Client-side Application (v4)
+   Evotion RAG — Client-side Application (v30)
    Features: Streaming, Hybrid Search, Feedback, Analytics, Auth
    ============================================================ */
 
+const APP_VERSION = 'v30';
 const API = '/api/v1';
 
 // --- State ---
@@ -207,85 +208,62 @@ async function apiDelete(path) {
 // ============================================================
 
 /**
- * Convert HTML to Markdown using the browser's built-in DOMParser.
- * This is bulletproof — handles any HTML regardless of attributes, nesting, etc.
+ * Convert HTML tags in LLM output to Markdown equivalents.
+ * Uses simple regex — no DOMParser, no complexity, works on partial text too.
  */
-function htmlToMarkdown(text) {
-  // Quick check: no HTML tags? Return as-is.
-  if (text.indexOf('<') === -1 || !/<[a-z]/i.test(text)) return text;
+function stripHtmlToMarkdown(text) {
+  if (!text || text.indexOf('<') === -1) return text;
+  // Skip if no actual HTML tags (just angle brackets in math/code)
+  if (!/<[a-z/]/i.test(text)) return text;
 
-  // Preserve followup and citation markers before parsing
-  const followupMap = {};
-  let fIdx = 0;
+  // Preserve <followup> tags
+  const followups = [];
   text = text.replace(/<followup>[\s\S]*?<\/followup>/gi, (m) => {
-    const key = `__FOLLOWUP_${fIdx++}__`;
-    followupMap[key] = m;
-    return key;
-  });
-  const citationMap = {};
-  let cIdx = 0;
-  text = text.replace(/\[(\d+)\]/g, (m) => {
-    const key = `__CITE_${cIdx++}__`;
-    citationMap[key] = m;
-    return key;
+    followups.push(m);
+    return `\x00FU${followups.length - 1}\x00`;
   });
 
-  try {
-    const doc = new DOMParser().parseFromString(text, 'text/html');
-    const md = _nodeToMd(doc.body);
+  // Convert semantic HTML → Markdown
+  text = text.replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi, '**$1**');
+  text = text.replace(/<b[^>]*>([\s\S]*?)<\/b>/gi, '**$1**');
+  text = text.replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, '*$1*');
+  text = text.replace(/<i[^>]*>([\s\S]*?)<\/i>/gi, '*$1*');
+  text = text.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, '\n## $1\n');
+  text = text.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, '\n### $1\n');
+  text = text.replace(/<h[3-6][^>]*>([\s\S]*?)<\/h[3-6]>/gi, '\n#### $1\n');
+  text = text.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '\n- $1');
+  text = text.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '$1\n\n');
+  text = text.replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, '`$1`');
+  text = text.replace(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)');
 
-    // Restore citations and followups
-    let result = md;
-    for (const [key, val] of Object.entries(citationMap)) result = result.replace(key, val);
-    for (const [key, val] of Object.entries(followupMap)) result = result.replace(key, val);
-    return result.replace(/\n{3,}/g, '\n\n').trim();
-  } catch (e) {
-    // Fallback: strip tags with regex if DOMParser fails
-    return text.replace(/<[^>]+>/g, ' ').replace(/\s{2,}/g, ' ').trim();
-  }
-}
+  // Strip structural/non-semantic tags
+  text = text.replace(/<\/?(ul|ol|div|span|br|table|tr|td|th|thead|tbody|blockquote|hr|section|article|header|footer|nav|main)[^>]*\/?>/gi, '\n');
 
-function _nodeToMd(node) {
-  let out = '';
-  for (const child of node.childNodes) {
-    if (child.nodeType === 3) {
-      // Text node
-      out += child.textContent;
-    } else if (child.nodeType === 1) {
-      // Element node
-      const tag = child.tagName.toLowerCase();
-      const inner = _nodeToMd(child);
-      switch (tag) {
-        case 'strong': case 'b': out += `**${inner.trim()}**`; break;
-        case 'em': case 'i': out += `*${inner.trim()}*`; break;
-        case 'p': out += `${inner.trim()}\n\n`; break;
-        case 'li': out += `\n- ${inner.trim()}`; break;
-        case 'ul': case 'ol': out += `\n${inner}\n`; break;
-        case 'h1': out += `\n## ${inner.trim()}\n`; break;
-        case 'h2': out += `\n### ${inner.trim()}\n`; break;
-        case 'h3': case 'h4': case 'h5': case 'h6': out += `\n#### ${inner.trim()}\n`; break;
-        case 'br': out += '\n'; break;
-        case 'code': out += `\`${inner}\``; break;
-        case 'pre': out += `\n\`\`\`\n${inner}\n\`\`\`\n`; break;
-        case 'a': {
-          const href = child.getAttribute('href');
-          out += href ? `[${inner}](${href})` : inner;
-          break;
-        }
-        default: out += inner; break;
-      }
-    }
-  }
-  return out;
+  // Nuclear: strip ANY remaining HTML tags
+  text = text.replace(/<\/?[a-z][a-z0-9]*[^>]*\/?>/gi, '');
+
+  // Also strip HTML entities that look like tags (e.g. &lt;strong&gt;)
+  text = text.replace(/&lt;\/?(?:strong|b|em|i|p|li|ul|ol|div|span|br|h[1-6]|a|code|pre)[^&]*&gt;/gi, '');
+
+  // Clean up whitespace
+  text = text.replace(/\n{3,}/g, '\n\n');
+
+  // Restore followups
+  followups.forEach((fu, i) => {
+    text = text.replace(`\x00FU${i}\x00`, fu);
+  });
+
+  return text.trim();
 }
 
 function renderMarkdown(text, sources) {
-  // Strip follow-up tags before rendering
+  // 1. Strip follow-up tags before rendering
   text = text.replace(/<followup>[\s\S]*?<\/followup>/gi, '').trim();
 
-  // Convert any HTML to Markdown using DOMParser (handles all edge cases)
-  text = htmlToMarkdown(text);
+  // 2. Convert any HTML to Markdown (simple regex, works on any input)
+  text = stripHtmlToMarkdown(text);
 
+  // 3. Parse Markdown → HTML
   let html;
   if (typeof marked !== 'undefined') {
     marked.setOptions({
@@ -307,6 +285,7 @@ function renderMarkdown(text, sources) {
       ? DOMPurify.sanitize(rawHtml)
       : rawHtml.replace(/</g, '&lt;').replace(/>/g, '&gt;');
   } else {
+    // Fallback: marked.js not loaded — render as plain text with line breaks
     html = text
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -314,7 +293,7 @@ function renderMarkdown(text, sources) {
       .replace(/\n/g, '<br>');
   }
 
-  // Convert [1], [2] etc. into interactive citation badges
+  // 4. Convert [1], [2] etc. into interactive citation badges
   if (sources && sources.length > 0) {
     html = html.replace(/\[(\d+)\]/g, (match, num) => {
       const idx = parseInt(num, 10) - 1;
