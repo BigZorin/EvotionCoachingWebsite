@@ -198,6 +198,7 @@ async def auth_middleware(request: Request, call_next):
         or path in ("/", "")
         or path.startswith("/ui")
         or path in PUBLIC_PATHS
+        or path.startswith("/api/v1/health/")
     ):
         return await call_next(request)
 
