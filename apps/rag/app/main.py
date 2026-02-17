@@ -23,14 +23,24 @@ RATE_LIMIT_AUTH = 5      # max auth attempts per window
 RATE_LIMIT_API = 60      # max API requests per window
 
 
+def _is_trusted_proxy(ip: str) -> bool:
+    """Check if IP is from Docker internal network (Caddy reverse proxy)."""
+    # Docker Compose default bridge: 172.16-31.x.x, 192.168.x.x, 10.x.x.x
+    return (
+        ip.startswith("172.") or ip.startswith("192.168.") or ip.startswith("10.")
+        or ip in ("127.0.0.1", "::1")
+    )
+
+
 def _get_client_ip(request: Request) -> str:
-    """Get real client IP, accounting for reverse proxy (Caddy).
-    Caddy automatically sets X-Forwarded-For with the real client IP."""
+    """Get real client IP, only trusting X-Forwarded-For from known proxies.
+    Caddy (in Docker) sets X-Forwarded-For — we only trust it from internal IPs."""
+    direct_ip = request.client.host if request.client else "unknown"
     forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        # First IP in chain is the original client
+    if forwarded and _is_trusted_proxy(direct_ip):
+        # Only trust X-Forwarded-For when request came from Caddy (internal network)
         return forwarded.split(",")[0].strip()
-    return request.client.host if request.client else "unknown"
+    return direct_ip
 
 
 def _check_rate_limit(key: str, max_requests: int) -> bool:
@@ -138,6 +148,20 @@ app.add_middleware(
 )
 
 
+# --- Content Security Policy ---
+_CSP = "; ".join([
+    "default-src 'self'",
+    "script-src 'self' cdn.jsdelivr.net cdnjs.cloudflare.com",
+    "style-src 'self' 'unsafe-inline' fonts.googleapis.com cdnjs.cloudflare.com",
+    "font-src 'self' fonts.gstatic.com",
+    "img-src 'self' data:",
+    "connect-src 'self'",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+])
+
+
 # --- Security headers middleware ---
 @app.middleware("http")
 async def security_headers_middleware(request: Request, call_next):
@@ -147,6 +171,7 @@ async def security_headers_middleware(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Content-Security-Policy"] = _CSP
     # Behind Caddy, internal scheme is always HTTP — check X-Forwarded-Proto
     if request.url.scheme == "https" or request.headers.get("x-forwarded-proto") == "https":
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
@@ -212,6 +237,13 @@ async def verify_token(request: Request):
 @app.get("/")
 async def root_redirect():
     return RedirectResponse(url="/ui/")
+
+
+@app.get("/robots.txt")
+async def robots_txt():
+    """Block all search engine indexing."""
+    from fastapi.responses import PlainTextResponse
+    return PlainTextResponse("User-agent: *\nDisallow: /\n")
 
 
 app.include_router(api_router, prefix="/api/v1")

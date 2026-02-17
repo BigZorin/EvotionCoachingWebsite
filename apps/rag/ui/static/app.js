@@ -1,8 +1,9 @@
 /* ============================================================
-   Evotion RAG — Client-side Application (v31)
+   Evotion RAG — Client-side Application (v33)
    Features: Streaming, Hybrid Search, Feedback, Analytics, Auth
    ============================================================ */
 
+const APP_VERSION = 'v33';
 const API = '/api/v1';
 
 // --- State ---
@@ -2727,6 +2728,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const authed = await checkAuth();
   if (authed) {
     init();
+  }
+
+  // Inject app version into sidebar footer
+  const model = document.querySelector('.sidebar-model');
+  if (model) {
+    const v = document.createElement('span');
+    v.className = 'app-version';
+    v.textContent = APP_VERSION;
+    model.appendChild(v);
   }
 
   // Code copy button observer
