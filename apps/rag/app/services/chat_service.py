@@ -613,12 +613,13 @@ def _build_search_query(question: str, history: list[dict]) -> str:
     Combine the current question with recent context for better retrieval.
     """
     if not history:
-        return question
+        return question[:500]
 
     # Take recent user messages for context
     recent_user = [msg["content"] for msg in history if msg["role"] == "user"]
     recent_user.append(question)
-    return " ".join(recent_user[-3:])
+    query = " ".join(recent_user[-3:])
+    return query[:500]
 
 
 def _auto_title(session_id: str, question: str):

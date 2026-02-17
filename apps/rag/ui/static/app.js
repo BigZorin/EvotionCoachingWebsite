@@ -747,13 +747,14 @@ async function streamResponse(sessionId, message) {
         }
 
         if (eventType === 'status') {
-          statusEl.querySelector('span').textContent = data;
+          const span = statusEl?.querySelector('span');
+          if (span) span.textContent = data;
         } else if (eventType === 'sources') {
           sources = data;
         } else if (eventType === 'content') {
           // Server sends full cleaned text (replaces everything) — no client-side HTML cleaning needed
           if (firstToken) {
-            statusEl.style.display = 'none';
+            if (statusEl) statusEl.style.display = 'none';
             streamingText.innerHTML = '';
             firstToken = false;
           }
@@ -763,7 +764,7 @@ async function streamResponse(sessionId, message) {
         } else if (eventType === 'token') {
           // Legacy: individual token append (fallback)
           if (firstToken) {
-            statusEl.style.display = 'none';
+            if (statusEl) statusEl.style.display = 'none';
             streamingText.innerHTML = '';
             firstToken = false;
           }

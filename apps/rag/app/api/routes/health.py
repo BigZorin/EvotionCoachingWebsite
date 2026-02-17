@@ -131,6 +131,11 @@ def system_info():
                 {"name": "YouTube Transcripties", "description": "YouTube URLs worden verwerkt via de YouTube Transcript API (niet via Whisper) — sneller en gratis"},
                 {"name": "Collection Cleanup", "description": "Micro-chunks (< 50 tekens) kunnen per collectie worden opgeruimd via de cleanup endpoint"},
                 {"name": "Chat Bestandsbijlagen", "description": "Bestanden bijvoegen in de chat via paperclip-knop of drag-and-drop (PDF, Word, afbeeldingen, CSV, audio, etc.). Bestanden worden verwerkt via de standaard ingestion pipeline en opgeslagen in een sessie-gebonden collectie (chatfiles-*). De AI doorzoekt zowel de bijlagen als de geselecteerde collectie voor antwoorden met bronverwijzingen. Bij verwijdering van een sessie wordt de bijlage-collectie automatisch opgeruimd uit ChromaDB."},
+                {"name": "KB Fallback bij Bijlagen", "description": "Wanneer een bestand is bijgevoegd maar geen collectie geselecteerd, wordt automatisch de volledige kennisbank doorzocht (global search) naast de bijlage-chunks — voorkomt dat alleen bijlage-bronnen worden getoond"},
+                {"name": "Adaptieve Antwoorddiepte", "description": "AI past diepgang aan op het type vraag: feitelijke vragen krijgen kort antwoord, analyse/adviesvragen (programma's, schema's) krijgen uitgebreide onderbouwing met maximale bronverwijzingen"},
+                {"name": "Gespreks-citaties", "description": "Bronverwijzingen [1], [2] etc. worden in ALLE antwoorden getoond — ook bij vervolgvragen in een gesprek, niet alleen bij het eerste antwoord"},
+                {"name": "Professionele Opmaak", "description": "Training- en voedingsschema's gebruiken geoptimaliseerde Markdown: tabellen met max 4 kolommen en korte cellen, kopje-per-maaltijd format voor voeding, blockquote macro-samenvattingen, paarse accenten"},
+                {"name": "Citatie-rendering in Tabellen", "description": "Bronverwijzingen [1][2] worden correct gestyled als paarse badges, ook binnen Markdown-tabelcellen — via placeholder-bescherming door de markdown→HTML→sanitize pipeline"},
             ],
         },
         "stability": {
@@ -180,6 +185,9 @@ def system_info():
                 {"name": "Uvicorn Timeouts", "description": "Keep-alive timeout (30s) en graceful shutdown timeout (30s) geconfigureerd — voorkomt hangende connections en zorgt voor schone herstart bij deploys"},
                 {"name": "Dagelijkse Backups", "description": "Automatisch backup-script (cron, 03:00 UTC): docker cp → tar.gz compressie → 30-dagen retentie in /opt/evotion-backups/ — beschermt tegen dataverlies"},
                 {"name": "ChromaDB Health Check", "description": "Health endpoint test daadwerkelijk ChromaDB connectiviteit via list_collections() — voorheen hardcoded 'true', nu echte degraded-status bij connectieproblemen"},
+                {"name": "Berichtlengte Validatie", "description": "Chat-berichten zijn beperkt tot 10.000 tekens — voorkomt token-misbruik en excessieve kosten bij kwaadwillende input"},
+                {"name": "Zoekquery Begrenzing", "description": "Zoekquery's worden afgekapt op 500 tekens — voorkomt trage embedding-calls bij onredelijk lange input"},
+                {"name": "Lege Vraag Validatie", "description": "Lege of whitespace-only berichten worden geweigerd met HTTP 400 — voorkomt onnodige LLM-calls en lege antwoorden"},
             ],
         },
         "config": {

@@ -30,7 +30,7 @@ def _attachment_collection(session_id: str) -> str:
 
 
 class ChatRequest(BaseModel):
-    message: str
+    message: str = Field(..., min_length=1, max_length=10000)
     top_k: int = Field(default=15, ge=1, le=50)
     temperature: float = Field(default=0.3, ge=0.0, le=2.0)
 
@@ -92,8 +92,9 @@ def delete_chat_session(session_id: str):
     # Clean up attachment collection if it exists
     try:
         remove_collection(_attachment_collection(session_id))
-    except Exception:
-        pass  # Collection may not exist — that's fine
+        logger.info(f"Cleaned up attachment collection for session {session_id[:8]}")
+    except Exception as e:
+        logger.debug(f"No attachment collection to clean for session {session_id[:8]}: {e}")
     delete_session(session_id)
     return {"deleted": True}
 
@@ -103,13 +104,20 @@ def send_message(session_id: str, body: ChatRequest):
     try:
         result = chat(
             session_id=session_id,
-            question=body.message,
+            question=body.message.strip(),
             top_k=body.top_k,
             temperature=body.temperature,
         )
         return result
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except RuntimeError as e:
+        # LLM provider errors (rate limit, all providers down)
+        logger.warning(f"LLM provider error: {e}")
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        logger.error(f"Chat failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Er is een fout opgetreden bij het genereren van het antwoord.")
 
 
 @router.post("/sessions/{session_id}/messages/stream")
@@ -120,7 +128,7 @@ def send_message_stream(session_id: str, body: ChatRequest):
         try:
             for event in chat_stream(
                 session_id=session_id,
-                question=body.message,
+                question=body.message.strip(),
                 top_k=body.top_k,
                 temperature=body.temperature,
             ):
