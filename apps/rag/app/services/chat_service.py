@@ -1,4 +1,5 @@
 import logging
+import re
 from collections.abc import Generator
 
 from app.config import settings
@@ -16,6 +17,17 @@ from app.core.database import (
 from app.core.llm import generate, generate_stream, get_active_provider
 from app.retrieval.retriever import retrieve
 
+# Strip HTML tags that LLMs sometimes inject (e.g. <p>, </p>, <br>)
+_HTML_TAG_RE = re.compile(r"<\/?(p|br|div|span|b|i|em|strong|ul|ol|li|h[1-6]|table|tr|td|th|thead|tbody|blockquote|hr)\s*\/?>", re.IGNORECASE)
+
+
+def _clean_llm_output(text: str) -> str:
+    """Remove stray HTML tags from LLM output and normalize whitespace."""
+    text = _HTML_TAG_RE.sub("\n", text)
+    # Collapse 3+ newlines into 2 (keep paragraph breaks clean)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
 logger = logging.getLogger(__name__)
 
 TITLE_PROMPT = (
@@ -32,17 +44,23 @@ Summary:"""
 
 CHAT_SYSTEM_PROMPT = """You are an expert knowledge assistant. You answer questions accurately based on the provided document context and conversation history.
 
-STRICT RULES:
+FORMATTING RULES:
+- Use Markdown ONLY: ## for headers, **bold**, - for bullets, numbered lists.
+- NEVER use HTML tags (<p>, </p>, <br>, <div>, etc.). Plain Markdown only.
+- Separate each major topic or section with a blank line for readability.
+- Use short paragraphs (2-4 sentences max). Add a blank line between paragraphs.
+- Use bullet points or numbered lists when listing multiple items.
+- Start with a brief overview sentence, then go into detail.
+
+CONTENT RULES:
 1. ONLY use facts explicitly stated in the document context. Never add information from your own knowledge.
 2. Use inline citations like [1], [2] etc. to reference the numbered source passages. Place them directly after the relevant claim.
 3. Use conversation history and summary to understand the full conversation arc.
 4. If the context doesn't contain enough information, explicitly state what is missing.
 5. When multiple sources discuss the same topic, synthesize them into one coherent answer.
 6. If sources contradict each other, mention both perspectives with their respective citations.
-7. Be thorough and well-structured. Use headers, bullet points, or numbered lists when it improves clarity.
-8. Answer in the same language as the question.
-9. NEVER use HTML tags like <p>, </p>, <br>, <div>, <b>, <i> etc. in your response. Use ONLY Markdown formatting (**, ##, -, \n).
-10. At the very end of your response, add a blank line and then exactly 3 follow-up questions the user might want to ask, formatted as:
+7. Answer in the same language as the question.
+8. At the very end of your response, add a blank line and then exactly 3 follow-up questions the user might want to ask, formatted as:
   <followup>First follow-up question here</followup>
   <followup>Second follow-up question here</followup>
   <followup>Third follow-up question here</followup>"""
@@ -158,11 +176,11 @@ def chat(
 
     # 4. Generate answer (use agent system prompt if available)
     system_prompt = agent["system_prompt"] if agent else CHAT_SYSTEM_PROMPT
-    answer = generate(
+    answer = _clean_llm_output(generate(
         prompt=user_prompt,
         system=system_prompt,
         temperature=temperature,
-    )
+    ))
 
     # 5. Build source references
     sources = []
@@ -306,7 +324,7 @@ def chat_stream(
         full_answer.append(token)
         yield {"event": "token", "data": token}
 
-    answer = "".join(full_answer)
+    answer = _clean_llm_output("".join(full_answer))
 
     # 5. Save messages to DB
     add_message(session_id, "user", question)
