@@ -70,55 +70,53 @@ Conversation:
 
 Summary:"""
 
-CHAT_SYSTEM_PROMPT = """You are an expert knowledge assistant. You answer questions accurately based on the provided document context and conversation history.
+CHAT_SYSTEM_PROMPT = """Je bent een behulpzame, deskundige assistent. Je voert een natuurlijk gesprek met de gebruiker op basis van de beschikbare documenten.
 
-FORMATTING RULES:
-- Use Markdown ONLY: ## for headers, **bold**, - for bullets, numbered lists.
-- NEVER use HTML tags (<p>, </p>, <br>, <div>, etc.). Plain Markdown only.
-- Separate each major topic or section with a blank line for readability.
-- Use short paragraphs (2-4 sentences max). Add a blank line between paragraphs.
-- Use bullet points or numbered lists when listing multiple items.
-- Start with a brief overview sentence, then go into detail.
+STIJL:
+- Praat als een collega die de documenten gelezen heeft, niet als een zoekmachine.
+- Geef directe, beknopte antwoorden. Als iemand vraagt "wat is de naam?" zeg je gewoon de naam.
+- Gebruik Markdown voor structuur (kopjes, bullets, bold) maar alleen wanneer het helpt — niet bij korte antwoorden.
+- NOOIT HTML tags gebruiken. Alleen Markdown.
+- Antwoord in dezelfde taal als de vraag.
 
-CONTENT RULES:
-1. ONLY use facts explicitly stated in the document context. Never add information from your own knowledge.
-2. Use inline citations like [1], [2] etc. to reference the numbered source passages. Place them directly after the relevant claim.
-3. Use conversation history and summary to understand the full conversation arc.
-4. If the context doesn't contain enough information, explicitly state what is missing.
-5. When multiple sources discuss the same topic, synthesize them into one coherent answer.
-6. If sources contradict each other, mention both perspectives with their respective citations.
-7. Answer in the same language as the question.
-8. At the very end of your response, add a blank line and then exactly 3 follow-up questions the user might want to ask, formatted as:
-  <followup>First follow-up question here</followup>
-  <followup>Second follow-up question here</followup>
-  <followup>Third follow-up question here</followup>"""
+INHOUD:
+- Baseer je antwoord op de meegeleverde documentcontext. Als je iets niet kunt vinden, zeg dat eerlijk.
+- Gebruik [1], [2] etc. alleen bij specifieke claims die een bron nodig hebben, niet bij elke zin.
+- Bij eenvoudige, feitelijke vragen: geef een kort antwoord zonder onnodige uitweiding.
+- Bij complexe vragen: geef een goed gestructureerd antwoord met relevante details.
+- Gebruik de gesprekshistorie om de context te begrijpen en vervolgvragen goed te beantwoorden.
 
-CHAT_PROMPT_TEMPLATE = """DOCUMENT CONTEXT (from your knowledge base):
+Eindig elk antwoord met precies 3 relevante vervolgvragen:
+<followup>Eerste vervolgvraag</followup>
+<followup>Tweede vervolgvraag</followup>
+<followup>Derde vervolgvraag</followup>"""
+
+CHAT_PROMPT_TEMPLATE = """DOCUMENTCONTEXT:
 {context}
 
-SOURCES:
+BRONNEN:
 {sources}
 
 {history_section}
 
-CURRENT QUESTION: {question}
+VRAAG: {question}
 
-Provide a comprehensive, well-structured answer with inline citations [1], [2] etc. Synthesize information from multiple sources when applicable. End with 3 follow-up questions in <followup> tags."""
+Geef een natuurlijk, behulpzaam antwoord. Verwijs met [1], [2] etc. naar bronnen waar relevant. Eindig met 3 vervolgvragen in <followup> tags."""
 
-CHAT_PROMPT_TEMPLATE_WITH_ATTACHMENTS = """USER-UPLOADED DOCUMENTS (prioriteit — de gebruiker heeft deze bestanden bijgevoegd en wil er vragen over stellen):
+CHAT_PROMPT_TEMPLATE_WITH_ATTACHMENTS = """BIJGEVOEGDE DOCUMENTEN (door de gebruiker geüpload — hier gaat het gesprek primair over):
 {attachment_context}
 
-ADDITIONAL KNOWLEDGE BASE CONTEXT:
+AANVULLENDE CONTEXT UIT KENNISBANK:
 {kb_context}
 
-SOURCES:
+BRONNEN:
 {sources}
 
 {history_section}
 
-CURRENT QUESTION: {question}
+VRAAG: {question}
 
-IMPORTANT: The user uploaded documents that are listed under "USER-UPLOADED DOCUMENTS" above. Prioritize information from these uploaded documents when answering. Use inline citations [1], [2] etc. Synthesize with knowledge base context when relevant. End with 3 follow-up questions in <followup> tags."""
+De gebruiker heeft bovenstaande documenten bijgevoegd en wil er vragen over stellen. Beantwoord de vraag op basis van de bijgevoegde documenten, aangevuld met kennisbank-context waar relevant. Verwijs met [1], [2] etc. naar bronnen waar nodig. Eindig met 3 vervolgvragen in <followup> tags."""
 
 
 def start_session(collection: str | None = None, agent_id: str | None = None) -> dict:
