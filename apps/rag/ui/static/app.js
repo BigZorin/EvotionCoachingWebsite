@@ -610,6 +610,7 @@ async function streamResponse(sessionId, message) {
   let buffer = '';
   let firstToken = true;
   let streamDone = false;
+  let streamError = false;
 
   while (!streamDone) {
     const { done, value } = await reader.read();
@@ -656,12 +657,33 @@ async function streamResponse(sessionId, message) {
         } else if (eventType === 'error') {
           statusEl.style.display = 'none';
           streamingText.innerHTML = `<p class="error-text">⚠️ ${escapeHtml(data.detail || 'Onbekende fout')}</p>`;
+          streamError = true;
           streamDone = true;
           break;
         }
         eventType = null;
       }
     }
+  }
+
+  // If stream errored, keep the error message visible — don't overwrite with final render
+  if (streamError) {
+    const contentEl = el.querySelector('.message-content');
+    statusEl.remove();
+    // Add retry button below the error
+    contentEl.innerHTML = `
+      <div>${streamingText.innerHTML}</div>
+      <div class="message-actions">
+        <button class="retry-btn" title="Opnieuw genereren">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+          </svg>
+        </button>
+      </div>
+    `;
+    addCodeCopyButtons(contentEl);
+    scrollToBottom();
+    return;
   }
 
   // Extract follow-up suggestions
