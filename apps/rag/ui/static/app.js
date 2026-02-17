@@ -3,7 +3,6 @@
    Features: Streaming, Hybrid Search, Feedback, Analytics, Auth
    ============================================================ */
 
-const APP_VERSION = 'v31';
 const API = '/api/v1';
 
 // --- State ---

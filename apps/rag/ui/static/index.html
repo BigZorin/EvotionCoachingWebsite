@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="/ui/static/style.css?v=18">
+  <link rel="stylesheet" href="/ui/static/style.css?v=19">
 </head>
 <body>
   <!-- ===== LOGIN SCREEN ===== -->
@@ -525,17 +525,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin="anonymous"></script>
   <script src="/ui/static/app.js?v=31"></script>
   <script>
-    // Version + library diagnostics — confirms JS and deps are loaded
+    // Inject app version into sidebar footer (next to provider label)
     document.addEventListener('DOMContentLoaded', () => {
-      const libs = [];
-      if (typeof marked !== 'undefined') libs.push('M');
-      if (typeof DOMPurify !== 'undefined') libs.push('D');
-      if (typeof hljs !== 'undefined') libs.push('H');
-      const v = document.createElement('div');
-      v.id = 'js-version-check';
-      v.style.cssText = 'position:fixed;bottom:4px;left:4px;font-size:11px;color:rgba(255,255,255,0.6);z-index:9999;font-family:monospace;background:rgba(0,0,0,0.3);padding:1px 5px;border-radius:3px';
-      v.textContent = 'v31 [' + (libs.join('') || 'NONE') + ']';
-      document.body.appendChild(v);
+      const model = document.querySelector('.sidebar-model');
+      if (model) {
+        const v = document.createElement('span');
+        v.className = 'app-version';
+        v.textContent = 'v31';
+        model.appendChild(v);
+      }
     });
   </script>
 </body>

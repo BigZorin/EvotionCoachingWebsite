@@ -19,12 +19,6 @@ from app.retrieval.retriever import retrieve
 
 # HTML → Markdown conversion for LLMs that output HTML despite instructions
 _STRIP_TAG_RE = re.compile(r"<\/?(div|span|br|table|tr|td|th|thead|tbody|blockquote|hr)[\s/]*>", re.IGNORECASE)
-_TOKEN_TAG_RE = re.compile(r"<\/?[a-z][a-z0-9]*[^>]*>", re.IGNORECASE)
-
-
-def _strip_token_html(token: str) -> str:
-    """Strip HTML tags from a single streaming token (fast, simple)."""
-    return _TOKEN_TAG_RE.sub("", token)
 
 
 def _clean_llm_output(text: str) -> str:
@@ -362,10 +356,12 @@ def chat_stream(
         # Every 3 tokens, send the full cleaned text so far
         if token_count % 3 == 0 or token.endswith(("\n", ".", "!", "?")):
             raw = "".join(full_answer)
-            # Chop off any incomplete HTML tag at the end
+            # Chop off any incomplete HTML tag at the end (but not math like "< 5")
             last_lt = raw.rfind("<")
             if last_lt != -1 and ">" not in raw[last_lt:]:
-                raw = raw[:last_lt]
+                tail = raw[last_lt:]
+                if len(tail) > 1 and (tail[1:2].isalpha() or tail[1:2] == "/"):
+                    raw = raw[:last_lt]
             clean = _clean_llm_output(raw)
             if clean != prev_clean:
                 yield {"event": "content", "data": clean}
