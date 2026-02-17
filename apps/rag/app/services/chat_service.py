@@ -79,6 +79,7 @@ ANTWOORDSTIJL — pas aan op de vraag:
 
 BRONVERWIJZINGEN — BELANGRIJK:
 - Citeer met [1], [2] etc. bij ELKE inhoudelijke keuze, aanbeveling of onderbouwing.
+- Dit geldt voor ALLE antwoorden — ook bij vervolgvragen in een gesprek. Zolang je documentcontext hebt, citeer je.
 - Bij programma's en schema's: citeer waarom je een oefening kiest, waarom een bepaalde set/rep-range, waarom een periodiseringsmodel, waarom een voedingsrichtlijn. Dus niet alleen bij de samenvatting, maar ook bij individuele oefeningen, fases en voedingskeuzes.
 - Voorbeeld: "Back Squat 4×8 @ 70% 1RM [3] met 2s pause [7]" of "Periodisering in 3 blokken van 4 weken (hypertrofie → kracht → piek) [9][13]"
 - Hoe meer citaties hoe beter — de gebruiker wil zien waar elke keuze vandaan komt.
@@ -110,7 +111,7 @@ BRONNEN:
 
 VRAAG: {question}
 
-Beantwoord de vraag. Pas je diepgang aan op wat er gevraagd wordt — kort bij feitelijke vragen, uitgebreid bij analyse/advies. Onderbouw met [1], [2] citaties waar het meerwaarde heeft. Eindig met 3 vervolgvragen in <followup> tags."""
+Beantwoord de vraag. Pas je diepgang aan op wat er gevraagd wordt — kort bij feitelijke vragen, uitgebreid bij analyse/advies. Onderbouw ALTIJD met [1], [2] citaties wanneer je informatie uit de documentcontext gebruikt — ook bij vervolgvragen. Eindig met 3 vervolgvragen in <followup> tags."""
 
 CHAT_PROMPT_TEMPLATE_WITH_ATTACHMENTS = """BIJGEVOEGDE DOCUMENTEN (door de gebruiker geüpload):
 {attachment_context}
