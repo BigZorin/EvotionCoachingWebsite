@@ -182,14 +182,25 @@ def chat(
             top_k=min(top_k * 2, 30),
             use_multi_query=False,
         )
-        # Pass 2: KB chunks from selected/agent collections
-        kb_col = collection if not agent_collections else None
-        kb_cols = agent_collections if agent_collections else None
-        if kb_col or kb_cols:
+        # Pass 2: KB chunks — from selected collection, agent collections, or global search
+        if agent_collections:
             kb_chunks = retrieve(
                 query=search_query,
-                collection_name=kb_col,
-                collection_names=kb_cols,
+                collection_names=agent_collections,
+                top_k=top_k,
+                use_multi_query=False,
+            )
+        elif collection:
+            kb_chunks = retrieve(
+                query=search_query,
+                collection_name=collection,
+                top_k=top_k,
+                use_multi_query=False,
+            )
+        else:
+            # No collection selected — search all KB collections
+            kb_chunks = retrieve(
+                query=search_query,
                 top_k=top_k,
                 use_multi_query=False,
             )
@@ -344,13 +355,25 @@ def chat_stream(
             top_k=min(top_k * 2, 30),
             use_multi_query=False,
         )
-        kb_col = collection if not agent_collections else None
-        kb_cols = agent_collections if agent_collections else None
-        if kb_col or kb_cols:
+        # KB chunks — from selected collection, agent collections, or global search
+        if agent_collections:
             kb_chunks = retrieve(
                 query=search_query,
-                collection_name=kb_col,
-                collection_names=kb_cols,
+                collection_names=agent_collections,
+                top_k=top_k,
+                use_multi_query=False,
+            )
+        elif collection:
+            kb_chunks = retrieve(
+                query=search_query,
+                collection_name=collection,
+                top_k=top_k,
+                use_multi_query=False,
+            )
+        else:
+            # No collection selected — search all KB collections
+            kb_chunks = retrieve(
+                query=search_query,
                 top_k=top_k,
                 use_multi_query=False,
             )
