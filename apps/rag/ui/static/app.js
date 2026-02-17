@@ -710,7 +710,18 @@ async function streamResponse(sessionId, message) {
           statusEl.querySelector('span').textContent = data;
         } else if (eventType === 'sources') {
           sources = data;
+        } else if (eventType === 'content') {
+          // Server sends full cleaned text (replaces everything) — no client-side HTML cleaning needed
+          if (firstToken) {
+            statusEl.style.display = 'none';
+            streamingText.innerHTML = '';
+            firstToken = false;
+          }
+          fullText = data;
+          streamingText.innerHTML = renderMarkdown(fullText, sources);
+          scrollToBottom();
         } else if (eventType === 'token') {
+          // Legacy: individual token append (fallback)
           if (firstToken) {
             statusEl.style.display = 'none';
             streamingText.innerHTML = '';
@@ -720,13 +731,11 @@ async function streamResponse(sessionId, message) {
           streamingText.innerHTML = renderMarkdown(fullText, sources);
           scrollToBottom();
         } else if (eventType === 'replace') {
-          // Server sends cleaned text (HTML tags stripped) — replace dirty streaming text
           fullText = data;
           streamingText.innerHTML = renderMarkdown(fullText, sources);
         } else if (eventType === 'done') {
           messageId = data.message_id || null;
           modelUsed = data.model_used || null;
-          // Use server-cleaned answer (HTML→Markdown converted) for final render
           if (data.answer) {
             fullText = data.answer;
           }

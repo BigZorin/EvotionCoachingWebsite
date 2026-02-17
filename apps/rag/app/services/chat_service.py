@@ -348,24 +348,31 @@ def chat_stream(
 
     system_prompt = agent["system_prompt"] if agent else CHAT_SYSTEM_PROMPT
 
-    # 4. Stream the answer (strip HTML tags from individual tokens)
+    # 4. Stream the answer — server cleans HTML, client just displays
     full_answer = []
     provider_info = {"name": "unknown"}
+    prev_clean = ""
+    token_count = 0
     for token in generate_stream(
         prompt=user_prompt, system=system_prompt,
         temperature=temperature, provider_info=provider_info,
     ):
         full_answer.append(token)
-        clean_token = _strip_token_html(token)
-        if clean_token:
-            yield {"event": "token", "data": clean_token}
+        token_count += 1
+        # Every 3 tokens, send the full cleaned text so far
+        if token_count % 3 == 0 or token.endswith(("\n", ".", "!", "?")):
+            raw = "".join(full_answer)
+            # Chop off any incomplete HTML tag at the end
+            last_lt = raw.rfind("<")
+            if last_lt != -1 and ">" not in raw[last_lt:]:
+                raw = raw[:last_lt]
+            clean = _clean_llm_output(raw)
+            if clean != prev_clean:
+                yield {"event": "content", "data": clean}
+                prev_clean = clean
 
     raw_answer = "".join(full_answer)
     answer = _clean_llm_output(raw_answer)
-
-    # Send cleaned text to replace any HTML artefacts from streaming
-    if answer != raw_answer:
-        yield {"event": "replace", "data": answer}
 
     # 5. Save messages to DB
     add_message(session_id, "user", question)
