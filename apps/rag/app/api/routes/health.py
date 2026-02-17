@@ -1,9 +1,13 @@
+import logging
+
 from fastapi import APIRouter
 
 from app.core.embeddings import check_ollama_embeddings
 from app.core.llm import check_groq, check_cerebras, check_openrouter, list_available_models, get_active_provider
+from app.core.vectorstore import get_chroma_client
 from app.config import settings
 
+logger = logging.getLogger(__name__)
 router = APIRouter(tags=["health"])
 
 
@@ -14,17 +18,25 @@ def health_check():
     cerebras_ok = check_cerebras()
     openrouter_ok = check_openrouter()
 
+    # Actually test ChromaDB connectivity
+    try:
+        get_chroma_client().list_collections()
+        chroma_ok = True
+    except Exception as e:
+        logger.warning(f"ChromaDB health check failed: {e}")
+        chroma_ok = False
+
     # System is OK if embeddings work AND at least one cloud LLM is available
     llm_ok = groq_ok or cerebras_ok or openrouter_ok
 
     return {
-        "status": "ok" if (ollama_embed and llm_ok) else "degraded",
+        "status": "ok" if (ollama_embed and llm_ok and chroma_ok) else "degraded",
         "ollama_embeddings": ollama_embed,
         "groq": groq_ok,
         "cerebras": cerebras_ok,
         "openrouter": openrouter_ok,
         "active_provider": get_active_provider(),
-        "chroma": True,
+        "chroma": chroma_ok,
     }
 
 
@@ -161,6 +173,12 @@ def system_info():
                 {"name": "SRI Integrity Hashes", "description": "Alle externe CDN-scripts (marked, DOMPurify, highlight.js) laden met Subresource Integrity hashes en gepinde versies — voorkomt supply-chain aanvallen via gecompromitteerde CDN's"},
                 {"name": "Batch Upload Limiet", "description": "Maximaal 20 bestanden per batch-upload, met collectienaam-validatie op alle upload-endpoints — voorkomt resource exhaustion"},
                 {"name": "Veilige Temp-Bestanden", "description": "Audio/video processing gebruikt NamedTemporaryFile i.p.v. het onveilige mktemp — voorkomt race conditions bij tijdelijke bestanden"},
+                {"name": "Circuit Breaker", "description": "Per-provider circuit breaker: na 3 opeenvolgende fouten wordt de provider 60 seconden overgeslagen — voorkomt 60s timeout-cascades en versnelt failover naar werkende provider"},
+                {"name": "Upload Rate Limiting", "description": "Upload-endpoints (/documents/upload) hebben een aparte, strengere rate limit van 10 uploads per minuut per IP — voorkomt opslagmisbruik en resource exhaustion los van de algemene API rate limit"},
+                {"name": "Docker Resource Limits", "description": "Container is begrensd op 2 CPU cores en 4 GB geheugen (reservering: 0.5 CPU, 1 GB) — voorkomt dat een enkele container de hele VPS claimt"},
+                {"name": "Uvicorn Timeouts", "description": "Keep-alive timeout (30s) en graceful shutdown timeout (30s) geconfigureerd — voorkomt hangende connections en zorgt voor schone herstart bij deploys"},
+                {"name": "Dagelijkse Backups", "description": "Automatisch backup-script (cron, 03:00 UTC): docker cp → tar.gz compressie → 30-dagen retentie in /opt/evotion-backups/ — beschermt tegen dataverlies"},
+                {"name": "ChromaDB Health Check", "description": "Health endpoint test daadwerkelijk ChromaDB connectiviteit via list_collections() — voorheen hardcoded 'true', nu echte degraded-status bij connectieproblemen"},
             ],
         },
         "config": {
@@ -185,6 +203,11 @@ def system_info():
                 "Ollama Embedding Timeout": "30 seconden",
                 "Max Output Tokens": "2048",
                 "BM25 Max Documents": "10.000",
+                "Upload Rate Limit": "10 uploads/minuut per IP",
+                "Circuit Breaker Threshold": "3 fouten → 60s cooldown",
+                "Docker CPU Limit": "2 cores (reservering: 0.5)",
+                "Docker Memory Limit": "4 GB (reservering: 1 GB)",
+                "Backup Retentie": "30 dagen",
             },
         },
     }

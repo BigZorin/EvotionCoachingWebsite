@@ -21,6 +21,7 @@ _rate_limit_store: dict[str, list[float]] = defaultdict(list)
 RATE_LIMIT_WINDOW = 60  # seconds
 RATE_LIMIT_AUTH = 5      # max auth attempts per window
 RATE_LIMIT_API = 60      # max API requests per window
+RATE_LIMIT_UPLOAD = 10   # max uploads per window
 
 
 def _is_trusted_proxy(ip: str) -> bool:
@@ -203,6 +204,11 @@ async def auth_middleware(request: Request, call_next):
     # All other /api/ routes require auth
     if path.startswith("/api/"):
         client_ip = _get_client_ip(request)
+
+        # Stricter rate limit for upload endpoints (DoS protection)
+        if path.startswith("/api/v1/documents/upload"):
+            if not _check_rate_limit(f"upload:{client_ip}", RATE_LIMIT_UPLOAD):
+                return JSONResponse(status_code=429, content={"detail": "Upload rate limit exceeded. Try again later."})
 
         # Rate limit regular API calls (auth/verify already handled above)
         if not _check_rate_limit(f"api:{client_ip}", RATE_LIMIT_API):

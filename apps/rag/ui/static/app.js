@@ -1,9 +1,9 @@
 /* ============================================================
-   Evotion RAG — Client-side Application (v33)
+   Evotion RAG — Client-side Application (v34)
    Features: Streaming, Hybrid Search, Feedback, Analytics, Auth
    ============================================================ */
 
-const APP_VERSION = 'v33';
+const APP_VERSION = 'v34';
 const API = '/api/v1';
 
 // --- State ---
@@ -88,7 +88,6 @@ async function checkAuth() {
     }
   } catch {
     // Server unreachable — do NOT bypass auth
-    console.warn('Auth check failed: server unreachable');
     showLoginScreen('Server niet bereikbaar. Probeer het later opnieuw.');
     return false;
   }
@@ -261,7 +260,7 @@ if (typeof marked !== 'undefined' && typeof marked.use === 'function') {
   try {
     marked.use({ breaks: true, gfm: true });
   } catch (e) {
-    console.warn('[marked] use() failed:', e);
+    // marked.use() not available in this version
   }
 }
 
@@ -296,7 +295,7 @@ function renderMarkdown(text, sources) {
       html = typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(html) : html;
     }
   } catch (e) {
-    console.error('[renderMarkdown] Error:', e);
+    // Markdown rendering failed, using plaintext fallback
     // Absolute fallback: escape HTML and show as text
     html = text
       .replace(/&/g, '&amp;')
@@ -507,7 +506,7 @@ async function loadSessions(searchQuery = '') {
     const sessions = data.sessions || [];
     renderSessions(sessions, searchQuery);
   } catch (e) {
-    console.error('Failed to load sessions:', e);
+    // Session load failed silently
   }
 }
 
@@ -705,7 +704,7 @@ async function streamResponse(sessionId, message) {
         try {
           data = JSON.parse(line.slice(6));
         } catch {
-          console.warn('SSE: malformed JSON, skipping line', line);
+          // Malformed SSE line, skip
           continue;
         }
 
@@ -1039,7 +1038,7 @@ async function loadCollectionDropdowns() {
       }
     });
   } catch (e) {
-    console.error('Failed to load collections:', e);
+    // Collection load failed silently
   }
 }
 
@@ -1458,7 +1457,7 @@ async function loadGroqUsage() {
     const data = await apiGet('/usage');
     return data;
   } catch (e) {
-    console.error('Failed to load usage:', e);
+    // Usage load failed silently
     return null;
   }
 }
@@ -1679,7 +1678,7 @@ async function loadAgents() {
     renderAgents(agents);
     updateAgentDropdown(agents);
   } catch (e) {
-    console.error('Failed to load agents:', e);
+    // Agents load failed silently
   }
 }
 
@@ -1885,7 +1884,7 @@ async function loadAgentFormCollections() {
       sel.appendChild(opt);
     });
   } catch (e) {
-    console.error('Failed to load collections for agent form:', e);
+    // Agent form collection load failed silently
   }
 }
 

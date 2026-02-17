@@ -1,6 +1,7 @@
 import json
 import logging
 import threading
+import time
 from collections.abc import Generator
 
 import httpx
@@ -8,6 +9,33 @@ import httpx
 from app.config import settings
 
 logger = logging.getLogger(__name__)
+
+# --- Circuit breaker: skip providers that recently failed ---
+_circuit_breaker: dict[str, dict] = {}  # provider -> {"failures": int, "last_failure": float}
+_CB_THRESHOLD = 3       # consecutive failures before tripping
+_CB_COOLDOWN = 60.0     # seconds to skip a tripped provider
+
+
+def _cb_is_open(provider: str) -> bool:
+    """Return True if provider should be skipped (circuit open)."""
+    state = _circuit_breaker.get(provider)
+    if not state or state["failures"] < _CB_THRESHOLD:
+        return False
+    # Check if cooldown has passed
+    if time.monotonic() - state["last_failure"] > _CB_COOLDOWN:
+        state["failures"] = 0  # half-open: allow retry
+        return False
+    return True
+
+
+def _cb_record_failure(provider: str):
+    state = _circuit_breaker.setdefault(provider, {"failures": 0, "last_failure": 0})
+    state["failures"] += 1
+    state["last_failure"] = time.monotonic()
+
+
+def _cb_record_success(provider: str):
+    _circuit_breaker.pop(provider, None)
 
 # ============================================================
 # Groq (Primary - fast cloud inference)
@@ -384,32 +412,47 @@ def _get_ollama_client():
 # ============================================================
 
 def generate(prompt: str, system: str | None = None, temperature: float = 0.7) -> str:
-    """Generate a response. Groq → Cerebras → OpenRouter fallback chain."""
+    """Generate a response. Groq → Cerebras → OpenRouter fallback chain with circuit breaker."""
     errors = []
 
     # 1. Try Groq (primary)
-    if settings.llm_provider == "groq" and settings.groq_api_key:
+    if settings.llm_provider == "groq" and settings.groq_api_key and not _cb_is_open("groq"):
         try:
-            return _groq_generate(prompt, system, temperature)
+            result = _groq_generate(prompt, system, temperature)
+            _cb_record_success("groq")
+            return result
         except Exception as e:
+            _cb_record_failure("groq")
             errors.append(f"Groq: {e}")
             logger.warning(f"Groq failed: {e}")
+    elif _cb_is_open("groq"):
+        errors.append("Groq: circuit breaker open (skipped)")
 
     # 2. Try Cerebras (secondary — fast & free)
-    if settings.cerebras_api_key:
+    if settings.cerebras_api_key and not _cb_is_open("cerebras"):
         try:
-            return _cerebras_generate(prompt, system, temperature)
+            result = _cerebras_generate(prompt, system, temperature)
+            _cb_record_success("cerebras")
+            return result
         except Exception as e:
+            _cb_record_failure("cerebras")
             errors.append(f"Cerebras: {e}")
             logger.warning(f"Cerebras failed: {e}")
+    elif _cb_is_open("cerebras"):
+        errors.append("Cerebras: circuit breaker open (skipped)")
 
     # 3. Try OpenRouter (tertiary cloud)
-    if settings.openrouter_api_key:
+    if settings.openrouter_api_key and not _cb_is_open("openrouter"):
         try:
-            return _openrouter_generate(prompt, system, temperature)
+            result = _openrouter_generate(prompt, system, temperature)
+            _cb_record_success("openrouter")
+            return result
         except Exception as e:
+            _cb_record_failure("openrouter")
             errors.append(f"OpenRouter: {e}")
             logger.warning(f"OpenRouter failed: {e}")
+    elif _cb_is_open("openrouter"):
+        errors.append("OpenRouter: circuit breaker open (skipped)")
 
     logger.error(f"All cloud LLM providers failed: {'; '.join(errors)}")
     raise RuntimeError(
@@ -422,7 +465,7 @@ def generate_stream(
     prompt: str, system: str | None = None, temperature: float = 0.7,
     provider_info: dict | None = None,
 ) -> Generator[str, None, None]:
-    """Stream a response. Groq → Cerebras → OpenRouter fallback chain.
+    """Stream a response. Groq → Cerebras → OpenRouter fallback chain with circuit breaker.
 
     If *provider_info* dict is passed, it will be updated with the key
     ``"name"`` set to the provider that actually handled the request.
@@ -430,35 +473,41 @@ def generate_stream(
     errors = []
 
     # 1. Try Groq (primary)
-    if settings.llm_provider == "groq" and settings.groq_api_key:
+    if settings.llm_provider == "groq" and settings.groq_api_key and not _cb_is_open("groq"):
         try:
             if provider_info is not None:
                 provider_info["name"] = f"groq ({settings.groq_model})"
             yield from _groq_generate_stream(prompt, system, temperature)
+            _cb_record_success("groq")
             return
         except Exception as e:
+            _cb_record_failure("groq")
             errors.append(f"Groq: {e}")
             logger.warning(f"Groq streaming failed: {e}")
 
     # 2. Try Cerebras (secondary — fast & free)
-    if settings.cerebras_api_key:
+    if settings.cerebras_api_key and not _cb_is_open("cerebras"):
         try:
             if provider_info is not None:
                 provider_info["name"] = f"cerebras ({settings.cerebras_model})"
             yield from _cerebras_generate_stream(prompt, system, temperature)
+            _cb_record_success("cerebras")
             return
         except Exception as e:
+            _cb_record_failure("cerebras")
             errors.append(f"Cerebras: {e}")
             logger.warning(f"Cerebras streaming failed: {e}")
 
     # 3. Try OpenRouter (tertiary cloud)
-    if settings.openrouter_api_key:
+    if settings.openrouter_api_key and not _cb_is_open("openrouter"):
         try:
             if provider_info is not None:
                 provider_info["name"] = f"openrouter ({settings.openrouter_model})"
             yield from _openrouter_generate_stream(prompt, system, temperature)
+            _cb_record_success("openrouter")
             return
         except Exception as e:
+            _cb_record_failure("openrouter")
             errors.append(f"OpenRouter: {e}")
             logger.warning(f"OpenRouter streaming failed: {e}")
 
