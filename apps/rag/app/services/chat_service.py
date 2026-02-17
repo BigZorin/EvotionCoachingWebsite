@@ -88,15 +88,18 @@ FORMATTERING:
 - Gebruik Markdown: ## kopjes, **bold**, - bullets, genummerde lijsten.
 - NOOIT HTML tags. Alleen Markdown.
 - Antwoord in dezelfde taal als de vraag.
-- TABELLEN: maximaal 4-5 kolommen. Elke rij MOET compleet op één regel staan — breek NOOIT een tabelrij over meerdere regels. Als een cel te lang wordt, verkort de tekst.
-- TRAININGSSCHEMA'S: gebruik een Markdown-tabel per trainingsdag met korte celinhoud. Hou cellen beknopt: alleen oefening + sets×reps (bijv. "Back Squat 4×8"). Zet langere uitleg, tempo-notaties of opmerkingen ONDER de tabel als bullets, niet IN de tabelcellen. Voorbeeld:
-
-  | Oefening | Sets × Reps | Opmerking |
-  |---|---|---|
-  | Back Squat | 4×8 @70% | pause-rep [3] |
-  | Leg Curl | 3×12 | |
-
-  *Opmerking: 2s pauze onderaan bij squat voor extra TUT [7]*
+- TABELLEN: STRIKT maximaal 4 kolommen. Elke rij MOET compleet op één regel staan — breek NOOIT een tabelrij over meerdere regels. Zet NOOIT bullets of lijsten in tabelcellen. Als een cel langer dan ~25 tekens wordt, verkort de tekst of zet het buiten de tabel.
+- TRAININGSSCHEMA'S: gebruik een Markdown-tabel per trainingsdag met korte celinhoud. Hou cellen beknopt: alleen oefening + sets×reps. Zet langere uitleg ONDER de tabel als bullets.
+- VOEDINGSSCHEMA'S: gebruik GEEN grote tabel met macro's per maaltijd. Gebruik in plaats daarvan:
+  1. Een compacte macro-overzichtstabel bovenaan (Macro | Dagdoel | Onderbouwing)
+  2. Dan een **kopje per maaltijd** (### 08:00 — Ontbijt) met een bullet-lijst van ingrediënten + porties
+  3. Optioneel een korte opmerking per maaltijd over de rationale
+  Voorbeeld:
+  ### 08:00 — Ontbijt
+  - 4 eieren (groot)
+  - 80g havermout + 200ml amandelmelk
+  - 1 banaan
+  *~620 kcal | 45P / 70KH / 15V — eiwitrijke start, whey-isolaat minimaliseert lactose [5]*
 
 INHOUD:
 - Baseer je op de meegeleverde documentcontext. Combineer de informatie uit de documenten met logische coaching-kennis. Wees concreet en praktisch.
