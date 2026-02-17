@@ -273,6 +273,15 @@ function renderMarkdown(text, sources) {
   // 2. Convert any HTML to Markdown (simple regex, works on any input)
   text = stripHtmlToMarkdown(text);
 
+  // 2b. Protect citation references [1], [2] from being mangled by marked/DOMPurify
+  //     Replace with placeholders before markdown parsing, restore after
+  const citationMap = {};
+  text = text.replace(/\[(\d+)\]/g, (match, num) => {
+    const placeholder = `%%CITE_${num}%%`;
+    citationMap[placeholder] = num;
+    return placeholder;
+  });
+
   // 3. Parse Markdown → HTML
   let html;
   try {
@@ -318,9 +327,9 @@ function renderMarkdown(text, sources) {
     });
   }
 
-  // 5. Convert [1], [2] etc. into interactive citation badges
+  // 5. Restore citation placeholders as interactive citation badges
   if (sources && sources.length > 0) {
-    html = html.replace(/\[(\d+)\]/g, (match, num) => {
+    html = html.replace(/%%CITE_(\d+)%%/g, (match, num) => {
       const idx = parseInt(num, 10) - 1;
       if (idx >= 0 && idx < sources.length) {
         const src = sources[idx];
@@ -329,8 +338,11 @@ function renderMarkdown(text, sources) {
         const score = Math.round((src.relevance_score || 0) * 100);
         return `<span class="citation-ref" data-idx="${num}" tabindex="0">[${num}]<span class="citation-tooltip"><strong>${filename}</strong> <span class="citation-score">${score}%</span><br>${preview}...</span></span>`;
       }
-      return match;
+      return `[${num}]`;
     });
+  } else {
+    // No sources — just restore plain [1] text
+    html = html.replace(/%%CITE_(\d+)%%/g, (match, num) => `[${num}]`);
   }
 
   return html;
