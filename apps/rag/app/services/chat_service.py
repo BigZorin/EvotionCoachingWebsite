@@ -324,7 +324,12 @@ def chat_stream(
         full_answer.append(token)
         yield {"event": "token", "data": token}
 
-    answer = _clean_llm_output("".join(full_answer))
+    raw_answer = "".join(full_answer)
+    answer = _clean_llm_output(raw_answer)
+
+    # Send cleaned text to replace any HTML artefacts from streaming
+    if answer != raw_answer:
+        yield {"event": "replace", "data": answer}
 
     # 5. Save messages to DB
     add_message(session_id, "user", question)

@@ -226,7 +226,10 @@ UI_DIR = Path(__file__).resolve().parent.parent / "ui" / "static"
 @app.get("/ui")
 @app.get("/ui/")
 async def serve_ui():
-    return FileResponse(UI_DIR / "index.html")
+    return FileResponse(
+        UI_DIR / "index.html",
+        headers={"Cache-Control": "no-cache, must-revalidate"},
+    )
 
 
 app.mount("/ui/static", StaticFiles(directory=str(UI_DIR)), name="static")

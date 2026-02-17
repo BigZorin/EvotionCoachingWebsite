@@ -646,6 +646,10 @@ async function streamResponse(sessionId, message) {
           fullText += data;
           streamingText.innerHTML = renderMarkdown(fullText, sources);
           scrollToBottom();
+        } else if (eventType === 'replace') {
+          // Server sends cleaned text (HTML tags stripped) — replace dirty streaming text
+          fullText = data;
+          streamingText.innerHTML = renderMarkdown(fullText, sources);
         } else if (eventType === 'done') {
           messageId = data.message_id || null;
           modelUsed = data.model_used || null;
