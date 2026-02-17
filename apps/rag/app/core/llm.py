@@ -97,7 +97,135 @@ def _groq_generate_stream(
 
 
 # ============================================================
-# OpenRouter (Secondary cloud fallback - OpenAI-compatible)
+# Cerebras (Secondary cloud fallback - fast & free, OpenAI-compatible)
+# ============================================================
+
+_cerebras_client = None
+_cerebras_lock = threading.Lock()
+
+
+def _get_cerebras_client() -> httpx.Client:
+    global _cerebras_client
+    if _cerebras_client is None:
+        with _cerebras_lock:
+            if _cerebras_client is None:
+                _cerebras_client = httpx.Client(
+                    base_url="https://api.cerebras.ai/v1",
+                    headers={
+                        "Authorization": f"Bearer {settings.cerebras_api_key}",
+                        "Content-Type": "application/json",
+                    },
+                    timeout=float(settings.cerebras_timeout),
+                )
+    return _cerebras_client
+
+
+def _cerebras_generate(prompt: str, system: str | None = None, temperature: float = 0.7) -> str:
+    client = _get_cerebras_client()
+    messages = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": prompt})
+
+    response = client.post(
+        "/chat/completions",
+        json={
+            "model": settings.cerebras_model,
+            "messages": messages,
+            "temperature": temperature,
+            "max_tokens": 2048,
+        },
+    )
+    response.raise_for_status()
+    data = response.json()
+
+    # Track usage
+    usage = data.get("usage")
+    if usage:
+        try:
+            from app.core.usage_tracker import log_llm_usage
+            log_llm_usage(
+                model=settings.cerebras_model,
+                input_tokens=usage.get("prompt_tokens", 0),
+                output_tokens=usage.get("completion_tokens", 0),
+                total_tokens=usage.get("total_tokens", 0),
+            )
+        except Exception as e:
+            logger.debug(f"Usage tracking failed: {e}")
+
+    return data["choices"][0]["message"]["content"]
+
+
+def _cerebras_generate_stream(
+    prompt: str, system: str | None = None, temperature: float = 0.7
+) -> Generator[str, None, None]:
+    messages = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": prompt})
+
+    usage_data = None
+    output_parts = []
+    with httpx.stream(
+        "POST",
+        "https://api.cerebras.ai/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {settings.cerebras_api_key}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "model": settings.cerebras_model,
+            "messages": messages,
+            "temperature": temperature,
+            "max_tokens": 2048,
+            "stream": True,
+        },
+        timeout=float(settings.cerebras_timeout),
+    ) as response:
+        response.raise_for_status()
+        for line in response.iter_lines():
+            if not line or not line.startswith("data: "):
+                continue
+            payload = line[6:]  # strip "data: "
+            if payload.strip() == "[DONE]":
+                break
+            try:
+                chunk = json.loads(payload)
+                if "usage" in chunk:
+                    usage_data = chunk["usage"]
+                delta = chunk.get("choices", [{}])[0].get("delta", {})
+                token = delta.get("content")
+                if token:
+                    output_parts.append(token)
+                    yield token
+            except (json.JSONDecodeError, IndexError, KeyError):
+                continue
+
+    # Track usage after stream completes
+    try:
+        from app.core.usage_tracker import log_llm_usage
+        if usage_data:
+            log_llm_usage(
+                model=settings.cerebras_model,
+                input_tokens=usage_data.get("prompt_tokens", 0),
+                output_tokens=usage_data.get("completion_tokens", 0),
+                total_tokens=usage_data.get("total_tokens", 0),
+            )
+        elif output_parts:
+            input_chars = len(prompt) + (len(system) if system else 0)
+            output_chars = sum(len(t) for t in output_parts)
+            log_llm_usage(
+                model=settings.cerebras_model,
+                input_tokens=input_chars // 4,
+                output_tokens=output_chars // 4,
+                total_tokens=(input_chars + output_chars) // 4,
+            )
+    except Exception as e:
+        logger.debug(f"Stream usage tracking failed: {e}")
+
+
+# ============================================================
+# OpenRouter (Tertiary cloud fallback - OpenAI-compatible)
 # ============================================================
 
 _openrouter_client = None
@@ -248,7 +376,7 @@ def _get_ollama_client():
 # ============================================================
 
 def generate(prompt: str, system: str | None = None, temperature: float = 0.7) -> str:
-    """Generate a response. Groq → OpenRouter fallback chain (no local Ollama — too slow on CPU)."""
+    """Generate a response. Groq → Cerebras → OpenRouter fallback chain."""
     errors = []
 
     # 1. Try Groq (primary)
@@ -259,7 +387,15 @@ def generate(prompt: str, system: str | None = None, temperature: float = 0.7) -
             errors.append(f"Groq: {e}")
             logger.warning(f"Groq failed: {e}")
 
-    # 2. Try OpenRouter (secondary cloud)
+    # 2. Try Cerebras (secondary — fast & free)
+    if settings.cerebras_api_key:
+        try:
+            return _cerebras_generate(prompt, system, temperature)
+        except Exception as e:
+            errors.append(f"Cerebras: {e}")
+            logger.warning(f"Cerebras failed: {e}")
+
+    # 3. Try OpenRouter (tertiary cloud)
     if settings.openrouter_api_key:
         try:
             return _openrouter_generate(prompt, system, temperature)
@@ -267,7 +403,6 @@ def generate(prompt: str, system: str | None = None, temperature: float = 0.7) -
             errors.append(f"OpenRouter: {e}")
             logger.warning(f"OpenRouter failed: {e}")
 
-    # No Ollama fallback for generation — too slow on CPU VPS
     logger.error(f"All cloud LLM providers failed: {'; '.join(errors)}")
     raise RuntimeError(
         "Alle LLM-providers zijn tijdelijk niet beschikbaar (rate limit of storing). "
@@ -279,7 +414,7 @@ def generate_stream(
     prompt: str, system: str | None = None, temperature: float = 0.7,
     provider_info: dict | None = None,
 ) -> Generator[str, None, None]:
-    """Stream a response. Groq → OpenRouter fallback chain (no local Ollama — too slow on CPU).
+    """Stream a response. Groq → Cerebras → OpenRouter fallback chain.
 
     If *provider_info* dict is passed, it will be updated with the key
     ``"name"`` set to the provider that actually handled the request.
@@ -297,7 +432,18 @@ def generate_stream(
             errors.append(f"Groq: {e}")
             logger.warning(f"Groq streaming failed: {e}")
 
-    # 2. Try OpenRouter (secondary cloud)
+    # 2. Try Cerebras (secondary — fast & free)
+    if settings.cerebras_api_key:
+        try:
+            if provider_info is not None:
+                provider_info["name"] = f"cerebras ({settings.cerebras_model})"
+            yield from _cerebras_generate_stream(prompt, system, temperature)
+            return
+        except Exception as e:
+            errors.append(f"Cerebras: {e}")
+            logger.warning(f"Cerebras streaming failed: {e}")
+
+    # 3. Try OpenRouter (tertiary cloud)
     if settings.openrouter_api_key:
         try:
             if provider_info is not None:
@@ -308,7 +454,6 @@ def generate_stream(
             errors.append(f"OpenRouter: {e}")
             logger.warning(f"OpenRouter streaming failed: {e}")
 
-    # No Ollama fallback for generation — too slow on CPU VPS
     logger.error(f"All cloud LLM providers failed (stream): {'; '.join(errors)}")
     raise RuntimeError(
         "Alle LLM-providers zijn tijdelijk niet beschikbaar (rate limit of storing). "
@@ -317,9 +462,11 @@ def generate_stream(
 
 
 def get_active_provider() -> str:
-    """Return which provider is currently active."""
+    """Return which provider is currently active (primary)."""
     if settings.llm_provider == "groq" and settings.groq_api_key:
         return f"groq ({settings.groq_model})"
+    if settings.cerebras_api_key:
+        return f"cerebras ({settings.cerebras_model})"
     if settings.openrouter_api_key:
         return f"openrouter ({settings.openrouter_model})"
     return "none (no cloud LLM configured)"
@@ -337,6 +484,21 @@ def check_groq() -> bool:
         client = _get_groq_client()
         client.models.list()
         return True
+    except Exception:
+        return False
+
+
+def check_cerebras() -> bool:
+    """Check Cerebras availability without consuming a chat request."""
+    if not settings.cerebras_api_key:
+        return False
+    try:
+        r = httpx.get(
+            "https://api.cerebras.ai/v1/models",
+            headers={"Authorization": f"Bearer {settings.cerebras_api_key}"},
+            timeout=10.0,
+        )
+        return r.status_code == 200
     except Exception:
         return False
 
@@ -360,6 +522,8 @@ def list_available_models() -> list[str]:
     models = []
     if settings.groq_api_key:
         models.append(f"groq:{settings.groq_model}")
+    if settings.cerebras_api_key:
+        models.append(f"cerebras:{settings.cerebras_model}")
     if settings.openrouter_api_key:
         models.append(f"openrouter:{settings.openrouter_model}")
     try:

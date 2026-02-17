@@ -23,8 +23,8 @@ PRICING = {
     "whisper-large-v3-turbo": {"per_second": 0.04 / 3600},  # ~$0.04/hour
 }
 
-# Free models (OpenRouter :free, local Ollama)
-FREE_MODELS = {"meta-llama/llama-3.3-70b-instruct:free", "llama3.2:3b"}
+# Free models (Cerebras, OpenRouter :free, local Ollama)
+FREE_MODELS = {"llama-3.3-70b", "meta-llama/llama-3.3-70b-instruct:free", "llama3.2:3b"}
 
 # Default pricing for unknown models
 DEFAULT_PRICING = {"input": 0.50 / 1_000_000, "output": 0.70 / 1_000_000}

@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.core.embeddings import check_ollama_embeddings
-from app.core.llm import check_groq, check_openrouter, list_available_models, get_active_provider
+from app.core.llm import check_groq, check_cerebras, check_openrouter, list_available_models, get_active_provider
 from app.config import settings
 
 router = APIRouter(tags=["health"])
@@ -11,15 +11,17 @@ router = APIRouter(tags=["health"])
 def health_check():
     ollama_embed = check_ollama_embeddings()
     groq_ok = check_groq()
+    cerebras_ok = check_cerebras()
     openrouter_ok = check_openrouter()
 
     # System is OK if embeddings work AND at least one cloud LLM is available
-    llm_ok = groq_ok or openrouter_ok
+    llm_ok = groq_ok or cerebras_ok or openrouter_ok
 
     return {
         "status": "ok" if (ollama_embed and llm_ok) else "degraded",
         "ollama_embeddings": ollama_embed,
         "groq": groq_ok,
+        "cerebras": cerebras_ok,
         "openrouter": openrouter_ok,
         "active_provider": get_active_provider(),
         "chroma": True,
@@ -45,7 +47,8 @@ def system_info():
             "components": [
                 {"name": "FastAPI Backend", "description": "REST API server die alle verzoeken afhandelt", "status": "active"},
                 {"name": "Groq LLM (Primair)", "description": f"Cloud LLM ({settings.groq_model}) voor snelle antwoordgeneratie", "model": settings.groq_model},
-                {"name": "OpenRouter (Fallback)", "description": f"Cloud LLM fallback ({settings.openrouter_model}) — automatisch actief als Groq faalt", "model": settings.openrouter_model},
+                {"name": "Cerebras (Fallback 1)", "description": f"Cloud LLM fallback ({settings.cerebras_model}) — gratis, snel, automatisch actief als Groq faalt", "model": settings.cerebras_model},
+                {"name": "OpenRouter (Fallback 2)", "description": f"Cloud LLM fallback ({settings.openrouter_model}) — automatisch actief als Groq én Cerebras falen", "model": settings.openrouter_model},
                 {"name": "Ollama (Embeddings Only)", "description": f"Lokale Ollama wordt alleen gebruikt voor embeddings — niet voor LLM generatie (te traag op CPU)"},
                 {"name": "Ollama Embeddings", "description": f"Lokale embedding-engine ({settings.embedding_model}) voor vectorisatie", "model": settings.embedding_model},
                 {"name": "ChromaDB", "description": "Lokale vector database voor opslag en zoeken van document-chunks"},
@@ -124,14 +127,14 @@ def system_info():
                 {"name": "Upload Limiet", "description": f"Bestanden groter dan {settings.max_file_size_mb} MB worden geweigerd vóór verwerking om geheugen- en opslagmisbruik te voorkomen"},
                 {"name": "CORS Restrictie", "description": "Alleen verzoeken van rag.evotiondata.com en localhost worden geaccepteerd met beperkte HTTP-methoden (GET/POST/PUT/DELETE/OPTIONS) en headers (Content-Type/Authorization)"},
                 {"name": "Embedding Dimensie-check", "description": "Fallback naar sentence-transformers (384-dim) wordt geblokkeerd als de collectie 768-dim vectors verwacht — voorkomt ChromaDB-fouten"},
-                {"name": "Dual-Provider Failover", "description": "Automatische fallback: Groq → OpenRouter. Als beide cloud-providers falen (rate limit), krijgt de gebruiker een duidelijke foutmelding i.p.v. een eindeloos wachtende Ollama-request"},
+                {"name": "Triple-Provider Failover", "description": "Automatische fallback: Groq → Cerebras → OpenRouter. Als alle cloud-providers falen (rate limit), krijgt de gebruiker een duidelijke foutmelding i.p.v. een eindeloos wachtende Ollama-request"},
                 {"name": "Collectienaam Validatie", "description": "Alle collectie-endpoints valideren namen op alfanumerieke tekens, streepjes en underscores (1-64 chars, moet starten met alfanumeriek)"},
                 {"name": "Auth Startup Check", "description": "Server weigert te starten als AUTH_ENABLED=true maar AUTH_TOKEN leeg is — voorkomt onbeveiligde API"},
-                {"name": "API Timeouts", "description": f"Groq: 60s, OpenRouter: {settings.openrouter_timeout}s, Ollama embeddings: 30s — voorkomt hangende requests"},
+                {"name": "API Timeouts", "description": f"Groq: 60s, Cerebras: {settings.cerebras_timeout}s, OpenRouter: {settings.openrouter_timeout}s, Ollama embeddings: 30s — voorkomt hangende requests"},
                 {"name": "Database Connection Management", "description": "Context managers (with-statement) garanderen dat SQLite-connecties altijd worden gesloten, ook bij fouten"},
                 {"name": "BM25 Memory Cap", "description": "Maximum 10.000 documenten per BM25-zoekopdracht om geheugenoverloop te voorkomen bij grote collecties"},
                 {"name": "SSE Error Handling", "description": "Streaming responses sturen een error-event naar de client bij onverwachte fouten in plaats van stil te crashen"},
-                {"name": "Thread-Safe Singletons", "description": "Alle lazy-loaded clients (Groq, OpenRouter, Ollama, embeddings, cross-encoder) gebruiken double-check locking om race conditions bij concurrent requests te voorkomen"},
+                {"name": "Thread-Safe Singletons", "description": "Alle lazy-loaded clients (Groq, Cerebras, OpenRouter, Ollama, embeddings, cross-encoder) gebruiken double-check locking om race conditions bij concurrent requests te voorkomen"},
                 {"name": "Query Parameter Limieten", "description": "Alle paginatie-parameters zijn geclampt: sessies max 500, chunks max 500, cleanup min_chars 0-10.000 — voorkomt resource exhaustion via onbegrensde queries"},
                 {"name": "Generieke Foutmeldingen", "description": "SSE streaming stuurt generieke foutberichten naar de client — volledige foutdetails worden alleen server-side gelogd, geen systeeminfo-lekkage"},
                 {"name": "Non-Root Container", "description": "Docker container draait als appuser (UID 1000) in plaats van root — beperkt impact van container-escapes"},
@@ -162,7 +165,8 @@ def system_info():
             "values": {
                 "LLM Provider (Primair)": settings.llm_provider,
                 "Groq Model": settings.groq_model,
-                "OpenRouter Model (Fallback)": settings.openrouter_model,
+                "Cerebras Model (Fallback 1)": settings.cerebras_model,
+                "OpenRouter Model (Fallback 2)": settings.openrouter_model,
                 "Embedding Model": f"{settings.embedding_model} (768-dim via Ollama)",
                 "Chunk Size": f"{settings.chunk_size} tekens",
                 "Chunk Overlap": f"{settings.chunk_overlap} tekens",
@@ -173,6 +177,7 @@ def system_info():
                 "Summarize After": f"{settings.summarize_after_messages} berichten",
                 "Max Upload Size": f"{settings.max_file_size_mb} MB",
                 "Groq Timeout": "60 seconden",
+                "Cerebras Timeout": f"{settings.cerebras_timeout} seconden",
                 "OpenRouter Timeout": f"{settings.openrouter_timeout} seconden",
                 "Ollama Embedding Timeout": "30 seconden",
                 "Max Output Tokens": "2048",

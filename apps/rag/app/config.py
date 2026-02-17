@@ -10,7 +10,12 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
 
-    # OpenRouter (secondary cloud fallback)
+    # Cerebras (secondary cloud fallback — fast & free)
+    cerebras_api_key: str = ""
+    cerebras_model: str = "llama-3.3-70b"
+    cerebras_timeout: int = 60
+
+    # OpenRouter (tertiary cloud fallback)
     openrouter_api_key: str = ""
     openrouter_model: str = "meta-llama/llama-3.3-70b-instruct:free"
     openrouter_timeout: int = 60
