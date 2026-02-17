@@ -112,7 +112,7 @@ def system_info():
                 {"name": "Streaming", "description": "Real-time token-voor-token antwoorden via Server-Sent Events (SSE)"},
                 {"name": "Feedback", "description": "Duim omhoog/omlaag per antwoord voor kwaliteitstracking"},
                 {"name": "Export", "description": "Gesprekken exporteren als Markdown bestand"},
-                {"name": "Analytics Dashboard", "description": "Gebruiksstatistieken: totaal sessies/berichten, feedback-scores, dagelijks gebruik, top-vragen, agent-gebruik en LLM kosten-tracking"},
+                {"name": "Analytics Dashboard", "description": "Gebruiksstatistieken: totaal sessies/berichten, feedback-scores, dagelijks gebruik, top-vragen, agent-gebruik en LLM kosten-tracking (inclusief streaming-calls)"},
                 {"name": "YouTube Transcripties", "description": "YouTube URLs worden verwerkt via de YouTube Transcript API (niet via Whisper) — sneller en gratis"},
                 {"name": "Collection Cleanup", "description": "Micro-chunks (< 50 tekens) kunnen per collectie worden opgeruimd via de cleanup endpoint"},
             ],

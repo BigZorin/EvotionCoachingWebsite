@@ -73,10 +73,28 @@ def _groq_generate_stream(
         temperature=temperature,
         max_tokens=2048,
         stream=True,
+        stream_options={"include_usage": True},
     )
+    usage_data = None
     for chunk in stream:
         if chunk.choices and chunk.choices[0].delta.content:
             yield chunk.choices[0].delta.content
+        # Final chunk contains usage stats when stream_options.include_usage=True
+        if hasattr(chunk, "usage") and chunk.usage:
+            usage_data = chunk.usage
+
+    # Track usage after stream completes
+    if usage_data:
+        try:
+            from app.core.usage_tracker import log_llm_usage
+            log_llm_usage(
+                model=settings.groq_model,
+                input_tokens=getattr(usage_data, "prompt_tokens", 0) or 0,
+                output_tokens=getattr(usage_data, "completion_tokens", 0) or 0,
+                total_tokens=getattr(usage_data, "total_tokens", 0) or 0,
+            )
+        except Exception as e:
+            logger.debug(f"Stream usage tracking failed: {e}")
 
 
 # ============================================================
@@ -147,6 +165,7 @@ def _openrouter_generate_stream(
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
 
+    usage_data = None
     with httpx.stream(
         "POST",
         "https://openrouter.ai/api/v1/chat/completions",
@@ -172,12 +191,28 @@ def _openrouter_generate_stream(
                 break
             try:
                 chunk = json.loads(payload)
+                # Capture usage from final chunk if present
+                if "usage" in chunk:
+                    usage_data = chunk["usage"]
                 delta = chunk.get("choices", [{}])[0].get("delta", {})
                 token = delta.get("content")
                 if token:
                     yield token
             except (json.JSONDecodeError, IndexError, KeyError):
                 continue
+
+    # Track usage after stream completes
+    if usage_data:
+        try:
+            from app.core.usage_tracker import log_llm_usage
+            log_llm_usage(
+                model=settings.openrouter_model,
+                input_tokens=usage_data.get("prompt_tokens", 0),
+                output_tokens=usage_data.get("completion_tokens", 0),
+                total_tokens=usage_data.get("total_tokens", 0),
+            )
+        except Exception as e:
+            logger.debug(f"Stream usage tracking failed: {e}")
 
 
 # ============================================================
