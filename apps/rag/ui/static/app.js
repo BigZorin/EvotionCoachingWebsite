@@ -609,8 +609,9 @@ async function streamResponse(sessionId, message) {
   const decoder = new TextDecoder();
   let buffer = '';
   let firstToken = true;
+  let streamDone = false;
 
-  while (true) {
+  while (!streamDone) {
     const { done, value } = await reader.read();
     if (done) break;
 
@@ -651,7 +652,7 @@ async function streamResponse(sessionId, message) {
         } else if (eventType === 'error') {
           statusEl.style.display = 'none';
           streamingText.innerHTML = `<p class="error-text">⚠️ ${escapeHtml(data.detail || 'Onbekende fout')}</p>`;
-          done = true;
+          streamDone = true;
           break;
         }
         eventType = null;
