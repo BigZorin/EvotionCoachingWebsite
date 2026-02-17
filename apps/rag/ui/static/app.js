@@ -210,9 +210,17 @@ function renderMarkdown(text, sources) {
   // Strip follow-up tags before rendering
   text = text.replace(/<followup>.*?<\/followup>/gs, '').trim();
 
-  // Strip stray HTML tags from LLM output (LLM should only produce Markdown)
-  // Preserve only <followup> (already stripped above) and code blocks
-  text = text.replace(/<\/?(p|br|div|span|b|i|em|strong|ul|ol|li|h[1-6]|table|tr|td|th|thead|tbody|blockquote|hr)\s*\/?>/gi, '\n');
+  // Convert HTML to Markdown (smaller LLMs often output HTML despite instructions)
+  text = text.replace(/<strong>(.*?)<\/strong>/gis, '**$1**');
+  text = text.replace(/<b>(.*?)<\/b>/gis, '**$1**');
+  text = text.replace(/<em>(.*?)<\/em>/gis, '*$1*');
+  text = text.replace(/<i>(.*?)<\/i>/gis, '*$1*');
+  text = text.replace(/<h([1-6])>(.*?)<\/h\1>/gis, (_, level, content) => '\n' + '#'.repeat(Math.min(+level + 1, 4)) + ' ' + content + '\n');
+  text = text.replace(/<li>(.*?)<\/li>/gis, '\n- $1');
+  text = text.replace(/<p>(.*?)<\/p>/gis, '$1\n\n');
+  text = text.replace(/<\/?(ul|ol|div|span|br|table|tr|td|th|thead|tbody|blockquote|hr)\s*\/?>/gi, '\n');
+  text = text.replace(/<\/?[a-z][a-z0-9]*\s*\/?>/gi, '');
+  text = text.replace(/\n{3,}/g, '\n\n');
 
   let html;
   if (typeof marked !== 'undefined') {

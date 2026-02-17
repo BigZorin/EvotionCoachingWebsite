@@ -17,15 +17,39 @@ from app.core.database import (
 from app.core.llm import generate, generate_stream, get_active_provider
 from app.retrieval.retriever import retrieve
 
-# Strip HTML tags that LLMs sometimes inject (e.g. <p>, </p>, <br>)
-_HTML_TAG_RE = re.compile(r"<\/?(p|br|div|span|b|i|em|strong|ul|ol|li|h[1-6]|table|tr|td|th|thead|tbody|blockquote|hr)\s*\/?>", re.IGNORECASE)
+# HTML → Markdown conversion for LLMs that output HTML despite instructions
+_STRIP_TAG_RE = re.compile(r"<\/?(div|span|br|table|tr|td|th|thead|tbody|blockquote|hr)\s*\/?>", re.IGNORECASE)
 
 
 def _clean_llm_output(text: str) -> str:
-    """Remove stray HTML tags from LLM output and normalize whitespace."""
-    text = _HTML_TAG_RE.sub("\n", text)
-    # Collapse 3+ newlines into 2 (keep paragraph breaks clean)
-    text = re.sub(r"\n{3,}", "\n\n", text)
+    """Convert HTML in LLM output to clean Markdown."""
+    # 1. Convert semantic HTML to Markdown equivalents
+    # Bold: <strong>text</strong> or <b>text</b> → **text**
+    text = re.sub(r"<strong>(.*?)</strong>", r"**\1**", text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r"<b>(.*?)</b>", r"**\1**", text, flags=re.DOTALL | re.IGNORECASE)
+    # Italic: <em>text</em> or <i>text</i> → *text*
+    text = re.sub(r"<em>(.*?)</em>", r"*\1*", text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r"<i>(.*?)</i>", r"*\1*", text, flags=re.DOTALL | re.IGNORECASE)
+    # Headers: <h1>text</h1> → ## text
+    for level in range(1, 7):
+        hashes = "#" * min(level + 1, 4)  # h1→##, h2→###, h3→####
+        text = re.sub(rf"<h{level}>(.*?)</h{level}>", rf"\n{hashes} \1\n", text, flags=re.DOTALL | re.IGNORECASE)
+    # List items: <li>text</li> → - text (on its own line)
+    text = re.sub(r"<li>(.*?)</li>", r"\n- \1", text, flags=re.DOTALL | re.IGNORECASE)
+    # Paragraphs: <p>text</p> → text + double newline
+    text = re.sub(r"<p>(.*?)</p>", r"\1\n\n", text, flags=re.DOTALL | re.IGNORECASE)
+
+    # 2. Strip remaining non-semantic HTML tags (ul, ol, div, span, br, table, etc.)
+    text = re.sub(r"<\/?(ul|ol)\s*>", "\n", text, flags=re.IGNORECASE)
+    text = _STRIP_TAG_RE.sub("\n", text)
+
+    # 3. Clean up any leftover HTML tags we missed
+    text = re.sub(r"<\/?[a-z][a-z0-9]*\s*\/?>", "", text, flags=re.IGNORECASE)
+
+    # 4. Normalize whitespace
+    text = re.sub(r"[ \t]+\n", "\n", text)       # trailing spaces before newline
+    text = re.sub(r"\n{3,}", "\n\n", text)        # collapse 3+ newlines
+    text = re.sub(r"(\n- )\n+(?=- )", r"\1", text)  # clean gaps between list items
     return text.strip()
 
 logger = logging.getLogger(__name__)
