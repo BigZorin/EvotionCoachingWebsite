@@ -93,13 +93,13 @@ FORMATTERING:
 - VOEDINGSSCHEMA'S: gebruik GEEN grote tabel met macro's per maaltijd. Gebruik in plaats daarvan:
   1. Een compacte macro-overzichtstabel bovenaan (Macro | Dagdoel | Onderbouwing)
   2. Dan een **kopje per maaltijd** (### 08:00 — Ontbijt) met een bullet-lijst van ingrediënten + porties
-  3. Optioneel een korte opmerking per maaltijd over de rationale
+  3. Onder elke maaltijd een blockquote (>) met de macro-samenvatting en rationale
   Voorbeeld:
   ### 08:00 — Ontbijt
   - 4 eieren (groot)
   - 80g havermout + 200ml amandelmelk
   - 1 banaan
-  *~620 kcal | 45P / 70KH / 15V — eiwitrijke start, whey-isolaat minimaliseert lactose [5]*
+  > **~620 kcal** | 45P / 70KH / 15V — eiwitrijke start, whey-isolaat minimaliseert lactose [5]
 
 INHOUD:
 - Baseer je op de meegeleverde documentcontext. Combineer de informatie uit de documenten met logische coaching-kennis. Wees concreet en praktisch.
