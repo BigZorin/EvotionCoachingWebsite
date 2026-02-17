@@ -1,9 +1,9 @@
 /* ============================================================
-   Evotion RAG — Client-side Application (v30)
+   Evotion RAG — Client-side Application (v31)
    Features: Streaming, Hybrid Search, Feedback, Analytics, Auth
    ============================================================ */
 
-const APP_VERSION = 'v30';
+const APP_VERSION = 'v31';
 const API = '/api/v1';
 
 // --- State ---
@@ -256,6 +256,15 @@ function stripHtmlToMarkdown(text) {
   return text.trim();
 }
 
+// Configure marked once at load time (v15+ API: use marked.use instead of setOptions)
+if (typeof marked !== 'undefined' && typeof marked.use === 'function') {
+  try {
+    marked.use({ breaks: true, gfm: true });
+  } catch (e) {
+    console.warn('[marked] use() failed:', e);
+  }
+}
+
 function renderMarkdown(text, sources) {
   // 1. Strip follow-up tags before rendering
   text = text.replace(/<followup>[\s\S]*?<\/followup>/gi, '').trim();
@@ -265,27 +274,30 @@ function renderMarkdown(text, sources) {
 
   // 3. Parse Markdown → HTML
   let html;
-  if (typeof marked !== 'undefined') {
-    marked.setOptions({
-      breaks: true,
-      gfm: true,
-      highlight: function(code, lang) {
-        if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
-          return hljs.highlight(code, { language: lang }).value;
-        }
-        if (typeof hljs !== 'undefined') {
-          return hljs.highlightAuto(code).value;
-        }
-        return code;
-      },
-    });
-    const rawHtml = marked.parse(text);
-    // SECURITY: refuse to render HTML if DOMPurify is not loaded
-    html = typeof DOMPurify !== 'undefined'
-      ? DOMPurify.sanitize(rawHtml)
-      : rawHtml.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  } else {
-    // Fallback: marked.js not loaded — render as plain text with line breaks
+  try {
+    if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
+      // marked v15+: pass options to parse() directly (setOptions is deprecated)
+      const rawHtml = marked.parse(text);
+      html = typeof DOMPurify !== 'undefined'
+        ? DOMPurify.sanitize(rawHtml)
+        : rawHtml;
+    } else {
+      // Fallback: marked.js not loaded — basic markdown rendering
+      html = text
+        .replace(/&/g, '&amp;')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/^#{1,4}\s+(.+)$/gm, '<h3>$1</h3>')
+        .replace(/^- (.+)$/gm, '<li>$1</li>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+      html = '<p>' + html + '</p>';
+      html = typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(html) : html;
+    }
+  } catch (e) {
+    console.error('[renderMarkdown] Error:', e);
+    // Absolute fallback: escape HTML and show as text
     html = text
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -293,7 +305,19 @@ function renderMarkdown(text, sources) {
       .replace(/\n/g, '<br>');
   }
 
-  // 4. Convert [1], [2] etc. into interactive citation badges
+  // 4. Code highlighting (post-render)
+  if (typeof hljs !== 'undefined') {
+    html = html.replace(/<code class="language-(\w+)">([\s\S]*?)<\/code>/g, (m, lang, code) => {
+      try {
+        if (hljs.getLanguage(lang)) {
+          return `<code class="language-${lang}">${hljs.highlight(code, { language: lang }).value}</code>`;
+        }
+      } catch (e) { /* ignore */ }
+      return m;
+    });
+  }
+
+  // 5. Convert [1], [2] etc. into interactive citation badges
   if (sources && sources.length > 0) {
     html = html.replace(/\[(\d+)\]/g, (match, num) => {
       const idx = parseInt(num, 10) - 1;
