@@ -372,7 +372,7 @@ a:hover { text-decoration: underline; }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  max-width: 600px;
+  max-width: 760px;
   width: 100%;
 }
 
@@ -402,7 +402,7 @@ a:hover { text-decoration: underline; }
 
 /* --- Messages --- */
 .messages {
-  max-width: 768px;
+  max-width: 960px;
   width: 100%;
   margin: 0 auto;
   padding: 24px;
@@ -579,7 +579,7 @@ a:hover { text-decoration: underline; }
 }
 
 .input-container {
-  max-width: 768px;
+  max-width: 960px;
   margin: 0 auto;
 }
 
