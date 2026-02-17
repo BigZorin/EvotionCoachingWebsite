@@ -228,7 +228,17 @@ UI_DIR = Path(__file__).resolve().parent.parent / "ui" / "static"
 async def serve_ui():
     return FileResponse(
         UI_DIR / "index.html",
-        headers={"Cache-Control": "no-cache, must-revalidate"},
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
+    )
+
+
+@app.get("/ui/static/app.js")
+async def serve_app_js():
+    """Serve app.js with no-cache to prevent stale JS issues."""
+    return FileResponse(
+        UI_DIR / "app.js",
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
+        media_type="application/javascript",
     )
 
 
