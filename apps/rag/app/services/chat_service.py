@@ -367,6 +367,7 @@ def chat_stream(
         "session_id": session_id,
         "message_id": assistant_msg["id"],
         "model_used": provider_info["name"],
+        "answer": answer,
     }}
 
 

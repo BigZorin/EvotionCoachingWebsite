@@ -662,6 +662,10 @@ async function streamResponse(sessionId, message) {
         } else if (eventType === 'done') {
           messageId = data.message_id || null;
           modelUsed = data.model_used || null;
+          // Use server-cleaned answer (HTML→Markdown converted) for final render
+          if (data.answer) {
+            fullText = data.answer;
+          }
         } else if (eventType === 'error') {
           statusEl.style.display = 'none';
           streamingText.innerHTML = `<p class="error-text">⚠️ ${escapeHtml(data.detail || 'Onbekende fout')}</p>`;
