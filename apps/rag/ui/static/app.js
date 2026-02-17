@@ -1492,40 +1492,51 @@ function renderGroqUsageSection(usage) {
   }
 
   return `
-    <div class="usage-section">
-      <h3>Groq API Gebruik</h3>
+    <div class="analytics-card usage-section">
+      <div class="section-header">
+        <div class="section-header-icon cyan">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <h3 style="margin:0">Groq API Gebruik</h3>
+      </div>
+      <div class="usage-row-label">Vandaag</div>
       <div class="usage-stats">
         <div class="usage-stat-card">
           <div class="usage-stat-value">${fmtNum(today.requests)}</div>
-          <div class="usage-stat-label">Requests vandaag</div>
+          <div class="usage-stat-label">Requests</div>
         </div>
         <div class="usage-stat-card">
           <div class="usage-stat-value">${fmtNum(today.total_tokens)}</div>
-          <div class="usage-stat-label">Tokens vandaag</div>
+          <div class="usage-stat-label">Tokens</div>
         </div>
         <div class="usage-stat-card">
           <div class="usage-stat-value">${fmtAudio(today.audio_seconds)}</div>
-          <div class="usage-stat-label">Audio vandaag</div>
+          <div class="usage-stat-label">Audio</div>
         </div>
         <div class="usage-stat-card">
           <div class="usage-stat-value">${fmtCost(today.estimated_cost)}</div>
-          <div class="usage-stat-label">Kosten vandaag</div>
+          <div class="usage-stat-label">Kosten</div>
         </div>
+      </div>
+      <div class="usage-row-label">Deze maand</div>
+      <div class="usage-stats">
         <div class="usage-stat-card">
           <div class="usage-stat-value">${fmtNum(month.requests)}</div>
-          <div class="usage-stat-label">Requests deze maand</div>
+          <div class="usage-stat-label">Requests</div>
         </div>
         <div class="usage-stat-card">
           <div class="usage-stat-value">${fmtNum(month.total_tokens)}</div>
-          <div class="usage-stat-label">Tokens deze maand</div>
+          <div class="usage-stat-label">Tokens</div>
         </div>
         <div class="usage-stat-card">
           <div class="usage-stat-value">${fmtAudio(month.audio_seconds)}</div>
-          <div class="usage-stat-label">Audio deze maand</div>
+          <div class="usage-stat-label">Audio</div>
         </div>
         <div class="usage-stat-card">
           <div class="usage-stat-value">${fmtCost(month.estimated_cost)}</div>
-          <div class="usage-stat-label">Kosten deze maand</div>
+          <div class="usage-stat-label">Kosten</div>
         </div>
       </div>
       ${models.length ? `
@@ -1918,6 +1929,18 @@ async function loadSystemInfo() {
 function renderSystemInfo(data, container) {
   const sections = [];
 
+  // Section icon SVGs
+  const sysIcons = {
+    arch: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+    ingest: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
+    retrieval: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+    gen: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    chat: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
+    stability: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    config: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>'
+  };
+  const sysColors = ['purple', 'blue', 'cyan', 'orange', 'pink', 'green', 'purple'];
+
   // Architecture
   if (data.architecture) {
     const comps = data.architecture.components.map(c =>
@@ -1929,7 +1952,10 @@ function renderSystemInfo(data, container) {
     ).join('');
     sections.push(`
       <div class="sys-section">
-        <h3>${escapeHtml(data.architecture.title)}</h3>
+        <div class="section-header">
+          <div class="section-header-icon ${sysColors[0]}">${sysIcons.arch}</div>
+          <h3 style="margin:0;border:0;padding:0">${escapeHtml(data.architecture.title)}</h3>
+        </div>
         <div class="sys-flow">
           <div class="sys-flow-diagram">
             <div class="sys-flow-box">Gebruiker</div>
@@ -1970,7 +1996,10 @@ function renderSystemInfo(data, container) {
 
     sections.push(`
       <div class="sys-section">
-        <h3>${escapeHtml(data.ingestion.title)}</h3>
+        <div class="section-header">
+          <div class="section-header-icon ${sysColors[1]}">${sysIcons.ingest}</div>
+          <h3 style="margin:0;border:0;padding:0">${escapeHtml(data.ingestion.title)}</h3>
+        </div>
         <div class="sys-steps">${steps}</div>
         <h4 style="margin-top:20px;color:var(--text-secondary);">Ondersteunde Bestandstypes</h4>
         <div class="sys-table-wrap">
@@ -2001,7 +2030,10 @@ function renderSystemInfo(data, container) {
 
     sections.push(`
       <div class="sys-section">
-        <h3>${escapeHtml(data.retrieval.title)}</h3>
+        <div class="section-header">
+          <div class="section-header-icon ${sysColors[2]}">${sysIcons.retrieval}</div>
+          <h3 style="margin:0;border:0;padding:0">${escapeHtml(data.retrieval.title)}</h3>
+        </div>
         <div class="sys-steps">${steps}</div>
         <div class="sys-config-grid" style="margin-top:16px;">${settings}</div>
       </div>`
@@ -2018,7 +2050,10 @@ function renderSystemInfo(data, container) {
     ).join('');
     sections.push(`
       <div class="sys-section">
-        <h3>${escapeHtml(data.generation.title)}</h3>
+        <div class="section-header">
+          <div class="section-header-icon ${sysColors[3]}">${sysIcons.gen}</div>
+          <h3 style="margin:0;border:0;padding:0">${escapeHtml(data.generation.title)}</h3>
+        </div>
         <div class="sys-features">${features}</div>
       </div>`
     );
@@ -2034,7 +2069,10 @@ function renderSystemInfo(data, container) {
     ).join('');
     sections.push(`
       <div class="sys-section">
-        <h3>${escapeHtml(data.chat.title)}</h3>
+        <div class="section-header">
+          <div class="section-header-icon ${sysColors[4]}">${sysIcons.chat}</div>
+          <h3 style="margin:0;border:0;padding:0">${escapeHtml(data.chat.title)}</h3>
+        </div>
         <div class="sys-features">${features}</div>
       </div>`
     );
@@ -2050,7 +2088,10 @@ function renderSystemInfo(data, container) {
     ).join('');
     sections.push(`
       <div class="sys-section">
-        <h3>${escapeHtml(data.stability.title)}</h3>
+        <div class="section-header">
+          <div class="section-header-icon ${sysColors[5]}">${sysIcons.stability}</div>
+          <h3 style="margin:0;border:0;padding:0">${escapeHtml(data.stability.title)}</h3>
+        </div>
         <div class="sys-features">${features}</div>
       </div>`
     );
@@ -2063,7 +2104,10 @@ function renderSystemInfo(data, container) {
     ).join('');
     sections.push(`
       <div class="sys-section">
-        <h3>${escapeHtml(data.config.title)}</h3>
+        <div class="section-header">
+          <div class="section-header-icon ${sysColors[6]}">${sysIcons.config}</div>
+          <h3 style="margin:0;border:0;padding:0">${escapeHtml(data.config.title)}</h3>
+        </div>
         <div class="sys-config-grid">${items}</div>
       </div>`
     );
@@ -2102,7 +2146,7 @@ function renderAnalytics(data, container, usage) {
   // Activity chart bars
   const maxCount = Math.max(...messagesPerDay.map(d => d.count), 1);
   const activityBars = messagesPerDay.slice(-14).map(d => {
-    const height = Math.max(4, (d.count / maxCount) * 80);
+    const height = Math.max(4, (d.count / maxCount) * 100);
     const dayLabel = d.day.slice(5);
     return `<div class="activity-bar-wrap" title="${d.day}: ${d.count} berichten">
       <div class="activity-bar" style="height: ${height}px"></div>
@@ -2113,42 +2157,99 @@ function renderAnalytics(data, container, usage) {
   container.innerHTML = `
     <div class="analytics-stats">
       <div class="stat-card">
-        <div class="stat-value">${totals.sessions || 0}</div>
-        <div class="stat-label">Gesprekken</div>
+        <div class="stat-icon purple">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">${totals.sessions || 0}</div>
+          <div class="stat-label">Gesprekken</div>
+        </div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">${totals.questions || 0}</div>
-        <div class="stat-label">Vragen gesteld</div>
+        <div class="stat-icon blue">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">${totals.questions || 0}</div>
+          <div class="stat-label">Vragen gesteld</div>
+        </div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">${totals.agents || 0}</div>
-        <div class="stat-label">Agents</div>
+        <div class="stat-icon orange">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">${totals.agents || 0}</div>
+          <div class="stat-label">Agents</div>
+        </div>
       </div>
       <div class="stat-card">
-        <div class="stat-value" style="color: ${satColor}">${satRate}</div>
-        <div class="stat-label">Tevredenheid</div>
+        <div class="stat-icon green">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value" style="color: ${satColor}">${satRate}</div>
+          <div class="stat-label">Tevredenheid</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analytics-card">
+      <div class="section-header">
+        <div class="section-header-icon purple">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+        </div>
+        <h3 style="margin:0">Activiteit</h3>
+        <span class="section-header-sub">Laatste 14 dagen</span>
+      </div>
+      <div class="activity-chart">
+        ${activityBars || '<div class="empty-docs">Nog geen activiteit</div>'}
       </div>
     </div>
 
     <div class="analytics-row">
-      <div class="card analytics-card">
-        <h3>Feedback</h3>
+      <div class="analytics-card">
+        <div class="section-header">
+          <div class="section-header-icon green">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>
+            </svg>
+          </div>
+          <h3 style="margin:0">Feedback</h3>
+        </div>
         <div class="feedback-stats">
           <div class="feedback-stat positive">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>
             <span class="feedback-count">${feedback.positive || 0}</span>
             <span class="feedback-label">Positief</span>
           </div>
           <div class="feedback-stat negative">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3zm7-13h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 4H17"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3zm7-13h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 4H17"/></svg>
             <span class="feedback-count">${feedback.negative || 0}</span>
             <span class="feedback-label">Negatief</span>
           </div>
         </div>
       </div>
 
-      <div class="card analytics-card">
-        <h3>Agent Gebruik</h3>
+      <div class="analytics-card">
+        <div class="section-header">
+          <div class="section-header-icon orange">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <h3 style="margin:0">Agent Gebruik</h3>
+        </div>
         <div class="agent-usage-list">
           ${agentUsage.length ? agentUsage.map(a => `
             <div class="agent-usage-item">
@@ -2161,38 +2262,49 @@ function renderAnalytics(data, container, usage) {
       </div>
     </div>
 
-    <div class="card analytics-card">
-      <h3>Activiteit (laatste 14 dagen)</h3>
-      <div class="activity-chart">
-        ${activityBars || '<div class="empty-docs">Nog geen activiteit</div>'}
-      </div>
-    </div>
-
-    <div class="card analytics-card">
-      <h3>Meest gestelde vragen</h3>
-      <div class="top-questions-list">
-        ${topQuestions.length ? topQuestions.map((q, i) => `
-          <div class="top-question-item">
-            <span class="top-question-rank">${i + 1}</span>
-            <span class="top-question-text">${escapeHtml(q.question)}</span>
-            <span class="top-question-count">${q.count}x</span>
+    <div class="analytics-row">
+      <div class="analytics-card">
+        <div class="section-header">
+          <div class="section-header-icon blue">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
           </div>
-        `).join('') : '<div class="empty-docs">Nog geen vragen</div>'}
-      </div>
-    </div>
-
-    <div class="card analytics-card">
-      <h3>Recente Feedback</h3>
-      <div class="recent-feedback-list">
-        ${recentFeedback.length ? recentFeedback.map(f => `
-          <div class="recent-feedback-item ${f.feedback}">
-            <span class="recent-feedback-icon">${f.feedback === 'positive' ? '+' : '-'}</span>
-            <div class="recent-feedback-content">
-              <div class="recent-feedback-text">${escapeHtml(f.message_preview)}</div>
-              <div class="recent-feedback-meta">${escapeHtml(f.session_title || 'Onbekend gesprek')}</div>
+          <h3 style="margin:0">Meest gestelde vragen</h3>
+        </div>
+        <div class="top-questions-list">
+          ${topQuestions.length ? topQuestions.map((q, i) => `
+            <div class="top-question-item">
+              <span class="top-question-rank">${i + 1}</span>
+              <span class="top-question-text">${escapeHtml(q.question)}</span>
+              <span class="top-question-count">${q.count}x</span>
             </div>
+          `).join('') : '<div class="empty-docs">Nog geen vragen</div>'}
+        </div>
+      </div>
+
+      <div class="analytics-card">
+        <div class="section-header">
+          <div class="section-header-icon pink">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
+            </svg>
           </div>
-        `).join('') : '<div class="empty-docs">Nog geen feedback</div>'}
+          <h3 style="margin:0">Recente Feedback</h3>
+        </div>
+        <div class="recent-feedback-list">
+          ${recentFeedback.length ? recentFeedback.map(f => `
+            <div class="recent-feedback-item">
+              <span class="recent-feedback-icon ${f.feedback === 'positive' ? 'pos' : 'neg'}">
+                ${f.feedback === 'positive' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3zm7-13h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 4H17"/></svg>'}
+              </span>
+              <div class="recent-feedback-content">
+                <div class="recent-feedback-text">${escapeHtml(f.message_preview)}</div>
+                <div class="recent-feedback-meta">${escapeHtml(f.session_title || 'Onbekend gesprek')}</div>
+              </div>
+            </div>
+          `).join('') : '<div class="empty-docs">Nog geen feedback</div>'}
+        </div>
       </div>
     </div>
 
