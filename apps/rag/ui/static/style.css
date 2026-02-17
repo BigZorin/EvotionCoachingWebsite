@@ -1146,6 +1146,7 @@ a:hover { text-decoration: underline; }
 
 .agents-content {
   padding: 28px 36px;
+  max-width: 1400px;
   flex: 1;
   overflow-y: auto;
 }
@@ -1352,6 +1353,13 @@ a:hover { text-decoration: underline; }
   margin-bottom: 14px;
 }
 
+/* Agent cards grid */
+.agents-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 12px;
+}
+
 /* Agent cards */
 .agent-card {
   display: flex;
@@ -1361,7 +1369,6 @@ a:hover { text-decoration: underline; }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  margin-bottom: 10px;
   transition: border-color var(--transition), transform var(--transition);
 }
 .agent-card:hover {
@@ -1793,6 +1800,7 @@ a:hover { text-decoration: underline; }
    ============================================================ */
 .analytics-content {
   padding: 28px 36px;
+  max-width: 1400px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -1837,7 +1845,7 @@ a:hover { text-decoration: underline; }
 /* Stats cards row */
 .analytics-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 14px;
 }
 .stat-card {
@@ -1887,7 +1895,7 @@ a:hover { text-decoration: underline; }
 /* Two-column row */
 .analytics-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   gap: 14px;
 }
 
@@ -1963,7 +1971,7 @@ a:hover { text-decoration: underline; }
 }
 .activity-bar {
   width: 100%;
-  max-width: 32px;
+  max-width: 48px;
   background: linear-gradient(to top, #7c3aed, #a78bfa);
   border-radius: 4px 4px 0 0;
   min-height: 2px;
@@ -2125,6 +2133,7 @@ a:hover { text-decoration: underline; }
    ============================================================ */
 .system-content {
   padding: 28px 36px;
+  max-width: 1400px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -2210,8 +2219,8 @@ a:hover { text-decoration: underline; }
 /* Components */
 .sys-components {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
 }
 .sys-component {
   background: var(--sidebar-hover);
@@ -2300,8 +2309,8 @@ a:hover { text-decoration: underline; }
 /* Feature list */
 .sys-features {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
 }
 .sys-feature {
   background: var(--sidebar-hover);
@@ -3062,7 +3071,7 @@ pre:hover .code-copy-btn {
 }
 .usage-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 10px;
   margin-bottom: 16px;
 }
