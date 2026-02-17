@@ -23,6 +23,16 @@ RATE_LIMIT_AUTH = 5      # max auth attempts per window
 RATE_LIMIT_API = 60      # max API requests per window
 
 
+def _get_client_ip(request: Request) -> str:
+    """Get real client IP, accounting for reverse proxy (Caddy).
+    Caddy automatically sets X-Forwarded-For with the real client IP."""
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        # First IP in chain is the original client
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
 def _check_rate_limit(key: str, max_requests: int) -> bool:
     """Returns True if request is allowed, False if rate-limited."""
     now = time.monotonic()
@@ -137,7 +147,8 @@ async def security_headers_middleware(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     response.headers["X-XSS-Protection"] = "1; mode=block"
-    if request.url.scheme == "https":
+    # Behind Caddy, internal scheme is always HTTP — check X-Forwarded-Proto
+    if request.url.scheme == "https" or request.headers.get("x-forwarded-proto") == "https":
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return response
 
@@ -149,7 +160,7 @@ async def auth_middleware(request: Request, call_next):
 
     # Rate limit auth endpoint BEFORE skipping public paths (brute-force protection)
     if path == "/api/v1/auth/verify":
-        client_ip = request.client.host if request.client else "unknown"
+        client_ip = _get_client_ip(request)
         if not _check_rate_limit(f"auth:{client_ip}", RATE_LIMIT_AUTH):
             logger.warning(f"Auth rate limit exceeded for {client_ip}")
             return JSONResponse(status_code=429, content={"detail": "Too many attempts. Try again later."})
@@ -166,7 +177,7 @@ async def auth_middleware(request: Request, call_next):
 
     # All other /api/ routes require auth
     if path.startswith("/api/"):
-        client_ip = request.client.host if request.client else "unknown"
+        client_ip = _get_client_ip(request)
 
         # Rate limit regular API calls (auth/verify already handled above)
         if not _check_rate_limit(f"api:{client_ip}", RATE_LIMIT_API):
