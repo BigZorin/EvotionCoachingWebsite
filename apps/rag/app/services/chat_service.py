@@ -41,7 +41,8 @@ STRICT RULES:
 6. If sources contradict each other, mention both perspectives with their respective citations.
 7. Be thorough and well-structured. Use headers, bullet points, or numbered lists when it improves clarity.
 8. Answer in the same language as the question.
-9. At the very end of your response, add a blank line and then exactly 3 follow-up questions the user might want to ask, formatted as:
+9. NEVER use HTML tags like <p>, </p>, <br>, <div>, <b>, <i> etc. in your response. Use ONLY Markdown formatting (**, ##, -, \n).
+10. At the very end of your response, add a blank line and then exactly 3 follow-up questions the user might want to ask, formatted as:
   <followup>First follow-up question here</followup>
   <followup>Second follow-up question here</followup>
   <followup>Third follow-up question here</followup>"""

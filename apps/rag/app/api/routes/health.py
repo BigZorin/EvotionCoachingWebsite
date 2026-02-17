@@ -143,6 +143,7 @@ def system_info():
                 {"name": "Gecachte Samenvatting", "description": "Conversatie-samenvattingen worden opgeslagen in session metadata en pas elke 10 nieuwe berichten vernieuwd — bespaart ~90% tokens bij lange gesprekken (voorheen: elke bericht opnieuw samengevat)"},
                 {"name": "Rate Limit Memory Cleanup", "description": "Verlopen IP-entries worden automatisch opgeruimd uit de rate limit store — voorkomt geheugengroei bij langdurige uptime"},
                 {"name": "XSS Sanitatie", "description": "Alle LLM-gegenereerde markdown wordt gesaniteerd met DOMPurify voordat het in de DOM wordt geplaatst — voorkomt XSS via geïnjecteerde HTML/scripts in documenten"},
+                {"name": "HTML Tag Stripping", "description": "Stray HTML tags (p, br, div, span, etc.) in LLM-output worden automatisch gestript vóór markdown rendering — voorkomt zichtbare </p><p> artefacten. Dubbele bescherming: system prompt verbiedt HTML + frontend stripper als fallback"},
                 {"name": "SSE Foutbestendigheid", "description": "JSON.parse in de SSE-streamlezer is gewrapped in try/catch — malformed events worden overgeslagen i.p.v. de hele UI te crashen"},
                 {"name": "Auth Bypass Preventie", "description": "Bij onbereikbare server wordt de login-scherm getoond met foutmelding i.p.v. de app zonder authenticatie te tonen"},
                 {"name": "Upload Pre-Check", "description": "Bestandsgrootte wordt gecontroleerd via Content-Length header vóór het inlezen in geheugen — voorkomt OOM bij grote uploads"},

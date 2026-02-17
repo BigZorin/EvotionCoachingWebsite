@@ -210,6 +210,10 @@ function renderMarkdown(text, sources) {
   // Strip follow-up tags before rendering
   text = text.replace(/<followup>.*?<\/followup>/gs, '').trim();
 
+  // Strip stray HTML tags from LLM output (LLM should only produce Markdown)
+  // Preserve only <followup> (already stripped above) and code blocks
+  text = text.replace(/<\/?(p|br|div|span|b|i|em|strong|ul|ol|li|h[1-6]|table|tr|td|th|thead|tbody|blockquote|hr)\s*\/?>/gi, '\n');
+
   let html;
   if (typeof marked !== 'undefined') {
     marked.setOptions({
