@@ -105,6 +105,21 @@ CURRENT QUESTION: {question}
 
 Provide a comprehensive, well-structured answer with inline citations [1], [2] etc. Synthesize information from multiple sources when applicable. End with 3 follow-up questions in <followup> tags."""
 
+CHAT_PROMPT_TEMPLATE_WITH_ATTACHMENTS = """USER-UPLOADED DOCUMENTS (prioriteit — de gebruiker heeft deze bestanden bijgevoegd en wil er vragen over stellen):
+{attachment_context}
+
+ADDITIONAL KNOWLEDGE BASE CONTEXT:
+{kb_context}
+
+SOURCES:
+{sources}
+
+{history_section}
+
+CURRENT QUESTION: {question}
+
+IMPORTANT: The user uploaded documents that are listed under "USER-UPLOADED DOCUMENTS" above. Prioritize information from these uploaded documents when answering. Use inline citations [1], [2] etc. Synthesize with knowledge base context when relevant. End with 3 follow-up questions in <followup> tags."""
+
 
 def start_session(collection: str | None = None, agent_id: str | None = None) -> dict:
     """Create a new chat session, optionally linked to an agent."""
@@ -152,70 +167,94 @@ def chat(
 
     # Determine collection search scope from agent + attachments
     agent_collections = agent.get("collections", []) if agent else []
-    meta = get_session_metadata(session_id)
-    attachment_collection = meta.get("attachment_collection")
+    session_meta = get_session_metadata(session_id)
+    attachment_collection = session_meta.get("attachment_collection")
 
-    # Build collection scope, merging attachment collection if present
-    search_collection_name = collection if not agent_collections else None
-    search_collection_names = agent_collections if agent_collections else None
+    # Retrieve: separate passes for attachments and KB for better coverage
+    att_chunks = []
+    kb_chunks = []
 
     if attachment_collection:
-        if search_collection_names:
-            search_collection_names = list(search_collection_names) + [attachment_collection]
-        elif search_collection_name:
-            search_collection_names = [search_collection_name, attachment_collection]
-            search_collection_name = None
-        else:
-            search_collection_names = [attachment_collection]
-
-    chunks = retrieve(
-        query=search_query,
-        collection_name=search_collection_name,
-        collection_names=search_collection_names,
-        top_k=top_k,
-        use_multi_query=False,
-    )
-
-    # Fallback: if agent collections yielded nothing, try all collections
-    if not chunks and agent_collections:
-        logger.warning(f"Agent collections {agent_collections} returned no results, falling back to all collections")
-        chunks = retrieve(
+        # Pass 1: Get generous amount of attachment chunks
+        att_chunks = retrieve(
             query=search_query,
-            collection_name=None,
-            collection_names=None,
+            collection_name=attachment_collection,
+            top_k=min(top_k * 2, 30),
+            use_multi_query=False,
+        )
+        # Pass 2: KB chunks from selected/agent collections
+        kb_col = collection if not agent_collections else None
+        kb_cols = agent_collections if agent_collections else None
+        if kb_col or kb_cols:
+            kb_chunks = retrieve(
+                query=search_query,
+                collection_name=kb_col,
+                collection_names=kb_cols,
+                top_k=top_k,
+                use_multi_query=False,
+            )
+    else:
+        # No attachments — standard retrieval
+        search_collection_name = collection if not agent_collections else None
+        search_collection_names = agent_collections if agent_collections else None
+        kb_chunks = retrieve(
+            query=search_query,
+            collection_name=search_collection_name,
+            collection_names=search_collection_names,
             top_k=top_k,
             use_multi_query=False,
         )
+        if not kb_chunks and agent_collections:
+            kb_chunks = retrieve(query=search_query, top_k=top_k, use_multi_query=False)
+
+    chunks = att_chunks + kb_chunks
 
     # 3. Build prompt
-    context_parts = []
     source_parts = []
     seen_sources = set()
 
-    for i, chunk in enumerate(chunks, 1):
-        context_parts.append(f"[{i}] {chunk.content}")
-        source_key = chunk.source_file
-        if source_key not in seen_sources:
-            seen_sources.add(source_key)
-            meta_info = []
-            if chunk.metadata.get("page_number"):
-                meta_info.append(f"page {chunk.metadata['page_number']}")
-            if chunk.metadata.get("section_header"):
-                meta_info.append(f"section: {chunk.metadata['section_header']}")
-            source_str = f"- [{i}] {source_key}"
-            if meta_info:
-                source_str += f" ({', '.join(meta_info)})"
-            source_parts.append(source_str)
+    def _build_context(chunk_list, start_idx=1):
+        parts = []
+        nonlocal seen_sources
+        idx = start_idx
+        for chunk in chunk_list:
+            parts.append(f"[{idx}] {chunk.content}")
+            key = chunk.source_file
+            if key not in seen_sources:
+                seen_sources.add(key)
+                mi = []
+                if chunk.metadata.get("page_number"):
+                    mi.append(f"page {chunk.metadata['page_number']}")
+                if chunk.metadata.get("section_header"):
+                    mi.append(f"section: {chunk.metadata['section_header']}")
+                s = f"- [{idx}] {key}"
+                if mi:
+                    s += f" ({', '.join(mi)})"
+                source_parts.append(s)
+            idx += 1
+        return "\n\n".join(parts), idx
 
-    context = "\n\n".join(context_parts) if context_parts else "(geen documenten gevonden)"
-    sources_text = "\n".join(source_parts) if source_parts else "(geen bronnen)"
-
-    user_prompt = CHAT_PROMPT_TEMPLATE.format(
-        context=context,
-        sources=sources_text,
-        history_section=history_section,
-        question=question,
-    )
+    if att_chunks:
+        att_context, next_idx = _build_context(att_chunks, 1)
+        kb_context, _ = _build_context(kb_chunks, next_idx)
+        sources_text = "\n".join(source_parts) if source_parts else "(geen bronnen)"
+        user_prompt = CHAT_PROMPT_TEMPLATE_WITH_ATTACHMENTS.format(
+            attachment_context=att_context or "(geen passages uit bijlage)",
+            kb_context=kb_context or "(geen aanvullende context)",
+            sources=sources_text,
+            history_section=history_section,
+            question=question,
+        )
+    else:
+        context, _ = _build_context(kb_chunks, 1)
+        context = context or "(geen documenten gevonden)"
+        sources_text = "\n".join(source_parts) if source_parts else "(geen bronnen)"
+        user_prompt = CHAT_PROMPT_TEMPLATE.format(
+            context=context,
+            sources=sources_text,
+            history_section=history_section,
+            question=question,
+        )
 
     # 4. Generate answer (use agent system prompt if available)
     system_prompt = agent["system_prompt"] if agent else CHAT_SYSTEM_PROMPT
@@ -291,33 +330,44 @@ def chat_stream(
     search_query = _build_search_query(question, recent)
 
     agent_collections = agent.get("collections", []) if agent else []
-    meta = get_session_metadata(session_id)
-    attachment_collection = meta.get("attachment_collection")
+    session_meta = get_session_metadata(session_id)
+    attachment_collection = session_meta.get("attachment_collection")
 
-    # Build collection scope, merging attachment collection if present
-    search_collection_name = collection if not agent_collections else None
-    search_collection_names = agent_collections if agent_collections else None
+    # Retrieve: separate passes for attachments and KB
+    att_chunks = []
+    kb_chunks = []
 
     if attachment_collection:
-        if search_collection_names:
-            search_collection_names = list(search_collection_names) + [attachment_collection]
-        elif search_collection_name:
-            search_collection_names = [search_collection_name, attachment_collection]
-            search_collection_name = None
-        else:
-            search_collection_names = [attachment_collection]
+        att_chunks = retrieve(
+            query=search_query,
+            collection_name=attachment_collection,
+            top_k=min(top_k * 2, 30),
+            use_multi_query=False,
+        )
+        kb_col = collection if not agent_collections else None
+        kb_cols = agent_collections if agent_collections else None
+        if kb_col or kb_cols:
+            kb_chunks = retrieve(
+                query=search_query,
+                collection_name=kb_col,
+                collection_names=kb_cols,
+                top_k=top_k,
+                use_multi_query=False,
+            )
+    else:
+        search_collection_name = collection if not agent_collections else None
+        search_collection_names = agent_collections if agent_collections else None
+        kb_chunks = retrieve(
+            query=search_query,
+            collection_name=search_collection_name,
+            collection_names=search_collection_names,
+            top_k=top_k,
+            use_multi_query=False,
+        )
+        if not kb_chunks and agent_collections:
+            kb_chunks = retrieve(query=search_query, top_k=top_k, use_multi_query=False)
 
-    chunks = retrieve(
-        query=search_query,
-        collection_name=search_collection_name,
-        collection_names=search_collection_names,
-        top_k=top_k,
-        use_multi_query=False,
-    )
-
-    # Fallback
-    if not chunks and agent_collections:
-        chunks = retrieve(query=search_query, top_k=top_k, use_multi_query=False)
+    chunks = att_chunks + kb_chunks
 
     # Build source references
     sources = []
@@ -335,41 +385,61 @@ def chat_stream(
     else:
         n_sources = len(set(s["filename"] for s in sources))
         avg_score = sum(s["relevance_score"] for s in sources) / len(sources) if sources else 0
-        if avg_score < 0.4:
+        if att_chunks:
+            yield {"event": "status", "data": f"{len(att_chunks)} passages uit bijlage + {len(kb_chunks)} uit kennisbank"}
+        elif avg_score < 0.4:
             yield {"event": "status", "data": f"{len(chunks)} passages gevonden (lage relevantie) in {n_sources} document(en)"}
         else:
             yield {"event": "status", "data": f"{len(chunks)} passages gevonden in {n_sources} document(en)"}
     yield {"event": "sources", "data": sources}
     yield {"event": "status", "data": "Antwoord genereren..."}
 
-    # 3. Build prompt
-    context_parts = []
+    # 3. Build prompt — attachment chunks first for priority
     source_parts = []
     seen_sources = set()
-    for i, chunk in enumerate(chunks, 1):
-        context_parts.append(f"[{i}] {chunk.content}")
-        source_key = chunk.source_file
-        if source_key not in seen_sources:
-            seen_sources.add(source_key)
-            meta_info = []
-            if chunk.metadata.get("page_number"):
-                meta_info.append(f"page {chunk.metadata['page_number']}")
-            if chunk.metadata.get("section_header"):
-                meta_info.append(f"section: {chunk.metadata['section_header']}")
-            source_str = f"- [{i}] {source_key}"
-            if meta_info:
-                source_str += f" ({', '.join(meta_info)})"
-            source_parts.append(source_str)
 
-    context = "\n\n".join(context_parts) if context_parts else "(geen documenten gevonden)"
-    sources_text = "\n".join(source_parts) if source_parts else "(geen bronnen)"
+    def _build_ctx(chunk_list, start_idx=1):
+        parts = []
+        nonlocal seen_sources
+        idx = start_idx
+        for chunk in chunk_list:
+            parts.append(f"[{idx}] {chunk.content}")
+            key = chunk.source_file
+            if key not in seen_sources:
+                seen_sources.add(key)
+                mi = []
+                if chunk.metadata.get("page_number"):
+                    mi.append(f"page {chunk.metadata['page_number']}")
+                if chunk.metadata.get("section_header"):
+                    mi.append(f"section: {chunk.metadata['section_header']}")
+                s = f"- [{idx}] {key}"
+                if mi:
+                    s += f" ({', '.join(mi)})"
+                source_parts.append(s)
+            idx += 1
+        return "\n\n".join(parts), idx
 
-    user_prompt = CHAT_PROMPT_TEMPLATE.format(
-        context=context,
-        sources=sources_text,
-        history_section=history_section,
-        question=question,
-    )
+    if att_chunks:
+        att_context, next_idx = _build_ctx(att_chunks, 1)
+        kb_context, _ = _build_ctx(kb_chunks, next_idx)
+        sources_text = "\n".join(source_parts) if source_parts else "(geen bronnen)"
+        user_prompt = CHAT_PROMPT_TEMPLATE_WITH_ATTACHMENTS.format(
+            attachment_context=att_context or "(geen passages uit bijlage)",
+            kb_context=kb_context or "(geen aanvullende context)",
+            sources=sources_text,
+            history_section=history_section,
+            question=question,
+        )
+    else:
+        context, _ = _build_ctx(kb_chunks, 1)
+        context = context or "(geen documenten gevonden)"
+        sources_text = "\n".join(source_parts) if source_parts else "(geen bronnen)"
+        user_prompt = CHAT_PROMPT_TEMPLATE.format(
+            context=context,
+            sources=sources_text,
+            history_section=history_section,
+            question=question,
+        )
 
     system_prompt = agent["system_prompt"] if agent else CHAT_SYSTEM_PROMPT
 
