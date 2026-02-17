@@ -24,7 +24,7 @@ PRICING = {
 }
 
 # Free models (Cerebras, OpenRouter :free, local Ollama)
-FREE_MODELS = {"llama-3.3-70b", "meta-llama/llama-3.3-70b-instruct:free", "llama3.2:3b"}
+FREE_MODELS = {"llama3.1-8b", "google/gemma-3-27b-it:free", "meta-llama/llama-3.3-70b-instruct:free", "llama3.2:3b"}
 
 # Default pricing for unknown models
 DEFAULT_PRICING = {"input": 0.50 / 1_000_000, "output": 0.70 / 1_000_000}

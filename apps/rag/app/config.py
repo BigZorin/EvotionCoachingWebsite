@@ -12,12 +12,12 @@ class Settings(BaseSettings):
 
     # Cerebras (secondary cloud fallback — fast & free)
     cerebras_api_key: str = ""
-    cerebras_model: str = "llama-3.3-70b"
+    cerebras_model: str = "llama3.1-8b"
     cerebras_timeout: int = 60
 
     # OpenRouter (tertiary cloud fallback)
     openrouter_api_key: str = ""
-    openrouter_model: str = "meta-llama/llama-3.3-70b-instruct:free"
+    openrouter_model: str = "google/gemma-3-27b-it:free"
     openrouter_timeout: int = 60
 
     # Ollama (embeddings only — generation is handled by cloud providers)
