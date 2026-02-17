@@ -206,23 +206,85 @@ async function apiDelete(path) {
 // Markdown rendering
 // ============================================================
 
+/**
+ * Convert HTML to Markdown using the browser's built-in DOMParser.
+ * This is bulletproof — handles any HTML regardless of attributes, nesting, etc.
+ */
+function htmlToMarkdown(text) {
+  // Quick check: no HTML tags? Return as-is.
+  if (text.indexOf('<') === -1 || !/<[a-z]/i.test(text)) return text;
+
+  // Preserve followup and citation markers before parsing
+  const followupMap = {};
+  let fIdx = 0;
+  text = text.replace(/<followup>[\s\S]*?<\/followup>/gi, (m) => {
+    const key = `__FOLLOWUP_${fIdx++}__`;
+    followupMap[key] = m;
+    return key;
+  });
+  const citationMap = {};
+  let cIdx = 0;
+  text = text.replace(/\[(\d+)\]/g, (m) => {
+    const key = `__CITE_${cIdx++}__`;
+    citationMap[key] = m;
+    return key;
+  });
+
+  try {
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    const md = _nodeToMd(doc.body);
+
+    // Restore citations and followups
+    let result = md;
+    for (const [key, val] of Object.entries(citationMap)) result = result.replace(key, val);
+    for (const [key, val] of Object.entries(followupMap)) result = result.replace(key, val);
+    return result.replace(/\n{3,}/g, '\n\n').trim();
+  } catch (e) {
+    // Fallback: strip tags with regex if DOMParser fails
+    return text.replace(/<[^>]+>/g, ' ').replace(/\s{2,}/g, ' ').trim();
+  }
+}
+
+function _nodeToMd(node) {
+  let out = '';
+  for (const child of node.childNodes) {
+    if (child.nodeType === 3) {
+      // Text node
+      out += child.textContent;
+    } else if (child.nodeType === 1) {
+      // Element node
+      const tag = child.tagName.toLowerCase();
+      const inner = _nodeToMd(child);
+      switch (tag) {
+        case 'strong': case 'b': out += `**${inner.trim()}**`; break;
+        case 'em': case 'i': out += `*${inner.trim()}*`; break;
+        case 'p': out += `${inner.trim()}\n\n`; break;
+        case 'li': out += `\n- ${inner.trim()}`; break;
+        case 'ul': case 'ol': out += `\n${inner}\n`; break;
+        case 'h1': out += `\n## ${inner.trim()}\n`; break;
+        case 'h2': out += `\n### ${inner.trim()}\n`; break;
+        case 'h3': case 'h4': case 'h5': case 'h6': out += `\n#### ${inner.trim()}\n`; break;
+        case 'br': out += '\n'; break;
+        case 'code': out += `\`${inner}\``; break;
+        case 'pre': out += `\n\`\`\`\n${inner}\n\`\`\`\n`; break;
+        case 'a': {
+          const href = child.getAttribute('href');
+          out += href ? `[${inner}](${href})` : inner;
+          break;
+        }
+        default: out += inner; break;
+      }
+    }
+  }
+  return out;
+}
+
 function renderMarkdown(text, sources) {
-  // Strip follow-up tags before rendering ([\s\S] for cross-browser compat instead of s flag)
+  // Strip follow-up tags before rendering
   text = text.replace(/<followup>[\s\S]*?<\/followup>/gi, '').trim();
 
-  // Convert HTML to Markdown (smaller LLMs often output HTML despite instructions)
-  // Use [\s\S] instead of . with s flag for maximum browser compatibility
-  // Use [^>]* to handle tags with attributes like <p class="...">
-  text = text.replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi, '**$1**');
-  text = text.replace(/<b[^>]*>([\s\S]*?)<\/b>/gi, '**$1**');
-  text = text.replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, '*$1*');
-  text = text.replace(/<i[^>]*>([\s\S]*?)<\/i>/gi, '*$1*');
-  text = text.replace(/<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi, (_, level, content) => '\n' + '#'.repeat(Math.min(+level + 1, 4)) + ' ' + content + '\n');
-  text = text.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '\n- $1');
-  text = text.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '$1\n\n');
-  text = text.replace(/<\/?(ul|ol|div|span|br|table|tr|td|th|thead|tbody|blockquote|hr)[^>]*>/gi, '\n');
-  text = text.replace(/<\/?[a-z][a-z0-9]*[^>]*>/gi, '');
-  text = text.replace(/\n{3,}/g, '\n\n');
+  // Convert any HTML to Markdown using DOMParser (handles all edge cases)
+  text = htmlToMarkdown(text);
 
   let html;
   if (typeof marked !== 'undefined') {
