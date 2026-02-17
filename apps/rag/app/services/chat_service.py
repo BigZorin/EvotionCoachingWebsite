@@ -18,39 +18,49 @@ from app.core.llm import generate, generate_stream, get_active_provider
 from app.retrieval.retriever import retrieve
 
 # HTML → Markdown conversion for LLMs that output HTML despite instructions
-_STRIP_TAG_RE = re.compile(r"<\/?(div|span|br|table|tr|td|th|thead|tbody|blockquote|hr)\s*\/?>", re.IGNORECASE)
+_STRIP_TAG_RE = re.compile(r"<\/?(div|span|br|table|tr|td|th|thead|tbody|blockquote|hr)[\s/]*>", re.IGNORECASE)
+_TOKEN_TAG_RE = re.compile(r"<\/?[a-z][a-z0-9]*[^>]*>", re.IGNORECASE)
+
+
+def _strip_token_html(token: str) -> str:
+    """Strip HTML tags from a single streaming token (fast, simple)."""
+    return _TOKEN_TAG_RE.sub("", token)
 
 
 def _clean_llm_output(text: str) -> str:
     """Convert HTML in LLM output to clean Markdown."""
-    # 1. Convert semantic HTML to Markdown equivalents
-    # Bold: <strong>text</strong> or <b>text</b> → **text**
-    text = re.sub(r"<strong>(.*?)</strong>", r"**\1**", text, flags=re.DOTALL | re.IGNORECASE)
-    text = re.sub(r"<b>(.*?)</b>", r"**\1**", text, flags=re.DOTALL | re.IGNORECASE)
-    # Italic: <em>text</em> or <i>text</i> → *text*
-    text = re.sub(r"<em>(.*?)</em>", r"*\1*", text, flags=re.DOTALL | re.IGNORECASE)
-    text = re.sub(r"<i>(.*?)</i>", r"*\1*", text, flags=re.DOTALL | re.IGNORECASE)
-    # Headers: <h1>text</h1> → ## text
-    for level in range(1, 7):
-        hashes = "#" * min(level + 1, 4)  # h1→##, h2→###, h3→####
-        text = re.sub(rf"<h{level}>(.*?)</h{level}>", rf"\n{hashes} \1\n", text, flags=re.DOTALL | re.IGNORECASE)
-    # List items: <li>text</li> → - text (on its own line)
-    text = re.sub(r"<li>(.*?)</li>", r"\n- \1", text, flags=re.DOTALL | re.IGNORECASE)
-    # Paragraphs: <p>text</p> → text + double newline
-    text = re.sub(r"<p>(.*?)</p>", r"\1\n\n", text, flags=re.DOTALL | re.IGNORECASE)
+    # 0. Preserve <followup> tags — extract them before cleaning
+    followups = re.findall(r"<followup>.*?</followup>", text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r"<followup>.*?</followup>", "", text, flags=re.DOTALL | re.IGNORECASE)
 
-    # 2. Strip remaining non-semantic HTML tags (ul, ol, div, span, br, table, etc.)
-    text = re.sub(r"<\/?(ul|ol)\s*>", "\n", text, flags=re.IGNORECASE)
+    # 1. Convert semantic HTML to Markdown equivalents (handle tags with attributes)
+    text = re.sub(r"<strong[^>]*>(.*?)</strong>", r"**\1**", text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r"<b[^>]*>(.*?)</b>", r"**\1**", text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r"<em[^>]*>(.*?)</em>", r"*\1*", text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r"<i[^>]*>(.*?)</i>", r"*\1*", text, flags=re.DOTALL | re.IGNORECASE)
+    for level in range(1, 7):
+        hashes = "#" * min(level + 1, 4)
+        text = re.sub(rf"<h{level}[^>]*>(.*?)</h{level}>", rf"\n{hashes} \1\n", text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r"<li[^>]*>(.*?)</li>", r"\n- \1", text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r"<p[^>]*>(.*?)</p>", r"\1\n\n", text, flags=re.DOTALL | re.IGNORECASE)
+
+    # 2. Strip remaining non-semantic HTML tags
+    text = re.sub(r"<\/?(ul|ol)[^>]*>", "\n", text, flags=re.IGNORECASE)
     text = _STRIP_TAG_RE.sub("\n", text)
 
-    # 3. Clean up any leftover HTML tags we missed
-    text = re.sub(r"<\/?[a-z][a-z0-9]*\s*\/?>", "", text, flags=re.IGNORECASE)
+    # 3. Clean up any leftover HTML tags (with or without attributes)
+    text = re.sub(r"<\/?[a-z][a-z0-9]*[^>]*>", "", text, flags=re.IGNORECASE)
 
     # 4. Normalize whitespace
-    text = re.sub(r"[ \t]+\n", "\n", text)       # trailing spaces before newline
-    text = re.sub(r"\n{3,}", "\n\n", text)        # collapse 3+ newlines
-    text = re.sub(r"(\n- )\n+(?=- )", r"\1", text)  # clean gaps between list items
-    return text.strip()
+    text = re.sub(r"[ \t]+\n", "\n", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = re.sub(r"(\n- )\n+(?=- )", r"\1", text)
+
+    # 5. Re-append followup tags
+    text = text.strip()
+    if followups:
+        text += "\n" + "\n".join(followups)
+    return text
 
 logger = logging.getLogger(__name__)
 
@@ -338,7 +348,7 @@ def chat_stream(
 
     system_prompt = agent["system_prompt"] if agent else CHAT_SYSTEM_PROMPT
 
-    # 4. Stream the answer
+    # 4. Stream the answer (strip HTML tags from individual tokens)
     full_answer = []
     provider_info = {"name": "unknown"}
     for token in generate_stream(
@@ -346,7 +356,9 @@ def chat_stream(
         temperature=temperature, provider_info=provider_info,
     ):
         full_answer.append(token)
-        yield {"event": "token", "data": token}
+        clean_token = _strip_token_html(token)
+        if clean_token:
+            yield {"event": "token", "data": clean_token}
 
     raw_answer = "".join(full_answer)
     answer = _clean_llm_output(raw_answer)

@@ -207,19 +207,21 @@ async function apiDelete(path) {
 // ============================================================
 
 function renderMarkdown(text, sources) {
-  // Strip follow-up tags before rendering
-  text = text.replace(/<followup>.*?<\/followup>/gs, '').trim();
+  // Strip follow-up tags before rendering ([\s\S] for cross-browser compat instead of s flag)
+  text = text.replace(/<followup>[\s\S]*?<\/followup>/gi, '').trim();
 
   // Convert HTML to Markdown (smaller LLMs often output HTML despite instructions)
-  text = text.replace(/<strong>(.*?)<\/strong>/gis, '**$1**');
-  text = text.replace(/<b>(.*?)<\/b>/gis, '**$1**');
-  text = text.replace(/<em>(.*?)<\/em>/gis, '*$1*');
-  text = text.replace(/<i>(.*?)<\/i>/gis, '*$1*');
-  text = text.replace(/<h([1-6])>(.*?)<\/h\1>/gis, (_, level, content) => '\n' + '#'.repeat(Math.min(+level + 1, 4)) + ' ' + content + '\n');
-  text = text.replace(/<li>(.*?)<\/li>/gis, '\n- $1');
-  text = text.replace(/<p>(.*?)<\/p>/gis, '$1\n\n');
-  text = text.replace(/<\/?(ul|ol|div|span|br|table|tr|td|th|thead|tbody|blockquote|hr)\s*\/?>/gi, '\n');
-  text = text.replace(/<\/?[a-z][a-z0-9]*\s*\/?>/gi, '');
+  // Use [\s\S] instead of . with s flag for maximum browser compatibility
+  // Use [^>]* to handle tags with attributes like <p class="...">
+  text = text.replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi, '**$1**');
+  text = text.replace(/<b[^>]*>([\s\S]*?)<\/b>/gi, '**$1**');
+  text = text.replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, '*$1*');
+  text = text.replace(/<i[^>]*>([\s\S]*?)<\/i>/gi, '*$1*');
+  text = text.replace(/<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi, (_, level, content) => '\n' + '#'.repeat(Math.min(+level + 1, 4)) + ' ' + content + '\n');
+  text = text.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '\n- $1');
+  text = text.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '$1\n\n');
+  text = text.replace(/<\/?(ul|ol|div|span|br|table|tr|td|th|thead|tbody|blockquote|hr)[^>]*>/gi, '\n');
+  text = text.replace(/<\/?[a-z][a-z0-9]*[^>]*>/gi, '');
   text = text.replace(/\n{3,}/g, '\n\n');
 
   let html;
