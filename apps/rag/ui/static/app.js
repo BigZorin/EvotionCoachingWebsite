@@ -23,6 +23,12 @@ let $sidebar, $overlay, $sessionsEl, $chatScroll, $emptyState, $messagesEl;
 let $chatInput, $sendBtn, $chatCollection, $agentSelect, $attachBtn, $chatFileInput, $chatAttachments;
 let $docsView, $collectionsView, $chatView, $agentsView, $analyticsView, $systemView;
 let $uploadStatus, $docsList, $collectionsList, $agentsList;
+let $folderList, $folderBreadcrumb;
+
+// --- Folder state ---
+let currentFolderId = null;
+let folderPath = []; // [{id, name}, ...] for breadcrumb
+let allFolders = []; // all folders for current collection
 
 // ============================================================
 // Authentication
@@ -183,6 +189,20 @@ async function apiPostForm(path, formData) {
 async function apiPut(path, body) {
   const res = await fetch(`${API}${path}`, {
     method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  if (res.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `${res.status} ${res.statusText}`);
+  }
+  return res.json();
+}
+
+async function apiPatch(path, body) {
+  const res = await fetch(`${API}${path}`, {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(body),
   });
@@ -1188,12 +1208,28 @@ async function loadCollectionDropdowns() {
 }
 
 async function loadDocuments(collectionName) {
-  if (!collectionName) return;
+  if (!collectionName) {
+    currentFolderId = null;
+    folderPath = [];
+    allFolders = [];
+    return;
+  }
   showLoadingIn($docsList, 'Documenten laden...');
+  if ($folderList) $folderList.innerHTML = '';
 
   try {
-    const data = await apiGet(`/collections/${collectionName}`);
-    const docs = data.documents || [];
+    // Fetch folders and documents in parallel
+    const folderParam = currentFolderId ? `?folder_id=${currentFolderId}` : '?root_only=true';
+    const [foldersData, docsData] = await Promise.all([
+      apiGet(`/collections/${collectionName}/folders`),
+      apiGet(`/collections/${collectionName}${folderParam}`),
+    ]);
+
+    allFolders = foldersData.folders || [];
+    const docs = docsData.documents || [];
+
+    renderBreadcrumb(collectionName);
+    renderFolders(collectionName);
     renderDocuments(docs, collectionName);
   } catch (e) {
     $docsList.innerHTML = '<div class="empty-docs">Fout bij laden documenten</div>';
@@ -1201,12 +1237,15 @@ async function loadDocuments(collectionName) {
 }
 
 function renderDocuments(docs, collectionName) {
-  if (!docs.length) {
-    $docsList.innerHTML = '<div class="empty-docs">Geen documenten in deze collectie</div>';
+  if (!docs.length && !allFolders.some(f => f.parent_id === currentFolderId || (!f.parent_id && !currentFolderId))) {
+    $docsList.innerHTML = '<div class="empty-docs">Geen documenten in deze map</div>';
     return;
   }
 
   $docsList.innerHTML = '';
+  if (!docs.length) {
+    $docsList.innerHTML = '<div class="empty-docs">Geen documenten in deze map</div>';
+  }
   docs.forEach(doc => {
     const fileType = doc.file_type || '';
     const ext = (fileType || doc.filename?.split('.').pop() || '?').toUpperCase();
@@ -1221,6 +1260,8 @@ function renderDocuments(docs, collectionName) {
     }
     const el = document.createElement('div');
     el.className = 'doc-item';
+    el.draggable = true;
+    el.dataset.documentId = doc.document_id;
     el.innerHTML = `
       <div class="doc-icon">${escapeHtml(ext.substring(0, 4))}</div>
       <div class="doc-info">
@@ -1241,6 +1282,14 @@ function renderDocuments(docs, collectionName) {
       </button>
     `;
 
+    // Drag start
+    el.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', doc.document_id);
+      e.dataTransfer.effectAllowed = 'move';
+      el.classList.add('dragging');
+    });
+    el.addEventListener('dragend', () => el.classList.remove('dragging'));
+
     el.querySelector('.doc-preview-btn').addEventListener('click', () => {
       openDocPreview(collectionName, doc.document_id, doc.filename || 'onbekend');
     });
@@ -1259,6 +1308,191 @@ function renderDocuments(docs, collectionName) {
 
     $docsList.appendChild(el);
   });
+}
+
+// ============================================================
+// FOLDER FUNCTIONS
+// ============================================================
+
+function renderBreadcrumb(collectionName) {
+  if (!$folderBreadcrumb) return;
+  $folderBreadcrumb.innerHTML = '';
+
+  // Root item
+  const rootEl = document.createElement('span');
+  rootEl.className = `breadcrumb-item${currentFolderId === null ? ' active' : ''}`;
+  rootEl.textContent = 'Documenten';
+  if (currentFolderId !== null) {
+    rootEl.addEventListener('click', () => navigateToFolder(null, null, collectionName));
+    // Drop on root = move to root
+    rootEl.addEventListener('dragover', (e) => { e.preventDefault(); rootEl.classList.add('drag-over'); });
+    rootEl.addEventListener('dragleave', () => rootEl.classList.remove('drag-over'));
+    rootEl.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      rootEl.classList.remove('drag-over');
+      const docId = e.dataTransfer.getData('text/plain');
+      if (docId) await moveDocToFolder(docId, null, collectionName);
+    });
+  }
+  $folderBreadcrumb.appendChild(rootEl);
+
+  // Path items
+  folderPath.forEach((item, idx) => {
+    const sep = document.createElement('span');
+    sep.className = 'breadcrumb-sep';
+    sep.textContent = '›';
+    $folderBreadcrumb.appendChild(sep);
+
+    const isLast = idx === folderPath.length - 1;
+    const pathEl = document.createElement('span');
+    pathEl.className = `breadcrumb-item${isLast ? ' active' : ''}`;
+    pathEl.textContent = item.name;
+    if (!isLast) {
+      pathEl.addEventListener('click', () => {
+        // Navigate to this folder, trimming the path
+        folderPath = folderPath.slice(0, idx + 1);
+        currentFolderId = item.id;
+        loadDocuments(collectionName);
+      });
+      // Drop target
+      pathEl.addEventListener('dragover', (e) => { e.preventDefault(); pathEl.classList.add('drag-over'); });
+      pathEl.addEventListener('dragleave', () => pathEl.classList.remove('drag-over'));
+      pathEl.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        pathEl.classList.remove('drag-over');
+        const docId = e.dataTransfer.getData('text/plain');
+        if (docId) await moveDocToFolder(docId, item.id, collectionName);
+      });
+    }
+    $folderBreadcrumb.appendChild(pathEl);
+  });
+}
+
+function renderFolders(collectionName) {
+  if (!$folderList) return;
+  $folderList.innerHTML = '';
+
+  // Filter folders that belong to the current parent
+  const childFolders = allFolders.filter(f =>
+    (currentFolderId === null && !f.parent_id) ||
+    f.parent_id === currentFolderId
+  );
+
+  childFolders.forEach(folder => {
+    const el = document.createElement('div');
+    el.className = 'folder-item';
+    el.innerHTML = `
+      <div class="folder-icon">📁</div>
+      <div class="folder-info">
+        <div class="folder-name">${escapeHtml(folder.name)}</div>
+        <div class="folder-meta">${folder.document_count || 0} documenten</div>
+      </div>
+      <div class="folder-actions-inline">
+        <button class="folder-action-btn" title="Hernoem">✏️</button>
+        <button class="folder-action-btn danger" title="Verwijder">🗑️</button>
+      </div>
+    `;
+
+    // Double-click to navigate into folder
+    el.addEventListener('dblclick', () => navigateToFolder(folder.id, folder.name, collectionName));
+    // Single click also navigates (more intuitive)
+    let clickTimer = null;
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.folder-actions-inline')) return;
+      if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; return; }
+      clickTimer = setTimeout(() => {
+        clickTimer = null;
+        navigateToFolder(folder.id, folder.name, collectionName);
+      }, 250);
+    });
+
+    // Drag-drop: accept documents
+    el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('drag-over'); });
+    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+    el.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      el.classList.remove('drag-over');
+      const docId = e.dataTransfer.getData('text/plain');
+      if (docId) await moveDocToFolder(docId, folder.id, collectionName);
+    });
+
+    // Rename button
+    const btns = el.querySelectorAll('.folder-action-btn');
+    btns[0].addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const newName = prompt('Nieuwe naam:', folder.name);
+      if (!newName || newName === folder.name) return;
+      try {
+        await apiPatch(`/collections/${collectionName}/folders/${folder.id}`, { name: newName });
+        showToast('Map hernoemd');
+        loadDocuments(collectionName);
+      } catch (err) {
+        showToast('Kon map niet hernoemen', true);
+      }
+    });
+
+    // Delete button
+    btns[1].addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const ok = await showConfirm('Map verwijderen', `'${folder.name}' verwijderen? Documenten worden teruggezet naar de root.`);
+      if (!ok) return;
+      try {
+        await apiDelete(`/collections/${collectionName}/folders/${folder.id}`);
+        showToast('Map verwijderd');
+        loadDocuments(collectionName);
+      } catch (err) {
+        showToast('Kon map niet verwijderen', true);
+      }
+    });
+
+    $folderList.appendChild(el);
+  });
+}
+
+function navigateToFolder(folderId, folderName, collectionName) {
+  if (folderId === null) {
+    currentFolderId = null;
+    folderPath = [];
+  } else {
+    currentFolderId = folderId;
+    // Check if we're navigating to an existing path item
+    const existingIdx = folderPath.findIndex(p => p.id === folderId);
+    if (existingIdx >= 0) {
+      folderPath = folderPath.slice(0, existingIdx + 1);
+    } else {
+      folderPath.push({ id: folderId, name: folderName });
+    }
+  }
+  loadDocuments(collectionName);
+}
+
+async function createNewFolder() {
+  const collectionName = document.getElementById('browse-collection').value;
+  if (!collectionName) return;
+  const name = prompt('Mapnaam:');
+  if (!name) return;
+  try {
+    await apiPost(`/collections/${collectionName}/folders`, {
+      name: name,
+      parent_id: currentFolderId,
+    });
+    showToast('Map aangemaakt');
+    loadDocuments(collectionName);
+  } catch (err) {
+    showToast('Kon map niet aanmaken', true);
+  }
+}
+
+async function moveDocToFolder(documentId, folderId, collectionName) {
+  try {
+    await apiPatch(`/collections/${collectionName}/documents/${documentId}/folder`, {
+      folder_id: folderId,
+    });
+    showToast(folderId ? 'Document verplaatst naar map' : 'Document verplaatst naar root');
+    loadDocuments(collectionName);
+  } catch (err) {
+    showToast('Kon document niet verplaatsen', true);
+  }
 }
 
 // Recursively collect files from drag-dropped directory entries
@@ -2611,6 +2845,8 @@ function init() {
   $analyticsView = document.getElementById('analytics-view');
   $systemView = document.getElementById('system-view');
   $docsList = document.getElementById('docs-list');
+  $folderList = document.getElementById('folder-list');
+  $folderBreadcrumb = document.getElementById('folder-breadcrumb');
   $collectionsList = document.getElementById('collections-list');
   $agentsList = document.getElementById('agents-list');
   $agentSelect = document.getElementById('agent-select');
@@ -2726,12 +2962,18 @@ function init() {
   });
 
   // --- Document browser ---
-  document.getElementById('browse-collection').addEventListener('change', (e) => loadDocuments(e.target.value));
+  document.getElementById('browse-collection').addEventListener('change', (e) => {
+    currentFolderId = null;
+    folderPath = [];
+    allFolders = [];
+    loadDocuments(e.target.value);
+  });
   document.getElementById('refresh-docs').addEventListener('click', () => {
     const col = document.getElementById('browse-collection').value;
     if (col) loadDocuments(col);
     loadCollectionDropdowns();
   });
+  document.getElementById('new-folder-btn').addEventListener('click', createNewFolder);
 
   // --- Collections ---
   document.getElementById('create-col-btn').addEventListener('click', createCollection);

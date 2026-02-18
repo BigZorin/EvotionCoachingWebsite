@@ -1,8 +1,20 @@
 import re
 
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
 
-from app.core.database import list_agents
+from app.core.database import (
+    list_agents,
+    create_folder,
+    get_all_folders,
+    list_folders,
+    get_folder,
+    update_folder,
+    delete_folder,
+    set_document_folder,
+    unset_document_folder,
+    get_folder_document_counts,
+)
 from app.models.schemas import CollectionCreate, CollectionInfo, CollectionListResponse
 from app.services.collection_service import (
     get_all_collections,
@@ -42,9 +54,9 @@ def create_new_collection(body: CollectionCreate):
 
 
 @router.get("/{name}")
-def get_collection(name: str):
+def get_collection(name: str, folder_id: str | None = None, root_only: bool = False):
     _validate_collection_name(name)
-    documents = get_collection_documents(name)
+    documents = get_collection_documents(name, folder_id=folder_id, root_only=root_only)
     collections = get_all_collections()
     info = next((c for c in collections if c.name == name), None)
     if not info:
@@ -127,5 +139,84 @@ def cleanup_collection_endpoint(name: str, min_chars: int = 50):
 @router.delete("/{name}/documents/{document_id}")
 def delete_document_endpoint(name: str, document_id: str):
     _validate_collection_name(name)
+    # Also remove from document_folders if present
+    unset_document_folder(document_id)
     chunks_removed = delete_document(name, document_id)
     return {"deleted": True, "document_id": document_id, "chunks_removed": chunks_removed}
+
+
+# ============================================================
+# Folders
+# ============================================================
+
+class CreateFolderRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    parent_id: str | None = None
+
+
+class UpdateFolderRequest(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+
+
+class MoveDocumentRequest(BaseModel):
+    folder_id: str | None = None  # None = move to root
+
+
+@router.get("/{name}/folders")
+def get_collection_folders(name: str):
+    """Get all folders for a collection with document counts."""
+    _validate_collection_name(name)
+    folders = get_all_folders(name)
+    doc_counts = get_folder_document_counts(name)
+    return {
+        "folders": [
+            {**f, "document_count": doc_counts.get(f["id"], 0)}
+            for f in folders
+        ]
+    }
+
+
+@router.post("/{name}/folders")
+def create_collection_folder(name: str, body: CreateFolderRequest):
+    _validate_collection_name(name)
+    if body.parent_id:
+        parent = get_folder(body.parent_id)
+        if not parent or parent["collection"] != name:
+            raise HTTPException(status_code=404, detail="Parent folder not found in this collection")
+    folder = create_folder(name, body.name, body.parent_id)
+    return folder
+
+
+@router.patch("/{name}/folders/{folder_id}")
+def update_collection_folder(name: str, folder_id: str, body: UpdateFolderRequest):
+    _validate_collection_name(name)
+    folder = get_folder(folder_id)
+    if not folder or folder["collection"] != name:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    updated = update_folder(folder_id, name=body.name)
+    return updated
+
+
+@router.delete("/{name}/folders/{folder_id}")
+def delete_collection_folder(name: str, folder_id: str):
+    _validate_collection_name(name)
+    folder = get_folder(folder_id)
+    if not folder or folder["collection"] != name:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    delete_folder(folder_id)
+    return {"deleted": True, "folder_id": folder_id}
+
+
+@router.patch("/{name}/documents/{document_id}/folder")
+def move_document_to_folder(name: str, document_id: str, body: MoveDocumentRequest):
+    """Move a document to a folder, or back to root (folder_id=null)."""
+    _validate_collection_name(name)
+    if body.folder_id:
+        folder = get_folder(body.folder_id)
+        if not folder or folder["collection"] != name:
+            raise HTTPException(status_code=404, detail="Folder not found in this collection")
+        result = set_document_folder(document_id, body.folder_id, name)
+        return {"moved": True, **result}
+    else:
+        unset_document_folder(document_id)
+        return {"moved": True, "document_id": document_id, "folder_id": None}

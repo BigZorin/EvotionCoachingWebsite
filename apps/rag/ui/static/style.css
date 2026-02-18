@@ -1108,6 +1108,147 @@ a:hover { text-decoration: underline; }
   font-size: 14px;
 }
 
+/* --- Folder toolbar & breadcrumb --- */
+.folder-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  min-height: 40px;
+}
+.folder-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  overflow: hidden;
+}
+.breadcrumb-item {
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  transition: background var(--transition), color var(--transition);
+}
+.breadcrumb-item:hover {
+  background: var(--sidebar-hover);
+  color: var(--text-primary);
+}
+.breadcrumb-item.active {
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: default;
+}
+.breadcrumb-item.active:hover {
+  background: transparent;
+}
+.breadcrumb-sep {
+  color: var(--text-faint);
+  font-size: 11px;
+  user-select: none;
+}
+.folder-actions {
+  flex-shrink: 0;
+}
+.folder-new-btn {
+  color: var(--text-secondary);
+}
+.folder-new-btn:hover {
+  color: var(--accent);
+  background: rgba(124, 58, 237, 0.1);
+}
+
+/* --- Folder items --- */
+.folder-list {
+  /* Container for folder items above docs-list */
+}
+.folder-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background var(--transition);
+  border-bottom: 1px solid var(--border);
+}
+.folder-item:hover {
+  background: var(--sidebar-hover);
+}
+.folder-item:last-child {
+  border-bottom: none;
+}
+.folder-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(124, 58, 237, 0.08);
+  border-radius: 8px;
+}
+.folder-info {
+  flex: 1;
+  min-width: 0;
+}
+.folder-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.folder-meta {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+.folder-item .folder-actions-inline {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.folder-item:hover .folder-actions-inline {
+  opacity: 1;
+}
+.folder-action-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-faint);
+  font-size: 14px;
+  transition: all var(--transition);
+}
+.folder-action-btn:hover {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+.folder-action-btn.danger:hover {
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* --- Drag & drop --- */
+.folder-item.drag-over,
+.breadcrumb-item.drag-over {
+  background: rgba(124, 58, 237, 0.15);
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
+}
+.doc-item.dragging {
+  opacity: 0.5;
+}
+
 /* ============================================================
    COLLECTIONS VIEW
    ============================================================ */

@@ -63,8 +63,18 @@ def remove_collection(name: str) -> bool:
         return False
 
 
-def get_collection_documents(name: str) -> list[dict]:
-    """Get all unique documents in a collection."""
+def get_collection_documents(
+    name: str,
+    folder_id: str | None = None,
+    root_only: bool = False,
+) -> list[dict]:
+    """Get unique documents in a collection, optionally filtered by folder.
+
+    Args:
+        name: Collection name
+        folder_id: If set, only return documents in this folder
+        root_only: If True, only return documents NOT in any folder
+    """
     client = get_chroma_client()
     try:
         collection = client.get_collection(name)
@@ -83,7 +93,22 @@ def get_collection_documents(name: str) -> list[dict]:
                     "total_chunks": meta.get("total_chunks", 0),
                 }
 
-        return list(documents.values())
+        all_docs = list(documents.values())
+
+        # Apply folder filtering if requested
+        if folder_id is not None or root_only:
+            from app.core.database import get_documents_in_folder
+
+            if folder_id:
+                # Get documents explicitly in this folder
+                folder_doc_ids = set(get_documents_in_folder(name, folder_id))
+                all_docs = [d for d in all_docs if d["document_id"] in folder_doc_ids]
+            elif root_only:
+                # Get documents NOT in any folder
+                docs_in_any_folder = set(get_documents_in_folder(name, folder_id=None))
+                all_docs = [d for d in all_docs if d["document_id"] not in docs_in_any_folder]
+
+        return all_docs
     except Exception as e:
         logger.error(f"Failed to get documents for '{name}': {e}")
         return []

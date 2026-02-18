@@ -91,6 +91,31 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_feedback_created ON feedback(created_at DESC);
         """)
 
+        # Migration: folders and document_folders tables
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS folders (
+                id TEXT PRIMARY KEY,
+                collection TEXT NOT NULL,
+                name TEXT NOT NULL,
+                parent_id TEXT DEFAULT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY (parent_id) REFERENCES folders(id) ON DELETE CASCADE
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_folders_collection ON folders(collection, parent_id);
+
+            CREATE TABLE IF NOT EXISTS document_folders (
+                document_id TEXT PRIMARY KEY,
+                folder_id TEXT NOT NULL,
+                collection TEXT NOT NULL,
+                FOREIGN KEY (folder_id) REFERENCES folders(id) ON DELETE CASCADE
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_docfolders_folder ON document_folders(folder_id);
+            CREATE INDEX IF NOT EXISTS idx_docfolders_collection ON document_folders(collection);
+        """)
+
         conn.commit()
 
 
@@ -451,3 +476,154 @@ def get_analytics() -> dict:
             for r in recent_feedback
         ],
     }
+
+
+# --- Folders ---
+
+def create_folder(collection: str, name: str, parent_id: str | None = None) -> dict:
+    with _conn() as conn:
+        folder_id = str(uuid.uuid4())
+        now = datetime.now(timezone.utc).isoformat()
+        conn.execute(
+            "INSERT INTO folders (id, collection, name, parent_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+            (folder_id, collection, name, parent_id, now, now),
+        )
+        conn.commit()
+        return {"id": folder_id, "collection": collection, "name": name, "parent_id": parent_id, "created_at": now, "updated_at": now}
+
+
+def list_folders(collection: str, parent_id: str | None = None) -> list[dict]:
+    with _conn() as conn:
+        if parent_id is None:
+            rows = conn.execute(
+                "SELECT * FROM folders WHERE collection = ? AND parent_id IS NULL ORDER BY name ASC",
+                (collection,),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM folders WHERE collection = ? AND parent_id = ? ORDER BY name ASC",
+                (collection, parent_id),
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def get_all_folders(collection: str) -> list[dict]:
+    with _conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM folders WHERE collection = ? ORDER BY name ASC",
+            (collection,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def get_folder(folder_id: str) -> dict | None:
+    with _conn() as conn:
+        row = conn.execute("SELECT * FROM folders WHERE id = ?", (folder_id,)).fetchone()
+        return dict(row) if row else None
+
+
+def update_folder(folder_id: str, name: str | None = None, parent_id: str | None = "UNCHANGED") -> dict | None:
+    now = datetime.now(timezone.utc).isoformat()
+    updates = {}
+    if name is not None:
+        updates["name"] = name
+    if parent_id != "UNCHANGED":
+        # Prevent moving folder into its own descendants (cycle detection)
+        if parent_id is not None and parent_id == folder_id:
+            raise ValueError("Cannot move folder into itself")
+        if parent_id is not None:
+            with _conn() as conn:
+                descendants = _get_descendant_folder_ids(conn, folder_id)
+                if parent_id in descendants:
+                    raise ValueError("Cannot move folder into its own descendant")
+        updates["parent_id"] = parent_id
+    if not updates:
+        return get_folder(folder_id)
+
+    updates["updated_at"] = now
+    set_clause = ", ".join(f"{k} = ?" for k in updates)
+    values = list(updates.values()) + [folder_id]
+
+    with _conn() as conn:
+        conn.execute(f"UPDATE folders SET {set_clause} WHERE id = ?", values)
+        conn.commit()
+    return get_folder(folder_id)
+
+
+def delete_folder(folder_id: str) -> bool:
+    """Delete folder. SQLite CASCADE removes child folders and document_folders entries."""
+    with _conn() as conn:
+        # Recursively collect all descendant folder IDs to delete their document_folders too
+        all_ids = _get_descendant_folder_ids(conn, folder_id)
+        all_ids.append(folder_id)
+
+        # Move documents back to root (remove from document_folders)
+        placeholders = ",".join("?" * len(all_ids))
+        conn.execute(f"DELETE FROM document_folders WHERE folder_id IN ({placeholders})", all_ids)
+
+        # Delete the folder and all descendants
+        conn.execute(f"DELETE FROM folders WHERE id IN ({placeholders})", all_ids)
+        conn.commit()
+        return True
+
+
+def _get_descendant_folder_ids(conn, folder_id: str) -> list[str]:
+    """Recursively get all child folder IDs."""
+    children = conn.execute(
+        "SELECT id FROM folders WHERE parent_id = ?", (folder_id,)
+    ).fetchall()
+    result = []
+    for child in children:
+        child_id = child["id"]
+        result.append(child_id)
+        result.extend(_get_descendant_folder_ids(conn, child_id))
+    return result
+
+
+# --- Document Folders ---
+
+def set_document_folder(document_id: str, folder_id: str, collection: str) -> dict:
+    with _conn() as conn:
+        conn.execute(
+            "INSERT OR REPLACE INTO document_folders (document_id, folder_id, collection) VALUES (?, ?, ?)",
+            (document_id, folder_id, collection),
+        )
+        conn.commit()
+        return {"document_id": document_id, "folder_id": folder_id, "collection": collection}
+
+
+def unset_document_folder(document_id: str) -> bool:
+    with _conn() as conn:
+        conn.execute("DELETE FROM document_folders WHERE document_id = ?", (document_id,))
+        conn.commit()
+        return True
+
+
+def get_documents_in_folder(collection: str, folder_id: str | None = None) -> list[str]:
+    """Get document_ids for folder filtering.
+
+    folder_id=None → returns IDs of all docs assigned to ANY folder (caller inverts for root).
+    folder_id=<id> → returns IDs of docs in that specific folder.
+    """
+    with _conn() as conn:
+        if folder_id is None:
+            rows = conn.execute(
+                "SELECT document_id FROM document_folders WHERE collection = ?",
+                (collection,),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT document_id FROM document_folders WHERE collection = ? AND folder_id = ?",
+                (collection, folder_id),
+            ).fetchall()
+        return [r["document_id"] for r in rows]
+
+
+def get_folder_document_counts(collection: str) -> dict[str, int]:
+    """Get document count per folder for a collection."""
+    with _conn() as conn:
+        rows = conn.execute(
+            "SELECT folder_id, COUNT(*) as count FROM document_folders WHERE collection = ? GROUP BY folder_id",
+            (collection,),
+        ).fetchall()
+        return {r["folder_id"]: r["count"] for r in rows}
