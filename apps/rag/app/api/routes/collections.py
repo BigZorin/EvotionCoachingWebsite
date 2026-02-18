@@ -78,10 +78,10 @@ def delete_collection_endpoint(name: str):
 
 
 @router.get("/{name}/documents/{document_id}/chunks")
-def get_document_chunks(name: str, document_id: str, limit: int = 100):
+def get_document_chunks(name: str, document_id: str, limit: int = 500):
     """Get all chunks for a specific document — used for document preview."""
     _validate_collection_name(name)
-    limit = min(max(limit, 1), 500)
+    limit = min(max(limit, 1), 1000)
     from app.core.vectorstore import get_or_create_collection
 
     try:
