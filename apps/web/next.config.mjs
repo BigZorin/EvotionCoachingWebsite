@@ -9,6 +9,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  transpilePackages: ['@evotion/auth', '@evotion/database'],
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
