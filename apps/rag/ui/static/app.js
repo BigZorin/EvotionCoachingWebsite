@@ -1496,19 +1496,24 @@ async function moveDocToFolder(documentId, folderId, collectionName) {
 }
 
 // Recursively collect files from drag-dropped directory entries
+// Each file gets a _relativePath property with the folder path (e.g. 'TopFolder/SubFolder')
 async function collectFilesFromEntries(entries) {
   const files = [];
-  async function readEntry(entry) {
+  async function readEntry(entry, parentPath = '') {
     if (entry.isFile) {
       const file = await new Promise(resolve => entry.file(resolve));
       // Skip hidden files and system files
-      if (!file.name.startsWith('.') && file.size > 0) files.push(file);
+      if (!file.name.startsWith('.') && file.size > 0) {
+        file._relativePath = parentPath;
+        files.push(file);
+      }
     } else if (entry.isDirectory) {
+      const dirPath = parentPath ? `${parentPath}/${entry.name}` : entry.name;
       const reader = entry.createReader();
       let batch;
       do {
         batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject));
-        for (const child of batch) await readEntry(child);
+        for (const child of batch) await readEntry(child, dirPath);
       } while (batch.length > 0);
     }
   }
@@ -1568,7 +1573,102 @@ function uploadFileWithProgress(file, collection, onProgress) {
   });
 }
 
-async function uploadFiles(fileListOrArray) {
+/**
+ * Auto-create folder hierarchy from uploaded docs and move documents into them.
+ * @param {string} collection - Collection name
+ * @param {Array<{documentId: string, relativePath: string}>} docs - Uploaded docs with their relative paths
+ * @returns {Promise<boolean>} true if any folders were created or docs moved
+ */
+async function autoCreateFolders(collection, docs) {
+  try {
+    const uniquePaths = [...new Set(docs.map(d => d.relativePath).filter(Boolean))].sort();
+    console.log('[Auto-folder] Paths to create:', uniquePaths);
+    if (uniquePaths.length === 0) {
+      console.log('[Auto-folder] No paths found — skipping');
+      return false;
+    }
+
+    // Fetch existing folders to avoid duplicates
+    let existingFolders = [];
+    try {
+      const data = await apiGet(`/collections/${encodeURIComponent(collection)}/folders`);
+      existingFolders = data.folders || [];
+    } catch (err) {
+      console.warn('[Auto-folder] Could not fetch existing folders:', err.message);
+    }
+
+    // Build lookup: 'parentId::name' -> folderId
+    const folderLookup = {};
+    for (const f of existingFolders) {
+      folderLookup[`${f.parent_id || 'root'}::${f.name}`] = f.id;
+    }
+    console.log('[Auto-folder] Existing folders:', Object.keys(folderLookup));
+
+    const pathToFolderId = {};
+    let created = 0;
+
+    // Create folder hierarchy (parents first due to sort)
+    for (const path of uniquePaths) {
+      const parts = path.split('/');
+      let parentId = null;
+      for (let i = 0; i < parts.length; i++) {
+        const subPath = parts.slice(0, i + 1).join('/');
+        if (pathToFolderId[subPath]) {
+          parentId = pathToFolderId[subPath];
+          continue;
+        }
+        // Check if this folder already exists
+        const key = `${parentId || 'root'}::${parts[i]}`;
+        if (folderLookup[key]) {
+          pathToFolderId[subPath] = folderLookup[key];
+          parentId = folderLookup[key];
+          console.log('[Auto-folder] Reusing existing folder:', parts[i], '→', folderLookup[key]);
+        } else {
+          try {
+            const folder = await apiPost(`/collections/${encodeURIComponent(collection)}/folders`, {
+              name: parts[i],
+              parent_id: parentId,
+            });
+            pathToFolderId[subPath] = folder.id;
+            folderLookup[`${parentId || 'root'}::${parts[i]}`] = folder.id;
+            parentId = folder.id;
+            created++;
+            console.log('[Auto-folder] Created folder:', parts[i], '→', folder.id);
+          } catch (err) {
+            console.warn('[Auto-folder] Failed to create folder:', parts[i], err.message || err);
+            break; // Can't create children without parent
+          }
+        }
+      }
+    }
+
+    // Move documents to their folders
+    let moved = 0;
+    for (const { documentId, relativePath } of docs) {
+      const folderId = pathToFolderId[relativePath];
+      if (folderId) {
+        try {
+          await apiPatch(`/collections/${encodeURIComponent(collection)}/documents/${documentId}/folder`, {
+            folder_id: folderId,
+          });
+          moved++;
+        } catch (err) {
+          console.warn('[Auto-folder] Failed to move doc:', documentId, '→', folderId, err.message);
+        }
+      } else {
+        console.warn('[Auto-folder] No folder found for path:', relativePath);
+      }
+    }
+
+    console.log(`[Auto-folder] Done: ${created} folders created, ${moved} docs moved`);
+    return created > 0 || moved > 0;
+  } catch (e) {
+    console.error('[Auto-folder] Unexpected error:', e);
+    return false;
+  }
+}
+
+async function uploadFiles(fileListOrArray, fromFolder = false) {
   // Accept both FileList and Array of Files
   const allFiles = Array.from(fileListOrArray);
   const collection = document.getElementById('upload-collection').value || 'default';
@@ -1579,6 +1679,25 @@ async function uploadFiles(fileListOrArray) {
   const progressPct = document.getElementById('upload-progress-pct');
   const progressBar = document.getElementById('upload-progress-bar');
   const progressFiles = document.getElementById('upload-progress-files');
+
+  // Build a robust filename→relativePath map at the very start, before any filtering.
+  // Uses multiple sources: _relativePath (set by collectFilesFromEntries/folderInput),
+  // webkitRelativePath (browser-native, read-only, most reliable for <input webkitdirectory>).
+  const filePathByName = {};
+  if (fromFolder) {
+    for (const f of allFiles) {
+      let rp = '';
+      // Source 1: custom property set by our code
+      if (f._relativePath) rp = f._relativePath;
+      // Source 2: browser-native webkitRelativePath (always available for folder input)
+      if (!rp && f.webkitRelativePath) {
+        const parts = f.webkitRelativePath.split('/');
+        rp = parts.slice(0, -1).join('/');
+      }
+      if (rp) filePathByName[f.name] = rp;
+    }
+    console.log('[Upload] Folder upload — path map:', JSON.stringify(filePathByName));
+  }
 
   // Filter out unsupported file types (if we know supported extensions)
   let files = allFiles;
@@ -1595,14 +1714,51 @@ async function uploadFiles(fileListOrArray) {
     }
   }
 
-  if (!files.length && skipped.length) {
-    statusEl.textContent = `Geen ondersteunde bestanden gevonden. ${skipped.length} overgeslagen.`;
-    statusEl.className = 'upload-status error';
-    return;
-  }
+  // -- Duplicate detection: skip files already in this collection --
+  const dupes = [];
+  try {
+    const colData = await apiGet(`/collections/${encodeURIComponent(collection)}`);
+    const existingNames = new Set((colData.documents || []).map(d => d.filename));
+    if (existingNames.size > 0) {
+      const unique = [];
+      for (const f of files) {
+        if (existingNames.has(f.name)) dupes.push(f);
+        else unique.push(f);
+      }
+      files = unique;
+    }
+  } catch { /* collection doesn't exist yet — all files are new */ }
+
   if (!files.length) {
-    statusEl.textContent = 'Geen bestanden geselecteerd.';
-    statusEl.className = 'upload-status error';
+    if (dupes.length || skipped.length) {
+      let msg = '';
+      if (dupes.length) msg += `${dupes.length} al aanwezig`;
+      if (skipped.length) msg += `${msg ? ', ' : ''}${skipped.length} niet-ondersteund`;
+      statusEl.textContent = msg + ' — geen nieuwe bestanden om te uploaden.';
+      statusEl.className = 'upload-status';
+
+      // Still create folder structure for existing docs if from folder upload
+      if (fromFolder && dupes.length > 0) {
+        try {
+          const colData2 = await apiGet(`/collections/${encodeURIComponent(collection)}`);
+          const docsByName = {};
+          for (const d of (colData2.documents || [])) docsByName[d.filename] = d.document_id;
+          const existingDocs = [];
+          for (const df of dupes) {
+            const rp = filePathByName[df.name] || df._relativePath || '';
+            if (rp && docsByName[df.name]) {
+              existingDocs.push({ documentId: docsByName[df.name], relativePath: rp });
+            }
+          }
+          if (existingDocs.length > 0) {
+            await autoCreateFolders(collection, existingDocs);
+          }
+        } catch (e) { console.warn('[Auto-folder] Failed for existing docs:', e); }
+      }
+    } else {
+      statusEl.textContent = 'Geen bestanden geselecteerd.';
+      statusEl.className = 'upload-status error';
+    }
     return;
   }
 
@@ -1637,9 +1793,24 @@ async function uploadFiles(fileListOrArray) {
     fileEls.push(row);
   }
 
+  // Show duplicates as already-present in file list
+  for (const df of dupes) {
+    const row = document.createElement('div');
+    row.className = 'upload-file-item done';
+    row.innerHTML = `
+      <span class="upload-file-icon done">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+      <span class="upload-file-name">${escapeHtml(df.name)}</span>
+      <span class="upload-file-status">Al aanwezig</span>
+    `;
+    progressFiles.appendChild(row);
+  }
+
   let totalChunks = 0;
   let completedFiles = 0;
   const results = [];
+  const uploadedDocs = []; // {documentId, relativePath} for auto-folder creation
 
   const iconSvg = {
     uploading: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
@@ -1690,6 +1861,15 @@ async function uploadFiles(fileListOrArray) {
       completedFiles++;
       results.push(`${file.name} — ${chunks} chunks`);
 
+      // Track for auto-folder assignment — use filePathByName (most reliable)
+      const relPath = filePathByName[file.name] || file._relativePath || '';
+      if (response.document_id && relPath) {
+        uploadedDocs.push({ documentId: response.document_id, relativePath: relPath });
+      }
+      if (fromFolder) {
+        console.log('[Upload]', file.name, '→ doc_id:', response.document_id || '(none)', 'path:', relPath || '(root)');
+      }
+
       // Mark done
       row.className = 'upload-file-item done';
       iconEl.className = 'upload-file-icon done';
@@ -1717,11 +1897,42 @@ async function uploadFiles(fileListOrArray) {
     }
   }
 
+  // For folder uploads: also include duplicate files in the folder assignment
+  // (they're already uploaded but not yet in the right folder)
+  if (fromFolder && dupes.length > 0) {
+    try {
+      const colData3 = await apiGet(`/collections/${encodeURIComponent(collection)}`);
+      const docsByName = {};
+      for (const d of (colData3.documents || [])) docsByName[d.filename] = d.document_id;
+      for (const df of dupes) {
+        const rp = filePathByName[df.name] || df._relativePath || '';
+        if (rp && docsByName[df.name]) {
+          uploadedDocs.push({ documentId: docsByName[df.name], relativePath: rp });
+          console.log('[Upload] Dupe mapped:', df.name, '→', docsByName[df.name], 'path:', rp);
+        }
+      }
+    } catch (e) { console.warn('[Upload] Failed to map dupes to folders:', e); }
+  }
+
+  // Auto-create folder structure from uploaded folder
+  let foldersCreated = false;
+  if (fromFolder) {
+    console.log('[Upload] fromFolder=true, uploadedDocs:', uploadedDocs.length, uploadedDocs);
+    if (uploadedDocs.length > 0) {
+      progressLabel.textContent = 'Mappen aanmaken...';
+      foldersCreated = await autoCreateFolders(collection, uploadedDocs);
+    } else {
+      console.warn('[Upload] fromFolder=true but NO docs with paths! filePathByName:', JSON.stringify(filePathByName));
+    }
+  }
+
   // Final state
   progressBar.style.width = '100%';
   progressPct.textContent = '100%';
   let doneMsg = `Klaar — ${files.length} bestanden, ${totalChunks} chunks`;
+  if (dupes.length) doneMsg += `, ${dupes.length} al aanwezig`;
   if (skipped.length) doneMsg += ` (${skipped.length} niet-ondersteund overgeslagen)`;
+  if (foldersCreated) doneMsg += ' — mappen aangemaakt';
   progressLabel.textContent = doneMsg;
   uploadBtn.disabled = false;
   folderBtn.disabled = false;
@@ -2937,7 +3148,7 @@ function init() {
       const hasFolder = entries.some(e => e.isDirectory);
       if (hasFolder) {
         collectFilesFromEntries(entries).then(files => {
-          if (files.length > 0) uploadFiles(files);
+          if (files.length > 0) uploadFiles(files, true);
         });
         return;
       }
@@ -2945,7 +3156,18 @@ function init() {
     uploadFiles(e.dataTransfer.files);
   });
   fileInput.addEventListener('change', () => { uploadFiles(fileInput.files); fileInput.value = ''; });
-  folderInput.addEventListener('change', () => { uploadFiles(folderInput.files); folderInput.value = ''; });
+  folderInput.addEventListener('change', () => {
+    const files = Array.from(folderInput.files);
+    files.forEach(f => {
+      // webkitRelativePath = 'FolderName/sub/file.pdf' → _relativePath = 'FolderName/sub'
+      if (f.webkitRelativePath) {
+        const parts = f.webkitRelativePath.split('/');
+        f._relativePath = parts.slice(0, -1).join('/');
+      }
+    });
+    uploadFiles(files, true);
+    folderInput.value = '';
+  });
   document.getElementById('upload-btn').addEventListener('click', () => fileInput.click());
   document.getElementById('folder-upload-btn').addEventListener('click', () => folderInput.click());
 
