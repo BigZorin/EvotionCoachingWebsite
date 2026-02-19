@@ -66,11 +66,11 @@ export default function ProfileTab({
       )}
 
       {/* SECTION 1: Photos */}
-      <div className="bg-card rounded-xl border border-border p-5">
+      <div className="bg-card rounded-xl border border-border p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-foreground/5 flex items-center justify-center">
-              <Camera className="w-3.5 h-3.5 text-foreground" />
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-blue-50">
+              <Camera className="w-4 h-4 text-blue-600" />
             </div>
             <span className="text-sm font-semibold text-foreground">{"Foto's"}</span>
             {photos.length > 0 && (
@@ -133,10 +133,10 @@ export default function ProfileTab({
       </div>
 
       {/* SECTION 2: Coach Notes */}
-      <div className="bg-card rounded-xl border border-border p-5 space-y-4">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-foreground/5 flex items-center justify-center">
-            <StickyNote className="w-3.5 h-3.5 text-foreground" />
+      <div className="bg-card rounded-xl border border-border p-5 shadow-sm space-y-4">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-amber-50">
+            <StickyNote className="w-4 h-4 text-amber-600" />
           </div>
           <span className="text-sm font-semibold text-foreground">Notities</span>
           {notes.length > 0 && (
@@ -187,11 +187,11 @@ export default function ProfileTab({
       </div>
 
       {/* SECTION 3: Goals */}
-      <div className="bg-card rounded-xl border border-border p-5 space-y-4">
+      <div className="bg-card rounded-xl border border-border p-5 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-foreground/5 flex items-center justify-center">
-              <Target className="w-3.5 h-3.5 text-foreground" />
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-evotion-primary/5">
+              <Target className="w-4 h-4 text-evotion-primary" />
             </div>
             <span className="text-sm font-semibold text-foreground">Doelen</span>
             {goals.length > 0 && (

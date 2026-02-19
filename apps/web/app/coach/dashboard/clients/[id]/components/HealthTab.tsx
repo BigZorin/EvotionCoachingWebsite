@@ -65,11 +65,11 @@ export default function HealthTab({ clientId, healthData, weeklyCheckIns, dailyC
       {/* Row 1: Weight + Last check-in snapshot */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* Weight */}
-        <div className="lg:col-span-3 bg-card rounded-xl border border-border p-5">
+        <div className="lg:col-span-3 bg-card rounded-xl border border-border p-5 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-foreground/5 flex items-center justify-center">
-                <Scale className="h-3.5 w-3.5 text-foreground" />
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-secondary">
+                <Scale className="h-4 w-4 text-muted-foreground" />
               </div>
               <span className="text-sm font-semibold text-foreground">Gewicht</span>
             </div>
@@ -103,7 +103,7 @@ export default function HealthTab({ clientId, healthData, weeklyCheckIns, dailyC
         </div>
 
         {/* Snapshot */}
-        <div className="lg:col-span-2 bg-card rounded-xl border border-border p-5">
+        <div className="lg:col-span-2 bg-card rounded-xl border border-border p-5 shadow-sm">
           <p className="text-sm font-semibold text-foreground mb-3">Laatste check-in</p>
           <div className="space-y-2.5">
             <BarRow icon={<Moon className="h-3.5 w-3.5 text-violet-500" />} label="Slaap" value={sleepHistory[sleepHistory.length-1]?.value ?? null} color="#8b5cf6" />
@@ -116,10 +116,10 @@ export default function HealthTab({ clientId, healthData, weeklyCheckIns, dailyC
 
       {/* Row 2: Welzijnstrends */}
       {hasCheckInMetrics && (
-        <div className="bg-card rounded-xl border border-border p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-7 h-7 rounded-lg bg-foreground/5 flex items-center justify-center">
-              <Brain className="h-3.5 w-3.5 text-foreground" />
+        <div className="bg-card rounded-xl border border-border p-5 shadow-sm">
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="p-2 rounded-lg bg-violet-50">
+              <Brain className="h-4 w-4 text-violet-600" />
             </div>
             <span className="text-sm font-semibold text-foreground">Welzijnstrends</span>
             <span className="text-xs text-muted-foreground ml-1">(check-ins)</span>
@@ -134,11 +134,11 @@ export default function HealthTab({ clientId, healthData, weeklyCheckIns, dailyC
       )}
 
       {/* Row 3: Wearable */}
-      <div className="bg-card rounded-xl border border-border p-5">
+      <div className="bg-card rounded-xl border border-border p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-foreground/5 flex items-center justify-center">
-              <Activity className="h-3.5 w-3.5 text-foreground" />
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-emerald-50">
+              <Activity className="h-4 w-4 text-emerald-600" />
             </div>
             <span className="text-sm font-semibold text-foreground">Wearable</span>
             {healthData?.isConnected ? (
