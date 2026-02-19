@@ -1,0 +1,235 @@
+import logging
+
+from fastapi import APIRouter
+
+from app.core.embeddings import check_ollama_embeddings
+from app.core.llm import check_groq, check_cerebras, check_openrouter, list_available_models, get_active_provider
+from app.core.vectorstore import get_chroma_client
+from app.config import settings
+
+logger = logging.getLogger(__name__)
+router = APIRouter(tags=["health"])
+
+
+@router.get("/health")
+def health_check():
+    ollama_embed = check_ollama_embeddings()
+    groq_ok = check_groq()
+    cerebras_ok = check_cerebras()
+    openrouter_ok = check_openrouter()
+
+    # Actually test ChromaDB connectivity
+    try:
+        get_chroma_client().list_collections()
+        chroma_ok = True
+    except Exception as e:
+        logger.warning(f"ChromaDB health check failed: {e}")
+        chroma_ok = False
+
+    # System is OK if embeddings work AND at least one cloud LLM is available
+    llm_ok = groq_ok or cerebras_ok or openrouter_ok
+
+    return {
+        "status": "ok" if (ollama_embed and llm_ok and chroma_ok) else "degraded",
+        "ollama_embeddings": ollama_embed,
+        "groq": groq_ok,
+        "cerebras": cerebras_ok,
+        "openrouter": openrouter_ok,
+        "active_provider": get_active_provider(),
+        "chroma": chroma_ok,
+    }
+
+
+@router.get("/health/models")
+def list_models():
+    available = list_available_models()
+    return {
+        "embedding_model": settings.embedding_model,
+        "active_provider": get_active_provider(),
+        "available_models": available,
+    }
+
+
+@router.get("/health/system-info")
+def system_info():
+    """Return comprehensive system documentation for the UI docs page."""
+    return {
+        "architecture": {
+            "title": "Systeem Architectuur",
+            "components": [
+                {"name": "FastAPI Backend", "description": "REST API server die alle verzoeken afhandelt", "status": "active"},
+                {"name": "Groq LLM (Primair)", "description": f"Cloud LLM ({settings.groq_model}) voor snelle antwoordgeneratie", "model": settings.groq_model},
+                {"name": "Cerebras (Fallback 1)", "description": f"Cloud LLM fallback ({settings.cerebras_model}) — gratis, snel, automatisch actief als Groq faalt", "model": settings.cerebras_model},
+                {"name": "OpenRouter (Fallback 2)", "description": f"Cloud LLM fallback ({settings.openrouter_model}) — automatisch actief als Groq én Cerebras falen", "model": settings.openrouter_model},
+                {"name": "Ollama (Embeddings Only)", "description": f"Lokale Ollama wordt alleen gebruikt voor embeddings — niet voor LLM generatie (te traag op CPU)"},
+                {"name": "Ollama Embeddings", "description": f"Lokale embedding-engine ({settings.embedding_model}) voor vectorisatie", "model": settings.embedding_model},
+                {"name": "ChromaDB", "description": "Lokale vector database voor opslag en zoeken van document-chunks"},
+                {"name": "Cross-Encoder", "description": "Re-ranking model (ms-marco-MiniLM-L-6-v2) voor nauwkeurigere resultaten"},
+                {"name": "BM25", "description": "Keyword-gebaseerde zoekindex voor hybride retrieval (max 10.000 docs per zoekopdracht, Unicode-aware tokenisatie voor NL accenten)"},
+            ],
+        },
+        "ingestion": {
+            "title": "Document Verwerking (Ingestion Pipeline)",
+            "steps": [
+                {"step": 1, "name": "Bestandsdetectie", "description": "Automatische herkenning van bestandstype via extensie en MIME-type"},
+                {"step": 2, "name": "Tekst Extractie", "description": "Processor-specifieke extractie: PyMuPDF (PDF met pagina-markers voor paginanummer-tracking), python-docx (DOCX), Pandas (CSV/XLSX), EasyOCR (afbeeldingen), Whisper/Groq (audio/video)"},
+                {"step": 3, "name": "Deduplicatie Check", "description": "Content-hash (SHA256) wordt vergeleken met bestaande chunks in ChromaDB. Identieke bestanden worden overgeslagen met status 'duplicate' — voorkomt dubbele chunks bij herhaald uploaden"},
+                {"step": 4, "name": "Chunking", "description": f"Semantic chunking voor PDF en TXT: paragrafen worden geëmbed en gegroepeerd op cosine similarity (drempel {settings.semantic_similarity_threshold}). Bij hoge gelijkenis blijven alinea's bij elkaar, bij lage similarity wordt een chunk-grens geplaatst. Oversized groepen worden gesplitst via recursive fallback (~{settings.chunk_size} tekens, {settings.chunk_overlap} overlap). PDF-chunks krijgen automatisch paginanummer in metadata"},
+                {"step": 5, "name": "Contextual Headers", "description": "Elke chunk krijgt een verrijkte versie met bron, sectie, paginanummer header voor betere embeddings"},
+                {"step": 6, "name": "Batch Embedding", "description": f"Verrijkte tekst wordt gevectoriseerd met {settings.embedding_model} via Ollama (1024 dimensies, meertalig NL+EN). Native batch-embedding (50 teksten per call) voor snellere verwerking"},
+                {"step": 7, "name": "Opslag", "description": "Platte tekst + vector + metadata worden opgeslagen in ChromaDB"},
+            ],
+            "supported_types": [
+                {"type": "PDF", "extensions": [".pdf"], "processor": "PyMuPDF — pagina-markers voor paginanummer-tracking in chunk metadata, tekst samengevoegd voor cross-page chunking"},
+                {"type": "Word", "extensions": [".docx"], "processor": "python-docx — secties en headers als metadata"},
+                {"type": "Tekst", "extensions": [".txt", ".md"], "processor": "Direct lezen, markdown headers als sectie-metadata"},
+                {"type": "Spreadsheets", "extensions": [".csv", ".xlsx"], "processor": "Pandas — rij-gebaseerde chunks (20 rijen per chunk)"},
+                {"type": "JSON", "extensions": [".json"], "processor": "Recursief flattenen naar leesbare tekst"},
+                {"type": "Code", "extensions": [".py", ".ts", ".js", ".java", ".go"], "processor": "Functie/class-level splitting (1500 char chunks)"},
+                {"type": "Afbeeldingen", "extensions": [".png", ".jpg", ".jpeg"], "processor": "EasyOCR tekst extractie (optioneel)"},
+                {"type": "Audio/Video", "extensions": [".mp3", ".mp4", ".wav", ".m4a", ".webm"], "processor": "Groq Whisper transcriptie"},
+                {"type": "URLs", "extensions": [], "processor": "Web scraping (BeautifulSoup) of YouTube transcript API"},
+            ],
+        },
+        "retrieval": {
+            "title": "Zoek & Retrieval Pipeline",
+            "steps": [
+                {"step": 1, "name": "Semantisch Zoeken", "description": f"Vector similarity search in ChromaDB (top {settings.max_context_chunks} resultaten). Multi-query expansie genereert 3 alternatieve zoekformuleringen via LLM voor bredere retrieval — per agent configureerbaar (standaard aan)"},
+                {"step": 2, "name": "BM25 Keyword Search", "description": "Parallelle keyword-matching met BM25Okapi algoritme (max 10.000 documenten per zoekopdracht)"},
+                {"step": 3, "name": "Reciprocal Rank Fusion (RRF)", "description": "Samenvoegen van semantische en keyword-resultaten met RRF (k=60) — documenten die in beide methoden hoog scoren worden geprioriteerd"},
+                {"step": 4, "name": "Cross-Encoder Re-ranking", "description": "Top-10 resultaten worden opnieuw gerankt met cross-encoder model (ms-marco-MiniLM-L-6-v2) voor betere precisie"},
+                {"step": 5, "name": "Threshold Filtering", "description": f"Alleen chunks met cosine distance <= {settings.similarity_threshold} worden behouden. Fallback: top 3 als niets de drempel haalt"},
+                {"step": 6, "name": "Neighbor Expansion", "description": "Top 3 chunks worden uitgebreid met aangrenzende chunks (±1) uit hetzelfde document voor bredere context"},
+            ],
+            "settings": {
+                "top_k": settings.top_k,
+                "max_top_k": settings.max_top_k,
+                "similarity_threshold": settings.similarity_threshold,
+                "max_context_chunks": settings.max_context_chunks,
+            },
+        },
+        "generation": {
+            "title": "Antwoord Generatie",
+            "features": [
+                {"name": "Strikte context-binding", "description": "LLM mag ALLEEN feiten uit de aangeleverde documenten gebruiken — geen eigen kennis"},
+                {"name": "Inline bronverwijzingen", "description": "Elk antwoord bevat [1], [2] etc. citaties die verwijzen naar specifieke bronpassages"},
+                {"name": "Anti-hallucinatie regels", "description": "Expliciete instructies om ontbrekende informatie te benoemen i.p.v. te verzinnen"},
+                {"name": "Temperatuur 0.3", "description": "Lage temperatuur voor feitelijke, consistente antwoorden (configureerbaar per agent)"},
+                {"name": "Gespreksgeheugen", "description": f"Chat-modus onthoudt eerdere berichten, met gecachte samenvatting na {settings.summarize_after_messages} berichten (hergebruikt cache, alleen elke 10 berichten opnieuw samengevat)"},
+                {"name": "Follow-up suggesties", "description": "Elk antwoord eindigt met 3 relevante vervolgvragen"},
+            ],
+        },
+        "chat": {
+            "title": "Chat Functies",
+            "features": [
+                {"name": "Sessie Management", "description": "Meerdere gesprekken opslaan en laden, automatische titels via LLM (eerste bericht → 6-woorden titel)"},
+                {"name": "Smart History", "description": f"Laatste 6 berichten worden volledig meegestuurd, oudere berichten worden samengevat (na {settings.summarize_after_messages} berichten). Samenvatting wordt gecacht en alleen elke 10 nieuwe berichten vernieuwd — bespaart ~90% tokens bij lange gesprekken"},
+                {"name": "Agent Modus", "description": "Gespecialiseerde AI-assistenten met eigen system prompt, collectie-scoping, temperatuur, top_k en multi-query instellingen. Multi-query genereert 3 alternatieve zoekformuleringen per vraag voor bredere retrieval (per agent aan/uit schakelbaar)"},
+                {"name": "Streaming", "description": "Real-time token-voor-token antwoorden via Server-Sent Events (SSE)"},
+                {"name": "Feedback", "description": "Duim omhoog/omlaag per antwoord voor kwaliteitstracking"},
+                {"name": "Export", "description": "Gesprekken exporteren als Markdown bestand"},
+                {"name": "Analytics Dashboard", "description": "Gebruiksstatistieken: totaal sessies/berichten, feedback-scores, dagelijks gebruik, top-vragen, agent-gebruik en LLM kosten-tracking per provider (Groq/Cerebras/OpenRouter) inclusief streaming-calls"},
+                {"name": "YouTube Transcripties", "description": "YouTube URLs worden verwerkt via de YouTube Transcript API (niet via Whisper) — sneller en gratis"},
+                {"name": "Collection Cleanup", "description": "Micro-chunks (< 50 tekens) kunnen per collectie worden opgeruimd via de cleanup endpoint"},
+                {"name": "Mappensysteem", "description": "Documenten organiseren in mappen en submappen binnen collecties. Mappen aanmaken, hernoemen, verwijderen en documenten verplaatsen via drag-and-drop. Breadcrumb-navigatie voor mappenstructuur. Mappen worden opgeslagen in SQLite — ChromaDB chunks blijven ongewijzigd, waardoor verplaatsingen instant zijn."},
+                {"name": "Auto-Mapstructuur bij Upload", "description": "Bij het uploaden van mappen (drag-and-drop of map-selectie) wordt de originele mappenstructuur automatisch herkend en aangemaakt. Submappen worden hiërarchisch aangemaakt en documenten worden direct in de juiste map geplaatst. Bestaande mappen worden gededupliceerd op naam+parent."},
+                {"name": "Duplicate Detectie (2-laags)", "description": "Tweelaagsdetectie: (1) UI-laag vergelijkt bestandsnamen met bestaande documenten, (2) Backend-laag vergelijkt SHA256 content-hash in ChromaDB — voorkomt dubbele chunks zelfs bij hernoemde bestanden. Duplicaten worden overgeslagen met status 'duplicate' en bestaand document_id."},
+                {"name": "YouTube Timestamp Links", "description": "YouTube-transcripties worden gechunkt met automatische timestamp-extractie. Elke chunk bevat start_time, start_seconds en een directe YouTube-link (video?t=seconds) naar het juiste moment in de video."},
+                {"name": "Chat Bestandsbijlagen", "description": "Bestanden bijvoegen in de chat via paperclip-knop of drag-and-drop (PDF, Word, afbeeldingen, CSV, audio, etc.). Bestanden worden verwerkt via de standaard ingestion pipeline en opgeslagen in een sessie-gebonden collectie (chatfiles-*). De AI doorzoekt zowel de bijlagen als de geselecteerde collectie voor antwoorden met bronverwijzingen. Bij verwijdering van een sessie wordt de bijlage-collectie automatisch opgeruimd uit ChromaDB."},
+                {"name": "KB Fallback bij Bijlagen", "description": "Wanneer een bestand is bijgevoegd maar geen collectie geselecteerd, wordt automatisch de volledige kennisbank doorzocht (global search) naast de bijlage-chunks — voorkomt dat alleen bijlage-bronnen worden getoond"},
+                {"name": "Adaptieve Antwoorddiepte", "description": "AI past diepgang aan op het type vraag: feitelijke vragen krijgen kort antwoord, analyse/adviesvragen (programma's, schema's) krijgen uitgebreide onderbouwing met maximale bronverwijzingen"},
+                {"name": "Gespreks-citaties", "description": "Bronverwijzingen [1], [2] etc. worden in ALLE antwoorden getoond — ook bij vervolgvragen in een gesprek, niet alleen bij het eerste antwoord"},
+                {"name": "Professionele Opmaak", "description": "Training- en voedingsschema's gebruiken geoptimaliseerde Markdown: tabellen met max 4 kolommen en korte cellen, kopje-per-maaltijd format voor voeding, blockquote macro-samenvattingen, paarse accenten"},
+                {"name": "Citatie-rendering in Tabellen", "description": "Bronverwijzingen [1][2] worden correct gestyled als paarse badges, ook binnen Markdown-tabelcellen — via placeholder-bescherming door de markdown→HTML→sanitize pipeline"},
+            ],
+        },
+        "stability": {
+            "title": "Stabiliteit & Beveiliging",
+            "features": [
+                {"name": "SSRF Bescherming", "description": "URL-ingestion blokkeert private IP-adressen (RFC 1918), loopback, link-local en cloud metadata endpoints. DNS-resolutie wordt gevalideerd vóór het opvragen."},
+                {"name": "Upload Limiet", "description": f"Bestanden groter dan {settings.max_file_size_mb} MB worden geweigerd vóór verwerking om geheugen- en opslagmisbruik te voorkomen"},
+                {"name": "CORS Restrictie", "description": "Alleen verzoeken van rag.evotiondata.com en localhost worden geaccepteerd met beperkte HTTP-methoden (GET/POST/PUT/DELETE/OPTIONS) en headers (Content-Type/Authorization)"},
+                {"name": "Embedding Dimensie-check", "description": "Fallback naar sentence-transformers (384-dim) wordt geblokkeerd als de collectie 1024-dim vectors verwacht — voorkomt ChromaDB-fouten"},
+                {"name": "Batch Embedding", "description": "Ollama embed() API met native batch-input (max 50 teksten per call) i.p.v. one-by-one — aanzienlijk snellere ingestie bij grote documenten"},
+                {"name": "Triple-Provider Failover", "description": "Automatische fallback: Groq → Cerebras → OpenRouter. Als alle cloud-providers falen (rate limit), krijgt de gebruiker een duidelijke foutmelding i.p.v. een eindeloos wachtende Ollama-request"},
+                {"name": "Collectienaam Validatie", "description": "Alle collectie-endpoints valideren namen op alfanumerieke tekens, streepjes en underscores (1-64 chars, moet starten met alfanumeriek)"},
+                {"name": "Auth Startup Check", "description": "Server weigert te starten als AUTH_ENABLED=true maar AUTH_TOKEN leeg is — voorkomt onbeveiligde API"},
+                {"name": "API Timeouts", "description": f"Groq: 60s, Cerebras: {settings.cerebras_timeout}s, OpenRouter: {settings.openrouter_timeout}s, Ollama embeddings: 120s — voorkomt hangende requests"},
+                {"name": "Embedding Retry", "description": "Batch-embedding probeert tot 3× met exponentiële backoff (1s, 2s, 4s) bij timeout of connectiefouten — voorkomt falen bij tijdelijke Ollama-overbelasting (bijv. tijdens startup)"},
+                {"name": "Database Connection Management", "description": "Context managers (with-statement) garanderen dat SQLite-connecties altijd worden gesloten, ook bij fouten"},
+                {"name": "BM25 Memory Cap", "description": "Maximum 10.000 documenten per BM25-zoekopdracht om geheugenoverloop te voorkomen bij grote collecties"},
+                {"name": "SSE Error Handling", "description": "Streaming responses sturen een error-event naar de client bij onverwachte fouten in plaats van stil te crashen"},
+                {"name": "Thread-Safe Singletons", "description": "Alle lazy-loaded clients (Groq, Cerebras, OpenRouter, Ollama, embeddings, cross-encoder) gebruiken double-check locking om race conditions bij concurrent requests te voorkomen"},
+                {"name": "Query Parameter Limieten", "description": "Alle paginatie-parameters zijn geclampt: sessies max 500, chunks max 500, cleanup min_chars 0-10.000 — voorkomt resource exhaustion via onbegrensde queries"},
+                {"name": "Generieke Foutmeldingen", "description": "Alle API endpoints (chat, streaming, collections) sturen generieke foutberichten naar de client — volledige foutdetails (stack traces, interne paden) worden alleen server-side gelogd, geen systeeminfo-lekkage"},
+                {"name": "Non-Root Container", "description": "Docker container draait als appuser (UID 1000) in plaats van root — beperkt impact van container-escapes"},
+                {"name": "Zero-Cost Health Checks", "description": "Health checks gebruiken models.list() in plaats van chat completions — kost geen API-quota (voorheen ~2880 Groq-requests/dag)"},
+                {"name": "Per-Response Provider Tracking", "description": "Elke streaming response bevat in het 'done' event de daadwerkelijk gebruikte LLM provider — UI toont dit als label onder elk antwoord. Elke API-call wordt in de usage database opgeslagen met provider label (groq/cerebras/openrouter) voor per-provider kostenanalyse"},
+                {"name": "RRF Score Blending", "description": "Reciprocal Rank Fusion gebruikt gewogen gemiddelde (40% origineel + 60% RRF positie) voor nauwkeurigere relevantie-scores"},
+                {"name": "SSRF Redirect Validatie", "description": "Na HTTP-redirects wordt het eindpunt opnieuw gevalideerd tegen private IP-adressen — voorkomt SSRF bypass via open-redirect chains"},
+                {"name": "Chat History Truncatie", "description": "Lange assistant-antwoorden in gesprekshistorie worden afgekapt op 800 tekens — gebalanceerde kwaliteit vs. efficiëntie (volledige document-context blijft ongewijzigd op 15 chunks × 1000 chars)"},
+                {"name": "Gecachte Samenvatting", "description": "Conversatie-samenvattingen worden opgeslagen in session metadata en pas elke 10 nieuwe berichten vernieuwd — bespaart ~90% tokens bij lange gesprekken (voorheen: elke bericht opnieuw samengevat)"},
+                {"name": "Rate Limit Memory Cleanup", "description": "Verlopen IP-entries worden automatisch opgeruimd uit de rate limit store — voorkomt geheugengroei bij langdurige uptime"},
+                {"name": "XSS Sanitatie", "description": "Alle LLM-gegenereerde markdown wordt gesaniteerd met DOMPurify voordat het in de DOM wordt geplaatst. Bij CDN-uitval (DOMPurify niet geladen) wordt veilig gefallbackt naar escapeHtml() i.p.v. ruwe HTML — voorkomt XSS via geïnjecteerde HTML/scripts in documenten"},
+                {"name": "HTML→Markdown Conversie", "description": "HTML tags in LLM-output worden driedubbel gefilterd: (1) system prompt verbiedt HTML, (2) server-side _clean_llm_output() converteert HTML→Markdown (strong→**, li→-, p→paragraaf) en stuurt schone 'content' SSE events, (3) client-side stripHtmlToMarkdown() past dezelfde regex-keten toe als extra vangnet — ook bij incomplete streaming HTML en entity-encoded tags"},
+                {"name": "SSE Foutbestendigheid", "description": "JSON.parse in de SSE-streamlezer is gewrapped in try/catch — malformed events worden overgeslagen i.p.v. de hele UI te crashen"},
+                {"name": "Auth Bypass Preventie", "description": "Bij onbereikbare server wordt de login-scherm getoond met foutmelding i.p.v. de app zonder authenticatie te tonen"},
+                {"name": "Upload Pre-Check", "description": "Bestandsgrootte wordt gecontroleerd via Content-Length header vóór het inlezen in geheugen — voorkomt OOM bij grote uploads"},
+                {"name": "Graceful OCR Degradatie", "description": "ImageProcessor wordt alleen geregistreerd als easyocr daadwerkelijk geïnstalleerd is — geen crash bij ontbrekende dependency"},
+                {"name": "Meertalig Embedding Model", "description": f"bge-m3 (1024-dim) via Ollama — specifiek geoptimaliseerd voor meertalige retrieval (NL+EN). Scoort top op MTEB benchmarks voor cross-language zoeken"},
+                {"name": "Semantic Chunking", "description": f"PDF en TXT bestanden worden gechunkt op basis van semantische gelijkenis (cosine similarity drempel {settings.semantic_similarity_threshold}). Opeenvolgende alinea's met hoge gelijkenis blijven in dezelfde chunk. Oversized groepen worden gesplitst via recursive fallback. Safeguard: documenten met >500 paragrafen vallen automatisch terug op recursive chunker om excessieve embedding-calls te voorkomen. Resultaat: chunks die inhoudelijk bij elkaar horen i.p.v. arbitraire lengte-grenzen"},
+                {"name": "Per-Agent Multi-Query", "description": "Multi-query expansie genereert 3 alternatieve formuleringen van de vraag via LLM, waardoor meer relevante chunks worden gevonden. Per agent configureerbaar via toggle in de agent-instellingen (standaard aan). Voegt ~1-2s latentie toe maar verbetert retrieval-kwaliteit significant"},
+                {"name": "Performance-Optimized Pipeline", "description": "Cross-encoder beperkt tot top 10 (i.p.v. 30), neighbor expansion beperkt tot top 3 (i.p.v. 5), context chunks verlaagd naar 15, cross-encoder wordt bij startup voorgeladen (i.p.v. lazy-load bij eerste query) — geoptimaliseerde response tijd"},
+                {"name": "API Docs Uitgeschakeld", "description": "Swagger UI (/docs), ReDoc (/redoc) en OpenAPI schema (/openapi.json) zijn uitgeschakeld in productie — voorkomt volledige API-reconnaissance door aanvallers"},
+                {"name": "Content Security Policy", "description": "Strikte CSP header beperkt script-bronnen tot 'self' + gepinde CDN's (jsdelivr, cloudflare), blokkeert inline scripts, connect-src beperkt tot 'self' + CDN (source maps), frame-ancestors 'none' — voorkomt XSS payload execution zelfs bij geïnjecteerde HTML"},
+                {"name": "Security Headers", "description": "Alle responses bevatten X-Content-Type-Options: nosniff, X-Frame-Options: DENY, Referrer-Policy, Permissions-Policy, X-XSS-Protection, CSP en HSTS (via X-Forwarded-Proto achter Caddy) — beschermt tegen clickjacking, MIME-sniffing en token-lekkage"},
+                {"name": "Trusted Proxy Validatie", "description": "X-Forwarded-For header wordt alleen vertrouwd als het request afkomstig is van een intern Docker-netwerk IP (172.x/192.168.x/10.x) — voorkomt rate limit bypass via gespoofde headers van externe aanvallers"},
+                {"name": "Rate Limiting", "description": "In-memory rate limiter met geharde IP-detectie (trusted proxy only): auth endpoint max 5 pogingen/minuut per IP, API endpoints max 60 requests/minuut per IP — voorkomt brute-force en API-misbruik"},
+                {"name": "Robots.txt", "description": "Automatisch gegenereerd robots.txt met Disallow: / — voorkomt indexering door zoekmachines"},
+                {"name": "SRI Integrity Hashes", "description": "Alle externe CDN-scripts (marked, DOMPurify, highlight.js) laden met Subresource Integrity hashes en gepinde versies — voorkomt supply-chain aanvallen via gecompromitteerde CDN's"},
+                {"name": "Async Background Uploads", "description": "Upload-endpoint start documentverwerking (chunking + embedding) in een background thread en retourneert direct een job_id met status 'processing'. Frontend pollt GET /documents/jobs/{job_id} elke 3 seconden tot voltooiing (max 20 min). Voorkomt 502/504 timeouts bij grote documenten (300+ chunks) die lang duren om te embedden op CPU. Event loop blijft vrij voor health checks en andere requests tijdens verwerking. Jobs worden 1 uur bewaard en daarna automatisch opgeruimd"},
+                {"name": "Batch Upload Limiet", "description": "Maximaal 20 bestanden per batch-upload, met collectienaam-validatie op alle upload-endpoints — voorkomt resource exhaustion"},
+                {"name": "Veilige Temp-Bestanden", "description": "Audio/video processing gebruikt NamedTemporaryFile i.p.v. het onveilige mktemp — voorkomt race conditions bij tijdelijke bestanden"},
+                {"name": "Circuit Breaker", "description": "Per-provider circuit breaker: na 3 opeenvolgende fouten wordt de provider 60 seconden overgeslagen — voorkomt 60s timeout-cascades en versnelt failover naar werkende provider"},
+                {"name": "Upload Rate Limiting", "description": "Upload-endpoints (/documents/upload) hebben een aparte, strengere rate limit van 10 uploads per minuut per IP — voorkomt opslagmisbruik en resource exhaustion los van de algemene API rate limit"},
+                {"name": "Docker Resource Limits", "description": "Container is begrensd op 2 CPU cores en 4 GB geheugen (reservering: 0.5 CPU, 1 GB) — voorkomt dat een enkele container de hele VPS claimt"},
+                {"name": "Uvicorn Timeouts", "description": "Keep-alive timeout (30s) en graceful shutdown timeout (30s) geconfigureerd — voorkomt hangende connections en zorgt voor schone herstart bij deploys"},
+                {"name": "Dagelijkse Backups", "description": "Automatisch backup-script (cron, 03:00 UTC): docker cp → tar.gz compressie → 30-dagen retentie in /opt/evotion-backups/ — beschermt tegen dataverlies"},
+                {"name": "ChromaDB Health Check", "description": "Health endpoint test daadwerkelijk ChromaDB connectiviteit via list_collections() — voorheen hardcoded 'true', nu echte degraded-status bij connectieproblemen"},
+                {"name": "Berichtlengte Validatie", "description": "Chat-berichten zijn beperkt tot 10.000 tekens — voorkomt token-misbruik en excessieve kosten bij kwaadwillende input"},
+                {"name": "Zoekquery Begrenzing", "description": "Zoekquery's worden afgekapt op 500 tekens — voorkomt trage embedding-calls bij onredelijk lange input"},
+                {"name": "Lege Vraag Validatie", "description": "Lege of whitespace-only berichten worden geweigerd met HTTP 400 — voorkomt onnodige LLM-calls en lege antwoorden"},
+                {"name": "Endpoint Auth Scoping", "description": "Alleen /health en /health/system-info zijn publiek — /health/models (LLM provider info) vereist authenticatie. Voorkomt lekkage van LLM-configuratie naar ongeauthenticeerde gebruikers"},
+            ],
+        },
+        "config": {
+            "title": "Huidige Configuratie",
+            "values": {
+                "LLM Provider (Primair)": settings.llm_provider,
+                "Groq Model": settings.groq_model,
+                "Cerebras Model (Fallback 1)": settings.cerebras_model,
+                "OpenRouter Model (Fallback 2)": settings.openrouter_model,
+                "Embedding Model": f"{settings.embedding_model} (1024-dim, meertalig NL+EN, via Ollama, batch 50)",
+                "Chunk Size": f"{settings.chunk_size} tekens",
+                "Chunk Overlap": f"{settings.chunk_overlap} tekens",
+                "Top K (standaard)": settings.top_k,
+                "Similarity Threshold": settings.similarity_threshold,
+                "Semantic Similarity Threshold": settings.semantic_similarity_threshold,
+                "Max Context Chunks": settings.max_context_chunks,
+                "Max History Messages": settings.max_history_messages,
+                "Summarize After": f"{settings.summarize_after_messages} berichten",
+                "Max Upload Size": f"{settings.max_file_size_mb} MB",
+                "Groq Timeout": "60 seconden",
+                "Cerebras Timeout": f"{settings.cerebras_timeout} seconden",
+                "OpenRouter Timeout": f"{settings.openrouter_timeout} seconden",
+                "Ollama Embedding Timeout": "120 seconden (3x retry met exponentiële backoff)",
+                "Max Output Tokens": "2048",
+                "BM25 Max Documents": "10.000",
+                "Upload Rate Limit": "10 uploads/minuut per IP",
+                "Circuit Breaker Threshold": "3 fouten → 60s cooldown",
+                "Docker CPU Limit": "2 cores (reservering: 0.5)",
+                "Docker Memory Limit": "4 GB (reservering: 1 GB)",
+                "Backup Retentie": "30 dagen",
+            },
+        },
+    }

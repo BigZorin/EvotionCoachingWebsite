@@ -1,0 +1,303 @@
+import logging
+import re
+from dataclasses import dataclass
+
+import numpy as np
+
+from app.config import settings
+
+_TIMESTAMP_RE = re.compile(r"\[(\d{1,2}:\d{2}(?::\d{2})?)\]")
+
+
+@dataclass
+class Chunk:
+    """A chunk of text ready for embedding."""
+    content: str
+    metadata: dict
+
+
+MIN_CHUNK_CHARS = 50  # Skip junk chunks (page numbers, headers, etc.)
+
+
+class RecursiveCharacterChunker:
+    """Split text by trying progressively smaller separators."""
+
+    def __init__(
+        self,
+        chunk_size: int | None = None,
+        chunk_overlap: int | None = None,
+        separators: list[str] | None = None,
+    ):
+        self.chunk_size = chunk_size or settings.chunk_size
+        self.chunk_overlap = chunk_overlap or settings.chunk_overlap
+        self.separators = separators or ["\n\n", "\n", ". ", " "]
+
+    def chunk(self, text: str, base_metadata: dict | None = None) -> list[Chunk]:
+        base_metadata = base_metadata or {}
+        pieces = self._split_recursive(text, self.separators)
+        chunks = self._merge_with_overlap(pieces)
+
+        return [
+            Chunk(
+                content=c,
+                metadata={**base_metadata, "chunk_index": i, "char_count": len(c)},
+            )
+            for i, c in enumerate(chunks)
+            if c.strip() and len(c.strip()) >= MIN_CHUNK_CHARS
+        ]
+
+    def _split_recursive(self, text: str, separators: list[str]) -> list[str]:
+        if not separators:
+            return [text]
+
+        sep = separators[0]
+        remaining_seps = separators[1:]
+        parts = text.split(sep)
+
+        result = []
+        for part in parts:
+            if len(part) <= self.chunk_size:
+                result.append(part)
+            elif remaining_seps:
+                result.extend(self._split_recursive(part, remaining_seps))
+            else:
+                # Force split at chunk_size boundaries
+                for i in range(0, len(part), self.chunk_size):
+                    result.append(part[i:i + self.chunk_size])
+
+        return result
+
+    def _merge_with_overlap(self, pieces: list[str]) -> list[str]:
+        chunks: list[str] = []
+        current = ""
+
+        for piece in pieces:
+            if len(current) + len(piece) <= self.chunk_size:
+                current = f"{current} {piece}".strip() if current else piece
+            else:
+                if current:
+                    chunks.append(current)
+                    overlap = self._sentence_aware_overlap(current)
+                    current = f"{overlap} {piece}".strip()
+                else:
+                    current = piece
+
+        if current:
+            chunks.append(current)
+
+        return chunks
+
+    def _sentence_aware_overlap(self, text: str) -> str:
+        """Extract overlap that starts at a sentence boundary.
+
+        Instead of blindly taking the last N characters (which can cut
+        mid-word), look for the last sentence-ending punctuation within
+        the overlap zone and start from the sentence after it.
+        """
+        if len(text) <= self.chunk_overlap:
+            return text
+
+        # Take the raw overlap zone from the end of the chunk
+        zone = text[-self.chunk_overlap:]
+
+        # Try to find a sentence boundary (. ! ? followed by space/newline)
+        # Search from the START of the zone so we keep as many full
+        # sentences as possible.
+        best = -1
+        for i in range(len(zone) - 1):
+            if zone[i] in ".!?" and (zone[i + 1] in " \n\t"):
+                best = i + 2  # start after the punctuation + space
+
+        if best > 0 and best < len(zone) - 10:
+            return zone[best:].strip()
+
+        # Fallback: try splitting on newline
+        nl = zone.find("\n")
+        if 0 < nl < len(zone) - 10:
+            return zone[nl + 1:].strip()
+
+        # Last resort: raw character overlap (original behavior)
+        return zone.strip()
+
+
+class MarkdownChunker:
+    """Split markdown by headers and then apply recursive chunking."""
+
+    def __init__(self, chunk_size: int | None = None, chunk_overlap: int | None = None):
+        self.recursive = RecursiveCharacterChunker(
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+        )
+
+    def chunk(self, text: str, base_metadata: dict | None = None) -> list[Chunk]:
+        # The TextProcessor already splits by headers,
+        # so we just apply recursive chunking to each block
+        return self.recursive.chunk(text, base_metadata)
+
+
+class CodeChunker:
+    """Code-aware chunking with larger chunk sizes."""
+
+    def __init__(self):
+        self.recursive = RecursiveCharacterChunker(
+            chunk_size=1500,
+            chunk_overlap=300,
+            separators=["\n\n", "\n"],
+        )
+
+    def chunk(self, text: str, base_metadata: dict | None = None) -> list[Chunk]:
+        return self.recursive.chunk(text, base_metadata)
+
+
+class TabularChunker:
+    """For spreadsheet data - the SpreadsheetProcessor already handles row grouping."""
+
+    def __init__(self):
+        self.recursive = RecursiveCharacterChunker(
+            chunk_size=1200,
+            chunk_overlap=100,
+        )
+
+    def chunk(self, text: str, base_metadata: dict | None = None) -> list[Chunk]:
+        return self.recursive.chunk(text, base_metadata)
+
+
+class YouTubeChunker:
+    """Chunker for YouTube transcripts that extracts timestamp metadata."""
+
+    def __init__(self):
+        self.recursive = RecursiveCharacterChunker()
+
+    def chunk(self, text: str, base_metadata: dict | None = None) -> list[Chunk]:
+        chunks = self.recursive.chunk(text, base_metadata)
+
+        for chunk in chunks:
+            match = _TIMESTAMP_RE.search(chunk.content)
+            if match:
+                ts = match.group(1)
+                chunk.metadata["start_time"] = ts
+                seconds = _timestamp_to_seconds(ts)
+                chunk.metadata["start_seconds"] = seconds
+                video_id = chunk.metadata.get("video_id", "")
+                if video_id:
+                    chunk.metadata["youtube_link"] = (
+                        f"https://www.youtube.com/watch?v={video_id}&t={seconds}"
+                    )
+
+        return chunks
+
+
+def _timestamp_to_seconds(ts: str) -> int:
+    """Convert MM:SS or H:MM:SS to seconds."""
+    parts = ts.split(":")
+    if len(parts) == 3:
+        return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+    if len(parts) == 2:
+        return int(parts[0]) * 60 + int(parts[1])
+    return 0
+
+
+logger = logging.getLogger(__name__)
+
+
+class SemanticChunker:
+    """Embedding-based semantic chunking.
+
+    Splits text into paragraphs, embeds each, and groups consecutive
+    paragraphs with high cosine similarity into the same chunk.
+    Falls back to RecursiveCharacterChunker for single-paragraph texts
+    or when embedding fails.
+    """
+
+    def __init__(
+        self,
+        similarity_threshold: float | None = None,
+        chunk_size: int | None = None,
+    ):
+        self.threshold = similarity_threshold or settings.semantic_similarity_threshold
+        self.chunk_size = chunk_size or settings.chunk_size
+        self._fallback = RecursiveCharacterChunker()
+
+    def chunk(self, text: str, base_metadata: dict | None = None) -> list[Chunk]:
+        base_metadata = base_metadata or {}
+
+        # Split on double newlines → paragraphs
+        paragraphs = [p.strip() for p in re.split(r"\n\n+", text) if p.strip()]
+
+        if len(paragraphs) <= 1:
+            return self._fallback.chunk(text, base_metadata)
+
+        # Guard: too many paragraphs would cause excessive embedding calls
+        MAX_PARAGRAPHS = 500
+        if len(paragraphs) > MAX_PARAGRAPHS:
+            logger.warning(
+                f"SemanticChunker: {len(paragraphs)} paragraphs exceeds limit ({MAX_PARAGRAPHS}), "
+                "falling back to recursive chunker"
+            )
+            return self._fallback.chunk(text, base_metadata)
+
+        # Embed all paragraphs in batch
+        try:
+            from app.core.embeddings import embed_batch
+            embeddings = embed_batch(paragraphs)
+        except Exception as e:
+            logger.warning(f"Semantic chunking embedding failed, falling back to recursive: {e}")
+            return self._fallback.chunk(text, base_metadata)
+
+        # Compute cosine similarity between consecutive paragraphs
+        similarities = []
+        for i in range(len(embeddings) - 1):
+            a = np.array(embeddings[i])
+            b = np.array(embeddings[i + 1])
+            norm_a = np.linalg.norm(a)
+            norm_b = np.linalg.norm(b)
+            if norm_a == 0 or norm_b == 0:
+                similarities.append(0.0)
+            else:
+                similarities.append(float(np.dot(a, b) / (norm_a * norm_b)))
+
+        # Group paragraphs into semantic groups
+        groups: list[list[str]] = [[paragraphs[0]]]
+        for i, sim in enumerate(similarities):
+            if sim >= self.threshold:
+                groups[-1].append(paragraphs[i + 1])
+            else:
+                groups.append([paragraphs[i + 1]])
+
+        # Merge groups into chunks, splitting oversized groups with fallback
+        chunks: list[Chunk] = []
+        idx = 0
+        for group in groups:
+            group_text = "\n\n".join(group)
+            if len(group_text) <= self.chunk_size:
+                if group_text.strip() and len(group_text.strip()) >= MIN_CHUNK_CHARS:
+                    chunks.append(Chunk(
+                        content=group_text,
+                        metadata={**base_metadata, "chunk_index": idx, "char_count": len(group_text), "chunker": "semantic"},
+                    ))
+                    idx += 1
+            else:
+                # Group too large — use recursive chunker to split it
+                sub_chunks = self._fallback.chunk(group_text, base_metadata)
+                for sc in sub_chunks:
+                    sc.metadata["chunk_index"] = idx
+                    sc.metadata["chunker"] = "semantic+recursive"
+                    idx += 1
+                chunks.extend(sub_chunks)
+
+        return chunks
+
+
+def get_chunker(file_type: str) -> RecursiveCharacterChunker:
+    """Get the appropriate chunker based on file type."""
+    chunkers = {
+        "pdf": SemanticChunker(),
+        "txt": SemanticChunker(),
+        "md": MarkdownChunker(),
+        "code": CodeChunker(),
+        "csv": TabularChunker(),
+        "xlsx": TabularChunker(),
+        "xls": TabularChunker(),
+        "youtube": YouTubeChunker(),
+    }
+    return chunkers.get(file_type, RecursiveCharacterChunker())

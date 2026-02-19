@@ -1,0 +1,16 @@
+# Evotion RAG — Caddy Reverse Proxy + Auto HTTPS
+
+rag.evotiondata.com {
+    request_body {
+        max_size 100MB
+    }
+
+    reverse_proxy rag:8000 {
+        transport http {
+            # Allow long processing time for audio/video transcription
+            response_header_timeout 600s
+            read_timeout             600s
+            write_timeout            600s
+        }
+    }
+}

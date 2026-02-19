@@ -1,0 +1,7 @@
+# Prisma
+node_modules
+.env
+.env.local
+
+# Generated files
+src/generated

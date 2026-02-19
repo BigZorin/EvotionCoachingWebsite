@@ -1,0 +1,3432 @@
+/* ============================================================
+   Evotion RAG — Client-side Application (v38)
+   Features: Streaming, Hybrid Search, Feedback, Analytics, Auth,
+             Semantic Chunking, Multi-Query, bge-m3 Embeddings,
+             Async Background Uploads
+   ============================================================ */
+
+const APP_VERSION = 'v38';
+const API = '/api/v1';
+
+// --- State ---
+let currentSessionId = null;
+let currentAgentId = null;
+let currentView = 'chat';
+let isLoading = false;
+let agentsCache = [];
+let editingAgentId = null;
+let searchDebounce = null;
+let supportedExtensions = []; // Loaded from server on init
+let pendingAttachments = [];  // Files selected but not yet uploaded
+let uploadedAttachments = []; // Successfully uploaded attachment info
+
+// --- DOM refs (set in init) ---
+let $sidebar, $overlay, $sessionsEl, $chatScroll, $emptyState, $messagesEl;
+let $chatInput, $sendBtn, $chatCollection, $agentSelect, $attachBtn, $chatFileInput, $chatAttachments;
+let $docsView, $collectionsView, $chatView, $agentsView, $analyticsView, $systemView;
+let $uploadStatus, $docsList, $collectionsList, $agentsList;
+let $folderList, $folderBreadcrumb;
+
+// --- Folder state ---
+let currentFolderId = null;
+let folderPath = []; // [{id, name}, ...] for breadcrumb
+let allFolders = []; // all folders for current collection
+
+// ============================================================
+// Authentication
+// ============================================================
+
+function getAuthToken() {
+  return localStorage.getItem('rag_auth_token') || '';
+}
+
+function setAuthToken(token) {
+  localStorage.setItem('rag_auth_token', token);
+}
+
+function clearAuthToken() {
+  localStorage.removeItem('rag_auth_token');
+}
+
+function authHeaders() {
+  const token = getAuthToken();
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
+function showLoginScreen(errorMsg) {
+  document.getElementById('login-overlay').style.display = 'flex';
+  document.querySelector('.app').style.display = 'none';
+  const errorEl = document.getElementById('login-error');
+  if (errorMsg) {
+    errorEl.textContent = errorMsg;
+    errorEl.style.display = 'block';
+  } else {
+    errorEl.style.display = 'none';
+  }
+  document.getElementById('login-token').value = '';
+  document.getElementById('login-token').focus();
+}
+
+function hideLoginScreen() {
+  document.getElementById('login-overlay').style.display = 'none';
+  document.querySelector('.app').style.display = '';
+}
+
+function handleUnauthorized() {
+  clearAuthToken();
+  showLoginScreen();
+}
+
+async function checkAuth() {
+  const token = getAuthToken();
+  try {
+    const res = await fetch(`${API}/auth/verify`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.auth_required === false) {
+        // Auth is disabled on server, skip login
+        hideLoginScreen();
+        return true;
+      }
+      if (data.authenticated) {
+        hideLoginScreen();
+        return true;
+      }
+    }
+  } catch {
+    // Server unreachable — do NOT bypass auth
+    showLoginScreen('Server niet bereikbaar. Probeer het later opnieuw.');
+    return false;
+  }
+  showLoginScreen();
+  return false;
+}
+
+async function attemptLogin() {
+  const tokenInput = document.getElementById('login-token');
+  const errorEl = document.getElementById('login-error');
+  const loginBtn = document.getElementById('login-btn');
+  const token = tokenInput.value.trim();
+
+  if (!token) {
+    errorEl.textContent = 'Voer een token in.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'Controleren...';
+  errorEl.style.display = 'none';
+
+  try {
+    const res = await fetch(`${API}/auth/verify`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+
+    if (res.ok) {
+      setAuthToken(token);
+      hideLoginScreen();
+      init();
+    } else {
+      errorEl.textContent = 'Ongeldig token. Probeer opnieuw.';
+      errorEl.style.display = 'block';
+      tokenInput.value = '';
+      tokenInput.focus();
+    }
+  } catch {
+    errorEl.textContent = 'Server niet bereikbaar. Probeer later opnieuw.';
+    errorEl.style.display = 'block';
+  } finally {
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'Inloggen';
+  }
+}
+
+// ============================================================
+// API helpers (with auth headers)
+// ============================================================
+
+async function apiGet(path) {
+  const res = await fetch(`${API}${path}`, { headers: authHeaders() });
+  if (res.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `${res.status} ${res.statusText}`);
+  }
+  return res.json();
+}
+
+async function apiPost(path, body) {
+  const res = await fetch(`${API}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  if (res.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `${res.status} ${res.statusText}`);
+  }
+  return res.json();
+}
+
+async function apiPostForm(path, formData) {
+  const res = await fetch(`${API}${path}`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: formData,
+  });
+  if (res.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `${res.status} ${res.statusText}`);
+  }
+  return res.json();
+}
+
+async function apiPut(path, body) {
+  const res = await fetch(`${API}${path}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  if (res.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `${res.status} ${res.statusText}`);
+  }
+  return res.json();
+}
+
+async function apiPatch(path, body) {
+  const res = await fetch(`${API}${path}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  if (res.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `${res.status} ${res.statusText}`);
+  }
+  return res.json();
+}
+
+async function apiDelete(path) {
+  const res = await fetch(`${API}${path}`, { method: 'DELETE', headers: authHeaders() });
+  if (res.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `${res.status} ${res.statusText}`);
+  }
+  return res.json();
+}
+
+// ============================================================
+// Markdown rendering
+// ============================================================
+
+/**
+ * Convert HTML tags in LLM output to Markdown equivalents.
+ * Uses simple regex — no DOMParser, no complexity, works on partial text too.
+ */
+function stripHtmlToMarkdown(text) {
+  if (!text || text.indexOf('<') === -1) return text;
+  // Skip if no actual HTML tags (just angle brackets in math/code)
+  if (!/<[a-z/]/i.test(text)) return text;
+
+  // Preserve <followup> tags
+  const followups = [];
+  text = text.replace(/<followup>[\s\S]*?<\/followup>/gi, (m) => {
+    followups.push(m);
+    return `\x00FU${followups.length - 1}\x00`;
+  });
+
+  // Convert semantic HTML → Markdown
+  text = text.replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi, '**$1**');
+  text = text.replace(/<b[^>]*>([\s\S]*?)<\/b>/gi, '**$1**');
+  text = text.replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, '*$1*');
+  text = text.replace(/<i[^>]*>([\s\S]*?)<\/i>/gi, '*$1*');
+  text = text.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, '\n## $1\n');
+  text = text.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, '\n### $1\n');
+  text = text.replace(/<h[3-6][^>]*>([\s\S]*?)<\/h[3-6]>/gi, '\n#### $1\n');
+  text = text.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '\n- $1');
+  text = text.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '$1\n\n');
+  text = text.replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, '`$1`');
+  text = text.replace(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)');
+
+  // Strip structural/non-semantic tags
+  text = text.replace(/<\/?(ul|ol|div|span|br|table|tr|td|th|thead|tbody|blockquote|hr|section|article|header|footer|nav|main)[^>]*\/?>/gi, '\n');
+
+  // Nuclear: strip ANY remaining HTML tags
+  text = text.replace(/<\/?[a-z][a-z0-9]*[^>]*\/?>/gi, '');
+
+  // Also strip HTML entities that look like tags (e.g. &lt;strong&gt;)
+  text = text.replace(/&lt;\/?(?:strong|b|em|i|p|li|ul|ol|div|span|br|h[1-6]|a|code|pre)[^&]*&gt;/gi, '');
+
+  // Clean up whitespace
+  text = text.replace(/\n{3,}/g, '\n\n');
+
+  // Restore followups
+  followups.forEach((fu, i) => {
+    text = text.replace(`\x00FU${i}\x00`, fu);
+  });
+
+  return text.trim();
+}
+
+// Configure marked once at load time (v15+ API: use marked.use instead of setOptions)
+if (typeof marked !== 'undefined' && typeof marked.use === 'function') {
+  try {
+    marked.use({ breaks: true, gfm: true });
+  } catch (e) {
+    // marked.use() not available in this version
+  }
+}
+
+function renderMarkdown(text, sources) {
+  // 1. Strip follow-up tags before rendering
+  text = text.replace(/<followup>[\s\S]*?<\/followup>/gi, '').trim();
+
+  // 2. Convert any HTML to Markdown (simple regex, works on any input)
+  text = stripHtmlToMarkdown(text);
+
+  // 2b. Protect citation references [1], [2] from being mangled by marked/DOMPurify
+  //     Replace with placeholders before markdown parsing, restore after
+  const citationMap = {};
+  text = text.replace(/\[(\d+)\]/g, (match, num) => {
+    const placeholder = `%%CITE_${num}%%`;
+    citationMap[placeholder] = num;
+    return placeholder;
+  });
+
+  // 3. Parse Markdown → HTML
+  let html;
+  try {
+    if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
+      // marked v15+: pass options to parse() directly (setOptions is deprecated)
+      const rawHtml = marked.parse(text);
+      html = typeof DOMPurify !== 'undefined'
+        ? DOMPurify.sanitize(rawHtml)
+        : escapeHtml(text);
+    } else {
+      // Fallback: marked.js not loaded — basic markdown rendering
+      html = text
+        .replace(/&/g, '&amp;')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/^#{1,4}\s+(.+)$/gm, '<h3>$1</h3>')
+        .replace(/^- (.+)$/gm, '<li>$1</li>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+      html = '<p>' + html + '</p>';
+      html = typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(html) : escapeHtml(text);
+    }
+  } catch (e) {
+    // Markdown rendering failed, using plaintext fallback
+    // Absolute fallback: escape HTML and show as text
+    html = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br>');
+  }
+
+  // 4. Code highlighting (post-render)
+  if (typeof hljs !== 'undefined') {
+    html = html.replace(/<code class="language-(\w+)">([\s\S]*?)<\/code>/g, (m, lang, code) => {
+      try {
+        if (hljs.getLanguage(lang)) {
+          return `<code class="language-${lang}">${hljs.highlight(code, { language: lang }).value}</code>`;
+        }
+      } catch (e) { /* ignore */ }
+      return m;
+    });
+  }
+
+  // 5. Restore citation placeholders as interactive citation badges
+  if (sources && sources.length > 0) {
+    html = html.replace(/%%CITE_(\d+)%%/g, (match, num) => {
+      const idx = parseInt(num, 10) - 1;
+      if (idx >= 0 && idx < sources.length) {
+        const src = sources[idx];
+        const filename = escapeHtml(src.filename || 'Bron');
+        const preview = escapeHtml((src.chunk_text || '').slice(0, 150));
+        const score = Math.round((src.relevance_score || 0) * 100);
+        return `<span class="citation-ref" data-idx="${num}" tabindex="0">[${num}]<span class="citation-tooltip"><strong>${filename}</strong> <span class="citation-score">${score}%</span><br>${preview}...</span></span>`;
+      }
+      return `[${num}]`;
+    });
+  } else {
+    // No sources — just restore plain [1] text
+    html = html.replace(/%%CITE_(\d+)%%/g, (match, num) => `[${num}]`);
+  }
+
+  return html;
+}
+
+function extractFollowups(text) {
+  const followups = [];
+  const regex = /<followup>(.*?)<\/followup>/gs;
+  let m;
+  while ((m = regex.exec(text)) !== null) {
+    followups.push(m[1].trim());
+  }
+  return followups;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ============================================================
+// Toast notifications
+// ============================================================
+
+function showToast(message, isError = false) {
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (isError ? ' error' : '');
+  toast.innerHTML = `<span>${escapeHtml(message)}</span>`;
+
+  // Auto-dismiss with pause on hover
+  let timer;
+  const startTimer = () => { timer = setTimeout(() => { toast.classList.add('fade-out'); setTimeout(() => toast.remove(), 300); }, 3000); };
+  toast.addEventListener('mouseenter', () => clearTimeout(timer));
+  toast.addEventListener('mouseleave', startTimer);
+
+  document.body.appendChild(toast);
+  startTimer();
+}
+
+// ============================================================
+// Custom confirm dialog
+// ============================================================
+
+function showConfirm(title, message, dangerLabel = 'Verwijderen') {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    overlay.innerHTML = `
+      <div class="confirm-dialog">
+        <div class="confirm-title">${escapeHtml(title)}</div>
+        <div class="confirm-message">${escapeHtml(message)}</div>
+        <div class="confirm-actions">
+          <button class="btn confirm-cancel">Annuleren</button>
+          <button class="btn danger confirm-ok">${escapeHtml(dangerLabel)}</button>
+        </div>
+      </div>
+    `;
+
+    overlay.querySelector('.confirm-cancel').addEventListener('click', () => {
+      overlay.remove();
+      resolve(false);
+    });
+    overlay.querySelector('.confirm-ok').addEventListener('click', () => {
+      overlay.remove();
+      resolve(true);
+    });
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.remove();
+        resolve(false);
+      }
+    });
+
+    document.body.appendChild(overlay);
+    overlay.querySelector('.confirm-cancel').focus();
+  });
+}
+
+// ============================================================
+// Loading spinner helper
+// ============================================================
+
+function showLoadingIn(el, message = 'Laden...') {
+  el.innerHTML = `<div class="loading-state"><div class="spinner"></div><span>${escapeHtml(message)}</span></div>`;
+}
+
+// ============================================================
+// Form validation helper
+// ============================================================
+
+function validateField(input, errorMsg) {
+  const val = input.value.trim();
+  if (!val) {
+    input.classList.add('input-error');
+    input.addEventListener('input', () => input.classList.remove('input-error'), { once: true });
+    showToast(errorMsg, true);
+    input.focus();
+    return false;
+  }
+  input.classList.remove('input-error');
+  return true;
+}
+
+// ============================================================
+// View switching
+// ============================================================
+
+function switchView(view) {
+  currentView = view;
+
+  $chatView.classList.toggle('active', view === 'chat');
+  $docsView.classList.toggle('active', view === 'documents');
+  $collectionsView.classList.toggle('active', view === 'collections');
+  $agentsView.classList.toggle('active', view === 'agents');
+  $analyticsView.classList.toggle('active', view === 'analytics');
+  $systemView.classList.toggle('active', view === 'system');
+
+  document.getElementById('nav-docs').classList.toggle('active', view === 'documents');
+  document.getElementById('nav-collections').classList.toggle('active', view === 'collections');
+  document.getElementById('nav-agents').classList.toggle('active', view === 'agents');
+  document.getElementById('nav-analytics').classList.toggle('active', view === 'analytics');
+  document.getElementById('nav-system').classList.toggle('active', view === 'system');
+
+  closeSidebar();
+
+  if (view === 'documents') {
+    loadCollectionDropdowns();
+    const col = document.getElementById('browse-collection').value;
+    if (col) loadDocuments(col);
+  } else if (view === 'collections') {
+    loadCollections();
+  } else if (view === 'agents') {
+    loadAgents();
+    loadAgentFormCollections();
+  } else if (view === 'analytics') {
+    loadAnalytics();
+  } else if (view === 'system') {
+    loadSystemInfo();
+  }
+}
+
+// ============================================================
+// Sidebar
+// ============================================================
+
+function openSidebar() {
+  $sidebar.classList.add('open');
+  $overlay.classList.add('active');
+}
+
+function closeSidebar() {
+  $sidebar.classList.remove('open');
+  $overlay.classList.remove('active');
+}
+
+function toggleSidebar() {
+  if ($sidebar.classList.contains('collapsed')) {
+    $sidebar.classList.remove('collapsed');
+  } else {
+    $sidebar.classList.add('collapsed');
+  }
+}
+
+// ============================================================
+// Sessions
+// ============================================================
+
+async function loadSessions(searchQuery = '') {
+  try {
+    const endpoint = searchQuery
+      ? `/chat/sessions/search?q=${encodeURIComponent(searchQuery)}&limit=30`
+      : '/chat/sessions?limit=30';
+    const data = await apiGet(endpoint);
+    const sessions = data.sessions || [];
+    renderSessions(sessions, searchQuery);
+  } catch (e) {
+    // Session load failed silently
+  }
+}
+
+function renderSessions(sessions, searchQuery = '') {
+  if (!sessions.length) {
+    $sessionsEl.innerHTML = searchQuery
+      ? `<div class="sessions-empty">Geen resultaten voor "${escapeHtml(searchQuery)}"</div>`
+      : '<div class="sessions-empty">Nog geen gesprekken</div>';
+    return;
+  }
+
+  $sessionsEl.innerHTML = searchQuery
+    ? `<div class="sessions-group-label">${sessions.length} resultaten</div>`
+    : '<div class="sessions-group-label">Recente gesprekken</div>';
+
+  sessions.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'session-item' + (s.id === currentSessionId ? ' active' : '');
+
+    let agentBadge = '';
+    if (s.agent_id) {
+      const agent = agentsCache.find(a => a.id === s.agent_id);
+      if (agent) {
+        agentBadge = `<span class="session-agent-badge" title="${escapeHtml(agent.name)}">${escapeHtml(agent.icon || 'E')}</span>`;
+      }
+    }
+
+    el.innerHTML = `
+      ${agentBadge}
+      <span class="session-title">${escapeHtml(s.title || 'Nieuw gesprek')}</span>
+      <button class="session-delete" title="Verwijder" data-id="${s.id}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+        </svg>
+      </button>
+    `;
+
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.session-delete')) return;
+      loadSession(s.id, s.agent_id);
+      switchView('chat');
+    });
+
+    const delBtn = el.querySelector('.session-delete');
+    delBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const ok = await showConfirm('Gesprek verwijderen', 'Weet je zeker dat je dit gesprek wilt verwijderen?');
+      if (!ok) return;
+      try {
+        await apiDelete(`/chat/sessions/${s.id}`);
+        if (currentSessionId === s.id) newChat();
+        loadSessions();
+        showToast('Gesprek verwijderd');
+      } catch (err) {
+        showToast('Kon gesprek niet verwijderen', true);
+      }
+    });
+
+    $sessionsEl.appendChild(el);
+  });
+}
+
+async function loadSession(sessionId, agentId = null) {
+  try {
+    const data = await apiGet(`/chat/sessions/${sessionId}`);
+    currentSessionId = sessionId;
+    currentAgentId = agentId || data.session?.agent_id || null;
+    const messages = data.messages || [];
+
+    // Restore attachment state from session metadata
+    pendingAttachments = [];
+    const meta = data.session?.metadata;
+    uploadedAttachments = (meta && meta.attachments) ? meta.attachments : [];
+    renderChatAttachments();
+
+    $messagesEl.innerHTML = '';
+    $emptyState.style.display = 'none';
+
+    if (currentAgentId) {
+      $agentSelect.value = currentAgentId;
+    }
+
+    messages.forEach(m => {
+      appendMessage(m.role, m.content, m.role === 'assistant', m.sources || [], m.id);
+    });
+
+    scrollToBottom();
+    loadSessions();
+  } catch (e) {
+    showToast('Kon gesprek niet laden', true);
+  }
+}
+
+function newChat() {
+  currentSessionId = null;
+  pendingAttachments = [];
+  uploadedAttachments = [];
+  $messagesEl.innerHTML = '';
+  $emptyState.style.display = '';
+  $chatInput.value = '';
+  $chatInput.style.height = 'auto';
+  renderChatAttachments();
+  updateSendBtn();
+  loadSessions();
+}
+
+// ============================================================
+// Chat (Streaming via SSE)
+// ============================================================
+
+async function sendMessage() {
+  const message = $chatInput.value.trim();
+  const hasAttachments = pendingAttachments.length > 0;
+  if ((!message && !hasAttachments) || isLoading) return;
+
+  isLoading = true;
+  $chatInput.value = '';
+  $chatInput.style.height = 'auto';
+  updateSendBtn();
+
+  $emptyState.style.display = 'none';
+
+  // Show user message with attachment filenames if any
+  const fileNames = pendingAttachments.map(f => f.name);
+  const displayMsg = hasAttachments && message
+    ? `${message}\n\n📎 ${fileNames.join(', ')}`
+    : hasAttachments
+      ? `📎 ${fileNames.join(', ')}`
+      : message;
+  appendMessage('user', displayMsg);
+
+  try {
+    if (!currentSessionId) {
+      const collection = $chatCollection.value || null;
+      const agentId = $agentSelect.value || null;
+      const session = await apiPost('/chat/sessions', { collection, agent_id: agentId });
+      currentSessionId = session.id;
+      currentAgentId = agentId;
+    }
+
+    // Upload pending attachments before sending message
+    if (hasAttachments) {
+      await uploadChatAttachments(currentSessionId);
+    }
+
+    const questionText = message || 'Analyseer de bijgevoegde bestanden en geef een samenvatting.';
+    await streamResponse(currentSessionId, questionText);
+    loadSessions();
+  } catch (e) {
+    appendMessage('assistant', `Er ging iets mis: ${e.message}`);
+    scrollToBottom();
+  } finally {
+    isLoading = false;
+    updateSendBtn();
+  }
+}
+
+async function streamResponse(sessionId, message) {
+  // Create the assistant message element for streaming
+  const el = document.createElement('div');
+  el.className = 'message assistant';
+
+  let avatar = '<img src="/ui/static/evotion-icon.png" alt="E" width="20" height="20">';
+  if (currentAgentId) {
+    const agent = agentsCache.find(a => a.id === currentAgentId);
+    if (agent && agent.icon) avatar = agent.icon;
+  }
+
+  el.innerHTML = `
+    <div class="message-avatar">${avatar}</div>
+    <div class="message-content">
+      <div class="retrieval-status"><div class="spinner-sm"></div><span>Voorbereiden...</span></div>
+      <div class="streaming-text"></div>
+    </div>
+  `;
+  $messagesEl.appendChild(el);
+
+  const statusEl = el.querySelector('.retrieval-status');
+  const streamingText = el.querySelector('.streaming-text');
+  let fullText = '';
+  let sources = [];
+  let messageId = null;
+  let modelUsed = null;
+
+  const res = await fetch(`${API}/chat/sessions/${sessionId}/messages/stream`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ message, top_k: 15 }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `${res.status} ${res.statusText}`);
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let firstToken = true;
+  let streamDone = false;
+  let streamError = false;
+
+  while (!streamDone) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    let eventType = null;
+
+    for (const line of lines) {
+      if (line.startsWith('event: ')) {
+        eventType = line.slice(7).trim();
+      } else if (line.startsWith('data: ') && eventType) {
+        let data;
+        try {
+          data = JSON.parse(line.slice(6));
+        } catch {
+          // Malformed SSE line, skip
+          continue;
+        }
+
+        if (eventType === 'status') {
+          const span = statusEl?.querySelector('span');
+          if (span) span.textContent = data;
+        } else if (eventType === 'sources') {
+          sources = data;
+        } else if (eventType === 'content') {
+          // Server sends full cleaned text (replaces everything) — no client-side HTML cleaning needed
+          if (firstToken) {
+            if (statusEl) statusEl.style.display = 'none';
+            streamingText.innerHTML = '';
+            firstToken = false;
+          }
+          fullText = data;
+          streamingText.innerHTML = renderMarkdown(fullText, sources);
+          scrollToBottom();
+        } else if (eventType === 'token') {
+          // Legacy: individual token append (fallback)
+          if (firstToken) {
+            if (statusEl) statusEl.style.display = 'none';
+            streamingText.innerHTML = '';
+            firstToken = false;
+          }
+          fullText += data;
+          streamingText.innerHTML = renderMarkdown(fullText, sources);
+          scrollToBottom();
+        } else if (eventType === 'replace') {
+          fullText = data;
+          streamingText.innerHTML = renderMarkdown(fullText, sources);
+        } else if (eventType === 'done') {
+          messageId = data.message_id || null;
+          modelUsed = data.model_used || null;
+          if (data.answer) {
+            fullText = data.answer;
+          }
+        } else if (eventType === 'error') {
+          statusEl.style.display = 'none';
+          streamingText.innerHTML = `<p class="error-text">⚠️ ${escapeHtml(data.detail || 'Onbekende fout')}</p>`;
+          streamError = true;
+          streamDone = true;
+          break;
+        }
+        eventType = null;
+      }
+    }
+  }
+
+  // If stream errored, keep the error message visible — don't overwrite with final render
+  if (streamError) {
+    const contentEl = el.querySelector('.message-content');
+    statusEl.remove();
+    // Add retry button below the error
+    contentEl.innerHTML = `
+      <div>${streamingText.innerHTML}</div>
+      <div class="message-actions">
+        <button class="retry-btn" title="Opnieuw genereren">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+          </svg>
+        </button>
+      </div>
+    `;
+    addCodeCopyButtons(contentEl);
+    scrollToBottom();
+    return;
+  }
+
+  // Extract follow-up suggestions
+  const followups = extractFollowups(fullText);
+
+  // Final render with citations, sources, feedback, follow-ups, retry
+  const contentEl = el.querySelector('.message-content');
+  statusEl.remove();
+  const sourcesHtml = buildSourcesHtml(sources);
+  const followupsHtml = buildFollowupsHtml(followups);
+
+  const providerLabelHtml = modelUsed ? `<span class="provider-label">${escapeHtml(_formatProviderLabel(modelUsed))}</span>` : '';
+  const feedbackHtml = `<div class="message-actions">
+    <div class="message-feedback" data-feedback="none"${messageId ? ` data-message-id="${messageId}"` : ''}>
+      <button class="feedback-btn thumbs-up" title="Goed antwoord">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>
+        </svg>
+      </button>
+      <button class="feedback-btn thumbs-down" title="Slecht antwoord">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3zm7-13h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 4H17"/>
+        </svg>
+      </button>
+    </div>
+    <button class="retry-btn" title="Opnieuw genereren">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+      </svg>
+    </button>
+    ${providerLabelHtml}
+  </div>`;
+
+  contentEl.innerHTML = `
+    <div>${renderMarkdown(fullText, sources)}</div>
+    ${sourcesHtml}
+    ${feedbackHtml}
+    ${followupsHtml}
+  `;
+
+  // Attach feedback handlers using message_id directly
+  const feedbackDiv = contentEl.querySelector('.message-feedback');
+  if (messageId) {
+    feedbackDiv.querySelector('.thumbs-up').addEventListener('click', () => submitFeedbackDirect(messageId, feedbackDiv, 'positive'));
+    feedbackDiv.querySelector('.thumbs-down').addEventListener('click', () => submitFeedbackDirect(messageId, feedbackDiv, 'negative'));
+  } else {
+    feedbackDiv.querySelector('.thumbs-up').addEventListener('click', () => submitStreamFeedbackLegacy(feedbackDiv, 'positive'));
+    feedbackDiv.querySelector('.thumbs-down').addEventListener('click', () => submitStreamFeedbackLegacy(feedbackDiv, 'negative'));
+  }
+
+  // Attach retry handler
+  contentEl.querySelector('.retry-btn').addEventListener('click', () => retryLastMessage(message));
+
+  // Attach follow-up handlers
+  contentEl.querySelectorAll('.followup-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      $chatInput.value = btn.textContent;
+      autoResizeInput();
+      sendMessage();
+    });
+  });
+}
+
+async function submitStreamFeedbackLegacy(feedbackDiv, feedback) {
+  try {
+    const data = await apiGet(`/chat/sessions/${currentSessionId}`);
+    const messages = data.messages || [];
+    const lastAssistant = [...messages].reverse().find(m => m.role === 'assistant');
+    if (!lastAssistant) return;
+
+    await apiPost('/chat/feedback', { message_id: lastAssistant.id, feedback });
+    feedbackDiv.dataset.feedback = feedback;
+    feedbackDiv.querySelector('.thumbs-up').classList.toggle('active', feedback === 'positive');
+    feedbackDiv.querySelector('.thumbs-down').classList.toggle('active', feedback === 'negative');
+    showToast(feedback === 'positive' ? 'Bedankt voor je feedback!' : 'Feedback opgeslagen');
+  } catch (e) {
+    showToast('Feedback kon niet worden opgeslagen', true);
+  }
+}
+
+function buildFollowupsHtml(followups) {
+  if (!followups || followups.length === 0) return '';
+  const buttons = followups.map(q =>
+    `<button class="followup-btn">${escapeHtml(q)}</button>`
+  ).join('');
+  return `<div class="followup-suggestions"><span class="followup-label">Stel ook:</span>${buttons}</div>`;
+}
+
+async function retryLastMessage(originalMessage) {
+  if (isLoading || !currentSessionId) return;
+
+  // Remove the last assistant message from the DOM
+  const allMsgs = $messagesEl.querySelectorAll('.message.assistant');
+  if (allMsgs.length > 0) {
+    allMsgs[allMsgs.length - 1].remove();
+  }
+
+  isLoading = true;
+  updateSendBtn();
+
+  try {
+    await streamResponse(currentSessionId, originalMessage);
+    loadSessions();
+  } catch (e) {
+    appendMessage('assistant', `Er ging iets mis: ${e.message}`);
+    scrollToBottom();
+  } finally {
+    isLoading = false;
+    updateSendBtn();
+  }
+}
+
+function buildSourcesHtml(sources) {
+  if (!sources || sources.length === 0) return '';
+
+  const unique = {};
+  sources.forEach(s => {
+    const fn = s.filename || 'unknown';
+    const sc = s.relevance_score || 0;
+    if (!unique[fn] || sc > unique[fn]) unique[fn] = sc;
+  });
+  const attachedNames = new Set(uploadedAttachments.map(a => a.filename));
+  const chips = Object.entries(unique)
+    .map(([fn, sc]) => {
+      const isAtt = attachedNames.has(fn);
+      const badge = isAtt ? '📎 ' : '';
+      const cls = isAtt ? ' source-attachment' : '';
+      return `<span class="source-chip${cls}">${badge}<span class="source-name">${escapeHtml(fn)}</span> ${Math.round(sc * 100)}%</span>`;
+    })
+    .join('');
+  return `<div class="sources">${chips}</div>`;
+}
+
+function appendMessage(role, content, isMarkdown = false, sources = [], messageId = null) {
+  const el = document.createElement('div');
+  el.className = `message ${role}`;
+  el.setAttribute('role', 'article');
+  el.setAttribute('aria-label', role === 'user' ? 'Gebruiker bericht' : 'Assistent antwoord');
+  if (messageId) el.dataset.messageId = messageId;
+
+  let avatar = role === 'user' ? 'U' : '<img src="/ui/static/evotion-icon.png" alt="E" width="20" height="20">';
+  if (role === 'assistant' && currentAgentId) {
+    const agent = agentsCache.find(a => a.id === currentAgentId);
+    if (agent && agent.icon) avatar = agent.icon;
+  }
+  const renderedContent = role === 'assistant' || isMarkdown
+    ? renderMarkdown(content, sources)
+    : `<p>${escapeHtml(content)}</p>`;
+
+  const sourcesHtml = buildSourcesHtml(sources);
+
+  // Add feedback + retry for assistant messages
+  let actionsHtml = '';
+  if (role === 'assistant' && messageId) {
+    actionsHtml = `<div class="message-actions">
+      <div class="message-feedback" data-feedback="none" data-message-id="${messageId}">
+        <button class="feedback-btn thumbs-up" aria-label="Goed antwoord" title="Goed antwoord">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>
+          </svg>
+        </button>
+        <button class="feedback-btn thumbs-down" aria-label="Slecht antwoord" title="Slecht antwoord">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3zm7-13h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 4H17"/>
+          </svg>
+        </button>
+      </div>
+    </div>`;
+  }
+
+  // Edit button for user messages
+  let editBtnHtml = '';
+  if (role === 'user') {
+    editBtnHtml = `<button class="msg-edit-btn" aria-label="Bericht bewerken" title="Bewerken">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+    </button>`;
+  }
+
+  el.innerHTML = `
+    <div class="message-avatar" aria-hidden="true">${avatar}</div>
+    <div class="message-content">${renderedContent}${sourcesHtml}${actionsHtml}</div>
+    ${editBtnHtml}
+  `;
+
+  // Attach feedback handlers for loaded messages
+  if (role === 'assistant' && messageId) {
+    const feedbackDiv = el.querySelector('.message-feedback');
+    feedbackDiv.querySelector('.thumbs-up').addEventListener('click', () => submitFeedbackDirect(messageId, feedbackDiv, 'positive'));
+    feedbackDiv.querySelector('.thumbs-down').addEventListener('click', () => submitFeedbackDirect(messageId, feedbackDiv, 'negative'));
+  }
+
+  // Attach edit handler for user messages
+  if (role === 'user') {
+    const editBtn = el.querySelector('.msg-edit-btn');
+    if (editBtn) editBtn.addEventListener('click', () => editUserMessage(el));
+  }
+
+  $messagesEl.appendChild(el);
+  scrollToBottom();
+}
+
+async function submitFeedbackDirect(messageId, feedbackDiv, feedback) {
+  try {
+    await apiPost('/chat/feedback', { message_id: messageId, feedback });
+    feedbackDiv.dataset.feedback = feedback;
+    feedbackDiv.querySelector('.thumbs-up').classList.toggle('active', feedback === 'positive');
+    feedbackDiv.querySelector('.thumbs-down').classList.toggle('active', feedback === 'negative');
+    showToast(feedback === 'positive' ? 'Bedankt voor je feedback!' : 'Feedback opgeslagen');
+  } catch (e) {
+    showToast('Feedback kon niet worden opgeslagen', true);
+  }
+}
+
+function scrollToBottom() {
+  requestAnimationFrame(() => {
+    $chatScroll.scrollTop = $chatScroll.scrollHeight;
+  });
+}
+
+function updateSendBtn() {
+  const hasText = $chatInput.value.trim().length > 0;
+  const hasFiles = pendingAttachments.length > 0;
+  $sendBtn.disabled = (!hasText && !hasFiles) || isLoading;
+}
+
+function autoResizeInput() {
+  $chatInput.style.height = 'auto';
+  $chatInput.style.height = Math.min($chatInput.scrollHeight, 200) + 'px';
+  updateSendBtn();
+}
+
+// ============================================================
+// Chat Attachments
+// ============================================================
+
+function addChatAttachments(fileList) {
+  for (const file of Array.from(fileList)) {
+    if (supportedExtensions.length > 0) {
+      const ext = '.' + file.name.split('.').pop().toLowerCase();
+      if (!supportedExtensions.includes(ext)) {
+        showToast(`${file.name}: bestandstype niet ondersteund`, true);
+        continue;
+      }
+    }
+    pendingAttachments.push(file);
+  }
+  renderChatAttachments();
+  updateSendBtn();
+}
+
+function renderChatAttachments() {
+  if (!$chatAttachments) return;
+  const total = pendingAttachments.length + uploadedAttachments.length;
+  $chatAttachments.classList.toggle('has-files', total > 0);
+  $chatAttachments.innerHTML = '';
+
+  // Uploaded (done) chips
+  uploadedAttachments.forEach(att => {
+    const chip = document.createElement('span');
+    chip.className = 'attachment-chip done';
+    chip.innerHTML = `<span class="att-name">${escapeHtml(att.filename)}</span> <span style="opacity:0.5">${att.chunks_created} chunks</span>`;
+    $chatAttachments.appendChild(chip);
+  });
+
+  // Pending chips
+  pendingAttachments.forEach((file, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'attachment-chip';
+    chip.innerHTML = `<span class="att-name">${escapeHtml(file.name)}</span><button class="remove-att" title="Verwijderen">&times;</button>`;
+    chip.querySelector('.remove-att').addEventListener('click', () => {
+      pendingAttachments.splice(i, 1);
+      renderChatAttachments();
+      updateSendBtn();
+    });
+    $chatAttachments.appendChild(chip);
+  });
+}
+
+async function uploadChatAttachments(sessionId) {
+  for (let i = 0; i < pendingAttachments.length; i++) {
+    const file = pendingAttachments[i];
+    // Update chip to uploading state
+    const pendingChips = $chatAttachments.querySelectorAll('.attachment-chip:not(.done)');
+    if (pendingChips[0]) {
+      pendingChips[0].className = 'attachment-chip uploading';
+      pendingChips[0].innerHTML = `<div class="spinner-sm"></div> <span class="att-name">${escapeHtml(file.name)}</span>`;
+    }
+    try {
+      const result = await uploadChatFile(file, sessionId);
+      uploadedAttachments.push({
+        filename: result.filename || file.name,
+        document_id: result.document_id || '',
+        chunks_created: result.chunks_created || 0,
+      });
+    } catch (e) {
+      showToast(`${file.name}: ${e.message}`, true);
+    }
+    // Re-render after each file
+    pendingAttachments.splice(0, 1);
+    i--;
+    renderChatAttachments();
+  }
+}
+
+function uploadChatFile(file, sessionId) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append('file', file);
+    xhr.timeout = 600_000;
+    xhr.addEventListener('load', () => {
+      if (xhr.status === 401) { handleUnauthorized(); reject(new Error('Unauthorized')); return; }
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try { resolve(JSON.parse(xhr.responseText)); } catch { resolve({}); }
+      } else {
+        try {
+          const err = JSON.parse(xhr.responseText);
+          reject(new Error(err.detail || `Upload failed: ${xhr.status}`));
+        } catch { reject(new Error(`Upload failed: ${xhr.status}`)); }
+      }
+    });
+    xhr.addEventListener('error', () => reject(new Error('Netwerkfout')));
+    xhr.addEventListener('timeout', () => reject(new Error('Timeout')));
+    xhr.open('POST', `${API}/chat/sessions/${sessionId}/attachments`);
+    const token = getAuthToken();
+    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    xhr.send(formData);
+  });
+}
+
+// ============================================================
+// Documents
+// ============================================================
+
+async function loadCollectionDropdowns() {
+  try {
+    const data = await apiGet('/collections');
+    const collections = (data.collections || []).map(c => c.name);
+
+    const selects = [
+      document.getElementById('upload-collection'),
+      document.getElementById('browse-collection'),
+      $chatCollection,
+      document.getElementById('url-collection'),
+    ];
+
+    selects.forEach((sel, i) => {
+      const currentVal = sel.value;
+      sel.innerHTML = '';
+
+      if (i === 2) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Alle collecties';
+        sel.appendChild(opt);
+      }
+
+      collections.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        sel.appendChild(opt);
+      });
+
+      if (currentVal && collections.includes(currentVal)) {
+        sel.value = currentVal;
+      } else if (i !== 2 && collections.length) {
+        sel.value = collections[0];
+      }
+    });
+  } catch (e) {
+    // Collection load failed silently
+  }
+}
+
+async function loadDocuments(collectionName) {
+  if (!collectionName) {
+    currentFolderId = null;
+    folderPath = [];
+    allFolders = [];
+    return;
+  }
+  showLoadingIn($docsList, 'Documenten laden...');
+  if ($folderList) $folderList.innerHTML = '';
+
+  try {
+    // Fetch folders and documents in parallel
+    const folderParam = currentFolderId ? `?folder_id=${currentFolderId}` : '?root_only=true';
+    const [foldersData, docsData] = await Promise.all([
+      apiGet(`/collections/${collectionName}/folders`),
+      apiGet(`/collections/${collectionName}${folderParam}`),
+    ]);
+
+    allFolders = foldersData.folders || [];
+    const docs = docsData.documents || [];
+
+    renderBreadcrumb(collectionName);
+    renderFolders(collectionName);
+    renderDocuments(docs, collectionName);
+  } catch (e) {
+    $docsList.innerHTML = '<div class="empty-docs">Fout bij laden documenten</div>';
+  }
+}
+
+function renderDocuments(docs, collectionName) {
+  if (!docs.length && !allFolders.some(f => f.parent_id === currentFolderId || (!f.parent_id && !currentFolderId))) {
+    $docsList.innerHTML = '<div class="empty-docs">Geen documenten in deze map</div>';
+    return;
+  }
+
+  $docsList.innerHTML = '';
+  if (!docs.length) {
+    $docsList.innerHTML = '<div class="empty-docs">Geen documenten in deze map</div>';
+  }
+  docs.forEach(doc => {
+    const fileType = doc.file_type || '';
+    const ext = (fileType || doc.filename?.split('.').pop() || '?').toUpperCase();
+    // Determine badge for special document types
+    let badge = '';
+    if (fileType === 'audio') {
+      badge = '<span class="doc-badge badge-transcribed">Getranscribeerd</span>';
+    } else if (fileType === 'web') {
+      badge = '<span class="doc-badge badge-web">Webpagina</span>';
+    } else if (fileType === 'youtube') {
+      badge = '<span class="doc-badge badge-youtube">YouTube</span>';
+    }
+    const el = document.createElement('div');
+    el.className = 'doc-item';
+    el.draggable = true;
+    el.dataset.documentId = doc.document_id;
+    el.innerHTML = `
+      <div class="doc-icon">${escapeHtml(ext.substring(0, 4))}</div>
+      <div class="doc-info">
+        <div class="doc-name">${escapeHtml(doc.filename || 'onbekend')}${badge}</div>
+        <div class="doc-meta">${doc.total_chunks || 0} chunks</div>
+      </div>
+      <button class="doc-preview-btn" title="Bekijk chunks" data-doc-id="${escapeHtml(doc.document_id)}" data-doc-name="${escapeHtml(doc.filename || 'onbekend')}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+      <button class="doc-delete" title="Verwijder document">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+        </svg>
+      </button>
+    `;
+
+    // Drag start
+    el.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', doc.document_id);
+      e.dataTransfer.effectAllowed = 'move';
+      el.classList.add('dragging');
+    });
+    el.addEventListener('dragend', () => el.classList.remove('dragging'));
+
+    el.querySelector('.doc-preview-btn').addEventListener('click', () => {
+      openDocPreview(collectionName, doc.document_id, doc.filename || 'onbekend');
+    });
+
+    el.querySelector('.doc-delete').addEventListener('click', async () => {
+      const ok = await showConfirm('Document verwijderen', `'${doc.filename}' verwijderen uit ${collectionName}?`);
+      if (!ok) return;
+      try {
+        const result = await apiDelete(`/collections/${collectionName}/documents/${doc.document_id}`);
+        showToast(`Verwijderd (${result.chunks_removed || 0} chunks)`);
+        loadDocuments(collectionName);
+      } catch (e) {
+        showToast('Kon document niet verwijderen', true);
+      }
+    });
+
+    $docsList.appendChild(el);
+  });
+}
+
+// ============================================================
+// FOLDER FUNCTIONS
+// ============================================================
+
+function renderBreadcrumb(collectionName) {
+  if (!$folderBreadcrumb) return;
+  $folderBreadcrumb.innerHTML = '';
+
+  // Root item
+  const rootEl = document.createElement('span');
+  rootEl.className = `breadcrumb-item${currentFolderId === null ? ' active' : ''}`;
+  rootEl.textContent = 'Documenten';
+  if (currentFolderId !== null) {
+    rootEl.addEventListener('click', () => navigateToFolder(null, null, collectionName));
+    // Drop on root = move to root
+    rootEl.addEventListener('dragover', (e) => { e.preventDefault(); rootEl.classList.add('drag-over'); });
+    rootEl.addEventListener('dragleave', () => rootEl.classList.remove('drag-over'));
+    rootEl.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      rootEl.classList.remove('drag-over');
+      const docId = e.dataTransfer.getData('text/plain');
+      if (docId) await moveDocToFolder(docId, null, collectionName);
+    });
+  }
+  $folderBreadcrumb.appendChild(rootEl);
+
+  // Path items
+  folderPath.forEach((item, idx) => {
+    const sep = document.createElement('span');
+    sep.className = 'breadcrumb-sep';
+    sep.textContent = '›';
+    $folderBreadcrumb.appendChild(sep);
+
+    const isLast = idx === folderPath.length - 1;
+    const pathEl = document.createElement('span');
+    pathEl.className = `breadcrumb-item${isLast ? ' active' : ''}`;
+    pathEl.textContent = item.name;
+    if (!isLast) {
+      pathEl.addEventListener('click', () => {
+        // Navigate to this folder, trimming the path
+        folderPath = folderPath.slice(0, idx + 1);
+        currentFolderId = item.id;
+        loadDocuments(collectionName);
+      });
+      // Drop target
+      pathEl.addEventListener('dragover', (e) => { e.preventDefault(); pathEl.classList.add('drag-over'); });
+      pathEl.addEventListener('dragleave', () => pathEl.classList.remove('drag-over'));
+      pathEl.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        pathEl.classList.remove('drag-over');
+        const docId = e.dataTransfer.getData('text/plain');
+        if (docId) await moveDocToFolder(docId, item.id, collectionName);
+      });
+    }
+    $folderBreadcrumb.appendChild(pathEl);
+  });
+}
+
+function renderFolders(collectionName) {
+  if (!$folderList) return;
+  $folderList.innerHTML = '';
+
+  // Filter folders that belong to the current parent
+  const childFolders = allFolders.filter(f =>
+    (currentFolderId === null && !f.parent_id) ||
+    f.parent_id === currentFolderId
+  );
+
+  // Natural sort so week2 < week10 (not alphabetical)
+  childFolders.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+
+  childFolders.forEach(folder => {
+    const el = document.createElement('div');
+    el.className = 'folder-item';
+    el.innerHTML = `
+      <div class="folder-icon">📁</div>
+      <div class="folder-info">
+        <div class="folder-name">${escapeHtml(folder.name)}</div>
+        <div class="folder-meta">${folder.document_count || 0} documenten</div>
+      </div>
+      <div class="folder-actions-inline">
+        <button class="folder-action-btn" title="Hernoem">✏️</button>
+        <button class="folder-action-btn danger" title="Verwijder">🗑️</button>
+      </div>
+    `;
+
+    // Double-click to navigate into folder
+    el.addEventListener('dblclick', () => navigateToFolder(folder.id, folder.name, collectionName));
+    // Single click also navigates (more intuitive)
+    let clickTimer = null;
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.folder-actions-inline')) return;
+      if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; return; }
+      clickTimer = setTimeout(() => {
+        clickTimer = null;
+        navigateToFolder(folder.id, folder.name, collectionName);
+      }, 250);
+    });
+
+    // Drag-drop: accept documents
+    el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('drag-over'); });
+    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+    el.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      el.classList.remove('drag-over');
+      const docId = e.dataTransfer.getData('text/plain');
+      if (docId) await moveDocToFolder(docId, folder.id, collectionName);
+    });
+
+    // Rename button
+    const btns = el.querySelectorAll('.folder-action-btn');
+    btns[0].addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const newName = prompt('Nieuwe naam:', folder.name);
+      if (!newName || newName === folder.name) return;
+      try {
+        await apiPatch(`/collections/${collectionName}/folders/${folder.id}`, { name: newName });
+        showToast('Map hernoemd');
+        loadDocuments(collectionName);
+      } catch (err) {
+        showToast('Kon map niet hernoemen', true);
+      }
+    });
+
+    // Delete button
+    btns[1].addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const ok = await showConfirm('Map verwijderen', `'${folder.name}' verwijderen? Documenten worden teruggezet naar de root.`);
+      if (!ok) return;
+      try {
+        await apiDelete(`/collections/${collectionName}/folders/${folder.id}`);
+        showToast('Map verwijderd');
+        loadDocuments(collectionName);
+      } catch (err) {
+        showToast('Kon map niet verwijderen', true);
+      }
+    });
+
+    $folderList.appendChild(el);
+  });
+}
+
+function navigateToFolder(folderId, folderName, collectionName) {
+  if (folderId === null) {
+    currentFolderId = null;
+    folderPath = [];
+  } else {
+    currentFolderId = folderId;
+    // Check if we're navigating to an existing path item
+    const existingIdx = folderPath.findIndex(p => p.id === folderId);
+    if (existingIdx >= 0) {
+      folderPath = folderPath.slice(0, existingIdx + 1);
+    } else {
+      folderPath.push({ id: folderId, name: folderName });
+    }
+  }
+  loadDocuments(collectionName);
+}
+
+async function createNewFolder() {
+  const collectionName = document.getElementById('browse-collection').value;
+  if (!collectionName) return;
+  const name = prompt('Mapnaam:');
+  if (!name) return;
+  try {
+    await apiPost(`/collections/${collectionName}/folders`, {
+      name: name,
+      parent_id: currentFolderId,
+    });
+    showToast('Map aangemaakt');
+    loadDocuments(collectionName);
+  } catch (err) {
+    showToast('Kon map niet aanmaken', true);
+  }
+}
+
+async function moveDocToFolder(documentId, folderId, collectionName) {
+  try {
+    await apiPatch(`/collections/${collectionName}/documents/${documentId}/folder`, {
+      folder_id: folderId,
+    });
+    showToast(folderId ? 'Document verplaatst naar map' : 'Document verplaatst naar root');
+    loadDocuments(collectionName);
+  } catch (err) {
+    showToast('Kon document niet verplaatsen', true);
+  }
+}
+
+// Recursively collect files from drag-dropped directory entries
+// Each file gets a _relativePath property with the folder path (e.g. 'TopFolder/SubFolder')
+async function collectFilesFromEntries(entries) {
+  const files = [];
+  async function readEntry(entry, parentPath = '') {
+    if (entry.isFile) {
+      const file = await new Promise(resolve => entry.file(resolve));
+      // Skip hidden files and system files
+      if (!file.name.startsWith('.') && file.size > 0) {
+        file._relativePath = parentPath;
+        files.push(file);
+      }
+    } else if (entry.isDirectory) {
+      const dirPath = parentPath ? `${parentPath}/${entry.name}` : entry.name;
+      const reader = entry.createReader();
+      let batch;
+      do {
+        batch = await new Promise((resolve, reject) => reader.readEntries(resolve, reject));
+        for (const child of batch) await readEntry(child, dirPath);
+      } while (batch.length > 0);
+    }
+  }
+  for (const entry of entries) await readEntry(entry);
+  return files;
+}
+
+// Audio/video extensions that need server-side transcription (long processing)
+const MEDIA_EXTENSIONS = ['.mp4', '.mp3', '.wav', '.m4a', '.webm', '.ogg', '.flac'];
+
+function isMediaFile(file) {
+  const ext = '.' + file.name.split('.').pop().toLowerCase();
+  return MEDIA_EXTENSIONS.includes(ext);
+}
+
+function uploadFileWithProgress(file, collection, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('collection', collection);
+
+    // Short timeout for the initial upload — server returns immediately with job_id
+    xhr.timeout = 120_000;
+
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable) {
+        onProgress('uploading', Math.round((e.loaded / e.total) * 100));
+      }
+    });
+
+    xhr.upload.addEventListener('load', () => {
+      onProgress(isMediaFile(file) ? 'transcribing' : 'processing', 100);
+    });
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status === 401) { handleUnauthorized(); reject(new Error('Unauthorized')); return; }
+      if (xhr.status >= 200 && xhr.status < 300) {
+        let data;
+        try { data = JSON.parse(xhr.responseText); } catch { resolve({}); return; }
+
+        // Backend returns {status: "processing", job_id: "..."} for background jobs
+        if (data.status === 'processing' && data.job_id) {
+          onProgress('processing', 100);
+          pollJobUntilDone(data.job_id, onProgress)
+            .then(resolve)
+            .catch(reject);
+        } else {
+          resolve(data);
+        }
+      } else {
+        try {
+          const err = JSON.parse(xhr.responseText);
+          reject(new Error(err.detail || `${xhr.status} ${xhr.statusText}`));
+        } catch { reject(new Error(`${xhr.status} ${xhr.statusText}`)); }
+      }
+    });
+
+    xhr.addEventListener('error', () => reject(new Error('Netwerkfout')));
+    xhr.addEventListener('abort', () => reject(new Error('Upload geannuleerd')));
+    xhr.addEventListener('timeout', () => reject(new Error('Timeout — bestand te groot of server te druk')));
+
+    xhr.open('POST', `${API}/documents/upload`);
+    const token = getAuthToken();
+    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    xhr.send(formData);
+  });
+}
+
+/**
+ * Poll GET /documents/jobs/{jobId} until the job completes.
+ * Resolves with the final result or rejects on error/timeout.
+ */
+async function pollJobUntilDone(jobId, onProgress, maxWaitMs = 1200_000) {
+  const pollInterval = 3000; // 3 seconds
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < maxWaitMs) {
+    await new Promise(r => setTimeout(r, pollInterval));
+
+    try {
+      const job = await apiGet(`/documents/jobs/${encodeURIComponent(jobId)}`);
+
+      if (job.status === 'processing') {
+        onProgress('processing', 100);
+        continue;
+      }
+
+      // Job finished — return result in the same shape as the old sync response
+      if (job.status === 'error') {
+        throw new Error(job.error || 'Verwerking mislukt');
+      }
+
+      return {
+        document_id: job.document_id || '',
+        filename: job.filename || '',
+        file_type: job.file_type || '',
+        chunks_created: job.chunks_created || 0,
+        collection: job.collection || '',
+        content_hash: job.content_hash || '',
+        status: job.status,
+      };
+    } catch (e) {
+      // Network error during poll — retry (server might be busy)
+      if (e.message === 'Unauthorized') throw e;
+      console.warn('[Poll] Job poll failed, retrying:', e.message);
+    }
+  }
+
+  throw new Error('Timeout — verwerking duurt te lang (>20 min)');
+}
+
+/**
+ * Auto-create folder hierarchy from uploaded docs and move documents into them.
+ * @param {string} collection - Collection name
+ * @param {Array<{documentId: string, relativePath: string}>} docs - Uploaded docs with their relative paths
+ * @returns {Promise<boolean>} true if any folders were created or docs moved
+ */
+async function autoCreateFolders(collection, docs) {
+  try {
+    const uniquePaths = [...new Set(docs.map(d => d.relativePath).filter(Boolean))].sort();
+    console.log('[Auto-folder] Paths to create:', uniquePaths);
+    if (uniquePaths.length === 0) {
+      console.log('[Auto-folder] No paths found — skipping');
+      return false;
+    }
+
+    // Fetch existing folders to avoid duplicates
+    let existingFolders = [];
+    try {
+      const data = await apiGet(`/collections/${encodeURIComponent(collection)}/folders`);
+      existingFolders = data.folders || [];
+    } catch (err) {
+      console.warn('[Auto-folder] Could not fetch existing folders:', err.message);
+    }
+
+    // Build lookup: 'parentId::name' -> folderId
+    const folderLookup = {};
+    for (const f of existingFolders) {
+      folderLookup[`${f.parent_id || 'root'}::${f.name}`] = f.id;
+    }
+    console.log('[Auto-folder] Existing folders:', Object.keys(folderLookup));
+
+    const pathToFolderId = {};
+    let created = 0;
+
+    // Create folder hierarchy (parents first due to sort)
+    for (const path of uniquePaths) {
+      const parts = path.split('/');
+      let parentId = null;
+      for (let i = 0; i < parts.length; i++) {
+        const subPath = parts.slice(0, i + 1).join('/');
+        if (pathToFolderId[subPath]) {
+          parentId = pathToFolderId[subPath];
+          continue;
+        }
+        // Check if this folder already exists
+        const key = `${parentId || 'root'}::${parts[i]}`;
+        if (folderLookup[key]) {
+          pathToFolderId[subPath] = folderLookup[key];
+          parentId = folderLookup[key];
+          console.log('[Auto-folder] Reusing existing folder:', parts[i], '→', folderLookup[key]);
+        } else {
+          try {
+            const folder = await apiPost(`/collections/${encodeURIComponent(collection)}/folders`, {
+              name: parts[i],
+              parent_id: parentId,
+            });
+            pathToFolderId[subPath] = folder.id;
+            folderLookup[`${parentId || 'root'}::${parts[i]}`] = folder.id;
+            parentId = folder.id;
+            created++;
+            console.log('[Auto-folder] Created folder:', parts[i], '→', folder.id);
+          } catch (err) {
+            console.warn('[Auto-folder] Failed to create folder:', parts[i], err.message || err);
+            break; // Can't create children without parent
+          }
+        }
+      }
+    }
+
+    // Move documents to their folders
+    let moved = 0;
+    for (const { documentId, relativePath } of docs) {
+      const folderId = pathToFolderId[relativePath];
+      if (folderId) {
+        try {
+          await apiPatch(`/collections/${encodeURIComponent(collection)}/documents/${documentId}/folder`, {
+            folder_id: folderId,
+          });
+          moved++;
+        } catch (err) {
+          console.warn('[Auto-folder] Failed to move doc:', documentId, '→', folderId, err.message);
+        }
+      } else {
+        console.warn('[Auto-folder] No folder found for path:', relativePath);
+      }
+    }
+
+    console.log(`[Auto-folder] Done: ${created} folders created, ${moved} docs moved`);
+    return created > 0 || moved > 0;
+  } catch (e) {
+    console.error('[Auto-folder] Unexpected error:', e);
+    return false;
+  }
+}
+
+async function uploadFiles(fileListOrArray, fromFolder = false) {
+  // Accept both FileList and Array of Files
+  const allFiles = Array.from(fileListOrArray);
+  const collection = document.getElementById('upload-collection').value || 'default';
+  const statusEl = document.getElementById('upload-status');
+  const uploadBtn = document.getElementById('upload-btn');
+  const progressEl = document.getElementById('upload-progress');
+  const progressLabel = document.getElementById('upload-progress-label');
+  const progressPct = document.getElementById('upload-progress-pct');
+  const progressBar = document.getElementById('upload-progress-bar');
+  const progressFiles = document.getElementById('upload-progress-files');
+
+  // Build a robust filename→relativePath map at the very start, before any filtering.
+  // Uses multiple sources: _relativePath (set by collectFilesFromEntries/folderInput),
+  // webkitRelativePath (browser-native, read-only, most reliable for <input webkitdirectory>).
+  const filePathByName = {};
+  if (fromFolder) {
+    for (const f of allFiles) {
+      let rp = '';
+      // Source 1: custom property set by our code
+      if (f._relativePath) rp = f._relativePath;
+      // Source 2: browser-native webkitRelativePath (always available for folder input)
+      if (!rp && f.webkitRelativePath) {
+        const parts = f.webkitRelativePath.split('/');
+        rp = parts.slice(0, -1).join('/');
+      }
+      if (rp) filePathByName[f.name] = rp;
+    }
+    console.log('[Upload] Folder upload — path map:', JSON.stringify(filePathByName));
+  }
+
+  // Filter out unsupported file types (if we know supported extensions)
+  let files = allFiles;
+  let skipped = [];
+  if (supportedExtensions.length > 0) {
+    files = [];
+    for (const f of allFiles) {
+      const ext = '.' + f.name.split('.').pop().toLowerCase();
+      if (supportedExtensions.includes(ext)) {
+        files.push(f);
+      } else {
+        skipped.push(f.name);
+      }
+    }
+  }
+
+  // -- Duplicate detection: skip files already in this collection --
+  const dupes = [];
+  try {
+    const colData = await apiGet(`/collections/${encodeURIComponent(collection)}`);
+    const existingNames = new Set((colData.documents || []).map(d => d.filename));
+    if (existingNames.size > 0) {
+      const unique = [];
+      for (const f of files) {
+        if (existingNames.has(f.name)) dupes.push(f);
+        else unique.push(f);
+      }
+      files = unique;
+    }
+  } catch { /* collection doesn't exist yet — all files are new */ }
+
+  if (!files.length) {
+    if (dupes.length || skipped.length) {
+      let msg = '';
+      if (dupes.length) msg += `${dupes.length} al aanwezig`;
+      if (skipped.length) msg += `${msg ? ', ' : ''}${skipped.length} niet-ondersteund`;
+      statusEl.textContent = msg + ' — geen nieuwe bestanden om te uploaden.';
+      statusEl.className = 'upload-status';
+
+      // Still create folder structure for existing docs if from folder upload
+      if (fromFolder && dupes.length > 0) {
+        try {
+          const colData2 = await apiGet(`/collections/${encodeURIComponent(collection)}`);
+          const docsByName = {};
+          for (const d of (colData2.documents || [])) docsByName[d.filename] = d.document_id;
+          const existingDocs = [];
+          for (const df of dupes) {
+            const rp = filePathByName[df.name] || df._relativePath || '';
+            if (rp && docsByName[df.name]) {
+              existingDocs.push({ documentId: docsByName[df.name], relativePath: rp });
+            }
+          }
+          if (existingDocs.length > 0) {
+            await autoCreateFolders(collection, existingDocs);
+          }
+        } catch (e) { console.warn('[Auto-folder] Failed for existing docs:', e); }
+      }
+    } else {
+      statusEl.textContent = 'Geen bestanden geselecteerd.';
+      statusEl.className = 'upload-status error';
+    }
+    return;
+  }
+
+  // Reset & show progress UI
+  const folderBtn = document.getElementById('folder-upload-btn');
+  uploadBtn.disabled = true;
+  folderBtn.disabled = true;
+  statusEl.textContent = '';
+  statusEl.className = 'upload-status';
+  progressEl.classList.add('active');
+  progressBar.style.width = '0%';
+  progressBar.classList.remove('processing');
+  progressPct.textContent = '0%';
+  progressLabel.textContent = `Uploaden (0/${files.length})...`;
+
+  // Build file list UI
+  progressFiles.innerHTML = '';
+  const fileEls = [];
+  for (let i = 0; i < files.length; i++) {
+    const row = document.createElement('div');
+    row.className = 'upload-file-item';
+    row.innerHTML = `
+      <span class="upload-file-icon pending">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+        </svg>
+      </span>
+      <span class="upload-file-name">${escapeHtml(files[i].name)}</span>
+      <span class="upload-file-status">Wachtend</span>
+    `;
+    progressFiles.appendChild(row);
+    fileEls.push(row);
+  }
+
+  // Show duplicates as already-present in file list
+  for (const df of dupes) {
+    const row = document.createElement('div');
+    row.className = 'upload-file-item done';
+    row.innerHTML = `
+      <span class="upload-file-icon done">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+      <span class="upload-file-name">${escapeHtml(df.name)}</span>
+      <span class="upload-file-status">Al aanwezig</span>
+    `;
+    progressFiles.appendChild(row);
+  }
+
+  let totalChunks = 0;
+  let completedFiles = 0;
+  const results = [];
+  const uploadedDocs = []; // {documentId, relativePath} for auto-folder creation
+
+  const iconSvg = {
+    uploading: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
+    processing: '<div class="spinner-sm"></div>',
+    done: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    error: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  };
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const row = fileEls[i];
+    const iconEl = row.querySelector('.upload-file-icon');
+    const statusSpan = row.querySelector('.upload-file-status');
+
+    // Mark as uploading
+    iconEl.className = 'upload-file-icon uploading';
+    iconEl.innerHTML = iconSvg.uploading;
+    statusSpan.textContent = 'Uploaden...';
+    progressLabel.textContent = `Uploaden (${i + 1}/${files.length})...`;
+
+    try {
+      const response = await uploadFileWithProgress(file, collection, (phase, pct) => {
+        if (phase === 'uploading') {
+          // Per-file upload progress → map to overall
+          const fileWeight = 1 / files.length;
+          const overallPct = Math.round((completedFiles * fileWeight + (pct / 100) * fileWeight * 0.5) * 100);
+          progressBar.style.width = overallPct + '%';
+          progressPct.textContent = overallPct + '%';
+          statusSpan.textContent = `Uploaden ${pct}%`;
+        } else if (phase === 'transcribing') {
+          iconEl.className = 'upload-file-icon processing';
+          iconEl.innerHTML = iconSvg.processing;
+          statusSpan.textContent = 'Transcriberen...';
+          progressLabel.textContent = `Transcriberen ${file.name}...`;
+          progressBar.classList.add('processing');
+        } else if (phase === 'processing') {
+          iconEl.className = 'upload-file-icon processing';
+          iconEl.innerHTML = iconSvg.processing;
+          statusSpan.textContent = 'Verwerken & embedden...';
+          progressLabel.textContent = `Verwerken ${file.name}...`;
+          progressBar.classList.add('processing');
+        }
+      });
+
+      progressBar.classList.remove('processing');
+      const chunks = response.chunks_created || 0;
+      totalChunks += chunks;
+      completedFiles++;
+      results.push(`${file.name} — ${chunks} chunks`);
+
+      // Track for auto-folder assignment — use filePathByName (most reliable)
+      const relPath = filePathByName[file.name] || file._relativePath || '';
+      if (response.document_id && relPath) {
+        uploadedDocs.push({ documentId: response.document_id, relativePath: relPath });
+      }
+      if (fromFolder) {
+        console.log('[Upload]', file.name, '→ doc_id:', response.document_id || '(none)', 'path:', relPath || '(root)');
+      }
+
+      // Mark done
+      row.className = 'upload-file-item done';
+      iconEl.className = 'upload-file-icon done';
+      iconEl.innerHTML = iconSvg.done;
+      statusSpan.textContent = `${chunks} chunks`;
+
+      // Update overall progress
+      const overallPct = Math.round((completedFiles / files.length) * 100);
+      progressBar.style.width = overallPct + '%';
+      progressPct.textContent = overallPct + '%';
+
+    } catch (e) {
+      progressBar.classList.remove('processing');
+      completedFiles++;
+      results.push(`${file.name} — fout: ${e.message}`);
+
+      row.className = 'upload-file-item error';
+      iconEl.className = 'upload-file-icon error';
+      iconEl.innerHTML = iconSvg.error;
+      statusSpan.textContent = e.message;
+
+      const overallPct = Math.round((completedFiles / files.length) * 100);
+      progressBar.style.width = overallPct + '%';
+      progressPct.textContent = overallPct + '%';
+    }
+  }
+
+  // For folder uploads: also include duplicate files in the folder assignment
+  // (they're already uploaded but not yet in the right folder)
+  if (fromFolder && dupes.length > 0) {
+    try {
+      const colData3 = await apiGet(`/collections/${encodeURIComponent(collection)}`);
+      const docsByName = {};
+      for (const d of (colData3.documents || [])) docsByName[d.filename] = d.document_id;
+      for (const df of dupes) {
+        const rp = filePathByName[df.name] || df._relativePath || '';
+        if (rp && docsByName[df.name]) {
+          uploadedDocs.push({ documentId: docsByName[df.name], relativePath: rp });
+          console.log('[Upload] Dupe mapped:', df.name, '→', docsByName[df.name], 'path:', rp);
+        }
+      }
+    } catch (e) { console.warn('[Upload] Failed to map dupes to folders:', e); }
+  }
+
+  // Auto-create folder structure from uploaded folder
+  let foldersCreated = false;
+  if (fromFolder) {
+    console.log('[Upload] fromFolder=true, uploadedDocs:', uploadedDocs.length, uploadedDocs);
+    if (uploadedDocs.length > 0) {
+      progressLabel.textContent = 'Mappen aanmaken...';
+      foldersCreated = await autoCreateFolders(collection, uploadedDocs);
+    } else {
+      console.warn('[Upload] fromFolder=true but NO docs with paths! filePathByName:', JSON.stringify(filePathByName));
+    }
+  }
+
+  // Final state
+  progressBar.style.width = '100%';
+  progressPct.textContent = '100%';
+  let doneMsg = `Klaar — ${files.length} bestanden, ${totalChunks} chunks`;
+  if (dupes.length) doneMsg += `, ${dupes.length} al aanwezig`;
+  if (skipped.length) doneMsg += ` (${skipped.length} niet-ondersteund overgeslagen)`;
+  if (foldersCreated) doneMsg += ' — mappen aangemaakt';
+  progressLabel.textContent = doneMsg;
+  uploadBtn.disabled = false;
+  folderBtn.disabled = false;
+
+  // Hide progress after 8 seconds
+  setTimeout(() => {
+    progressEl.classList.remove('active');
+  }, 8000);
+
+  const browseCol = document.getElementById('browse-collection').value;
+  if (browseCol) loadDocuments(browseCol);
+  loadCollectionDropdowns();
+}
+
+// ============================================================
+// URL Upload
+// ============================================================
+
+async function uploadUrl() {
+  const urlInput = document.getElementById('url-input');
+  const collection = document.getElementById('url-collection').value || 'default';
+  const statusEl = document.getElementById('url-upload-status');
+  const btn = document.getElementById('url-upload-btn');
+  const url = urlInput.value.trim();
+
+  if (!url) {
+    statusEl.textContent = 'Voer een URL in.';
+    statusEl.className = 'url-upload-status error';
+    return;
+  }
+
+  btn.disabled = true;
+  const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+  statusEl.textContent = isYouTube ? 'YouTube transcript ophalen...' : 'Webpagina ophalen & verwerken...';
+  statusEl.className = 'url-upload-status loading';
+
+  try {
+    const result = await apiPost('/documents/upload-url', { url, collection });
+    if (result.status === 'success') {
+      statusEl.textContent = `${result.filename} — ${result.chunks_created} chunks aangemaakt`;
+      statusEl.className = 'url-upload-status success';
+      urlInput.value = '';
+      const browseCol = document.getElementById('browse-collection').value;
+      if (browseCol) loadDocuments(browseCol);
+      loadCollectionDropdowns();
+    } else {
+      statusEl.textContent = `Fout: ${result.filename || url}`;
+      statusEl.className = 'url-upload-status error';
+    }
+  } catch (e) {
+    statusEl.textContent = `Fout: ${e.message || 'URL kon niet worden verwerkt'}`;
+    statusEl.className = 'url-upload-status error';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ============================================================
+// Document Preview
+// ============================================================
+
+async function openDocPreview(collectionName, documentId, filename) {
+  const modal = document.getElementById('doc-preview-modal');
+  const title = document.getElementById('doc-preview-title');
+  const body = document.getElementById('doc-preview-body');
+
+  title.textContent = filename;
+  body.innerHTML = '<div class="loading-state"><div class="spinner"></div><span>Chunks laden...</span></div>';
+  modal.style.display = 'flex';
+
+  try {
+    const data = await apiGet(`/collections/${collectionName}/documents/${documentId}/chunks`);
+    const chunks = data.chunks || [];
+
+    if (!chunks.length) {
+      body.innerHTML = '<div class="empty-docs">Geen chunks gevonden voor dit document</div>';
+      return;
+    }
+
+    body.innerHTML = `<div style="margin-bottom:12px;font-size:12px;color:var(--text-muted)">${chunks.length} chunks in collectie "${escapeHtml(collectionName)}"</div>`;
+
+    chunks.forEach((chunk, i) => {
+      const div = document.createElement('div');
+      div.className = 'chunk-item';
+
+      const meta = chunk.metadata || {};
+      const metaParts = [];
+      if (meta.page) metaParts.push(`Pagina ${meta.page}`);
+      if (meta.section) metaParts.push(meta.section);
+      if (meta.source_url) metaParts.push(meta.source_url);
+
+      div.innerHTML = `
+        <div class="chunk-item-header">
+          <span class="chunk-idx">Chunk ${chunk.chunk_index + 1}</span>
+          <span>${metaParts.join(' · ') || ''}</span>
+        </div>
+        <div>${escapeHtml(chunk.content)}</div>
+      `;
+      body.appendChild(div);
+    });
+  } catch (e) {
+    body.innerHTML = `<div class="empty-docs">Fout bij laden: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+// ============================================================
+// Groq Usage
+// ============================================================
+
+async function loadGroqUsage() {
+  try {
+    const data = await apiGet('/usage');
+    return data;
+  } catch (e) {
+    // Usage load failed silently
+    return null;
+  }
+}
+
+function renderGroqUsageSection(usage) {
+  if (!usage) return '';
+
+  const today = usage.today || {};
+  const month = usage.this_month || {};
+  const models = usage.by_model || [];
+  const todayByProvider = usage.today_by_provider || [];
+  const monthByProvider = usage.month_by_provider || [];
+
+  function fmtCost(v) { return '$' + (v || 0).toFixed(4); }
+  function fmtNum(v) { return (v || 0).toLocaleString(); }
+  function fmtAudio(s) {
+    if (!s) return '0s';
+    if (s < 60) return Math.round(s) + 's';
+    return Math.round(s / 60) + 'min';
+  }
+
+  const providerLabels = { groq: 'Groq', cerebras: 'Cerebras', openrouter: 'OpenRouter' };
+  const providerColors = { groq: '#f55036', cerebras: '#6366f1', openrouter: '#22c55e' };
+
+  // Provider mini-cards for today
+  let todayProviderCards = '';
+  if (todayByProvider.length) {
+    todayProviderCards = `<div class="provider-breakdown">${todayByProvider.map(p => `
+      <div class="provider-mini-card" style="border-left: 3px solid ${providerColors[p.provider] || '#888'}">
+        <span class="provider-mini-name">${escapeHtml(providerLabels[p.provider] || p.provider)}</span>
+        <span class="provider-mini-stat">${fmtNum(p.requests)} req</span>
+        <span class="provider-mini-stat">${fmtNum(p.total_tokens)} tok</span>
+        <span class="provider-mini-stat">${fmtCost(p.cost)}</span>
+      </div>
+    `).join('')}</div>`;
+  }
+
+  // Provider mini-cards for this month
+  let monthProviderCards = '';
+  if (monthByProvider.length) {
+    monthProviderCards = `<div class="provider-breakdown">${monthByProvider.map(p => `
+      <div class="provider-mini-card" style="border-left: 3px solid ${providerColors[p.provider] || '#888'}">
+        <span class="provider-mini-name">${escapeHtml(providerLabels[p.provider] || p.provider)}</span>
+        <span class="provider-mini-stat">${fmtNum(p.requests)} req</span>
+        <span class="provider-mini-stat">${fmtNum(p.total_tokens)} tok</span>
+        <span class="provider-mini-stat">${fmtCost(p.cost)}</span>
+      </div>
+    `).join('')}</div>`;
+  }
+
+  let modelRows = '';
+  if (models.length) {
+    modelRows = models.map(m => {
+      const pColor = providerColors[m.provider] || '#888';
+      return `
+      <tr>
+        <td><span class="provider-dot" style="background:${pColor}"></span>${escapeHtml(providerLabels[m.provider] || m.provider)}</td>
+        <td>${escapeHtml(m.model)}</td>
+        <td>${fmtNum(m.requests)}</td>
+        <td>${fmtNum(m.tokens)}</td>
+        <td>${fmtAudio(m.audio_seconds)}</td>
+        <td>${fmtCost(m.cost)}</td>
+      </tr>
+    `}).join('');
+  }
+
+  return `
+    <div class="analytics-card usage-section">
+      <div class="section-header">
+        <div class="section-header-icon cyan">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <h3 style="margin:0">LLM Gebruik</h3>
+      </div>
+      <div class="usage-row-label">Vandaag</div>
+      <div class="usage-stats">
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtNum(today.requests)}</div>
+          <div class="usage-stat-label">Requests</div>
+        </div>
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtNum(today.total_tokens)}</div>
+          <div class="usage-stat-label">Tokens</div>
+        </div>
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtAudio(today.audio_seconds)}</div>
+          <div class="usage-stat-label">Audio</div>
+        </div>
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtCost(today.estimated_cost)}</div>
+          <div class="usage-stat-label">Kosten</div>
+        </div>
+      </div>
+      ${todayProviderCards}
+      <div class="usage-row-label">Deze maand</div>
+      <div class="usage-stats">
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtNum(month.requests)}</div>
+          <div class="usage-stat-label">Requests</div>
+        </div>
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtNum(month.total_tokens)}</div>
+          <div class="usage-stat-label">Tokens</div>
+        </div>
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtAudio(month.audio_seconds)}</div>
+          <div class="usage-stat-label">Audio</div>
+        </div>
+        <div class="usage-stat-card">
+          <div class="usage-stat-value">${fmtCost(month.estimated_cost)}</div>
+          <div class="usage-stat-label">Kosten</div>
+        </div>
+      </div>
+      ${monthProviderCards}
+      ${models.length ? `
+        <table class="usage-model-table">
+          <thead>
+            <tr><th>Provider</th><th>Model</th><th>Requests</th><th>Tokens</th><th>Audio</th><th>Kosten</th></tr>
+          </thead>
+          <tbody>${modelRows}</tbody>
+        </table>
+      ` : ''}
+    </div>
+  `;
+}
+
+// ============================================================
+// Collections
+// ============================================================
+
+async function loadCollections() {
+  showLoadingIn($collectionsList, 'Collecties laden...');
+  try {
+    const data = await apiGet('/collections');
+    const collections = data.collections || [];
+    renderCollections(collections);
+  } catch (e) {
+    $collectionsList.innerHTML = '<div class="empty-docs">Fout bij laden collecties</div>';
+  }
+}
+
+function renderCollections(collections) {
+  $collectionsList.innerHTML = '';
+
+  if (!collections.length) {
+    $collectionsList.innerHTML = '<div class="empty-docs">Geen collecties gevonden</div>';
+    return;
+  }
+
+  collections.forEach(col => {
+    const el = document.createElement('div');
+    el.className = 'collection-item';
+    el.innerHTML = `
+      <div class="collection-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <ellipse cx="12" cy="5" rx="9" ry="3"/>
+          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+        </svg>
+      </div>
+      <div class="collection-info">
+        <div class="collection-name">${escapeHtml(col.name)}</div>
+        <div class="collection-stats">${col.document_count || 0} documenten - ${col.total_chunks || 0} chunks</div>
+      </div>
+      <button class="collection-delete" title="Verwijder collectie">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+        </svg>
+      </button>
+    `;
+
+    el.querySelector('.collection-delete').addEventListener('click', async () => {
+      const ok = await showConfirm('Collectie verwijderen', `Collectie '${col.name}' verwijderen? Alle documenten worden gewist.`);
+      if (!ok) return;
+      try {
+        const result = await apiDelete(`/collections/${col.name}`);
+        let msg = `Collectie '${col.name}' verwijderd`;
+        if (result.warning) msg += `. ${result.warning}`;
+        showToast(msg);
+        loadCollections();
+        loadCollectionDropdowns();
+      } catch (e) {
+        showToast('Kon collectie niet verwijderen', true);
+      }
+    });
+
+    $collectionsList.appendChild(el);
+  });
+}
+
+async function createCollection() {
+  const input = document.getElementById('new-col-name');
+  if (!validateField(input, 'Geef een naam op voor de collectie')) return;
+
+  const name = input.value.trim();
+  try {
+    await apiPost('/collections', { name });
+    showToast(`Collectie '${name}' aangemaakt`);
+    input.value = '';
+    loadCollections();
+    loadCollectionDropdowns();
+  } catch (e) {
+    showToast(`Fout: ${e.message}`, true);
+  }
+}
+
+// ============================================================
+// Agents
+// ============================================================
+
+async function loadAgents() {
+  try {
+    const agents = await apiGet('/agents');
+    agentsCache = agents;
+    renderAgents(agents);
+    updateAgentDropdown(agents);
+  } catch (e) {
+    // Agents load failed silently
+  }
+}
+
+function updateAgentDropdown(agents) {
+  const current = $agentSelect.value;
+  $agentSelect.innerHTML = '<option value="">Geen agent (standaard)</option>';
+  agents.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a.id;
+    opt.textContent = `${a.icon} ${a.name}`;
+    $agentSelect.appendChild(opt);
+  });
+  if (current && agents.find(a => a.id === current)) {
+    $agentSelect.value = current;
+  }
+}
+
+function renderAgents(agents) {
+  const titleEl = document.getElementById('agents-list-title');
+
+  if (!agents.length) {
+    titleEl.style.display = 'none';
+    $agentsList.innerHTML = `
+      <div class="agents-empty">
+        <div class="agents-empty-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div class="agents-empty-title">Nog geen agents</div>
+        <div class="agents-empty-desc">Maak je eerste agent aan via het formulier hierboven.</div>
+      </div>
+    `;
+    return;
+  }
+
+  titleEl.style.display = '';
+  titleEl.textContent = `Jouw Agents (${agents.length})`;
+  $agentsList.innerHTML = '';
+
+  agents.forEach(agent => {
+    const colTags = agent.collections.length
+      ? agent.collections.map(c => `<span class="agent-tag"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>${escapeHtml(c)}</span>`).join('')
+      : '<span class="agent-tag">Alle collecties</span>';
+
+    const promptPreview = agent.system_prompt.length > 120
+      ? agent.system_prompt.substring(0, 120) + '...'
+      : agent.system_prompt;
+
+    const el = document.createElement('div');
+    el.className = 'agent-card';
+    el.innerHTML = `
+      <div class="agent-avatar">${escapeHtml(agent.icon || 'E')}</div>
+      <div class="agent-details">
+        <div class="agent-name">${escapeHtml(agent.name)}</div>
+        <div class="agent-desc">${escapeHtml(agent.description || 'Geen beschrijving')}</div>
+        <div class="agent-prompt-preview">${escapeHtml(promptPreview)}</div>
+        <div class="agent-meta">${colTags}
+          <span class="agent-tag">temp: ${agent.temperature}</span>
+          <span class="agent-tag">top_k: ${agent.top_k}</span>
+        </div>
+      </div>
+      <div class="agent-actions">
+        <button class="agent-action-btn chat-btn agent-use" title="Chat">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+          Chat
+        </button>
+        <button class="agent-action-btn edit-btn agent-edit" title="Bewerk">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+          Bewerk
+        </button>
+        <button class="agent-action-btn del-btn agent-del" title="Verwijder">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+          </svg>
+          Verwijder
+        </button>
+      </div>
+    `;
+
+    el.querySelector('.agent-use').addEventListener('click', () => {
+      $agentSelect.value = agent.id;
+      currentAgentId = agent.id;
+      newChat();
+      switchView('chat');
+      showToast(`Agent '${agent.name}' geselecteerd`);
+    });
+
+    el.querySelector('.agent-edit').addEventListener('click', () => editAgent(agent));
+
+    el.querySelector('.agent-del').addEventListener('click', async () => {
+      const ok = await showConfirm('Agent verwijderen', `Agent '${agent.name}' verwijderen?`);
+      if (!ok) return;
+      try {
+        await apiDelete(`/agents/${agent.id}`);
+        showToast(`Agent '${agent.name}' verwijderd`);
+        loadAgents();
+      } catch (e) {
+        showToast('Kon agent niet verwijderen', true);
+      }
+    });
+
+    $agentsList.appendChild(el);
+  });
+}
+
+function editAgent(agent) {
+  editingAgentId = agent.id;
+
+  const formBody = document.getElementById('agent-form-body');
+  formBody.classList.remove('collapsed');
+  updateToggleBtn(false);
+
+  document.getElementById('agent-name').value = agent.name;
+  document.getElementById('agent-icon').value = agent.icon || 'E';
+  document.getElementById('agent-desc').value = agent.description || '';
+  document.getElementById('agent-prompt').value = agent.system_prompt;
+  document.getElementById('agent-temp').value = agent.temperature;
+  document.getElementById('agent-topk').value = agent.top_k;
+  document.getElementById('agent-multiquery').checked = agent.use_multi_query !== false;
+
+  const colSelect = document.getElementById('agent-collections');
+  Array.from(colSelect.options).forEach(opt => {
+    opt.selected = agent.collections.includes(opt.value);
+  });
+
+  const submitBtn = document.getElementById('create-agent-btn');
+  submitBtn.innerHTML = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+      <polyline points="17 21 17 13 7 13 7 21"/>
+      <polyline points="7 3 7 8 15 8"/>
+    </svg>
+    Wijzigingen opslaan
+  `;
+
+  let cancelBtn = document.getElementById('cancel-edit-btn');
+  if (!cancelBtn) {
+    cancelBtn = document.createElement('button');
+    cancelBtn.id = 'cancel-edit-btn';
+    cancelBtn.className = 'btn cancel-edit-btn';
+    cancelBtn.textContent = 'Annuleren';
+    cancelBtn.addEventListener('click', cancelEditAgent);
+    submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling);
+  }
+  cancelBtn.style.display = '';
+
+  document.querySelector('.agent-form-card .card-header-row h3').textContent = `Agent bewerken: ${agent.name}`;
+  document.querySelector('.agent-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  showToast(`Bewerken: ${agent.name}`);
+}
+
+function cancelEditAgent() {
+  editingAgentId = null;
+  resetAgentForm();
+}
+
+function resetAgentForm() {
+  editingAgentId = null;
+
+  document.getElementById('agent-name').value = '';
+  document.getElementById('agent-icon').value = '';
+  document.getElementById('agent-desc').value = '';
+  document.getElementById('agent-prompt').value = '';
+  document.getElementById('agent-temp').value = '0.7';
+  document.getElementById('agent-topk').value = '15';
+  document.getElementById('agent-multiquery').checked = true;
+
+  const colSelect = document.getElementById('agent-collections');
+  Array.from(colSelect.options).forEach(opt => { opt.selected = false; });
+
+  const submitBtn = document.getElementById('create-agent-btn');
+  submitBtn.innerHTML = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/>
+      <line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Agent aanmaken
+  `;
+
+  const cancelBtn = document.getElementById('cancel-edit-btn');
+  if (cancelBtn) cancelBtn.style.display = 'none';
+
+  document.querySelector('.agent-form-card .card-header-row h3').textContent = 'Nieuwe Agent';
+}
+
+async function loadAgentFormCollections() {
+  try {
+    const data = await apiGet('/collections');
+    const sel = document.getElementById('agent-collections');
+    const currentSelections = Array.from(sel.selectedOptions).map(o => o.value);
+    sel.innerHTML = '';
+    (data.collections || []).forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.name;
+      opt.textContent = `${c.name} (${c.document_count} docs)`;
+      opt.selected = currentSelections.includes(c.name);
+      sel.appendChild(opt);
+    });
+  } catch (e) {
+    // Agent form collection load failed silently
+  }
+}
+
+async function saveAgent() {
+  const nameInput = document.getElementById('agent-name');
+  const promptInput = document.getElementById('agent-prompt');
+
+  if (!validateField(nameInput, 'Geef de agent een naam')) return;
+  if (!validateField(promptInput, 'System prompt is verplicht')) return;
+
+  const name = nameInput.value.trim();
+  const desc = document.getElementById('agent-desc').value.trim();
+  const prompt = promptInput.value.trim();
+  const icon = document.getElementById('agent-icon').value.trim() || 'E';
+  const temp = parseFloat(document.getElementById('agent-temp').value) || 0.7;
+  const topk = parseInt(document.getElementById('agent-topk').value) || 15;
+  const useMultiQuery = document.getElementById('agent-multiquery').checked;
+
+  const colSelect = document.getElementById('agent-collections');
+  const collections = Array.from(colSelect.selectedOptions).map(o => o.value);
+
+  const payload = {
+    name, description: desc, system_prompt: prompt,
+    collections, temperature: temp, top_k: topk, icon,
+    use_multi_query: useMultiQuery,
+  };
+
+  const submitBtn = document.getElementById('create-agent-btn');
+  const origHtml = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<div class="spinner spinner-sm"></div> Opslaan...';
+
+  try {
+    if (editingAgentId) {
+      await apiPut(`/agents/${editingAgentId}`, payload);
+      showToast(`Agent '${name}' bijgewerkt!`);
+    } else {
+      await apiPost('/agents', payload);
+      showToast(`Agent '${name}' aangemaakt!`);
+    }
+
+    resetAgentForm();
+    loadAgents();
+  } catch (e) {
+    showToast(`Fout: ${e.message}`, true);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = origHtml;
+  }
+}
+
+function updateToggleBtn(isHidden) {
+  const toggleFormBtn = document.getElementById('toggle-agent-form');
+  toggleFormBtn.innerHTML = isHidden
+    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Formulier tonen`
+    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg> Formulier verbergen`;
+}
+
+// ============================================================
+// Analytics Dashboard
+// ============================================================
+
+// ============================================================
+// System Documentation
+// ============================================================
+
+async function loadSystemInfo() {
+  const container = document.getElementById('system-content');
+  showLoadingIn(container, 'Systeem informatie laden...');
+
+  try {
+    const data = await apiGet('/health/system-info');
+    renderSystemInfo(data, container);
+  } catch (e) {
+    container.innerHTML = `<div class="empty-docs">Fout bij laden systeem info: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+function renderSystemInfo(data, container) {
+  const sections = [];
+
+  // Section icon SVGs
+  const sysIcons = {
+    arch: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+    ingest: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
+    retrieval: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+    gen: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    chat: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
+    stability: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    config: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>'
+  };
+  const sysColors = ['purple', 'blue', 'cyan', 'orange', 'pink', 'green', 'purple'];
+
+  // Architecture
+  if (data.architecture) {
+    const comps = data.architecture.components.map(c =>
+      `<div class="sys-component">
+        <div class="sys-comp-name">${escapeHtml(c.name)}</div>
+        <div class="sys-comp-desc">${escapeHtml(c.description)}</div>
+        ${c.model ? `<span class="sys-badge">${escapeHtml(c.model)}</span>` : ''}
+      </div>`
+    ).join('');
+    sections.push(`
+      <div class="sys-section">
+        <div class="section-header">
+          <div class="section-header-icon ${sysColors[0]}">${sysIcons.arch}</div>
+          <h3 style="margin:0;border:0;padding:0">${escapeHtml(data.architecture.title)}</h3>
+        </div>
+        <div class="sys-flow">
+          <div class="sys-flow-diagram">
+            <div class="sys-flow-box">Gebruiker</div>
+            <div class="sys-flow-arrow">&rarr;</div>
+            <div class="sys-flow-box">FastAPI</div>
+            <div class="sys-flow-arrow">&rarr;</div>
+            <div class="sys-flow-box">Retrieval Pipeline</div>
+            <div class="sys-flow-arrow">&rarr;</div>
+            <div class="sys-flow-box">Groq LLM</div>
+            <div class="sys-flow-arrow">&rarr;</div>
+            <div class="sys-flow-box">Antwoord</div>
+          </div>
+        </div>
+        <div class="sys-components">${comps}</div>
+      </div>`
+    );
+  }
+
+  // Ingestion Pipeline
+  if (data.ingestion) {
+    const steps = data.ingestion.steps.map(s =>
+      `<div class="sys-step">
+        <div class="sys-step-num">${s.step}</div>
+        <div class="sys-step-body">
+          <div class="sys-step-name">${escapeHtml(s.name)}</div>
+          <div class="sys-step-desc">${escapeHtml(s.description)}</div>
+        </div>
+      </div>`
+    ).join('');
+
+    const types = data.ingestion.supported_types.map(t =>
+      `<tr>
+        <td><strong>${escapeHtml(t.type)}</strong></td>
+        <td><code>${t.extensions.map(e => escapeHtml(e)).join(', ') || 'URL'}</code></td>
+        <td>${escapeHtml(t.processor)}</td>
+      </tr>`
+    ).join('');
+
+    sections.push(`
+      <div class="sys-section">
+        <div class="section-header">
+          <div class="section-header-icon ${sysColors[1]}">${sysIcons.ingest}</div>
+          <h3 style="margin:0;border:0;padding:0">${escapeHtml(data.ingestion.title)}</h3>
+        </div>
+        <div class="sys-steps">${steps}</div>
+        <h4 style="margin-top:20px;color:var(--text-secondary);">Ondersteunde Bestandstypes</h4>
+        <div class="sys-table-wrap">
+          <table class="sys-table">
+            <thead><tr><th>Type</th><th>Extensies</th><th>Processor</th></tr></thead>
+            <tbody>${types}</tbody>
+          </table>
+        </div>
+      </div>`
+    );
+  }
+
+  // Retrieval Pipeline
+  if (data.retrieval) {
+    const steps = data.retrieval.steps.map(s =>
+      `<div class="sys-step">
+        <div class="sys-step-num">${s.step}</div>
+        <div class="sys-step-body">
+          <div class="sys-step-name">${escapeHtml(s.name)}</div>
+          <div class="sys-step-desc">${escapeHtml(s.description)}</div>
+        </div>
+      </div>`
+    ).join('');
+
+    const settings = Object.entries(data.retrieval.settings).map(([k, v]) =>
+      `<div class="sys-config-item"><span class="sys-config-key">${escapeHtml(k)}</span><span class="sys-config-val">${v}</span></div>`
+    ).join('');
+
+    sections.push(`
+      <div class="sys-section">
+        <div class="section-header">
+          <div class="section-header-icon ${sysColors[2]}">${sysIcons.retrieval}</div>
+          <h3 style="margin:0;border:0;padding:0">${escapeHtml(data.retrieval.title)}</h3>
+        </div>
+        <div class="sys-steps">${steps}</div>
+        <div class="sys-config-grid" style="margin-top:16px;">${settings}</div>
+      </div>`
+    );
+  }
+
+  // Generation
+  if (data.generation) {
+    const features = data.generation.features.map(f =>
+      `<div class="sys-feature">
+        <div class="sys-feature-name">${escapeHtml(f.name)}</div>
+        <div class="sys-feature-desc">${escapeHtml(f.description)}</div>
+      </div>`
+    ).join('');
+    sections.push(`
+      <div class="sys-section">
+        <div class="section-header">
+          <div class="section-header-icon ${sysColors[3]}">${sysIcons.gen}</div>
+          <h3 style="margin:0;border:0;padding:0">${escapeHtml(data.generation.title)}</h3>
+        </div>
+        <div class="sys-features">${features}</div>
+      </div>`
+    );
+  }
+
+  // Chat Features
+  if (data.chat) {
+    const features = data.chat.features.map(f =>
+      `<div class="sys-feature">
+        <div class="sys-feature-name">${escapeHtml(f.name)}</div>
+        <div class="sys-feature-desc">${escapeHtml(f.description)}</div>
+      </div>`
+    ).join('');
+    sections.push(`
+      <div class="sys-section">
+        <div class="section-header">
+          <div class="section-header-icon ${sysColors[4]}">${sysIcons.chat}</div>
+          <h3 style="margin:0;border:0;padding:0">${escapeHtml(data.chat.title)}</h3>
+        </div>
+        <div class="sys-features">${features}</div>
+      </div>`
+    );
+  }
+
+  // Stability
+  if (data.stability) {
+    const features = data.stability.features.map(f =>
+      `<div class="sys-feature">
+        <div class="sys-feature-name">${escapeHtml(f.name)}</div>
+        <div class="sys-feature-desc">${escapeHtml(f.description)}</div>
+      </div>`
+    ).join('');
+    sections.push(`
+      <div class="sys-section">
+        <div class="section-header">
+          <div class="section-header-icon ${sysColors[5]}">${sysIcons.stability}</div>
+          <h3 style="margin:0;border:0;padding:0">${escapeHtml(data.stability.title)}</h3>
+        </div>
+        <div class="sys-features">${features}</div>
+      </div>`
+    );
+  }
+
+  // Configuration
+  if (data.config) {
+    const items = Object.entries(data.config.values).map(([k, v]) =>
+      `<div class="sys-config-item"><span class="sys-config-key">${escapeHtml(k)}</span><span class="sys-config-val">${v}</span></div>`
+    ).join('');
+    sections.push(`
+      <div class="sys-section">
+        <div class="section-header">
+          <div class="section-header-icon ${sysColors[6]}">${sysIcons.config}</div>
+          <h3 style="margin:0;border:0;padding:0">${escapeHtml(data.config.title)}</h3>
+        </div>
+        <div class="sys-config-grid">${items}</div>
+      </div>`
+    );
+  }
+
+  container.innerHTML = sections.join('');
+}
+
+
+async function loadAnalytics() {
+  const container = document.getElementById('analytics-content');
+  showLoadingIn(container, 'Analytics laden...');
+
+  try {
+    const [data, usage] = await Promise.all([
+      apiGet('/chat/analytics'),
+      loadGroqUsage(),
+    ]);
+    renderAnalytics(data, container, usage);
+  } catch (e) {
+    container.innerHTML = `<div class="empty-docs">Fout bij laden analytics: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+function renderAnalytics(data, container, usage) {
+  const totals = data.totals || {};
+  const feedback = data.feedback || {};
+  const messagesPerDay = data.messages_per_day || [];
+  const topQuestions = data.top_questions || [];
+  const agentUsage = data.agent_usage || [];
+  const recentFeedback = data.recent_feedback || [];
+
+  const satRate = feedback.satisfaction_rate != null ? `${feedback.satisfaction_rate}%` : '-';
+  const satColor = feedback.satisfaction_rate >= 75 ? '#22c55e' : feedback.satisfaction_rate >= 50 ? '#eab308' : '#ef4444';
+
+  // Activity chart bars
+  const maxCount = Math.max(...messagesPerDay.map(d => d.count), 1);
+  const activityBars = messagesPerDay.slice(-14).map(d => {
+    const height = Math.max(4, (d.count / maxCount) * 100);
+    const dayLabel = d.day.slice(5);
+    return `<div class="activity-bar-wrap" title="${d.day}: ${d.count} berichten">
+      <div class="activity-bar" style="height: ${height}px"></div>
+      <span class="activity-label">${dayLabel}</span>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="analytics-stats">
+      <div class="stat-card">
+        <div class="stat-icon purple">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">${totals.sessions || 0}</div>
+          <div class="stat-label">Gesprekken</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">${totals.questions || 0}</div>
+          <div class="stat-label">Vragen gesteld</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">${totals.agents || 0}</div>
+          <div class="stat-label">Agents</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value" style="color: ${satColor}">${satRate}</div>
+          <div class="stat-label">Tevredenheid</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analytics-card">
+      <div class="section-header">
+        <div class="section-header-icon purple">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+        </div>
+        <h3 style="margin:0">Activiteit</h3>
+        <span class="section-header-sub">Laatste 14 dagen</span>
+      </div>
+      <div class="activity-chart">
+        ${activityBars || '<div class="empty-docs">Nog geen activiteit</div>'}
+      </div>
+    </div>
+
+    <div class="analytics-row">
+      <div class="analytics-card">
+        <div class="section-header">
+          <div class="section-header-icon green">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>
+            </svg>
+          </div>
+          <h3 style="margin:0">Feedback</h3>
+        </div>
+        <div class="feedback-stats">
+          <div class="feedback-stat positive">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>
+            <span class="feedback-count">${feedback.positive || 0}</span>
+            <span class="feedback-label">Positief</span>
+          </div>
+          <div class="feedback-stat negative">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3zm7-13h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 4H17"/></svg>
+            <span class="feedback-count">${feedback.negative || 0}</span>
+            <span class="feedback-label">Negatief</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="analytics-card">
+        <div class="section-header">
+          <div class="section-header-icon orange">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <h3 style="margin:0">Agent Gebruik</h3>
+        </div>
+        <div class="agent-usage-list">
+          ${agentUsage.length ? agentUsage.map(a => `
+            <div class="agent-usage-item">
+              <span class="agent-usage-icon">${escapeHtml(a.icon || 'E')}</span>
+              <span class="agent-usage-name">${escapeHtml(a.name)}</span>
+              <span class="agent-usage-count">${a.sessions} sessies</span>
+            </div>
+          `).join('') : '<div class="empty-docs">Nog geen agent gebruik</div>'}
+        </div>
+      </div>
+    </div>
+
+    <div class="analytics-row">
+      <div class="analytics-card">
+        <div class="section-header">
+          <div class="section-header-icon blue">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <h3 style="margin:0">Meest gestelde vragen</h3>
+        </div>
+        <div class="top-questions-list">
+          ${topQuestions.length ? topQuestions.map((q, i) => `
+            <div class="top-question-item">
+              <span class="top-question-rank">${i + 1}</span>
+              <span class="top-question-text">${escapeHtml(q.question)}</span>
+              <span class="top-question-count">${q.count}x</span>
+            </div>
+          `).join('') : '<div class="empty-docs">Nog geen vragen</div>'}
+        </div>
+      </div>
+
+      <div class="analytics-card">
+        <div class="section-header">
+          <div class="section-header-icon pink">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
+            </svg>
+          </div>
+          <h3 style="margin:0">Recente Feedback</h3>
+        </div>
+        <div class="recent-feedback-list">
+          ${recentFeedback.length ? recentFeedback.map(f => `
+            <div class="recent-feedback-item">
+              <span class="recent-feedback-icon ${f.feedback === 'positive' ? 'pos' : 'neg'}">
+                ${f.feedback === 'positive' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3zm7-13h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 4H17"/></svg>'}
+              </span>
+              <div class="recent-feedback-content">
+                <div class="recent-feedback-text">${escapeHtml(f.message_preview)}</div>
+                <div class="recent-feedback-meta">${escapeHtml(f.session_title || 'Onbekend gesprek')}</div>
+              </div>
+            </div>
+          `).join('') : '<div class="empty-docs">Nog geen feedback</div>'}
+        </div>
+      </div>
+    </div>
+
+    <div id="groq-usage-section"></div>
+  `;
+
+  // Render Groq usage section separately
+  const usageContainer = container.querySelector('#groq-usage-section');
+  if (usageContainer && usage) {
+    usageContainer.innerHTML = renderGroqUsageSection(usage);
+  }
+}
+
+// ============================================================
+// Export conversation as Markdown
+// ============================================================
+
+async function exportConversation() {
+  if (!currentSessionId) { showToast('Geen gesprek om te exporteren', true); return; }
+  try {
+    const data = await apiGet(`/chat/sessions/${currentSessionId}`);
+    const session = data.session || {};
+    const messages = data.messages || [];
+    const title = session.title || 'Chat Export';
+    const date = new Date(session.created_at).toLocaleDateString('nl-NL');
+
+    let md = `# ${title}\n`;
+    md += `*Geëxporteerd op ${new Date().toLocaleDateString('nl-NL')} — Aangemaakt op ${date}*\n\n---\n\n`;
+
+    for (const m of messages) {
+      if (m.role === 'user') {
+        md += `## 👤 Gebruiker\n\n${m.content}\n\n`;
+      } else {
+        // Strip followup tags
+        const clean = m.content.replace(/<followup>.*?<\/followup>/gs, '').trim();
+        md += `## 🤖 Assistent\n\n${clean}\n\n`;
+        if (m.sources && m.sources.length > 0) {
+          const unique = [...new Set(m.sources.map(s => s.filename))];
+          md += `**Bronnen:** ${unique.join(', ')}\n\n`;
+        }
+      }
+      md += `---\n\n`;
+    }
+
+    md += `\n*Geëxporteerd uit Evotion RAG*\n`;
+
+    // Download
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title.replace(/[^a-zA-Z0-9 ]/g, '').trim().replace(/\s+/g, '-')}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Gesprek geëxporteerd als Markdown');
+  } catch (e) {
+    showToast('Export mislukt: ' + e.message, true);
+  }
+}
+
+// ============================================================
+// Edit user message (re-ask with edited text)
+// ============================================================
+
+function editUserMessage(messageEl) {
+  const contentEl = messageEl.querySelector('.message-content');
+  const originalText = contentEl.textContent.trim();
+
+  // Replace content with edit field
+  contentEl.innerHTML = `
+    <textarea class="edit-message-input" rows="3">${escapeHtml(originalText)}</textarea>
+    <div class="edit-message-actions">
+      <button class="btn-sm edit-cancel">Annuleren</button>
+      <button class="btn-sm btn-primary edit-save">Opnieuw stellen</button>
+    </div>
+  `;
+
+  const textarea = contentEl.querySelector('.edit-message-input');
+  textarea.focus();
+  textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+
+  contentEl.querySelector('.edit-cancel').addEventListener('click', () => {
+    contentEl.innerHTML = `<p>${escapeHtml(originalText)}</p>`;
+  });
+
+  contentEl.querySelector('.edit-save').addEventListener('click', async () => {
+    const newText = textarea.value.trim();
+    if (!newText) return;
+
+    // Remove this message and all following messages from DOM
+    let sibling = messageEl.nextElementSibling;
+    while (sibling) {
+      const next = sibling.nextElementSibling;
+      sibling.remove();
+      sibling = next;
+    }
+    messageEl.remove();
+
+    // Re-send
+    $chatInput.value = newText;
+    autoResizeInput();
+    sendMessage();
+  });
+}
+
+// ============================================================
+// Initialization
+// ============================================================
+
+function init() {
+  $sidebar = document.getElementById('sidebar');
+  $overlay = document.getElementById('overlay');
+  $sessionsEl = document.getElementById('sessions-list');
+  $chatScroll = document.getElementById('chat-scroll');
+  $emptyState = document.getElementById('empty-state');
+  $messagesEl = document.getElementById('messages');
+  $chatInput = document.getElementById('chat-input');
+  $sendBtn = document.getElementById('send-btn');
+  $chatCollection = document.getElementById('chat-collection');
+  $chatView = document.getElementById('chat-view');
+  $docsView = document.getElementById('docs-view');
+  $collectionsView = document.getElementById('collections-view');
+  $agentsView = document.getElementById('agents-view');
+  $analyticsView = document.getElementById('analytics-view');
+  $systemView = document.getElementById('system-view');
+  $docsList = document.getElementById('docs-list');
+  $folderList = document.getElementById('folder-list');
+  $folderBreadcrumb = document.getElementById('folder-breadcrumb');
+  $collectionsList = document.getElementById('collections-list');
+  $agentsList = document.getElementById('agents-list');
+  $agentSelect = document.getElementById('agent-select');
+  $uploadStatus = document.getElementById('upload-status');
+  $attachBtn = document.getElementById('attach-btn');
+  $chatFileInput = document.getElementById('chat-file-input');
+  $chatAttachments = document.getElementById('chat-attachments');
+
+  // --- Sidebar ---
+  document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
+  document.getElementById('sidebar-open')?.addEventListener('click', openSidebar);
+  $overlay.addEventListener('click', closeSidebar);
+
+  // --- New chat ---
+  document.getElementById('new-chat-btn').addEventListener('click', () => { newChat(); switchView('chat'); });
+  document.getElementById('new-chat-mobile')?.addEventListener('click', () => { newChat(); switchView('chat'); });
+
+  // --- Navigation ---
+  document.getElementById('nav-docs').addEventListener('click', () => switchView('documents'));
+  document.getElementById('nav-collections').addEventListener('click', () => switchView('collections'));
+  document.getElementById('nav-agents').addEventListener('click', () => switchView('agents'));
+  document.getElementById('nav-analytics').addEventListener('click', () => switchView('analytics'));
+  document.getElementById('nav-system').addEventListener('click', () => switchView('system'));
+  document.getElementById('docs-back').addEventListener('click', () => switchView('chat'));
+  document.getElementById('cols-back').addEventListener('click', () => switchView('chat'));
+  document.getElementById('agents-back').addEventListener('click', () => switchView('chat'));
+  document.getElementById('analytics-back').addEventListener('click', () => switchView('chat'));
+  document.getElementById('system-back').addEventListener('click', () => switchView('chat'));
+
+  // --- Session search ---
+  const sessionSearchInput = document.getElementById('session-search');
+  sessionSearchInput.addEventListener('input', () => {
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => {
+      loadSessions(sessionSearchInput.value.trim());
+    }, 300);
+  });
+
+  // --- Export ---
+  document.getElementById('export-btn').addEventListener('click', exportConversation);
+
+  // --- Chat input ---
+  $chatInput.addEventListener('input', autoResizeInput);
+  $chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+  $sendBtn.addEventListener('click', sendMessage);
+
+  // --- Chat file attachments ---
+  $attachBtn.addEventListener('click', () => $chatFileInput.click());
+  $chatFileInput.addEventListener('change', () => {
+    addChatAttachments($chatFileInput.files);
+    $chatFileInput.value = '';
+  });
+  // Drag-drop on chat scroll area
+  $chatScroll.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); });
+  $chatScroll.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.files.length > 0) addChatAttachments(e.dataTransfer.files);
+  });
+
+  // --- Suggestions ---
+  document.querySelectorAll('.suggestion').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const msg = btn.dataset.msg;
+      if (msg) { $chatInput.value = msg; autoResizeInput(); sendMessage(); }
+    });
+  });
+
+  // --- File upload ---
+  const dropZone = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+  const folderInput = document.getElementById('folder-input');
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    // Handle folder drops via DataTransferItem.webkitGetAsEntry()
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      const entries = [];
+      for (const item of e.dataTransfer.items) {
+        const entry = item.webkitGetAsEntry && item.webkitGetAsEntry();
+        if (entry) entries.push(entry);
+      }
+      const hasFolder = entries.some(e => e.isDirectory);
+      if (hasFolder) {
+        collectFilesFromEntries(entries).then(files => {
+          if (files.length > 0) uploadFiles(files, true);
+        });
+        return;
+      }
+    }
+    uploadFiles(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', () => { uploadFiles(fileInput.files); fileInput.value = ''; });
+  folderInput.addEventListener('change', () => {
+    const files = Array.from(folderInput.files);
+    files.forEach(f => {
+      // webkitRelativePath = 'FolderName/sub/file.pdf' → _relativePath = 'FolderName/sub'
+      if (f.webkitRelativePath) {
+        const parts = f.webkitRelativePath.split('/');
+        f._relativePath = parts.slice(0, -1).join('/');
+      }
+    });
+    uploadFiles(files, true);
+    folderInput.value = '';
+  });
+  document.getElementById('upload-btn').addEventListener('click', () => fileInput.click());
+  document.getElementById('folder-upload-btn').addEventListener('click', () => folderInput.click());
+
+  // --- URL Upload ---
+  document.getElementById('url-upload-btn').addEventListener('click', uploadUrl);
+  document.getElementById('url-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') uploadUrl(); });
+
+  // --- Document Preview Modal ---
+  document.getElementById('doc-preview-close').addEventListener('click', () => {
+    document.getElementById('doc-preview-modal').style.display = 'none';
+  });
+  document.getElementById('doc-preview-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) e.currentTarget.style.display = 'none';
+  });
+
+  // --- Document browser ---
+  document.getElementById('browse-collection').addEventListener('change', (e) => {
+    currentFolderId = null;
+    folderPath = [];
+    allFolders = [];
+    loadDocuments(e.target.value);
+  });
+  document.getElementById('refresh-docs').addEventListener('click', () => {
+    const col = document.getElementById('browse-collection').value;
+    if (col) loadDocuments(col);
+    loadCollectionDropdowns();
+  });
+  document.getElementById('new-folder-btn').addEventListener('click', createNewFolder);
+
+  // --- Collections ---
+  document.getElementById('create-col-btn').addEventListener('click', createCollection);
+  document.getElementById('new-col-name').addEventListener('keydown', (e) => { if (e.key === 'Enter') createCollection(); });
+
+  // --- Agents ---
+  document.getElementById('create-agent-btn').addEventListener('click', saveAgent);
+  $agentSelect.addEventListener('change', () => { currentAgentId = $agentSelect.value || null; currentSessionId = null; });
+
+  const agentFormBody = document.getElementById('agent-form-body');
+  const toggleFormBtn = document.getElementById('toggle-agent-form');
+  toggleFormBtn.addEventListener('click', () => {
+    if (editingAgentId) cancelEditAgent();
+    const isHidden = agentFormBody.classList.toggle('collapsed');
+    updateToggleBtn(isHidden);
+  });
+
+  // --- Keyboard shortcuts ---
+  document.addEventListener('keydown', (e) => {
+    // Ctrl+K / Cmd+K → focus session search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      if (currentView !== 'chat') switchView('chat');
+      const searchInput = document.getElementById('session-search');
+      searchInput.focus();
+      searchInput.select();
+    }
+    // Ctrl+N / Cmd+N → new chat
+    if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+      e.preventDefault();
+      newChat();
+      switchView('chat');
+    }
+    // Escape → close sidebar (mobile) or blur search
+    if (e.key === 'Escape') {
+      closeSidebar();
+      document.activeElement?.blur();
+    }
+  });
+
+  // --- Logout ---
+  const logoutBtn = document.getElementById('nav-logout');
+  if (logoutBtn) {
+    if (getAuthToken()) logoutBtn.style.display = '';
+    logoutBtn.addEventListener('click', () => {
+      clearAuthToken();
+      showLoginScreen();
+    });
+  }
+
+  // --- Connection status check ---
+  checkConnectionStatus();
+  setInterval(checkConnectionStatus, 30000);
+
+  // --- Initial load ---
+  loadSessions();
+  loadCollectionDropdowns();
+  loadAgents();
+  loadSupportedExtensions();
+}
+
+
+async function loadSupportedExtensions() {
+  try {
+    const resp = await apiGet('/documents/supported-types');
+    supportedExtensions = resp.extensions || [];
+  } catch { /* fallback: accept all files, let server decide */ }
+}
+
+// ============================================================
+// Connection status indicator
+// ============================================================
+
+async function checkConnectionStatus() {
+  const indicator = document.getElementById('connection-status');
+  const providerLabel = document.getElementById('active-provider-label');
+  if (!indicator) return;
+  try {
+    const data = await apiGet('/health');
+    indicator.className = 'connection-dot online';
+    indicator.title = `Online — ${data.active_provider || 'verbonden'}`;
+    if (providerLabel) {
+      providerLabel.textContent = _formatProviderLabel(data.active_provider);
+    }
+  } catch {
+    indicator.className = 'connection-dot offline';
+    indicator.title = 'Offline — server niet bereikbaar';
+    if (providerLabel) providerLabel.textContent = 'Offline';
+  }
+}
+
+function _formatProviderLabel(raw) {
+  // "groq (llama-3.3-70b-versatile)" → "Groq · Llama 3.3 70B"
+  if (!raw) return 'Onbekend';
+  const match = raw.match(/^(\w+)\s*\((.+)\)$/);
+  if (!match) return raw;
+  const provider = match[1].charAt(0).toUpperCase() + match[1].slice(1);
+  let model = match[2]
+    .replace('meta-llama/', '')
+    .replace(':free', '')
+    .replace(/-/g, ' ')
+    .replace(/\b(versatile|instruct)\b/gi, '')   // strip noise words
+    .replace(/\b(\d+)b\b/gi, '$1B')              // 70b → 70B
+    .replace(/\s{2,}/g, ' ')                       // collapse double spaces
+    .trim();
+  model = model.replace(/\b\w/g, c => c.toUpperCase());
+  return `${provider} · ${model}`;
+}
+
+// ============================================================
+// Code block copy buttons (injected after markdown render)
+// ============================================================
+
+function addCodeCopyButtons(container) {
+  container.querySelectorAll('pre > code').forEach(codeBlock => {
+    if (codeBlock.parentNode.querySelector('.code-copy-btn')) return; // already has one
+    const btn = document.createElement('button');
+    btn.className = 'code-copy-btn';
+    btn.title = 'Kopieer';
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    });
+    codeBlock.parentNode.style.position = 'relative';
+    codeBlock.parentNode.appendChild(btn);
+  });
+}
+
+// Observe DOM changes in messages to add copy buttons to new code blocks
+const codeObserver = new MutationObserver((mutations) => {
+  for (const m of mutations) {
+    for (const node of m.addedNodes) {
+      if (node.nodeType === 1) addCodeCopyButtons(node);
+    }
+  }
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // Wire up login form
+  const loginBtn = document.getElementById('login-btn');
+  const loginInput = document.getElementById('login-token');
+  if (loginBtn) loginBtn.addEventListener('click', attemptLogin);
+  if (loginInput) loginInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') attemptLogin();
+  });
+
+  // Check authentication before initializing
+  const authed = await checkAuth();
+  if (authed) {
+    init();
+  }
+
+  // Inject app version into sidebar footer
+  const model = document.querySelector('.sidebar-model');
+  if (model) {
+    const v = document.createElement('span');
+    v.className = 'app-version';
+    v.textContent = APP_VERSION;
+    model.appendChild(v);
+  }
+
+  // Code copy button observer
+  const msgs = document.getElementById('messages');
+  if (msgs) codeObserver.observe(msgs, { childList: true, subtree: true });
+});

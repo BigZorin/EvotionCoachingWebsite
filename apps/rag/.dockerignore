@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Data (will use persistent volumes)
+data/
+*.db
+
+# Dev/deploy files
+.env
+.env.local
+.env.production.example
+.git/
+.gitignore
+*.md
+tests/
+.pytest_cache/
+deploy/
+docker-compose.yml
+Caddyfile
+railway.toml
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
