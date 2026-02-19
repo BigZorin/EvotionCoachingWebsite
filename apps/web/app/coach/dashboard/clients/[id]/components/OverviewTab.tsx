@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import {
   Dumbbell, UtensilsCrossed, Pill, Sparkles, History, ChevronDown,
   Eye, Target, Pin, BarChart3, ArrowRight, AlertTriangle,
-  MessageSquare, Calendar, X,
+  MessageSquare, Calendar, X, Scale, Flame, TrendingDown, TrendingUp,
 } from "lucide-react"
 import {
   generateClientSummary,
@@ -129,30 +129,48 @@ export default function OverviewTab({
     }
   }
 
-  // Build alerts
-  const alerts: { type: "warning" | "info"; message: string; action?: string; tab?: string }[] = []
-
+  // ── Compute data ──
   const pendingFeedback = weeklyCheckIns.filter(ci => !ci.coach_feedback).length
-  if (pendingFeedback > 0) {
-    alerts.push({ type: "warning", message: `${pendingFeedback} check-in(s) zonder feedback`, action: "Bekijk", tab: "coaching" })
-  }
-
   const last30 = dailyCheckIns.filter(ci => (Date.now() - new Date(ci.check_in_date).getTime()) / 86400000 <= 30)
-  if (last30.length < 15) {
-    alerts.push({ type: "info", message: `Compliance: ${last30.length}/30 dagen`, action: "Bekijk", tab: "coaching" })
+  const compliancePct = Math.round((last30.length / 30) * 100)
+
+  // Weight
+  const weightMap = new Map<string, number>()
+  for (const ci of weeklyCheckIns) { if (ci.weight) weightMap.set((ci as any).check_in_date || new Date(ci.created_at).toISOString().split("T")[0], ci.weight) }
+  for (const ci of dailyCheckIns) { if (ci.weight) weightMap.set(ci.check_in_date, ci.weight) }
+  const weightPts = Array.from(weightMap.entries()).map(([d, w]) => ({ date: d, weight: w })).sort((a, b) => a.date.localeCompare(b.date))
+  const latestWeight = weightPts.length > 0 ? weightPts[weightPts.length - 1].weight : null
+  const firstWeight = weightPts.length > 0 ? weightPts[0].weight : null
+  const weightDelta = latestWeight && firstWeight ? latestWeight - firstWeight : null
+
+  // Streak
+  let streak = 0
+  const sortedDaily = [...dailyCheckIns].sort((a, b) => b.check_in_date.localeCompare(a.check_in_date))
+  for (let i = 0; i < sortedDaily.length; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i)
+    if (sortedDaily[i]?.check_in_date === d.toISOString().split("T")[0]) streak++; else break
   }
 
+  const hasActiveProgram = clientPrograms.some(p => p.status?.toLowerCase() === "active")
+
+  // Build alerts
+  const alerts: { type: "warning" | "info"; icon: any; message: string; action?: string; tab?: string }[] = []
+  if (pendingFeedback > 0) {
+    alerts.push({ type: "warning", icon: MessageSquare, message: `${pendingFeedback} check-in(s) zonder feedback`, action: "Bekijk", tab: "coaching" })
+  }
+  if (compliancePct < 50) {
+    alerts.push({ type: "warning", icon: AlertTriangle, message: `Lage compliance: ${compliancePct}%`, action: "Bekijk", tab: "coaching" })
+  }
   const expiringGoals = activeGoals.filter(g => {
     if (!g.target_date) return false
     const days = Math.ceil((new Date(g.target_date).getTime() - Date.now()) / 86400000)
     return days >= 0 && days <= 7
   })
   if (expiringGoals.length > 0) {
-    alerts.push({ type: "warning", message: `${expiringGoals.length} doel(en) verlopen binnen 7 dagen`, action: "Bekijk", tab: "profiel" })
+    alerts.push({ type: "warning", icon: Target, message: `${expiringGoals.length} doel(en) verlopen binnen 7 dagen`, action: "Bekijk", tab: "profiel" })
   }
-
-  if (!clientPrograms.some(p => p.status?.toLowerCase() === "active")) {
-    alerts.push({ type: "info", message: "Geen actief trainingsprogramma", action: "Toewijzen", tab: "coaching" })
+  if (!hasActiveProgram) {
+    alerts.push({ type: "info", icon: Dumbbell, message: "Geen actief trainingsprogramma", action: "Toewijzen", tab: "coaching" })
   }
 
   const typeConfig: Record<string, { icon: any; color: string; bg: string }> = {
@@ -164,39 +182,43 @@ export default function OverviewTab({
   }
 
   return (
-    <div className="space-y-5">
-      {/* Alerts - actionable items at the top */}
+    <div className="space-y-6">
+
+      {/* ── Alerts ── */}
       {alerts.length > 0 && (
         <div className="flex flex-col gap-2">
-          {alerts.map((alert, i) => (
-            <button
-              key={i}
-              onClick={() => alert.tab && onNavigateToTab(alert.tab)}
-              className={`flex items-center justify-between px-4 py-2.5 rounded-lg text-sm transition-colors group ${
-                alert.type === "warning"
-                  ? "bg-amber-50/80 border border-amber-200/50 hover:bg-amber-50"
-                  : "bg-muted/50 border border-border hover:bg-muted"
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <AlertTriangle className={`w-4 h-4 flex-shrink-0 ${
-                  alert.type === "warning" ? "text-amber-600" : "text-muted-foreground"
-                }`} />
-                <span className={alert.type === "warning" ? "text-amber-800 font-medium" : "text-foreground"}>
-                  {alert.message}
-                </span>
-              </div>
-              {alert.action && (
-                <span className="text-xs font-medium text-evotion-primary group-hover:underline flex-shrink-0">
-                  {alert.action}
-                </span>
-              )}
-            </button>
-          ))}
+          {alerts.map((alert, i) => {
+            const Icon = alert.icon
+            return (
+              <button
+                key={i}
+                onClick={() => alert.tab && onNavigateToTab(alert.tab)}
+                className={`flex items-center justify-between px-4 py-2.5 rounded-lg text-sm transition-colors group ${
+                  alert.type === "warning"
+                    ? "bg-amber-50/80 border border-amber-200/50 hover:bg-amber-50"
+                    : "bg-muted/50 border border-border hover:bg-muted"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${
+                    alert.type === "warning" ? "text-amber-600" : "text-muted-foreground"
+                  }`} />
+                  <span className={alert.type === "warning" ? "text-amber-800 font-medium" : "text-foreground"}>
+                    {alert.message}
+                  </span>
+                </div>
+                {alert.action && (
+                  <span className="text-xs font-medium text-evotion-primary group-hover:underline flex-shrink-0">
+                    {alert.action}
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </div>
       )}
 
-      {/* Pinned notes - always visible if present */}
+      {/* ── Pinned notes ── */}
       {pinnedNotes.length > 0 && (
         <div className="flex items-start gap-3 px-4 py-3 bg-amber-50/40 border border-amber-200/30 rounded-lg">
           <Pin className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
@@ -207,32 +229,80 @@ export default function OverviewTab({
               </p>
             ))}
           </div>
-          <button
-            onClick={() => onNavigateToTab("profiel")}
-            className="text-[11px] text-evotion-primary font-medium hover:underline flex-shrink-0"
-          >
+          <button onClick={() => onNavigateToTab("profiel")} className="text-[11px] text-evotion-primary font-medium hover:underline flex-shrink-0">
             Bewerk
           </button>
         </div>
       )}
 
-      {/* Quick Status - compact 3-col grid */}
+      {/* ── Hero Stats Row ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Compliance Donut */}
+        <button onClick={() => onNavigateToTab("coaching")} className="bg-card rounded-xl border border-border p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-all group">
+          <ComplianceRing value={compliancePct} size={80} strokeWidth={8} />
+          <p className="text-xs text-muted-foreground mt-2 font-medium uppercase tracking-wider">Compliance</p>
+        </button>
+
+        {/* Weight */}
+        <button onClick={() => onNavigateToTab("gezondheid")} className="bg-card rounded-xl border border-border p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-all group">
+          <div className="flex items-center gap-1.5 mb-1">
+            <Scale className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <p className="text-2xl font-bold text-foreground tabular-nums">
+            {latestWeight ? `${latestWeight.toFixed(1)}` : "--"}
+          </p>
+          <p className="text-xs text-muted-foreground">kg</p>
+          {weightDelta !== null && weightDelta !== 0 && (
+            <span className={`flex items-center gap-0.5 text-xs font-semibold mt-1 ${weightDelta < 0 ? "text-emerald-600" : "text-amber-600"}`}>
+              {weightDelta < 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+              {weightDelta > 0 ? "+" : ""}{weightDelta.toFixed(1)}
+            </span>
+          )}
+        </button>
+
+        {/* Streak */}
+        <button onClick={() => onNavigateToTab("coaching")} className="bg-card rounded-xl border border-border p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-all group">
+          <Flame className={`w-7 h-7 mb-1 ${streak > 0 ? "text-orange-500" : "text-muted-foreground/25"}`} />
+          <p className="text-2xl font-bold text-foreground tabular-nums">{streak}</p>
+          <p className="text-xs text-muted-foreground">dagen streak</p>
+        </button>
+
+        {/* Workouts this month */}
+        <button onClick={() => onNavigateToTab("coaching")} className="bg-card rounded-xl border border-border p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-all group">
+          <Dumbbell className={`w-6 h-6 mb-1 ${workouts.length > 0 ? "text-evotion-primary" : "text-muted-foreground/25"}`} />
+          <p className="text-2xl font-bold text-foreground tabular-nums">{workouts.length}</p>
+          <p className="text-xs text-muted-foreground">workouts</p>
+        </button>
+      </div>
+
+      {/* ── Weight Sparkline ── */}
+      {weightPts.length >= 3 && (
+        <div className="bg-card rounded-xl border border-border p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Scale className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-semibold text-foreground">Gewichtsverloop</span>
+            </div>
+            <button onClick={() => onNavigateToTab("gezondheid")} className="text-xs text-evotion-primary font-medium hover:underline">
+              Details
+            </button>
+          </div>
+          <WeightChart data={weightPts} />
+        </div>
+      )}
+
+      {/* ── Quick Status Row ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <QuickCard
-          icon={Dumbbell}
-          iconBg="bg-evotion-primary/5"
-          iconColor="text-evotion-primary"
-          label="Training"
-          onClick={() => onNavigateToTab("coaching")}
+          icon={Dumbbell} iconBg="bg-evotion-primary/5" iconColor="text-evotion-primary"
+          label="Training" onClick={() => onNavigateToTab("coaching")}
         >
-          {clientPrograms.filter(p => p.status?.toLowerCase() === "active").length > 0 ? (
+          {hasActiveProgram ? (
             <>
               <p className="text-sm font-semibold text-foreground truncate">
                 {clientPrograms.find(p => p.status?.toLowerCase() === "active")?.training_programs?.name || "Programma"}
               </p>
-              <p className="text-xs text-muted-foreground">
-                {workouts.length} workouts gelogd
-              </p>
+              <p className="text-xs text-muted-foreground">{workouts.length} workouts gelogd</p>
             </>
           ) : (
             <p className="text-sm text-muted-foreground">Geen programma</p>
@@ -240,11 +310,8 @@ export default function OverviewTab({
         </QuickCard>
 
         <QuickCard
-          icon={UtensilsCrossed}
-          iconBg="bg-amber-50"
-          iconColor="text-amber-600"
-          label="Voeding"
-          onClick={() => onNavigateToTab("coaching")}
+          icon={UtensilsCrossed} iconBg="bg-amber-50" iconColor="text-amber-600"
+          label="Voeding" onClick={() => onNavigateToTab("coaching")}
         >
           {nutritionTargets ? (
             <>
@@ -259,11 +326,8 @@ export default function OverviewTab({
         </QuickCard>
 
         <QuickCard
-          icon={Pill}
-          iconBg="bg-emerald-50"
-          iconColor="text-emerald-600"
-          label="Supplementen"
-          onClick={() => onNavigateToTab("coaching")}
+          icon={Pill} iconBg="bg-emerald-50" iconColor="text-emerald-600"
+          label="Supplementen" onClick={() => onNavigateToTab("coaching")}
         >
           {supplements.filter(s => s.is_active).length > 0 ? (
             <>
@@ -278,23 +342,16 @@ export default function OverviewTab({
         </QuickCard>
       </div>
 
-      {/* Active Goals - compact row */}
+      {/* ── Active Goals ── */}
       {activeGoals.length > 0 && (
         <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Target className="w-4 h-4 text-evotion-primary" />
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Doelen
-              </span>
-              <span className="text-[10px] bg-evotion-primary/10 text-evotion-primary px-1.5 py-0.5 rounded font-bold">
-                {activeGoals.length}
-              </span>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Doelen</span>
+              <span className="text-[10px] bg-evotion-primary/10 text-evotion-primary px-1.5 py-0.5 rounded font-bold">{activeGoals.length}</span>
             </div>
-            <button
-              onClick={() => onNavigateToTab("profiel")}
-              className="text-[11px] text-evotion-primary font-medium hover:underline"
-            >
+            <button onClick={() => onNavigateToTab("profiel")} className="text-[11px] text-evotion-primary font-medium hover:underline">
               Beheren
             </button>
           </div>
@@ -321,7 +378,7 @@ export default function OverviewTab({
         </div>
       )}
 
-      {/* AI Generators */}
+      {/* ── AI Generators ── */}
       {!aiCockpitResult && (
         <AIGeneratorBanner
           title="AI Client Samenvatting"
@@ -362,10 +419,10 @@ export default function OverviewTab({
         />
       )}
 
-      {/* Coaching Timeline */}
+      {/* ── Coaching Timeline ── */}
       <CoachingTimeline clientId={clientId} />
 
-      {/* AI History - collapsible */}
+      {/* ── AI History ── */}
       {aiLogs.length > 0 && (
         <div className="bg-card rounded-xl border border-border">
           <button
@@ -374,12 +431,8 @@ export default function OverviewTab({
           >
             <div className="flex items-center gap-2">
               <History className="w-4 h-4 text-muted-foreground" />
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                AI Historie
-              </span>
-              <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded font-medium">
-                {aiLogs.length}
-              </span>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">AI Historie</span>
+              <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded font-medium">{aiLogs.length}</span>
             </div>
             <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${aiLogsExpanded ? "rotate-0" : "-rotate-90"}`} />
           </button>
@@ -429,27 +482,112 @@ export default function OverviewTab({
   )
 }
 
-/* Quick status card */
+/* ── Compliance Ring (SVG donut) ── */
+function ComplianceRing({ value, size, strokeWidth }: { value: number; size: number; strokeWidth: number }) {
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const progress = Math.min(Math.max(value, 0), 100)
+  const offset = circumference - (progress / 100) * circumference
+  const color = progress >= 75 ? "#10b981" : progress >= 50 ? "#f59e0b" : "#ef4444"
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle
+          cx={size / 2} cy={size / 2} r={radius}
+          fill="none" stroke="currentColor" strokeWidth={strokeWidth}
+          className="text-muted/50"
+        />
+        <circle
+          cx={size / 2} cy={size / 2} r={radius}
+          fill="none" stroke={color} strokeWidth={strokeWidth}
+          strokeDasharray={circumference} strokeDashoffset={offset}
+          strokeLinecap="round"
+          className="transition-all duration-700 ease-out"
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-xl font-bold text-foreground tabular-nums">{value}</span>
+        <span className="text-[9px] text-muted-foreground font-medium -mt-0.5">%</span>
+      </div>
+    </div>
+  )
+}
+
+/* ── Weight Chart (SVG area chart) ── */
+function WeightChart({ data }: { data: { date: string; weight: number }[] }) {
+  const w = 600
+  const h = 120
+  const pad = { top: 12, right: 16, bottom: 24, left: 40 }
+  const innerW = w - pad.left - pad.right
+  const innerH = h - pad.top - pad.bottom
+
+  const weights = data.map(d => d.weight)
+  const minW = Math.min(...weights) - 0.5
+  const maxW = Math.max(...weights) + 0.5
+  const rangeW = maxW - minW || 1
+
+  const pts = data.map((d, i) => ({
+    x: pad.left + (i / (data.length - 1)) * innerW,
+    y: pad.top + innerH - ((d.weight - minW) / rangeW) * innerH,
+  }))
+
+  const line = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join("")
+  const area = `${line}L${pts[pts.length - 1].x.toFixed(1)},${h - pad.bottom}L${pts[0].x.toFixed(1)},${h - pad.bottom}Z`
+
+  // Y-axis labels (3 lines)
+  const yLabels = [minW, (minW + maxW) / 2, maxW].map(v => ({
+    label: v.toFixed(1),
+    y: pad.top + innerH - ((v - minW) / rangeW) * innerH,
+  }))
+
+  // X-axis labels (first, middle, last)
+  const xIdxs = data.length > 2 ? [0, Math.floor(data.length / 2), data.length - 1] : [0, data.length - 1]
+  const fmtD = (d: string) => new Date(d + "T00:00:00").toLocaleDateString("nl-NL", { day: "numeric", month: "short" })
+
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full" style={{ height: 120 }}>
+      {/* Grid lines */}
+      {yLabels.map((yl, i) => (
+        <g key={i}>
+          <line x1={pad.left} x2={w - pad.right} y1={yl.y} y2={yl.y} stroke="currentColor" strokeWidth={0.5} className="text-border" />
+          <text x={pad.left - 6} y={yl.y + 3} textAnchor="end" className="fill-muted-foreground" fontSize={9}>{yl.label}</text>
+        </g>
+      ))}
+      {/* Area + Line */}
+      <path d={area} fill="url(#weightGrad)" />
+      <path d={line} fill="none" stroke="var(--evotion-primary, #1e1839)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      {/* Dots */}
+      {pts.map((p, i) => (
+        <circle key={i} cx={p.x} cy={p.y} r={3} fill="var(--evotion-primary, #1e1839)" stroke="var(--background)" strokeWidth={2}>
+          <title>{fmtD(data[i].date)}: {data[i].weight.toFixed(1)} kg</title>
+        </circle>
+      ))}
+      {/* X labels */}
+      {xIdxs.map(idx => (
+        <text key={idx} x={pts[idx].x} y={h - 4} textAnchor="middle" className="fill-muted-foreground" fontSize={9}>
+          {fmtD(data[idx].date)}
+        </text>
+      ))}
+      {/* Gradient def */}
+      <defs>
+        <linearGradient id="weightGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--evotion-primary, #1e1839)" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="var(--evotion-primary, #1e1839)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+    </svg>
+  )
+}
+
+/* ── Quick Card ── */
 function QuickCard({
-  icon: Icon,
-  iconBg,
-  iconColor,
-  label,
-  children,
-  onClick,
+  icon: Icon, iconBg, iconColor, label, children, onClick,
 }: {
-  icon: any
-  iconBg: string
-  iconColor: string
-  label: string
-  children: React.ReactNode
-  onClick: () => void
+  icon: any; iconBg: string; iconColor: string; label: string; children: React.ReactNode; onClick: () => void
 }) {
   return (
-    <button
-      onClick={onClick}
-      className="bg-card rounded-xl border border-border p-4 text-left hover:shadow-sm transition-all group"
-    >
+    <button onClick={onClick} className="bg-card rounded-xl border border-border p-4 text-left hover:shadow-sm transition-all group">
       <div className="flex items-center gap-2 mb-2.5">
         <div className={`p-1.5 rounded-lg ${iconBg}`}>
           <Icon className={`w-4 h-4 ${iconColor}`} />
@@ -462,7 +600,7 @@ function QuickCard({
   )
 }
 
-/* AI log detail renderer */
+/* ── AI Log Detail ── */
 function AILogDetail({ log, onDelete }: { log: AIGenerationLog; onDelete: () => void }) {
   return (
     <div className="ml-10 mt-1 mb-2 p-3 bg-secondary/50 rounded-lg border border-border text-xs text-foreground/80 space-y-2.5 max-h-[400px] overflow-y-auto">
