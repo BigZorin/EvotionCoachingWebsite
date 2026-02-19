@@ -1,10 +1,11 @@
 /* ============================================================
-   Evotion RAG — Client-side Application (v37)
+   Evotion RAG — Client-side Application (v38)
    Features: Streaming, Hybrid Search, Feedback, Analytics, Auth,
-             Semantic Chunking, Multi-Query, bge-m3 Embeddings
+             Semantic Chunking, Multi-Query, bge-m3 Embeddings,
+             Async Background Uploads
    ============================================================ */
 
-const APP_VERSION = 'v37';
+const APP_VERSION = 'v38';
 const API = '/api/v1';
 
 // --- State ---
@@ -1540,8 +1541,8 @@ function uploadFileWithProgress(file, collection, onProgress) {
     formData.append('file', file);
     formData.append('collection', collection);
 
-    // 10 min timeout — audio/video transcription can take several minutes
-    xhr.timeout = 600_000;
+    // Short timeout for the initial upload — server returns immediately with job_id
+    xhr.timeout = 120_000;
 
     xhr.upload.addEventListener('progress', (e) => {
       if (e.lengthComputable) {
@@ -1550,14 +1551,24 @@ function uploadFileWithProgress(file, collection, onProgress) {
     });
 
     xhr.upload.addEventListener('load', () => {
-      // Upload done, server is now processing
       onProgress(isMediaFile(file) ? 'transcribing' : 'processing', 100);
     });
 
     xhr.addEventListener('load', () => {
       if (xhr.status === 401) { handleUnauthorized(); reject(new Error('Unauthorized')); return; }
       if (xhr.status >= 200 && xhr.status < 300) {
-        try { resolve(JSON.parse(xhr.responseText)); } catch { resolve({}); }
+        let data;
+        try { data = JSON.parse(xhr.responseText); } catch { resolve({}); return; }
+
+        // Backend returns {status: "processing", job_id: "..."} for background jobs
+        if (data.status === 'processing' && data.job_id) {
+          onProgress('processing', 100);
+          pollJobUntilDone(data.job_id, onProgress)
+            .then(resolve)
+            .catch(reject);
+        } else {
+          resolve(data);
+        }
       } else {
         try {
           const err = JSON.parse(xhr.responseText);
@@ -1575,6 +1586,49 @@ function uploadFileWithProgress(file, collection, onProgress) {
     if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     xhr.send(formData);
   });
+}
+
+/**
+ * Poll GET /documents/jobs/{jobId} until the job completes.
+ * Resolves with the final result or rejects on error/timeout.
+ */
+async function pollJobUntilDone(jobId, onProgress, maxWaitMs = 1200_000) {
+  const pollInterval = 3000; // 3 seconds
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < maxWaitMs) {
+    await new Promise(r => setTimeout(r, pollInterval));
+
+    try {
+      const job = await apiGet(`/documents/jobs/${encodeURIComponent(jobId)}`);
+
+      if (job.status === 'processing') {
+        onProgress('processing', 100);
+        continue;
+      }
+
+      // Job finished — return result in the same shape as the old sync response
+      if (job.status === 'error') {
+        throw new Error(job.error || 'Verwerking mislukt');
+      }
+
+      return {
+        document_id: job.document_id || '',
+        filename: job.filename || '',
+        file_type: job.file_type || '',
+        chunks_created: job.chunks_created || 0,
+        collection: job.collection || '',
+        content_hash: job.content_hash || '',
+        status: job.status,
+      };
+    } catch (e) {
+      // Network error during poll — retry (server might be busy)
+      if (e.message === 'Unauthorized') throw e;
+      console.warn('[Poll] Job poll failed, retrying:', e.message);
+    }
+  }
+
+  throw new Error('Timeout — verwerking duurt te lang (>20 min)');
 }
 
 /**

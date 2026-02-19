@@ -1,5 +1,6 @@
 import logging
 import shutil
+import threading
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -8,15 +9,20 @@ from fastapi import UploadFile
 from app.config import settings
 from app.ingestion.pipeline import ingest_file, ingest_batch, ingest_text_blocks
 from app.ingestion.processors.registry import registry, UnsupportedFileType
+from app.services.job_store import create_job, update_job
 
 logger = logging.getLogger(__name__)
 
 
-async def process_upload(
+async def save_and_validate_upload(
     file: UploadFile,
     collection: str = "default",
 ) -> dict:
-    """Save uploaded file to disk and process it through the ingestion pipeline."""
+    """Save uploaded file to disk and validate it. Returns file_path + metadata.
+
+    Does NOT run ingestion — that's handled either synchronously or in background.
+    Returns dict with 'file_path' on success, or 'status': 'error' on failure.
+    """
     upload_dir = Path(settings.upload_dir)
     upload_dir.mkdir(parents=True, exist_ok=True)
 
@@ -27,7 +33,6 @@ async def process_upload(
     if not filename:
         filename = "unknown"
     file_path = upload_dir / filename
-    ext = file_path.suffix.lower()
 
     try:
         registry.get_processor(file_path)
@@ -43,7 +48,6 @@ async def process_upload(
 
     # Save file to disk
     try:
-        # Check Content-Length header before reading body (avoids loading huge files into memory)
         max_bytes = settings.max_file_size_mb * 1024 * 1024
         if file.size and file.size > max_bytes:
             return {
@@ -57,7 +61,6 @@ async def process_upload(
 
         content = await file.read()
 
-        # Double-check actual size after read (Content-Length can be missing or wrong)
         if len(content) > max_bytes:
             return {
                 "filename": filename,
@@ -80,31 +83,69 @@ async def process_upload(
             "collection": collection,
         }
 
-    # Process through pipeline
+    return {"file_path": file_path, "filename": filename, "collection": collection}
+
+
+def _run_ingestion(file_path: Path, collection: str, job_id: str):
+    """Run ingestion pipeline in a background thread and update job store."""
     try:
         result = ingest_file(file_path, collection_name=collection)
-        return result
+        update_job(job_id, status=result.get("status", "success"), result=result)
+        logger.info(f"Background job {job_id} completed: {result.get('chunks_created', 0)} chunks")
     except Exception as e:
-        logger.error(f"Ingestion failed for {filename}: {e}")
-        return {
-            "filename": filename,
-            "status": "error",
-            "error": str(e),
-            "document_id": "",
-            "chunks_created": 0,
-            "collection": collection,
-        }
+        logger.error(f"Background job {job_id} failed: {e}")
+        update_job(job_id, status="error", error=str(e))
     finally:
-        # Clean up uploaded file
         if file_path.exists():
             file_path.unlink()
+
+
+async def process_upload(
+    file: UploadFile,
+    collection: str = "default",
+) -> dict:
+    """Save uploaded file and process it in a background thread.
+
+    Returns immediately with job_id + status 'processing'.
+    Client polls GET /documents/jobs/{job_id} for completion.
+    """
+    saved = await save_and_validate_upload(file, collection)
+    if saved.get("status") == "error":
+        return saved
+
+    file_path = saved["file_path"]
+    filename = saved["filename"]
+
+    # Create background job
+    job_id = create_job(filename, collection)
+
+    # Start ingestion in background thread (doesn't block the event loop)
+    thread = threading.Thread(
+        target=_run_ingestion,
+        args=(file_path, collection, job_id),
+        daemon=True,
+    )
+    thread.start()
+
+    logger.info(f"Started background ingestion job {job_id} for {filename}")
+
+    return {
+        "document_id": "",
+        "filename": filename,
+        "file_type": file_path.suffix,
+        "chunks_created": 0,
+        "collection": collection,
+        "content_hash": "",
+        "status": "processing",
+        "job_id": job_id,
+    }
 
 
 async def process_batch_upload(
     files: list[UploadFile],
     collection: str = "default",
 ) -> list[dict]:
-    """Process multiple uploaded files."""
+    """Process multiple uploaded files — each one starts a background job."""
     results = []
     for file in files:
         result = await process_upload(file, collection)

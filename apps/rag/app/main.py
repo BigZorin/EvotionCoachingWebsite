@@ -164,7 +164,7 @@ _CSP = "; ".join([
     "style-src 'self' 'unsafe-inline' fonts.googleapis.com cdnjs.cloudflare.com",
     "font-src 'self' fonts.gstatic.com",
     "img-src 'self' data:",
-    "connect-src 'self'",
+    "connect-src 'self' cdnjs.cloudflare.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
