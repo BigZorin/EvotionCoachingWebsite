@@ -54,9 +54,14 @@ def create_collection(name: str) -> CollectionInfo:
 
 
 def remove_collection(name: str) -> bool:
-    """Delete a collection and all its contents."""
+    """Delete a collection and all its contents, including folders."""
     try:
         delete_collection(name)
+        # Also clean up folders and document-folder mappings from SQLite
+        from app.core.database import delete_collection_folders
+        removed = delete_collection_folders(name)
+        if removed:
+            logger.info(f"Cleaned up {removed} folders for collection '{name}'")
         return True
     except Exception as e:
         logger.error(f"Failed to delete collection '{name}': {e}")

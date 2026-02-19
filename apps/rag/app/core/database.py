@@ -620,6 +620,15 @@ def get_documents_in_folder(collection: str, folder_id: str | None = None) -> li
         return [r["document_id"] for r in rows]
 
 
+def delete_collection_folders(collection: str) -> int:
+    """Delete ALL folders and document_folder entries for a collection."""
+    with _conn() as conn:
+        conn.execute("DELETE FROM document_folders WHERE collection = ?", (collection,))
+        cursor = conn.execute("DELETE FROM folders WHERE collection = ?", (collection,))
+        conn.commit()
+        return cursor.rowcount
+
+
 def get_folder_document_counts(collection: str) -> dict[str, int]:
     """Get document count per folder for a collection."""
     with _conn() as conn:
