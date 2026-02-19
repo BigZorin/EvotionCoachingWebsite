@@ -1,0 +1,823 @@
+// Evotion Platform - Complete Database Schema
+// PostgreSQL + Prisma
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl not needed for Session pooler
+}
+
+// ============================================
+// 1. USERS & AUTHENTICATION
+// ============================================
+
+enum UserRole {
+  COACH
+  CLIENT
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum ActivityLevel {
+  SEDENTARY
+  LIGHTLY_ACTIVE
+  MODERATELY_ACTIVE
+  VERY_ACTIVE
+  EXTREMELY_ACTIVE
+}
+
+model User {
+  id        String   @id // Supabase Auth user ID
+  email     String   @unique
+  role      UserRole @default(CLIENT)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  profile                  Profile?
+  coachingAsCoach          CoachingRelationship[] @relation("CoachRelationships")
+  coachingAsClient         CoachingRelationship[] @relation("ClientRelationships")
+  courses                  Course[]
+  enrollments              CourseEnrollment[]
+  lessonProgress           LessonProgress[]
+  createdExercises         Exercise[]
+  workoutTemplates         WorkoutTemplate[]
+  assignedWorkoutsAsClient ClientWorkout[]        @relation("ClientWorkouts")
+  assignedWorkoutsAsCoach  ClientWorkout[]        @relation("CoachWorkouts")
+  workoutLogs              WorkoutLog[]
+  progressTracking         ProgressTracking[]
+  checkInsAsClient         CheckIn[]              @relation("ClientCheckIns")
+  checkInsAsCoach          CheckIn[]              @relation("CoachCheckIns")
+  mealPlansAsClient        MealPlan[]             @relation("ClientMealPlans")
+  mealPlansAsCoach         MealPlan[]             @relation("CoachMealPlans")
+  createdMeals             Meal[]
+  foodLogs                 FoodLog[]
+  habitsAsClient           Habit[]                @relation("ClientHabits")
+  habitsAsCoach            Habit[]                @relation("CoachHabits")
+  formCheckVideos          FormCheckVideo[]
+  formCheckFeedback        FormCheckFeedback[]
+  coachingSessionsAsCoach  CoachingSession[]      @relation("CoachSessions")
+  coachingSessionsAsClient CoachingSession[]      @relation("ClientSessions")
+  coachAvailability        CoachAvailability[]
+  uploadedFiles            SharedFile[]           @relation("FileUploader")
+  receivedFiles            SharedFile[]           @relation("FileReceiver")
+  notifications            Notification[]
+  pushTokens               PushToken[]
+  sentMessages             Message[]              @relation("MessageSender")
+  receivedMessages         Message[]              @relation("MessageReceiver")
+  conversationsAsCoach     Conversation[]         @relation("CoachConversations")
+  conversationsAsClient    Conversation[]         @relation("ClientConversations")
+  subscriptionsAsClient    Subscription[]         @relation("ClientSubscriptions")
+  subscriptionsAsCoach     Subscription[]         @relation("CoachSubscriptions")
+  payments                 Payment[]
+  coachAIGenerations       AIWorkoutGeneration[]  @relation("CoachAIGenerations")
+  clientAIGenerations      AIWorkoutGeneration[]  @relation("ClientAIGenerations")
+
+  @@map("users")
+}
+
+model Profile {
+  id                 String         @id @default(uuid())
+  userId             String         @unique @map("user_id")
+  firstName          String         @default("") @map("first_name")
+  lastName           String         @default("") @map("last_name")
+  avatarUrl          String?        @map("avatar_url")
+  bio                String?
+  dateOfBirth        DateTime?      @map("date_of_birth")
+  gender             Gender?
+  heightCm           Int?           @map("height_cm")
+  currentWeightKg    Float?         @map("current_weight_kg")
+  goalWeightKg       Float?         @map("goal_weight_kg")
+  activityLevel      ActivityLevel? @map("activity_level")
+  dietaryPreferences String?        @map("dietary_preferences")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+// ============================================
+// 2. COACHING RELATIONSHIPS
+// ============================================
+
+enum CoachingStatus {
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+model CoachingRelationship {
+  id        String         @id @default(uuid())
+  coachId   String         @map("coach_id")
+  clientId  String         @map("client_id")
+  status    CoachingStatus @default(ACTIVE)
+  startedAt DateTime       @default(now()) @map("started_at")
+  endedAt   DateTime?      @map("ended_at")
+
+  coach  User @relation("CoachRelationships", fields: [coachId], references: [id], onDelete: Cascade)
+  client User @relation("ClientRelationships", fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([coachId, clientId])
+  @@map("coaching_relationships")
+}
+
+// ============================================
+// 3. E-LEARNING MODULE
+// ============================================
+
+model Course {
+  id           String   @id @default(uuid())
+  title        String
+  description  String?
+  thumbnailUrl String?  @map("thumbnail_url")
+  priceCents   Int      @default(0) @map("price_cents")
+  createdBy    String   @map("created_by")
+  isPublished  Boolean  @default(false) @map("is_published")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  creator     User               @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  lessons     Lesson[]
+  enrollments CourseEnrollment[]
+
+  @@map("courses")
+}
+
+model Lesson {
+  id              String  @id @default(uuid())
+  courseId        String  @map("course_id")
+  title           String
+  description     String?
+  videoUrl        String? @map("video_url")
+  durationSeconds Int?    @map("duration_seconds")
+  orderIndex      Int     @map("order_index")
+  isFreePreview   Boolean @default(false) @map("is_free_preview")
+
+  course   Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress LessonProgress[]
+
+  @@map("lessons")
+}
+
+model CourseEnrollment {
+  id                 String    @id @default(uuid())
+  userId             String    @map("user_id")
+  courseId           String    @map("course_id")
+  enrolledAt         DateTime  @default(now()) @map("enrolled_at")
+  completedAt        DateTime? @map("completed_at")
+  progressPercentage Int       @default(0) @map("progress_percentage")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("course_enrollments")
+}
+
+model LessonProgress {
+  id             String    @id @default(uuid())
+  userId         String    @map("user_id")
+  lessonId       String    @map("lesson_id")
+  completed      Boolean   @default(false)
+  watchedSeconds Int       @default(0) @map("watched_seconds")
+  completedAt    DateTime? @map("completed_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@map("lesson_progress")
+}
+
+// ============================================
+// 4. WORKOUT & EXERCISE MODULE
+// ============================================
+
+enum ExerciseCategory {
+  STRENGTH
+  CARDIO
+  FLEXIBILITY
+  MOBILITY
+  CORE
+}
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+model Exercise {
+  id              String           @id @default(uuid())
+  name            String
+  description     String?
+  category        ExerciseCategory
+  equipmentNeeded String?          @map("equipment_needed")
+  videoUrl        String?          @map("video_url")
+  thumbnailUrl    String?          @map("thumbnail_url")
+
+  // NEW FIELDS for Exercise Library
+  muscleGroups     Json?            @map("muscle_groups") // Array of strings: ["chest", "triceps", "shoulders"]
+  difficulty       DifficultyLevel? @default(BEGINNER)
+  cues             String? // Form cues and technique instructions
+  videoStoragePath String?          @map("video_storage_path") // Supabase Storage path
+  imageStoragePath String?          @map("image_storage_path") // Supabase Storage path
+  isPublic         Boolean          @default(false) @map("is_public") // Coach-created vs platform library
+
+  createdBy String   @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  creator                  User                      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  workoutTemplateExercises WorkoutTemplateExercise[]
+  workoutLogs              WorkoutLog[]
+  formCheckVideos          FormCheckVideo[]
+
+  @@index([category])
+  @@index([difficulty])
+  @@map("exercises")
+}
+
+model WorkoutTemplate {
+  id              String   @id @default(uuid())
+  coachId         String   @map("coach_id")
+  name            String
+  description     String?
+  durationMinutes Int?     @map("duration_minutes")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  coach          User                      @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  exercises      WorkoutTemplateExercise[]
+  clientWorkouts ClientWorkout[]
+  aiGeneration   AIWorkoutGeneration?
+
+  @@map("workout_templates")
+}
+
+model WorkoutTemplateExercise {
+  id                String  @id @default(uuid())
+  workoutTemplateId String  @map("workout_template_id")
+  exerciseId        String  @map("exercise_id")
+  orderIndex        Int     @map("order_index")
+  sets              Int?
+  reps              String? // Can be "10-12" or "AMRAP"
+  restSeconds       Int?    @map("rest_seconds")
+  notes             String?
+
+  // Prescription fields
+  intensityType        String? @default("weight") @map("intensity_type")
+  prescribedWeightKg   Float?  @map("prescribed_weight_kg")
+  prescribedRpe        Int?    @map("prescribed_rpe")
+  prescribedRir        Int?    @map("prescribed_rir")
+  prescribedPercentage Int?    @map("prescribed_percentage")
+  tempo                String?
+  section              String? @default("workout")
+
+  workoutTemplate WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id], onDelete: Cascade)
+  exercise        Exercise        @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@map("workout_template_exercises")
+}
+
+model ClientWorkout {
+  id                String    @id @default(uuid())
+  clientId          String    @map("client_id")
+  coachId           String    @map("coach_id")
+  workoutTemplateId String    @map("workout_template_id")
+  scheduledDate     DateTime  @map("scheduled_date")
+  completed         Boolean   @default(false)
+  completedAt       DateTime? @map("completed_at")
+
+  client          User            @relation("ClientWorkouts", fields: [clientId], references: [id], onDelete: Cascade)
+  coach           User            @relation("CoachWorkouts", fields: [coachId], references: [id], onDelete: Cascade)
+  workoutTemplate WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id], onDelete: Cascade)
+  logs            WorkoutLog[]
+
+  @@map("client_workouts")
+}
+
+model WorkoutLog {
+  id              String   @id @default(uuid())
+  clientWorkoutId String   @map("client_workout_id")
+  userId          String   @map("user_id")
+  exerciseId      String   @map("exercise_id")
+  setNumber       Int      @map("set_number")
+  repsCompleted   Int      @map("reps_completed")
+  weightKg        Float?   @map("weight_kg")
+  notes           String?
+  loggedAt        DateTime @default(now()) @map("logged_at")
+
+  // Prescription snapshot (what was prescribed when the set was logged)
+  prescribedReps     String? @map("prescribed_reps")
+  prescribedWeightKg Float?  @map("prescribed_weight_kg")
+  prescribedRpe      Int?    @map("prescribed_rpe")
+  prescribedRir      Int?    @map("prescribed_rir")
+
+  // Client actual feedback
+  actualRpe Int? @map("actual_rpe")
+  actualRir Int? @map("actual_rir")
+
+  clientWorkout ClientWorkout @relation(fields: [clientWorkoutId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise      Exercise      @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@map("workout_logs")
+}
+
+// AI Workout Generation Tracking
+
+enum AIGenerationStatus {
+  PENDING
+  GENERATING
+  COMPLETED
+  FAILED
+}
+
+model AIWorkoutGeneration {
+  id       String             @id @default(uuid())
+  coachId  String             @map("coach_id")
+  clientId String             @map("client_id")
+  status   AIGenerationStatus @default(PENDING)
+
+  // Input context
+  clientGoals        String? @map("client_goals")
+  experience         String?
+  availableEquipment Json?   @map("available_equipment") // Array of equipment
+  sessionsPerWeek    Int?    @map("sessions_per_week")
+  sessionDuration    Int?    @map("session_duration") // Minutes
+
+  // AI metadata
+  promptUsed   String? @map("prompt_used") @db.Text
+  modelVersion String? @map("model_version") // e.g., "claude-3-5-sonnet-20241022"
+  tokensUsed   Int?    @map("tokens_used")
+
+  // Output
+  generatedTemplateId String? @unique @map("generated_template_id")
+  errorMessage        String? @map("error_message")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  completedAt DateTime? @map("completed_at")
+
+  coach             User             @relation("CoachAIGenerations", fields: [coachId], references: [id], onDelete: Cascade)
+  client            User             @relation("ClientAIGenerations", fields: [clientId], references: [id], onDelete: Cascade)
+  generatedTemplate WorkoutTemplate? @relation(fields: [generatedTemplateId], references: [id], onDelete: SetNull)
+
+  @@index([coachId])
+  @@index([clientId])
+  @@index([status])
+  @@map("ai_workout_generations")
+}
+
+// ============================================
+// 5. PROGRESS TRACKING
+// ============================================
+
+model ProgressTracking {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  date              DateTime @default(now())
+  weightKg          Float?   @map("weight_kg")
+  bodyFatPercentage Float?   @map("body_fat_percentage")
+  photos            Json? // Array of photo URLs
+  notes             String?
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("progress_tracking")
+}
+
+model CheckIn {
+  id            String   @id @default(uuid())
+  clientId      String   @map("client_id")
+  coachId       String   @map("coach_id")
+  date          DateTime @default(now())
+  weightKg      Float?   @map("weight_kg")
+  moodRating    Int?     @map("mood_rating") // 1-10
+  energyRating  Int?     @map("energy_rating") // 1-10
+  sleepHours    Float?   @map("sleep_hours")
+  photos        Json? // Array of photo URLs
+  notes         String?
+  coachFeedback String?  @map("coach_feedback")
+
+  client User @relation("ClientCheckIns", fields: [clientId], references: [id], onDelete: Cascade)
+  coach  User @relation("CoachCheckIns", fields: [coachId], references: [id], onDelete: Cascade)
+
+  @@map("check_ins")
+}
+
+// ============================================
+// 6. NUTRITION MODULE
+// ============================================
+
+model MealPlan {
+  id                  String    @id @default(uuid())
+  clientId            String    @map("client_id")
+  coachId             String    @map("coach_id")
+  name                String
+  startDate           DateTime  @map("start_date")
+  endDate             DateTime? @map("end_date")
+  dailyCaloriesTarget Int?      @map("daily_calories_target")
+  proteinGramsTarget  Int?      @map("protein_grams_target")
+  carbsGramsTarget    Int?      @map("carbs_grams_target")
+  fatGramsTarget      Int?      @map("fat_grams_target")
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  client User           @relation("ClientMealPlans", fields: [clientId], references: [id], onDelete: Cascade)
+  coach  User           @relation("CoachMealPlans", fields: [coachId], references: [id], onDelete: Cascade)
+  meals  MealPlanMeal[]
+
+  @@map("meal_plans")
+}
+
+model Meal {
+  id           String  @id @default(uuid())
+  name         String
+  description  String?
+  calories     Int?
+  proteinGrams Int?    @map("protein_grams")
+  carbsGrams   Int?    @map("carbs_grams")
+  fatGrams     Int?    @map("fat_grams")
+  recipeUrl    String? @map("recipe_url")
+  photoUrl     String? @map("photo_url")
+  createdBy    String  @map("created_by")
+
+  creator       User           @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  mealPlanMeals MealPlanMeal[]
+
+  @@map("meals")
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
+model MealPlanMeal {
+  id         String   @id @default(uuid())
+  mealPlanId String   @map("meal_plan_id")
+  mealId     String   @map("meal_id")
+  dayOfWeek  Int      @map("day_of_week") // 1-7
+  mealType   MealType @map("meal_type")
+  orderIndex Int      @map("order_index")
+
+  mealPlan MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  meal     Meal     @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@map("meal_plan_meals")
+}
+
+model FoodLog {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  date         DateTime
+  mealType     MealType @map("meal_type")
+  foodName     String   @map("food_name")
+  calories     Int?
+  proteinGrams Int?     @map("protein_grams")
+  carbsGrams   Int?     @map("carbs_grams")
+  fatGrams     Int?     @map("fat_grams")
+  photoUrl     String?  @map("photo_url")
+  notes        String?
+  loggedAt     DateTime @default(now()) @map("logged_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("food_logs")
+}
+
+// ============================================
+// 7. HABIT TRACKING
+// ============================================
+
+enum HabitFrequency {
+  DAILY
+  WEEKLY
+}
+
+model Habit {
+  id              String         @id @default(uuid())
+  clientId        String         @map("client_id")
+  coachId         String         @map("coach_id")
+  name            String
+  description     String?
+  targetFrequency HabitFrequency @map("target_frequency")
+  targetCount     Int            @default(1) @map("target_count") // For weekly habits
+  isActive        Boolean        @default(true) @map("is_active")
+  createdAt       DateTime       @default(now()) @map("created_at")
+
+  client  User         @relation("ClientHabits", fields: [clientId], references: [id], onDelete: Cascade)
+  coach   User         @relation("CoachHabits", fields: [coachId], references: [id], onDelete: Cascade)
+  logs    HabitLog[]
+  streaks HabitStreak?
+
+  @@map("habits")
+}
+
+model HabitLog {
+  id        String   @id @default(uuid())
+  habitId   String   @map("habit_id")
+  date      DateTime
+  completed Boolean  @default(false)
+  notes     String?
+  loggedAt  DateTime @default(now()) @map("logged_at")
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@map("habit_logs")
+}
+
+model HabitStreak {
+  id                String    @id @default(uuid())
+  habitId           String    @unique @map("habit_id")
+  currentStreakDays Int       @default(0) @map("current_streak_days")
+  longestStreakDays Int       @default(0) @map("longest_streak_days")
+  lastCompletedDate DateTime? @map("last_completed_date")
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@map("habit_streaks")
+}
+
+// ============================================
+// 8. FORM CHECK VIDEOS
+// ============================================
+
+enum FormCheckStatus {
+  PENDING
+  REVIEWED
+}
+
+model FormCheckVideo {
+  id           String          @id @default(uuid())
+  clientId     String          @map("client_id")
+  exerciseId   String          @map("exercise_id")
+  videoUrl     String          @map("video_url")
+  thumbnailUrl String?         @map("thumbnail_url")
+  status       FormCheckStatus @default(PENDING)
+  uploadedAt   DateTime        @default(now()) @map("uploaded_at")
+  reviewedAt   DateTime?       @map("reviewed_at")
+
+  client   User                @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  exercise Exercise            @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  feedback FormCheckFeedback[]
+
+  @@map("form_check_videos")
+}
+
+model FormCheckFeedback {
+  id               String   @id @default(uuid())
+  formCheckVideoId String   @map("form_check_video_id")
+  coachId          String   @map("coach_id")
+  feedbackText     String   @map("feedback_text")
+  timestampSeconds Int?     @map("timestamp_seconds")
+  isResolved       Boolean  @default(false) @map("is_resolved")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  formCheckVideo FormCheckVideo @relation(fields: [formCheckVideoId], references: [id], onDelete: Cascade)
+  coach          User           @relation(fields: [coachId], references: [id], onDelete: Cascade)
+
+  @@map("form_check_feedback")
+}
+
+// ============================================
+// 9. CALENDAR & SCHEDULING
+// ============================================
+
+enum SessionType {
+  IN_PERSON
+  VIDEO_CALL
+  CHECK_IN
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model CoachingSession {
+  id             String        @id @default(uuid())
+  coachId        String        @map("coach_id")
+  clientId       String        @map("client_id")
+  sessionType    SessionType   @map("session_type")
+  scheduledStart DateTime      @map("scheduled_start")
+  scheduledEnd   DateTime      @map("scheduled_end")
+  location       String?
+  videoCallUrl   String?       @map("video_call_url")
+  status         SessionStatus @default(SCHEDULED)
+  notes          String?
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  coach  User @relation("CoachSessions", fields: [coachId], references: [id], onDelete: Cascade)
+  client User @relation("ClientSessions", fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("coaching_sessions")
+}
+
+model CoachAvailability {
+  id          String  @id @default(uuid())
+  coachId     String  @map("coach_id")
+  dayOfWeek   Int     @map("day_of_week") // 0-6 (Sunday-Saturday)
+  startTime   String  @map("start_time") // HH:MM format
+  endTime     String  @map("end_time") // HH:MM format
+  isAvailable Boolean @default(true) @map("is_available")
+
+  coach User @relation(fields: [coachId], references: [id], onDelete: Cascade)
+
+  @@map("coach_availability")
+}
+
+// ============================================
+// 10. FILE SHARING
+// ============================================
+
+enum FileType {
+  PDF
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+model SharedFile {
+  id            String   @id @default(uuid())
+  uploadedBy    String   @map("uploaded_by")
+  sharedWith    String   @map("shared_with")
+  fileUrl       String   @map("file_url")
+  fileName      String   @map("file_name")
+  fileType      FileType @map("file_type")
+  fileSizeBytes Int      @map("file_size_bytes")
+  description   String?
+  uploadedAt    DateTime @default(now()) @map("uploaded_at")
+
+  uploader User @relation("FileUploader", fields: [uploadedBy], references: [id], onDelete: Cascade)
+  receiver User @relation("FileReceiver", fields: [sharedWith], references: [id], onDelete: Cascade)
+
+  @@map("shared_files")
+}
+
+// ============================================
+// 11. NOTIFICATIONS
+// ============================================
+
+enum NotificationType {
+  MESSAGE
+  WORKOUT_ASSIGNED
+  CHECK_IN_DUE
+  PAYMENT
+  FORM_CHECK_FEEDBACK
+  COURSE_ENROLLMENT
+  SESSION_REMINDER
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  message   String
+  linkUrl   String?          @map("link_url")
+  isRead    Boolean          @default(false) @map("is_read")
+  createdAt DateTime         @default(now()) @map("created_at")
+  readAt    DateTime?        @map("read_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+enum Platform {
+  IOS
+  ANDROID
+  WEB
+}
+
+model PushToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  platform  Platform
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("push_tokens")
+}
+
+// ============================================
+// 12. MESSAGING
+// ============================================
+
+model Message {
+  id         String    @id @default(uuid())
+  senderId   String    @map("sender_id")
+  receiverId String    @map("receiver_id")
+  content    String
+  read       Boolean   @default(false)
+  sentAt     DateTime  @default(now()) @map("sent_at")
+  readAt     DateTime? @map("read_at")
+
+  sender   User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId, receiverId])
+  @@map("messages")
+}
+
+model Conversation {
+  id            String   @id @default(uuid())
+  coachId       String   @map("coach_id")
+  clientId      String   @map("client_id")
+  lastMessageAt DateTime @default(now()) @map("last_message_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  coach  User @relation("CoachConversations", fields: [coachId], references: [id], onDelete: Cascade)
+  client User @relation("ClientConversations", fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([coachId, clientId])
+  @@map("conversations")
+}
+
+// ============================================
+// 13. PAYMENTS & SUBSCRIPTIONS
+// ============================================
+
+enum SubscriptionPlan {
+  MONTHLY
+  THREE_MONTHS
+  SIX_MONTHS
+  TWELVE_MONTHS
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+  EXPIRED
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  clientId             String             @map("client_id")
+  coachId              String             @map("coach_id")
+  planType             SubscriptionPlan   @map("plan_type")
+  priceCents           Int                @map("price_cents")
+  status               SubscriptionStatus @default(ACTIVE)
+  stripeSubscriptionId String?            @unique @map("stripe_subscription_id")
+  currentPeriodStart   DateTime           @map("current_period_start")
+  currentPeriodEnd     DateTime           @map("current_period_end")
+  createdAt            DateTime           @default(now()) @map("created_at")
+
+  client User @relation("ClientSubscriptions", fields: [clientId], references: [id], onDelete: Cascade)
+  coach  User @relation("CoachSubscriptions", fields: [coachId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+enum PaymentType {
+  COURSE
+  SUBSCRIPTION
+  COACHING
+  SESSION
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  userId          String        @map("user_id")
+  amountCents     Int           @map("amount_cents")
+  currency        String        @default("EUR")
+  type            PaymentType
+  status          PaymentStatus @default(PENDING)
+  stripePaymentId String?       @unique @map("stripe_payment_id")
+  description     String?
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}

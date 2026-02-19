@@ -9,6 +9,8 @@ import { Footer } from "@/components/footer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getCookieLogs, getCalculatorLogs, getContactLogs, clearCookieLogs } from "@/utils/cookie-utils"
 import { logoutAdmin } from "@/app/actions/admin-auth"
+import ClientsTab from "./ClientsTab"
+import UsersTab from "./UsersTab"
 import {
   Activity,
   TrendingUp,
@@ -21,6 +23,8 @@ import {
   Server,
   AlertCircle,
   LogOut,
+  Users,
+  Shield,
 } from "lucide-react"
 
 interface AnalyticsData {
@@ -304,23 +308,45 @@ export default function AdminDashboardClient() {
             </Badge>
           </div>
 
-          <Tabs defaultValue="server" className="space-y-8">
+          <Tabs defaultValue="clients" className="space-y-8">
             <TabsList className="bg-[#1e1839]/50 border border-[#bad4e1]/20 text-[#bad4e1]/70">
+              <TabsTrigger
+                value="clients"
+                className="data-[state=active]:bg-[#bad4e1] data-[state=active]:text-[#1e1839]"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Clients
+              </TabsTrigger>
+              <TabsTrigger
+                value="users"
+                className="data-[state=active]:bg-[#bad4e1] data-[state=active]:text-[#1e1839]"
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                Gebruikers
+              </TabsTrigger>
               <TabsTrigger
                 value="server"
                 className="data-[state=active]:bg-[#bad4e1] data-[state=active]:text-[#1e1839]"
               >
                 <Globe className="w-4 h-4 mr-2" />
-                Live Overzicht
+                Website Analytics
               </TabsTrigger>
               <TabsTrigger
                 value="local"
                 className="data-[state=active]:bg-[#bad4e1] data-[state=active]:text-[#1e1839]"
               >
                 <Clock className="w-4 h-4 mr-2" />
-                Lokale Debug Logs
+                Debug Logs
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="clients" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <ClientsTab />
+            </TabsContent>
+
+            <TabsContent value="users" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <UsersTab />
+            </TabsContent>
 
             <TabsContent value="server" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               {serverData ? (

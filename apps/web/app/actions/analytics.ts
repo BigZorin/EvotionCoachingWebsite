@@ -2,10 +2,14 @@
 
 import { Redis } from "@upstash/redis"
 
-const redis = new Redis({
-  url: process.env.KV_REST_API_URL!,
-  token: process.env.KV_REST_API_TOKEN!,
-})
+const redisConfigured = !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)
+
+const redis = redisConfigured
+  ? new Redis({
+      url: process.env.KV_REST_API_URL!,
+      token: process.env.KV_REST_API_TOKEN!,
+    })
+  : null
 
 export type AnalyticsEvent = {
   type: string
@@ -17,6 +21,8 @@ export type AnalyticsEvent = {
 }
 
 export async function trackServerEvent(event: AnalyticsEvent) {
+  if (!redis) return
+
   try {
     const date = new Date().toISOString().split("T")[0] // YYYY-MM-DD
 
@@ -51,6 +57,14 @@ export async function trackServerEvent(event: AnalyticsEvent) {
 }
 
 export async function getDashboardData() {
+  if (!redis) {
+    return {
+      stats: { visitors: 0, calculatorStarts: 0, calculatorCompletions: 0, leads: 0, contactSubmissions: 0 },
+      topPages: [],
+      recentActivity: [],
+    }
+  }
+
   try {
     const today = new Date().toISOString().split("T")[0]
 

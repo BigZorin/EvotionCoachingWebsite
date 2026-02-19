@@ -1,9 +1,12 @@
 "use server"
 
-import Anthropic from "@anthropic-ai/sdk"
+import dns from "node:dns"
 import { createServerClient } from "@supabase/ssr"
 import { createClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
+
+// Fix: Node.js fetch on Windows tries IPv6 first and fails for some hosts
+dns.setDefaultResultOrder("ipv4first")
 
 async function checkAuth() {
   const cookieStore = await cookies()
@@ -34,26 +37,66 @@ function getSupabaseAdmin() {
   )
 }
 
-function getAnthropicClient() {
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey || apiKey === "your_anthropic_api_key_here") {
-    throw new Error("ANTHROPIC_API_KEY is not configured")
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+const GROQ_MODEL = "llama-3.3-70b-versatile"
+const RAG_API_URL = "https://rag.evotiondata.com/api/v1/query"
+const RAG_AUTH_TOKEN = process.env.RAG_AUTH_TOKEN || ""
+
+function getGroqApiKey() {
+  const apiKey = process.env.GROQ_API_KEY
+  if (!apiKey) {
+    throw new Error("GROQ_API_KEY is not configured")
   }
-  return new Anthropic({ apiKey })
+  return apiKey
+}
+
+/**
+ * Query the RAG knowledge base for relevant coaching knowledge.
+ * Returns context text or empty string if RAG is unavailable.
+ */
+async function fetchRagContext(intakeText: string): Promise<string> {
+  if (!RAG_AUTH_TOKEN) return ""
+  try {
+    const response = await fetch(RAG_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${RAG_AUTH_TOKEN}`,
+      },
+      body: JSON.stringify({
+        question: `Op basis van deze client intake, geef relevante coaching richtlijnen voor programming, periodisering, voeding en trainingsopbouw:\n\n${intakeText}`,
+        top_k: 8,
+        include_sources: false,
+        temperature: 0.1,
+      }),
+      signal: AbortSignal.timeout(15000),
+    })
+
+    if (!response.ok) return ""
+
+    const result = await response.json()
+    return result.answer || ""
+  } catch {
+    // RAG unavailable — continue without it
+    return ""
+  }
 }
 
 const INTAKE_ANALYSIS_PROMPT = `Je bent een ervaren fitness- en voedingscoach-assistent. Je analyseert intake formulieren van nieuwe clients en genereert een gestructureerd rapport voor de coach.
 
-Analyseer de intake data grondig en genereer een rapport met EXACT deze secties:
+BELANGRIJK: Je MOET je output formatteren in Markdown met ## headings en - bullet lists. Gebruik EXACT deze structuur:
 
 ## Clientprofiel
+
 Korte samenvatting (3-4 zinnen) van wie deze client is: doelen, ervaringsniveau, leefstijl, beschikbaarheid.
 
 ## Rode Vlaggen
+
 Identificeer mogelijke risico's op basis van blessures, medische aandoeningen, medicijnen, stressniveau, slaaptekort of andere zorgpunten. Als er geen rode vlaggen zijn, vermeld dit expliciet.
 
 ## Trainingsadvies
-Concrete aanbevelingen:
+
+Concrete aanbevelingen als bullet points:
 - Aanbevolen trainingsfrequentie en split
 - Focus-gebieden op basis van doelen
 - Intensiteitsrichting (hypertrofie, kracht, conditie)
@@ -61,25 +104,33 @@ Concrete aanbevelingen:
 - Aanpassingen op basis van ervaring en beperkingen
 
 ## Voedingsadvies
-Concrete richtlijnen:
+
+Concrete richtlijnen als bullet points:
 - Geschatte calorische richting (surplus/deficit/onderhoud) op basis van doel
-- Macro-verdeling advies (eiwit/koolhydraten/vetten)
+- Macro-verdeling advies (eiwit/koolhydraten/vetten in gram per kg lichaamsgewicht)
 - Aandachtspunten bij restricties of allergieën
 - Timing-suggesties op basis van trainingsmoment
 
 ## Aandachtspunten
+
 Wat de coach extra moet uitvragen, monitoren of bespreken:
 - Ontbrekende informatie die belangrijk is
 - Verwachtingsmanagement
 - Potentiële compliance-risico's
 - Suggesties voor het eerste coachgesprek
 
-Wees concreet, praktisch en direct toepasbaar. Geen vage algemeenheden. De coach moet dit rapport kunnen gebruiken als basis voor het eerste programma.`
+REGELS:
+- Begin elke sectie met ## (twee hekjes + spatie + titel)
+- Gebruik - (streepje) voor opsommingen
+- Gebruik **vetgedrukt** voor belangrijke termen
+- Wees concreet met getallen: specificeer sets, reps, kg/lichaamsgewicht, gram eiwit, etc.
+- De coach moet dit rapport direct kunnen gebruiken als basis voor het eerste programma.`
 
 export interface IntakeAnalysis {
   analysis: string
   tokensUsed: number
   model: string
+  ragUsed: boolean
 }
 
 export async function analyzeClientIntake(clientId: string): Promise<{
@@ -143,30 +194,53 @@ export async function analyzeClientIntake(clientId: string): Promise<{
 
     const intakeText = sections.join("\n")
 
-    // Call Claude
-    const anthropic = getAnthropicClient()
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 2000,
-      temperature: 0.3,
-      system: INTAKE_ANALYSIS_PROMPT,
-      messages: [
-        {
-          role: "user",
-          content: `Analyseer het volgende intake formulier:\n\n${intakeText}`,
-        },
-      ],
+    // Fetch relevant coaching knowledge from RAG (parallel-safe, fails gracefully)
+    const ragContext = await fetchRagContext(intakeText)
+    const ragUsed = ragContext.length > 0
+
+    // Build user message with optional RAG context
+    let userMessage = `Analyseer het volgende intake formulier:\n\n${intakeText}`
+    if (ragUsed) {
+      userMessage += `\n\n---\n\nHieronder vind je relevante informatie uit de coaching kennisbank. Gebruik deze evidence-based richtlijnen om je advies te onderbouwen:\n\n${ragContext}`
+    }
+
+    // Call Groq (Llama 3.3 70B — free tier)
+    const apiKey = getGroqApiKey()
+    const response = await fetch(GROQ_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [
+          { role: "system", content: INTAKE_ANALYSIS_PROMPT },
+          { role: "user", content: userMessage },
+        ],
+        max_tokens: 3000,
+        temperature: 0.3,
+      }),
     })
 
-    const responseText = message.content[0].type === "text" ? message.content[0].text : ""
+    if (!response.ok) {
+      const err = await response.text()
+      return { success: false, error: `Groq API error: ${response.status} — ${err}` }
+    }
+
+    const result = await response.json()
+    const responseText = result.choices?.[0]?.message?.content || ""
     if (!responseText) return { success: false, error: "Geen antwoord van AI" }
+
+    const tokensUsed = (result.usage?.prompt_tokens || 0) + (result.usage?.completion_tokens || 0)
 
     return {
       success: true,
       data: {
         analysis: responseText,
-        tokensUsed: message.usage.input_tokens + message.usage.output_tokens,
-        model: "claude-sonnet-4-20250514",
+        tokensUsed,
+        model: GROQ_MODEL,
+        ragUsed,
       },
     }
   } catch (error: any) {
