@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import {
-  Activity, FileText, ClipboardList, Dumbbell,
-  UtensilsCrossed, User, HeartPulse,
+  LayoutDashboard, MessageSquareText, HeartPulse, UserCircle,
 } from "lucide-react"
 import {
   getClientProfile, getClientCheckIns, getClientDailyCheckIns,
@@ -25,23 +24,24 @@ import {
 
 import ClientHeader from "./components/ClientHeader"
 import OverviewTab from "./components/OverviewTab"
-import IntakeTab from "./components/IntakeTab"
-import CheckInsTab from "./components/CheckInsTab"
-import TrainingTab from "./components/TrainingTab"
-import NutritionTab from "./components/NutritionTab"
-import ProfileTab from "./components/ProfileTab"
+import CoachingTab from "./components/CoachingTab"
 import HealthTab from "./components/HealthTab"
+import ProfileTab from "./components/ProfileTab"
 
-type TabId = "overzicht" | "intake" | "checkins" | "training" | "voeding" | "gezondheid" | "profiel"
+/*
+ * 4 logical tabs instead of 7 flat ones:
+ * 1. Overzicht  = dashboard / alerts / timeline
+ * 2. Coaching   = check-ins + training + voeding (sub-tabs)
+ * 3. Gezondheid = weight, wellbeing, wearable
+ * 4. Profiel    = intake + photos + notes + goals
+ */
+type TabId = "overzicht" | "coaching" | "gezondheid" | "profiel"
 
 const TABS: { id: TabId; label: string; icon: any }[] = [
-  { id: "overzicht", label: "Overzicht", icon: Activity },
-  { id: "intake", label: "Intake", icon: FileText },
-  { id: "checkins", label: "Check-ins", icon: ClipboardList },
-  { id: "training", label: "Training", icon: Dumbbell },
-  { id: "voeding", label: "Voeding", icon: UtensilsCrossed },
+  { id: "overzicht", label: "Overzicht", icon: LayoutDashboard },
+  { id: "coaching", label: "Coaching", icon: MessageSquareText },
   { id: "gezondheid", label: "Gezondheid", icon: HeartPulse },
-  { id: "profiel", label: "Profiel", icon: User },
+  { id: "profiel", label: "Profiel", icon: UserCircle },
 ]
 
 export default function ClientDetailClient({ clientId }: { clientId: string }) {
@@ -198,8 +198,11 @@ export default function ClientDetailClient({ clientId }: { clientId: string }) {
 
   const activeGoals = goals.filter((g) => g.status === "active")
 
+  // Count pending check-ins for coaching badge
+  const pendingCheckIns = weeklyCheckIns.filter(ci => !ci.coach_feedback).length
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <ClientHeader
         client={client}
         profile={profile}
@@ -216,31 +219,33 @@ export default function ClientDetailClient({ clientId }: { clientId: string }) {
         onReject={handleReject}
       />
 
-      {/* Tab navigation - sticky with underline style */}
+      {/* 4-tab navigation - sticky with underline style */}
       <div className="sticky top-0 z-20 bg-background -mx-4 px-4 sm:-mx-6 sm:px-6">
-        <div className="relative">
-          {/* Fade edges for mobile scroll */}
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none sm:hidden" />
-          <div className="flex overflow-x-auto scrollbar-hide border-b border-border">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
-                  activeTab === tab.id
-                    ? "text-evotion-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <tab.icon className="h-4 w-4" />
-                {tab.label}
-                {/* Active underline indicator */}
-                {activeTab === tab.id && (
-                  <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-evotion-primary rounded-full" />
-                )}
-              </button>
-            ))}
-          </div>
+        <div className="flex border-b border-border">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`relative flex items-center gap-2 px-5 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
+                activeTab === tab.id
+                  ? "text-evotion-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <tab.icon className="h-4 w-4" />
+              {tab.label}
+              {/* Badge for pending items */}
+              {tab.id === "coaching" && pendingCheckIns > 0 && (
+                <span className="ml-1 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold bg-evotion-primary text-white rounded-full min-w-[18px]">
+                  {pendingCheckIns}
+                </span>
+              )}
+              {/* Active underline indicator */}
+              {activeTab === tab.id && (
+                <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-evotion-primary rounded-full" />
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -253,44 +258,25 @@ export default function ClientDetailClient({ clientId }: { clientId: string }) {
           supplements={supplements}
           activeGoals={activeGoals.map(g => ({ id: g.id, title: g.title, target_date: g.target_date || undefined }))}
           pinnedNotes={notes.filter(n => n.is_pinned).map(n => ({ id: n.id, content: n.content }))}
+          weeklyCheckIns={weeklyCheckIns}
+          dailyCheckIns={dailyCheckIns}
+          workouts={workouts}
           onNavigateToTab={(tab) => setActiveTab(tab as TabId)}
         />
       )}
 
-      {activeTab === "intake" && (
-        <IntakeTab
+      {activeTab === "coaching" && (
+        <CoachingTab
           clientId={clientId}
           clientName={clientName}
           intake={intake}
-          onIntakeReset={() => { setIntake(null) }}
-          onPlanComplete={() => loadData()}
-        />
-      )}
-
-      {activeTab === "checkins" && (
-        <CheckInsTab
-          clientId={clientId}
           weeklyCheckIns={weeklyCheckIns}
           dailyCheckIns={dailyCheckIns}
           weeklyCheckInDay={weeklyCheckInDay}
           clientTemplateAssignments={clientTemplateAssignments}
           coachTemplates={coachTemplates}
-          onDataRefresh={() => loadData()}
-        />
-      )}
-
-      {activeTab === "training" && (
-        <TrainingTab
-          clientId={clientId}
           workouts={workouts}
           clientPrograms={clientPrograms}
-          onDataRefresh={() => loadData()}
-        />
-      )}
-
-      {activeTab === "voeding" && (
-        <NutritionTab
-          clientId={clientId}
           nutritionTargets={nutritionTargets}
           foodLogs={foodLogs}
           clientAssignments={clientAssignments}
@@ -312,10 +298,14 @@ export default function ClientDetailClient({ clientId }: { clientId: string }) {
       {activeTab === "profiel" && (
         <ProfileTab
           clientId={clientId}
+          clientName={clientName}
+          intake={intake}
           photos={photos}
           notes={notes}
           goals={goals}
           onDataRefresh={() => loadData()}
+          onIntakeReset={() => { setIntake(null) }}
+          onPlanComplete={() => loadData()}
         />
       )}
     </div>

@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import {
-  Dumbbell, UtensilsCrossed, Pill, Sparkles, History, ChevronRight,
-  ChevronDown, Eye, Target, Pin, BarChart3, X, ArrowRight,
+  Dumbbell, UtensilsCrossed, Pill, Sparkles, History, ChevronDown,
+  Eye, Target, Pin, BarChart3, ArrowRight, AlertTriangle,
+  MessageSquare, Calendar, X,
 } from "lucide-react"
 import {
   generateClientSummary,
@@ -41,6 +42,9 @@ interface OverviewTabProps {
   supplements: any[]
   activeGoals: Array<{ id: string; title: string; target_date?: string }>
   pinnedNotes: Array<{ id: string; content: string }>
+  weeklyCheckIns: any[]
+  dailyCheckIns: any[]
+  workouts: any[]
   onNavigateToTab: (tab: string) => void
 }
 
@@ -51,6 +55,9 @@ export default function OverviewTab({
   supplements,
   activeGoals,
   pinnedNotes,
+  weeklyCheckIns,
+  dailyCheckIns,
+  workouts,
   onNavigateToTab,
 }: OverviewTabProps) {
   const [aiCockpitResult, setAiCockpitResult] = useState<AIClientSummaryResult | null>(null)
@@ -88,12 +95,8 @@ export default function OverviewTab({
       if (res.success && res.data) {
         setAiCockpitResult(res.data)
         saveAIGenerationLog(clientId, "client_summary", res.data, {
-          model: res.data.model,
-          tokensUsed: res.data.tokensUsed,
-          ragUsed: res.data.ragUsed,
-        }).then((logRes) => {
-          if (logRes.success) refreshLogs()
-        })
+          model: res.data.model, tokensUsed: res.data.tokensUsed, ragUsed: res.data.ragUsed,
+        }).then((logRes) => { if (logRes.success) refreshLogs() })
       } else {
         setAiCockpitError(res.error || "Samenvatting mislukt")
       }
@@ -112,14 +115,9 @@ export default function OverviewTab({
       if (res.success && res.data) {
         setAiReviewResult(res.data)
         saveAIGenerationLog(clientId, "weekly_review", res.data, {
-          model: res.data.model,
-          tokensUsed: res.data.tokensUsed,
-          ragUsed: res.data.ragUsed,
+          model: res.data.model, tokensUsed: res.data.tokensUsed, ragUsed: res.data.ragUsed,
         }).then((logRes) => {
-          if (logRes.success) {
-            setAiReviewLogId(logRes.id)
-            refreshLogs()
-          }
+          if (logRes.success) { setAiReviewLogId(logRes.id); refreshLogs() }
         })
       } else {
         setAiReviewError(res.error || "Review generatie mislukt")
@@ -131,6 +129,32 @@ export default function OverviewTab({
     }
   }
 
+  // Build alerts
+  const alerts: { type: "warning" | "info"; message: string; action?: string; tab?: string }[] = []
+
+  const pendingFeedback = weeklyCheckIns.filter(ci => !ci.coach_feedback).length
+  if (pendingFeedback > 0) {
+    alerts.push({ type: "warning", message: `${pendingFeedback} check-in(s) zonder feedback`, action: "Bekijk", tab: "coaching" })
+  }
+
+  const last30 = dailyCheckIns.filter(ci => (Date.now() - new Date(ci.check_in_date).getTime()) / 86400000 <= 30)
+  if (last30.length < 15) {
+    alerts.push({ type: "info", message: `Compliance: ${last30.length}/30 dagen`, action: "Bekijk", tab: "coaching" })
+  }
+
+  const expiringGoals = activeGoals.filter(g => {
+    if (!g.target_date) return false
+    const days = Math.ceil((new Date(g.target_date).getTime() - Date.now()) / 86400000)
+    return days >= 0 && days <= 7
+  })
+  if (expiringGoals.length > 0) {
+    alerts.push({ type: "warning", message: `${expiringGoals.length} doel(en) verlopen binnen 7 dagen`, action: "Bekijk", tab: "profiel" })
+  }
+
+  if (!clientPrograms.some(p => p.status?.toLowerCase() === "active")) {
+    alerts.push({ type: "info", message: "Geen actief trainingsprogramma", action: "Toewijzen", tab: "coaching" })
+  }
+
   const typeConfig: Record<string, { icon: any; color: string; bg: string }> = {
     training_program: { icon: Dumbbell, color: "text-evotion-primary", bg: "bg-evotion-primary/10" },
     nutrition_plan: { icon: UtensilsCrossed, color: "text-amber-600", bg: "bg-amber-50" },
@@ -140,8 +164,164 @@ export default function OverviewTab({
   }
 
   return (
-    <div className="space-y-6">
-      {/* AI Client Summary */}
+    <div className="space-y-5">
+      {/* Alerts - actionable items at the top */}
+      {alerts.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {alerts.map((alert, i) => (
+            <button
+              key={i}
+              onClick={() => alert.tab && onNavigateToTab(alert.tab)}
+              className={`flex items-center justify-between px-4 py-2.5 rounded-lg text-sm transition-colors group ${
+                alert.type === "warning"
+                  ? "bg-amber-50/80 border border-amber-200/50 hover:bg-amber-50"
+                  : "bg-muted/50 border border-border hover:bg-muted"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <AlertTriangle className={`w-4 h-4 flex-shrink-0 ${
+                  alert.type === "warning" ? "text-amber-600" : "text-muted-foreground"
+                }`} />
+                <span className={alert.type === "warning" ? "text-amber-800 font-medium" : "text-foreground"}>
+                  {alert.message}
+                </span>
+              </div>
+              {alert.action && (
+                <span className="text-xs font-medium text-evotion-primary group-hover:underline flex-shrink-0">
+                  {alert.action}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Pinned notes - always visible if present */}
+      {pinnedNotes.length > 0 && (
+        <div className="flex items-start gap-3 px-4 py-3 bg-amber-50/40 border border-amber-200/30 rounded-lg">
+          <Pin className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            {pinnedNotes.map((note, i) => (
+              <p key={note.id} className={`text-sm text-foreground leading-relaxed ${i > 0 ? "mt-1.5 pt-1.5 border-t border-amber-200/30" : ""}`}>
+                {note.content}
+              </p>
+            ))}
+          </div>
+          <button
+            onClick={() => onNavigateToTab("profiel")}
+            className="text-[11px] text-evotion-primary font-medium hover:underline flex-shrink-0"
+          >
+            Bewerk
+          </button>
+        </div>
+      )}
+
+      {/* Quick Status - compact 3-col grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <QuickCard
+          icon={Dumbbell}
+          iconBg="bg-evotion-primary/5"
+          iconColor="text-evotion-primary"
+          label="Training"
+          onClick={() => onNavigateToTab("coaching")}
+        >
+          {clientPrograms.filter(p => p.status?.toLowerCase() === "active").length > 0 ? (
+            <>
+              <p className="text-sm font-semibold text-foreground truncate">
+                {clientPrograms.find(p => p.status?.toLowerCase() === "active")?.training_programs?.name || "Programma"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {workouts.length} workouts gelogd
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">Geen programma</p>
+          )}
+        </QuickCard>
+
+        <QuickCard
+          icon={UtensilsCrossed}
+          iconBg="bg-amber-50"
+          iconColor="text-amber-600"
+          label="Voeding"
+          onClick={() => onNavigateToTab("coaching")}
+        >
+          {nutritionTargets ? (
+            <>
+              <p className="text-sm font-semibold text-foreground">{nutritionTargets.daily_calories} kcal</p>
+              <p className="text-xs text-muted-foreground">
+                E{nutritionTargets.daily_protein_grams} / K{nutritionTargets.daily_carbs_grams} / V{nutritionTargets.daily_fat_grams}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">Niet ingesteld</p>
+          )}
+        </QuickCard>
+
+        <QuickCard
+          icon={Pill}
+          iconBg="bg-emerald-50"
+          iconColor="text-emerald-600"
+          label="Supplementen"
+          onClick={() => onNavigateToTab("coaching")}
+        >
+          {supplements.filter(s => s.is_active).length > 0 ? (
+            <>
+              <p className="text-sm font-semibold text-foreground">{supplements.filter(s => s.is_active).length} actief</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {supplements.filter(s => s.is_active).map(s => s.name).join(", ")}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">Geen</p>
+          )}
+        </QuickCard>
+      </div>
+
+      {/* Active Goals - compact row */}
+      {activeGoals.length > 0 && (
+        <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-evotion-primary" />
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Doelen
+              </span>
+              <span className="text-[10px] bg-evotion-primary/10 text-evotion-primary px-1.5 py-0.5 rounded font-bold">
+                {activeGoals.length}
+              </span>
+            </div>
+            <button
+              onClick={() => onNavigateToTab("profiel")}
+              className="text-[11px] text-evotion-primary font-medium hover:underline"
+            >
+              Beheren
+            </button>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            {activeGoals.map((goal) => {
+              const daysLeft = goal.target_date
+                ? Math.max(0, Math.ceil((new Date(goal.target_date).getTime() - Date.now()) / 86400000))
+                : null
+              return (
+                <div key={goal.id} className="flex items-center justify-between py-2 px-3 bg-muted/40 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-1.5 h-1.5 rounded-full ${daysLeft !== null && daysLeft <= 7 ? "bg-amber-400" : "bg-evotion-primary"}`} />
+                    <span className="text-sm text-foreground">{goal.title}</span>
+                  </div>
+                  {daysLeft !== null && (
+                    <span className={`text-[11px] font-medium ${daysLeft <= 7 ? "text-amber-600" : "text-muted-foreground"}`}>
+                      {daysLeft}d
+                    </span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* AI Generators */}
       {!aiCockpitResult && (
         <AIGeneratorBanner
           title="AI Client Samenvatting"
@@ -159,113 +339,6 @@ export default function OverviewTab({
         <AIClientCockpit result={aiCockpitResult} onClose={() => setAiCockpitResult(null)} />
       )}
 
-      {/* Status Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Active Training Program */}
-        <button
-          onClick={() => onNavigateToTab("training")}
-          className="bg-card rounded-xl border border-border p-5 text-left hover:border-evotion-primary/30 hover:shadow-md transition-all group hover:-translate-y-px"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2.5 rounded-xl bg-evotion-primary/5 group-hover:bg-evotion-primary/10 transition-colors">
-                <Dumbbell className="w-5 h-5 text-evotion-primary" />
-              </div>
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actief Programma</span>
-            </div>
-            <ArrowRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-evotion-primary group-hover:translate-x-0.5 transition-all" />
-          </div>
-          {clientPrograms.filter((p: any) => p.status?.toLowerCase() === "active").length > 0 ? (
-            clientPrograms
-              .filter((p: any) => p.status?.toLowerCase() === "active")
-              .slice(0, 1)
-              .map((p: any) => (
-                <div key={p.id}>
-                  <p className="text-sm font-semibold text-foreground">
-                    {p.training_programs?.name || "Programma"}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1.5">
-                    Sinds{" "}
-                    {new Date(p.start_date).toLocaleDateString("nl-NL", {
-                      day: "numeric",
-                      month: "short",
-                    })}
-                  </p>
-                </div>
-              ))
-          ) : (
-            <div>
-              <p className="text-sm text-muted-foreground">Geen actief programma</p>
-              <p className="text-xs text-evotion-primary font-medium mt-1.5 group-hover:underline">Programma toewijzen</p>
-            </div>
-          )}
-        </button>
-
-        {/* Nutrition Targets */}
-        <button
-          onClick={() => onNavigateToTab("voeding")}
-          className="bg-card rounded-xl border border-border p-5 text-left hover:border-amber-300/50 hover:shadow-md transition-all group hover:-translate-y-px"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2.5 rounded-xl bg-amber-50 group-hover:bg-amber-100/70 transition-colors">
-                <UtensilsCrossed className="w-5 h-5 text-amber-600" />
-              </div>
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Voedingsdoelen</span>
-            </div>
-            <ArrowRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-amber-600 group-hover:translate-x-0.5 transition-all" />
-          </div>
-          {nutritionTargets ? (
-            <div>
-              <p className="text-sm font-semibold text-foreground">{nutritionTargets.daily_calories} kcal</p>
-              <p className="text-xs text-muted-foreground mt-1.5">
-                E{nutritionTargets.daily_protein_grams}g / K{nutritionTargets.daily_carbs_grams}g / V{nutritionTargets.daily_fat_grams}g
-              </p>
-            </div>
-          ) : (
-            <div>
-              <p className="text-sm text-muted-foreground">Niet ingesteld</p>
-              <p className="text-xs text-amber-600 font-medium mt-1.5 group-hover:underline">Targets instellen</p>
-            </div>
-          )}
-        </button>
-
-        {/* Active Supplements */}
-        <button
-          onClick={() => onNavigateToTab("voeding")}
-          className="bg-card rounded-xl border border-border p-5 text-left hover:border-emerald-300/50 hover:shadow-md transition-all group hover:-translate-y-px"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2.5 rounded-xl bg-emerald-50 group-hover:bg-emerald-100/70 transition-colors">
-                <Pill className="w-5 h-5 text-emerald-600" />
-              </div>
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Supplementen</span>
-            </div>
-            <ArrowRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all" />
-          </div>
-          {supplements.filter((s: any) => s.is_active).length > 0 ? (
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                {supplements.filter((s: any) => s.is_active).length} actief
-              </p>
-              <p className="text-xs text-muted-foreground mt-1.5 line-clamp-1">
-                {supplements
-                  .filter((s: any) => s.is_active)
-                  .map((s: any) => s.name)
-                  .join(", ")}
-              </p>
-            </div>
-          ) : (
-            <div>
-              <p className="text-sm text-muted-foreground">Geen supplementen</p>
-              <p className="text-xs text-emerald-600 font-medium mt-1.5 group-hover:underline">Supplement toevoegen</p>
-            </div>
-          )}
-        </button>
-      </div>
-
-      {/* AI Weekly Review */}
       {!aiReviewResult && (
         <AIGeneratorBanner
           title="AI Wekelijkse Review"
@@ -282,10 +355,7 @@ export default function OverviewTab({
       {aiReviewResult && (
         <AIWeeklyReview
           result={aiReviewResult}
-          onClose={() => {
-            setAiReviewResult(null)
-            setAiReviewLogId(undefined)
-          }}
+          onClose={() => { setAiReviewResult(null); setAiReviewLogId(undefined) }}
           clientId={clientId}
           reviewLogId={aiReviewLogId}
           onRecommendationApplied={() => refreshLogs()}
@@ -295,28 +365,26 @@ export default function OverviewTab({
       {/* Coaching Timeline */}
       <CoachingTimeline clientId={clientId} />
 
-      {/* AI Generation History */}
+      {/* AI History - collapsible */}
       {aiLogs.length > 0 && (
-        <div className="bg-card rounded-xl border border-border shadow-sm">
+        <div className="bg-card rounded-xl border border-border">
           <button
             onClick={() => setAiLogsExpanded(!aiLogsExpanded)}
-            className="w-full flex items-center justify-between p-5 hover:bg-muted/30 transition rounded-xl"
+            className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition rounded-xl"
           >
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-secondary">
-                <History className="w-4 h-4 text-muted-foreground" />
-              </div>
+            <div className="flex items-center gap-2">
+              <History className="w-4 h-4 text-muted-foreground" />
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                AI Generatie Historie
+                AI Historie
               </span>
-              <span className="text-xs bg-evotion-primary/10 text-evotion-primary px-2 py-0.5 rounded-md font-semibold">
+              <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded font-medium">
                 {aiLogs.length}
               </span>
             </div>
             <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${aiLogsExpanded ? "rotate-0" : "-rotate-90"}`} />
           </button>
           {aiLogsExpanded && (
-            <div className="border-t border-border px-5 pb-5 space-y-1.5">
+            <div className="border-t border-border px-4 pb-4 space-y-1">
               {aiLogs.map((log) => {
                 const cfg = typeConfig[log.generation_type] || typeConfig.client_summary
                 const LogIcon = cfg.icon
@@ -325,215 +393,30 @@ export default function OverviewTab({
                   <div key={log.id}>
                     <button
                       onClick={() => setSelectedLog(isSelected ? null : log)}
-                      className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition ${
-                        isSelected
-                          ? "bg-evotion-primary/5 border border-evotion-primary/10"
-                          : "hover:bg-secondary/50"
+                      className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-left transition ${
+                        isSelected ? "bg-evotion-primary/5 border border-evotion-primary/10" : "hover:bg-secondary/50"
                       }`}
                     >
-                      <div className={`w-8 h-8 rounded-lg ${cfg.bg} flex items-center justify-center shrink-0`}>
-                        <LogIcon className={`w-4 h-4 ${cfg.color}`} />
+                      <div className={`w-7 h-7 rounded-lg ${cfg.bg} flex items-center justify-center shrink-0`}>
+                        <LogIcon className={`w-3.5 h-3.5 ${cfg.color}`} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium text-foreground">
-                            {AI_TYPE_LABELS[log.generation_type as AIGenerationType] || log.generation_type}
-                          </span>
-                          {log.title && (
-                            <span className="text-xs text-muted-foreground truncate">
-                              -- {log.title}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                          <span>
-                            {new Date(log.created_at).toLocaleDateString("nl-NL", {
-                              day: "numeric",
-                              month: "short",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
+                        <span className="text-xs font-medium text-foreground">
+                          {AI_TYPE_LABELS[log.generation_type as AIGenerationType] || log.generation_type}
+                        </span>
+                        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5">
+                          <span>{new Date(log.created_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
                           {log.model && <span>/ {log.model}</span>}
-                          {log.tokens_used && <span>/ {log.tokens_used} tokens</span>}
-                          {log.rag_used && (
-                            <span className="text-emerald-600 font-medium">RAG</span>
-                          )}
                         </div>
                       </div>
-                      <Eye className={`w-4 h-4 shrink-0 ${isSelected ? "text-evotion-primary" : "text-muted-foreground/30"}`} />
+                      <Eye className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-evotion-primary" : "text-muted-foreground/30"}`} />
                     </button>
                     {isSelected && (
-                      <div className="ml-11 mt-1 mb-2 p-4 bg-secondary/50 rounded-lg border border-border text-xs text-foreground/80 space-y-3 max-h-[400px] overflow-y-auto">
-                        {/* WEEKLY REVIEW */}
-                        {log.generation_type === "weekly_review" && (
-                          <>
-                            {log.result?.summary && (
-                              <p className="font-medium text-foreground">{log.result.summary}</p>
-                            )}
-                            {log.result?.complianceAnalysis && (
-                              <div className="space-y-1.5">
-                                <strong className="text-foreground">Naleving:</strong>
-                                {log.result.complianceAnalysis.training && (
-                                  <p><span className="text-evotion-primary font-medium">Training:</span> {log.result.complianceAnalysis.training}</p>
-                                )}
-                                {log.result.complianceAnalysis.nutrition && (
-                                  <p><span className="text-amber-600 font-medium">Voeding:</span> {log.result.complianceAnalysis.nutrition}</p>
-                                )}
-                                {log.result.complianceAnalysis.checkIns && (
-                                  <p><span className="text-evotion-primary font-medium">Check-ins:</span> {log.result.complianceAnalysis.checkIns}</p>
-                                )}
-                              </div>
-                            )}
-                            {log.result?.progressAnalysis && (
-                              <div>
-                                <strong className="text-foreground">Voortgang:</strong>
-                                <p className="mt-0.5">{log.result.progressAnalysis}</p>
-                              </div>
-                            )}
-                            {log.result?.flaggedConcerns?.length > 0 && (
-                              <div>
-                                <strong className="text-foreground">Aandachtspunten:</strong>
-                                <ul className="list-disc pl-4 mt-1.5 space-y-1">
-                                  {log.result.flaggedConcerns.map((c: any, i: number) => (
-                                    <li key={i} className={c.severity === "critical" ? "text-destructive" : c.severity === "warning" ? "text-amber-600" : "text-evotion-primary"}>
-                                      [{c.area}] {c.description}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            {log.result?.recommendations?.length > 0 && (
-                              <div>
-                                <strong className="text-foreground">Aanbevelingen:</strong>
-                                <ul className="list-disc pl-4 mt-1.5 space-y-1">
-                                  {log.result.recommendations.map((r: any, i: number) => (
-                                    <li key={i}>
-                                      <span className="font-medium">[{r.area}]</span> {r.action}
-                                      {r.rationale && <span className="text-muted-foreground block">{r.rationale}</span>}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                          </>
-                        )}
-
-                        {/* CLIENT SUMMARY */}
-                        {log.generation_type === "client_summary" && (
-                          <>
-                            {log.result?.overallAssessment && (
-                              <p className="font-medium text-foreground">{log.result.overallAssessment}</p>
-                            )}
-                            {log.result?.trainingStatus?.keyInsight && (
-                              <p><span className="text-evotion-primary font-medium">Training:</span> {log.result.trainingStatus.currentProgram && `${log.result.trainingStatus.currentProgram} -- `}{log.result.trainingStatus.keyInsight}</p>
-                            )}
-                            {log.result?.nutritionStatus?.keyInsight && (
-                              <p><span className="text-amber-600 font-medium">Voeding:</span> {log.result.nutritionStatus.currentTargets && `${log.result.nutritionStatus.currentTargets} -- `}{log.result.nutritionStatus.keyInsight}</p>
-                            )}
-                            {log.result?.supplementStatus && (
-                              <p><span className="text-emerald-600 font-medium">Supplementen:</span> {log.result.supplementStatus}</p>
-                            )}
-                            {log.result?.progressHighlights?.length > 0 && (
-                              <div>
-                                <strong className="text-foreground">Highlights:</strong>
-                                <ul className="list-disc pl-4 mt-1.5 space-y-0.5">
-                                  {log.result.progressHighlights.map((h: string, i: number) => (
-                                    <li key={i}>{h}</li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            {log.result?.priorityActions?.length > 0 && (
-                              <div>
-                                <strong className="text-foreground">Prioriteiten:</strong>
-                                <ul className="list-disc pl-4 mt-1.5 space-y-0.5">
-                                  {log.result.priorityActions.map((a: any, i: number) => (
-                                    <li key={i} className={a.urgency === "high" ? "text-destructive font-medium" : a.urgency === "medium" ? "text-amber-600" : ""}>
-                                      [{a.area}] {a.action}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                          </>
-                        )}
-
-                        {/* NUTRITION PLAN */}
-                        {log.generation_type === "nutrition_plan" && (
-                          <>
-                            {log.result?.targets && (
-                              <p className="font-medium text-foreground">
-                                Targets: {log.result.targets.calories} kcal / {log.result.targets.proteinGrams}g eiwit / {log.result.targets.carbsGrams}g koolh / {log.result.targets.fatGrams}g vet
-                              </p>
-                            )}
-                            {log.result?.rationale && <p>{log.result.rationale}</p>}
-                            {log.result?.supplementAdvice && (
-                              <p><span className="text-emerald-600 font-medium">Supplementen:</span> {log.result.supplementAdvice}</p>
-                            )}
-                          </>
-                        )}
-
-                        {/* TRAINING PROGRAM */}
-                        {log.generation_type === "training_program" && (
-                          <>
-                            {log.result?.program?.name && (
-                              <p className="font-medium text-foreground">{log.result.program.name}</p>
-                            )}
-                            {log.result?.program?.description && <p>{log.result.program.description}</p>}
-                            {log.result?.program?.blocks?.length > 0 && (
-                              <div>
-                                <strong className="text-foreground">Blokken:</strong>
-                                <ul className="list-disc pl-4 mt-1.5 space-y-0.5">
-                                  {log.result.program.blocks.map((b: any, i: number) => (
-                                    <li key={i}>{b.name} -- {b.days?.length || 0} dagen</li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                          </>
-                        )}
-
-                        {/* SUPPLEMENT ANALYSIS */}
-                        {log.generation_type === "supplement_analysis" && (
-                          <>
-                            {log.result?.recommendations?.length > 0 && (
-                              <div>
-                                <strong className="text-foreground">Supplementen:</strong>
-                                <ul className="list-disc pl-4 mt-1.5 space-y-1.5">
-                                  {log.result.recommendations.map((s: any, i: number) => (
-                                    <li key={i}>
-                                      <span className="font-medium">{s.name}</span> -- {s.dosage} / {s.timing} / {s.frequency}
-                                      {s.rationale && <span className="text-muted-foreground block">{s.rationale}</span>}
-                                      {s.interactions && <span className="text-destructive block">Let op: {s.interactions}</span>}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            {log.result?.generalNotes && (
-                              <p><strong className="text-foreground">Opmerkingen:</strong> {log.result.generalNotes}</p>
-                            )}
-                          </>
-                        )}
-
-                        {/* Delete button */}
-                        <div className="flex items-center justify-end pt-2 border-t border-border">
-                          <button
-                            onClick={async (e) => {
-                              e.stopPropagation()
-                              if (confirm("Verwijder dit log?")) {
-                                await deleteAIGenerationLog(log.id)
-                                setAiLogs((prev) => prev.filter((l) => l.id !== log.id))
-                                setSelectedLog(null)
-                              }
-                            }}
-                            className="text-xs text-destructive/60 hover:text-destructive transition"
-                          >
-                            Verwijderen
-                          </button>
-                        </div>
-                      </div>
+                      <AILogDetail log={log} onDelete={async () => {
+                        await deleteAIGenerationLog(log.id)
+                        setAiLogs(prev => prev.filter(l => l.id !== log.id))
+                        setSelectedLog(null)
+                      }} />
                     )}
                   </div>
                 )
@@ -542,91 +425,113 @@ export default function OverviewTab({
           )}
         </div>
       )}
+    </div>
+  )
+}
 
-      {/* Active Goals Summary */}
-      {activeGoals.length > 0 && (
-        <div className="bg-card rounded-xl border border-border p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-evotion-primary/5">
-                <Target className="w-4 h-4 text-evotion-primary" />
-              </div>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Actieve Doelen
-              </h3>
-              <span className="text-xs bg-evotion-primary/10 text-evotion-primary px-2 py-0.5 rounded-md font-semibold">
-                {activeGoals.length}
-              </span>
-            </div>
-            <button
-              onClick={() => onNavigateToTab("profiel")}
-              className="text-xs text-evotion-primary font-medium hover:underline transition"
-            >
-              Beheren
-            </button>
-          </div>
-          <div className="flex flex-col gap-2">
-            {activeGoals.map((goal) => {
-              const daysLeft = goal.target_date
-                ? Math.max(0, Math.ceil((new Date(goal.target_date).getTime() - Date.now()) / 86400000))
-                : null
-              return (
-                <div
-                  key={goal.id}
-                  className="flex items-center justify-between p-3.5 bg-muted/50 rounded-lg border border-border/50"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                      daysLeft !== null && daysLeft <= 7 ? "bg-amber-400" : "bg-evotion-primary"
-                    }`} />
-                    <span className="text-sm font-medium text-foreground">{goal.title}</span>
-                  </div>
-                  {daysLeft !== null && (
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-md ${
-                      daysLeft <= 7
-                        ? "bg-amber-50 text-amber-700"
-                        : "bg-secondary text-muted-foreground"
-                    }`}>
-                      {daysLeft}d
-                    </span>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+/* Quick status card */
+function QuickCard({
+  icon: Icon,
+  iconBg,
+  iconColor,
+  label,
+  children,
+  onClick,
+}: {
+  icon: any
+  iconBg: string
+  iconColor: string
+  label: string
+  children: React.ReactNode
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="bg-card rounded-xl border border-border p-4 text-left hover:shadow-sm transition-all group"
+    >
+      <div className="flex items-center gap-2 mb-2.5">
+        <div className={`p-1.5 rounded-lg ${iconBg}`}>
+          <Icon className={`w-4 h-4 ${iconColor}`} />
         </div>
-      )}
+        <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{label}</span>
+        <ArrowRight className="w-3 h-3 text-muted-foreground/0 group-hover:text-muted-foreground/50 ml-auto transition-all" />
+      </div>
+      {children}
+    </button>
+  )
+}
 
-      {/* Pinned Notes Summary */}
-      {pinnedNotes.length > 0 && (
-        <div className="bg-amber-50/30 rounded-xl border border-amber-200/40 p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-amber-100/60">
-                <Pin className="w-4 h-4 text-amber-600" />
-              </div>
-              <h3 className="text-xs font-semibold text-amber-700 uppercase tracking-wider">
-                Vastgepinde Notities
-              </h3>
+/* AI log detail renderer */
+function AILogDetail({ log, onDelete }: { log: AIGenerationLog; onDelete: () => void }) {
+  return (
+    <div className="ml-10 mt-1 mb-2 p-3 bg-secondary/50 rounded-lg border border-border text-xs text-foreground/80 space-y-2.5 max-h-[400px] overflow-y-auto">
+      {log.generation_type === "weekly_review" && (
+        <>
+          {log.result?.summary && <p className="font-medium text-foreground">{log.result.summary}</p>}
+          {log.result?.complianceAnalysis && (
+            <div className="space-y-1">
+              {log.result.complianceAnalysis.training && <p><span className="text-evotion-primary font-medium">Training:</span> {log.result.complianceAnalysis.training}</p>}
+              {log.result.complianceAnalysis.nutrition && <p><span className="text-amber-600 font-medium">Voeding:</span> {log.result.complianceAnalysis.nutrition}</p>}
+              {log.result.complianceAnalysis.checkIns && <p><span className="text-evotion-primary font-medium">Check-ins:</span> {log.result.complianceAnalysis.checkIns}</p>}
             </div>
-            <button
-              onClick={() => onNavigateToTab("profiel")}
-              className="text-xs text-evotion-primary font-medium hover:underline transition"
-            >
-              Beheren
-            </button>
-          </div>
-          <div className="flex flex-col gap-2.5">
-            {pinnedNotes.map((note) => (
-              <div key={note.id} className="p-3.5 bg-card/60 rounded-lg border border-amber-200/30">
-                <p className="text-sm text-foreground leading-relaxed">
-                  {note.content}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+          )}
+          {log.result?.progressAnalysis && <p><strong className="text-foreground">Voortgang:</strong> {log.result.progressAnalysis}</p>}
+          {log.result?.flaggedConcerns?.length > 0 && (
+            <ul className="list-disc pl-4 space-y-0.5">
+              {log.result.flaggedConcerns.map((c: any, i: number) => (
+                <li key={i} className={c.severity === "critical" ? "text-destructive" : c.severity === "warning" ? "text-amber-600" : ""}>[{c.area}] {c.description}</li>
+              ))}
+            </ul>
+          )}
+          {log.result?.recommendations?.length > 0 && (
+            <ul className="list-disc pl-4 space-y-0.5">
+              {log.result.recommendations.map((r: any, i: number) => (
+                <li key={i}><span className="font-medium">[{r.area}]</span> {r.action}</li>
+              ))}
+            </ul>
+          )}
+        </>
       )}
+      {log.generation_type === "client_summary" && (
+        <>
+          {log.result?.overallAssessment && <p className="font-medium text-foreground">{log.result.overallAssessment}</p>}
+          {log.result?.trainingStatus?.keyInsight && <p><span className="text-evotion-primary font-medium">Training:</span> {log.result.trainingStatus.keyInsight}</p>}
+          {log.result?.nutritionStatus?.keyInsight && <p><span className="text-amber-600 font-medium">Voeding:</span> {log.result.nutritionStatus.keyInsight}</p>}
+          {log.result?.supplementStatus && <p><span className="text-emerald-600 font-medium">Supplementen:</span> {log.result.supplementStatus}</p>}
+          {log.result?.priorityActions?.length > 0 && (
+            <ul className="list-disc pl-4 space-y-0.5">
+              {log.result.priorityActions.map((a: any, i: number) => (
+                <li key={i} className={a.urgency === "high" ? "text-destructive font-medium" : ""}>[{a.area}] {a.action}</li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+      {log.generation_type === "nutrition_plan" && (
+        <>
+          {log.result?.targets && <p className="font-medium text-foreground">Targets: {log.result.targets.calories} kcal / {log.result.targets.proteinGrams}g E / {log.result.targets.carbsGrams}g K / {log.result.targets.fatGrams}g V</p>}
+          {log.result?.rationale && <p>{log.result.rationale}</p>}
+        </>
+      )}
+      {log.generation_type === "training_program" && (
+        <>
+          {log.result?.program?.name && <p className="font-medium text-foreground">{log.result.program.name}</p>}
+          {log.result?.program?.description && <p>{log.result.program.description}</p>}
+        </>
+      )}
+      {log.generation_type === "supplement_analysis" && log.result?.recommendations?.length > 0 && (
+        <ul className="list-disc pl-4 space-y-1">
+          {log.result.recommendations.map((s: any, i: number) => (
+            <li key={i}><span className="font-medium">{s.name}</span> -- {s.dosage} / {s.timing}</li>
+          ))}
+        </ul>
+      )}
+      <div className="flex justify-end pt-2 border-t border-border">
+        <button onClick={(e) => { e.stopPropagation(); if (confirm("Verwijder dit log?")) onDelete() }} className="text-[10px] text-destructive/60 hover:text-destructive transition">
+          Verwijderen
+        </button>
+      </div>
     </div>
   )
 }
