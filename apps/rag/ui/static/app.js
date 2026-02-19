@@ -2398,6 +2398,7 @@ function editAgent(agent) {
   document.getElementById('agent-prompt').value = agent.system_prompt;
   document.getElementById('agent-temp').value = agent.temperature;
   document.getElementById('agent-topk').value = agent.top_k;
+  document.getElementById('agent-multiquery').checked = agent.use_multi_query !== false;
 
   const colSelect = document.getElementById('agent-collections');
   Array.from(colSelect.options).forEach(opt => {
@@ -2444,6 +2445,7 @@ function resetAgentForm() {
   document.getElementById('agent-prompt').value = '';
   document.getElementById('agent-temp').value = '0.7';
   document.getElementById('agent-topk').value = '15';
+  document.getElementById('agent-multiquery').checked = true;
 
   const colSelect = document.getElementById('agent-collections');
   Array.from(colSelect.options).forEach(opt => { opt.selected = false; });
@@ -2494,6 +2496,7 @@ async function saveAgent() {
   const icon = document.getElementById('agent-icon').value.trim() || 'E';
   const temp = parseFloat(document.getElementById('agent-temp').value) || 0.7;
   const topk = parseInt(document.getElementById('agent-topk').value) || 15;
+  const useMultiQuery = document.getElementById('agent-multiquery').checked;
 
   const colSelect = document.getElementById('agent-collections');
   const collections = Array.from(colSelect.selectedOptions).map(o => o.value);
@@ -2501,6 +2504,7 @@ async function saveAgent() {
   const payload = {
     name, description: desc, system_prompt: prompt,
     collections, temperature: temp, top_k: topk, icon,
+    use_multi_query: useMultiQuery,
   };
 
   const submitBtn = document.getElementById('create-agent-btn');

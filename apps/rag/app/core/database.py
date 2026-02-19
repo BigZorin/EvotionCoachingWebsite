@@ -117,6 +117,12 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_docfolders_collection ON document_folders(collection);
         """)
 
+        # Migration: add use_multi_query to agents
+        try:
+            conn.execute("ALTER TABLE agents ADD COLUMN use_multi_query INTEGER DEFAULT 1")
+        except Exception:
+            pass  # Column already exists
+
         conn.commit()
 
 
@@ -259,21 +265,23 @@ def create_agent(
     temperature: float = 0.7,
     top_k: int = 15,
     icon: str = "E",
+    use_multi_query: bool = True,
 ) -> dict:
     with _conn() as conn:
         agent_id = str(uuid.uuid4())
         now = datetime.now(timezone.utc).isoformat()
         collections_json = json.dumps(collections or [])
         conn.execute(
-            "INSERT INTO agents (id, name, description, system_prompt, collections, temperature, top_k, icon, created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (agent_id, name, description, system_prompt, collections_json, temperature, top_k, icon, now, now),
+            "INSERT INTO agents (id, name, description, system_prompt, collections, temperature, top_k, icon, use_multi_query, created_at, updated_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (agent_id, name, description, system_prompt, collections_json, temperature, top_k, icon, int(use_multi_query), now, now),
         )
         conn.commit()
         return {
             "id": agent_id, "name": name, "description": description,
             "system_prompt": system_prompt, "collections": collections or [],
             "temperature": temperature, "top_k": top_k, "icon": icon,
+            "use_multi_query": use_multi_query,
             "created_at": now, "updated_at": now,
         }
 
@@ -296,6 +304,7 @@ def list_agents() -> list[dict]:
     for r in rows:
         agent = dict(r)
         agent["collections"] = _safe_parse_collections(agent.get("collections", "[]"))
+        agent["use_multi_query"] = bool(agent.get("use_multi_query", 1))
         agents.append(agent)
     return agents
 
@@ -307,17 +316,20 @@ def get_agent(agent_id: str) -> dict | None:
             return None
         agent = dict(row)
         agent["collections"] = _safe_parse_collections(agent.get("collections", "[]"))
+        agent["use_multi_query"] = bool(agent.get("use_multi_query", 1))
         return agent
 
 
 def update_agent(agent_id: str, **kwargs) -> dict | None:
     now = datetime.now(timezone.utc).isoformat()
 
-    allowed = {"name", "description", "system_prompt", "collections", "temperature", "top_k", "icon"}
+    allowed = {"name", "description", "system_prompt", "collections", "temperature", "top_k", "icon", "use_multi_query"}
     updates = {k: v for k, v in kwargs.items() if k in allowed and v is not None}
 
     if "collections" in updates:
         updates["collections"] = json.dumps(updates["collections"])
+    if "use_multi_query" in updates:
+        updates["use_multi_query"] = int(updates["use_multi_query"])
 
     if not updates:
         return get_agent(agent_id)

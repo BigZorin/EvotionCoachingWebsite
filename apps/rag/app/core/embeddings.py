@@ -33,10 +33,10 @@ def _get_sentence_transformer():
     return _st_model
 
 
-# Ollama nomic-embed-text produces 768-dim vectors; sentence-transformers fallback
+# Ollama bge-m3 produces 1024-dim vectors; sentence-transformers fallback
 # produces 384-dim. ChromaDB rejects mismatched dimensions, so we must NEVER
 # silently switch between the two once a collection exists.
-OLLAMA_EMBEDDING_DIM = 768
+OLLAMA_EMBEDDING_DIM = 1024
 FALLBACK_EMBEDDING_DIM = 384
 
 

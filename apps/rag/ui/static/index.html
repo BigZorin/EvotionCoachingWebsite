@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-  <link rel="stylesheet" href="/ui/static/style.css?v=27">
+  <link rel="stylesheet" href="/ui/static/style.css?v=28">
 </head>
 <body>
   <!-- ===== LOGIN SCREEN ===== -->
@@ -466,6 +466,13 @@
                       <input type="number" id="agent-topk" class="text-input" value="15" min="1" max="50">
                       <span class="form-hint">Hoeveel documentfragmenten worden geraadpleegd (10-20 aanbevolen)</span>
                     </div>
+                    <div class="form-group">
+                      <label class="toggle-label">
+                        <input type="checkbox" id="agent-multiquery" checked>
+                        <span>Multi-query expansie</span>
+                      </label>
+                      <span class="form-hint">Genereert 3 alternatieve zoekformuleringen voor betere retrieval (+1-2s latentie)</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -551,6 +558,6 @@
   <script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js" integrity="sha256-k04+Nuni2gr7Gm51B1uw8JrwUpOoROhKdHfvQJEcNJo=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.4/purify.min.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin="anonymous"></script>
-  <script src="/ui/static/app.js?v=45"></script>
+  <script src="/ui/static/app.js?v=46"></script>
 </body>
 </html>

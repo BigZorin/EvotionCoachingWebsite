@@ -81,6 +81,7 @@ class AgentCreate(BaseModel):
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
     top_k: int = Field(default=15, ge=1, le=50)
     icon: str = "E"
+    use_multi_query: bool = True
 
 
 class AgentUpdate(BaseModel):
@@ -91,6 +92,7 @@ class AgentUpdate(BaseModel):
     temperature: float | None = Field(default=None, ge=0.0, le=2.0)
     top_k: int | None = Field(default=None, ge=1, le=50)
     icon: str | None = None
+    use_multi_query: bool | None = None
 
 
 class AgentInfo(BaseModel):
@@ -102,5 +104,6 @@ class AgentInfo(BaseModel):
     temperature: float = 0.7
     top_k: int = 15
     icon: str = "E"
+    use_multi_query: bool = True
     created_at: str = ""
     updated_at: str = ""

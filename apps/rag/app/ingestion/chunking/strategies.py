@@ -1,5 +1,8 @@
+import logging
 import re
 from dataclasses import dataclass
+
+import numpy as np
 
 from app.config import settings
 
@@ -194,9 +197,93 @@ def _timestamp_to_seconds(ts: str) -> int:
     return 0
 
 
+logger = logging.getLogger(__name__)
+
+
+class SemanticChunker:
+    """Embedding-based semantic chunking.
+
+    Splits text into paragraphs, embeds each, and groups consecutive
+    paragraphs with high cosine similarity into the same chunk.
+    Falls back to RecursiveCharacterChunker for single-paragraph texts
+    or when embedding fails.
+    """
+
+    def __init__(
+        self,
+        similarity_threshold: float | None = None,
+        chunk_size: int | None = None,
+    ):
+        self.threshold = similarity_threshold or settings.semantic_similarity_threshold
+        self.chunk_size = chunk_size or settings.chunk_size
+        self._fallback = RecursiveCharacterChunker()
+
+    def chunk(self, text: str, base_metadata: dict | None = None) -> list[Chunk]:
+        base_metadata = base_metadata or {}
+
+        # Split on double newlines → paragraphs
+        paragraphs = [p.strip() for p in re.split(r"\n\n+", text) if p.strip()]
+
+        if len(paragraphs) <= 1:
+            return self._fallback.chunk(text, base_metadata)
+
+        # Embed all paragraphs in batch
+        try:
+            from app.core.embeddings import embed_batch
+            embeddings = embed_batch(paragraphs)
+        except Exception as e:
+            logger.warning(f"Semantic chunking embedding failed, falling back to recursive: {e}")
+            return self._fallback.chunk(text, base_metadata)
+
+        # Compute cosine similarity between consecutive paragraphs
+        similarities = []
+        for i in range(len(embeddings) - 1):
+            a = np.array(embeddings[i])
+            b = np.array(embeddings[i + 1])
+            norm_a = np.linalg.norm(a)
+            norm_b = np.linalg.norm(b)
+            if norm_a == 0 or norm_b == 0:
+                similarities.append(0.0)
+            else:
+                similarities.append(float(np.dot(a, b) / (norm_a * norm_b)))
+
+        # Group paragraphs into semantic groups
+        groups: list[list[str]] = [[paragraphs[0]]]
+        for i, sim in enumerate(similarities):
+            if sim >= self.threshold:
+                groups[-1].append(paragraphs[i + 1])
+            else:
+                groups.append([paragraphs[i + 1]])
+
+        # Merge groups into chunks, splitting oversized groups with fallback
+        chunks: list[Chunk] = []
+        idx = 0
+        for group in groups:
+            group_text = "\n\n".join(group)
+            if len(group_text) <= self.chunk_size:
+                if group_text.strip() and len(group_text.strip()) >= MIN_CHUNK_CHARS:
+                    chunks.append(Chunk(
+                        content=group_text,
+                        metadata={**base_metadata, "chunk_index": idx, "char_count": len(group_text), "chunker": "semantic"},
+                    ))
+                    idx += 1
+            else:
+                # Group too large — use recursive chunker to split it
+                sub_chunks = self._fallback.chunk(group_text, base_metadata)
+                for sc in sub_chunks:
+                    sc.metadata["chunk_index"] = idx
+                    sc.metadata["chunker"] = "semantic+recursive"
+                    idx += 1
+                chunks.extend(sub_chunks)
+
+        return chunks
+
+
 def get_chunker(file_type: str) -> RecursiveCharacterChunker:
     """Get the appropriate chunker based on file type."""
     chunkers = {
+        "pdf": SemanticChunker(),
+        "txt": SemanticChunker(),
         "md": MarkdownChunker(),
         "code": CodeChunker(),
         "csv": TabularChunker(),

@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     # Ollama (embeddings only — generation is handled by cloud providers)
     ollama_base_url: str = "http://localhost:11434"
-    embedding_model: str = "nomic-embed-text"
+    embedding_model: str = "bge-m3"
 
     # LLM provider: "groq" (primary)
     llm_provider: str = "groq"
@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     # Chunking
     chunk_size: int = 1000
     chunk_overlap: int = 200
+    semantic_similarity_threshold: float = 0.5
 
     # Upload
     max_file_size_mb: int = 100

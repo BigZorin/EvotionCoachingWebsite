@@ -185,6 +185,7 @@ def chat(
 
     # Determine collection search scope from agent + attachments
     agent_collections = agent.get("collections", []) if agent else []
+    multi_q = agent.get("use_multi_query", True) if agent else True
     session_meta = get_session_metadata(session_id)
     attachment_collection = session_meta.get("attachment_collection")
 
@@ -193,7 +194,7 @@ def chat(
     kb_chunks = []
 
     if attachment_collection:
-        # Pass 1: Get generous amount of attachment chunks
+        # Pass 1: Get generous amount of attachment chunks (no multi-query for speed)
         att_chunks = retrieve(
             query=search_query,
             collection_name=attachment_collection,
@@ -206,21 +207,20 @@ def chat(
                 query=search_query,
                 collection_names=agent_collections,
                 top_k=top_k,
-                use_multi_query=False,
+                use_multi_query=multi_q,
             )
         elif collection:
             kb_chunks = retrieve(
                 query=search_query,
                 collection_name=collection,
                 top_k=top_k,
-                use_multi_query=False,
+                use_multi_query=multi_q,
             )
         else:
-            # No collection selected — search all KB collections
             kb_chunks = retrieve(
                 query=search_query,
                 top_k=top_k,
-                use_multi_query=False,
+                use_multi_query=multi_q,
             )
     else:
         # No attachments — standard retrieval
@@ -231,10 +231,10 @@ def chat(
             collection_name=search_collection_name,
             collection_names=search_collection_names,
             top_k=top_k,
-            use_multi_query=False,
+            use_multi_query=multi_q,
         )
         if not kb_chunks and agent_collections:
-            kb_chunks = retrieve(query=search_query, top_k=top_k, use_multi_query=False)
+            kb_chunks = retrieve(query=search_query, top_k=top_k, use_multi_query=multi_q)
 
     chunks = att_chunks + kb_chunks
 
@@ -359,6 +359,7 @@ def chat_stream(
     search_query = _build_search_query(question, recent)
 
     agent_collections = agent.get("collections", []) if agent else []
+    multi_q = agent.get("use_multi_query", True) if agent else True
     session_meta = get_session_metadata(session_id)
     attachment_collection = session_meta.get("attachment_collection")
 
@@ -373,27 +374,25 @@ def chat_stream(
             top_k=min(top_k * 2, 30),
             use_multi_query=False,
         )
-        # KB chunks — from selected collection, agent collections, or global search
         if agent_collections:
             kb_chunks = retrieve(
                 query=search_query,
                 collection_names=agent_collections,
                 top_k=top_k,
-                use_multi_query=False,
+                use_multi_query=multi_q,
             )
         elif collection:
             kb_chunks = retrieve(
                 query=search_query,
                 collection_name=collection,
                 top_k=top_k,
-                use_multi_query=False,
+                use_multi_query=multi_q,
             )
         else:
-            # No collection selected — search all KB collections
             kb_chunks = retrieve(
                 query=search_query,
                 top_k=top_k,
-                use_multi_query=False,
+                use_multi_query=multi_q,
             )
     else:
         search_collection_name = collection if not agent_collections else None
@@ -403,10 +402,10 @@ def chat_stream(
             collection_name=search_collection_name,
             collection_names=search_collection_names,
             top_k=top_k,
-            use_multi_query=False,
+            use_multi_query=multi_q,
         )
         if not kb_chunks and agent_collections:
-            kb_chunks = retrieve(query=search_query, top_k=top_k, use_multi_query=False)
+            kb_chunks = retrieve(query=search_query, top_k=top_k, use_multi_query=multi_q)
 
     chunks = att_chunks + kb_chunks
 

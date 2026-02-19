@@ -58,6 +58,7 @@ def create_new_agent(body: AgentCreate):
         temperature=body.temperature,
         top_k=body.top_k,
         icon=body.icon.strip() or "E",
+        use_multi_query=body.use_multi_query,
     )
     return agent
 
