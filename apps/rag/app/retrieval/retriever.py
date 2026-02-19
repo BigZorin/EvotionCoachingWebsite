@@ -49,8 +49,8 @@ Original question: {question}"""
 
 
 def _tokenize(text: str) -> list[str]:
-    """Simple tokenization for BM25."""
-    return re.findall(r'\w+', text.lower())
+    """Simple tokenization for BM25 (Unicode-aware for Dutch/multilingual text)."""
+    return re.findall(r'\w+', text.lower(), flags=re.UNICODE)
 
 
 def retrieve(

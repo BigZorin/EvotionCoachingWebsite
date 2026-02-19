@@ -227,6 +227,15 @@ class SemanticChunker:
         if len(paragraphs) <= 1:
             return self._fallback.chunk(text, base_metadata)
 
+        # Guard: too many paragraphs would cause excessive embedding calls
+        MAX_PARAGRAPHS = 500
+        if len(paragraphs) > MAX_PARAGRAPHS:
+            logger.warning(
+                f"SemanticChunker: {len(paragraphs)} paragraphs exceeds limit ({MAX_PARAGRAPHS}), "
+                "falling back to recursive chunker"
+            )
+            return self._fallback.chunk(text, base_metadata)
+
         # Embed all paragraphs in batch
         try:
             from app.core.embeddings import embed_batch

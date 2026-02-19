@@ -1,6 +1,9 @@
+import logging
 import re
 
 from fastapi import APIRouter, HTTPException
+
+logger = logging.getLogger(__name__)
 from pydantic import BaseModel, Field
 
 from app.core.database import (
@@ -125,7 +128,8 @@ def get_document_chunks(name: str, document_id: str, limit: int = 500):
             "chunks": chunks,
         }
     except Exception as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        logger.error(f"Failed to get chunks for document '{document_id}': {e}")
+        raise HTTPException(status_code=404, detail="Document chunks niet gevonden")
 
 
 @router.post("/{name}/cleanup")

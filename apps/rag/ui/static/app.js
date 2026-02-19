@@ -1,9 +1,10 @@
 /* ============================================================
-   Evotion RAG — Client-side Application (v34)
-   Features: Streaming, Hybrid Search, Feedback, Analytics, Auth
+   Evotion RAG — Client-side Application (v37)
+   Features: Streaming, Hybrid Search, Feedback, Analytics, Auth,
+             Semantic Chunking, Multi-Query, bge-m3 Embeddings
    ============================================================ */
 
-const APP_VERSION = 'v35';
+const APP_VERSION = 'v37';
 const API = '/api/v1';
 
 // --- State ---
@@ -310,7 +311,7 @@ function renderMarkdown(text, sources) {
       const rawHtml = marked.parse(text);
       html = typeof DOMPurify !== 'undefined'
         ? DOMPurify.sanitize(rawHtml)
-        : rawHtml;
+        : escapeHtml(text);
     } else {
       // Fallback: marked.js not loaded — basic markdown rendering
       html = text
@@ -323,7 +324,7 @@ function renderMarkdown(text, sources) {
         .replace(/\n\n/g, '</p><p>')
         .replace(/\n/g, '<br>');
       html = '<p>' + html + '</p>';
-      html = typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(html) : html;
+      html = typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(html) : escapeHtml(text);
     }
   } catch (e) {
     // Markdown rendering failed, using plaintext fallback

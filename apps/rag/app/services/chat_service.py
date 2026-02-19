@@ -139,6 +139,71 @@ VRAAG: {question}
 De gebruiker heeft documenten bijgevoegd. Beantwoord de vraag primair op basis van deze documenten, aangevuld met kennisbank-context. Bij adviesvragen (programma maken, analyse, aanbevelingen): ga de diepte in met concrete, onderbouwde antwoorden. Citeer ELKE keuze met [1], [2] etc. — oefeningen, set/rep-schema's, periodisering, voedingsrichtlijnen. Hoe meer citaties hoe beter. Bij feitelijke vragen: wees direct. Eindig met 3 vervolgvragen in <followup> tags."""
 
 
+def _retrieve_chunks(
+    search_query: str,
+    collection: str | None,
+    agent: dict | None,
+    session_id: str,
+    top_k: int,
+) -> tuple[list, list]:
+    """Shared retrieval logic for chat() and chat_stream().
+
+    Returns (att_chunks, kb_chunks) — attachment chunks and knowledge-base chunks.
+    """
+    agent_collections = agent.get("collections", []) if agent else []
+    multi_q = agent.get("use_multi_query", True) if agent else True
+    session_meta = get_session_metadata(session_id)
+    attachment_collection = session_meta.get("attachment_collection")
+
+    att_chunks = []
+    kb_chunks = []
+
+    if attachment_collection:
+        # Pass 1: generous attachment chunks (no multi-query for speed)
+        att_chunks = retrieve(
+            query=search_query,
+            collection_name=attachment_collection,
+            top_k=min(top_k * 2, 30),
+            use_multi_query=False,
+        )
+        # Pass 2: KB chunks — agent collections, session collection, or global
+        if agent_collections:
+            kb_chunks = retrieve(
+                query=search_query,
+                collection_names=agent_collections,
+                top_k=top_k,
+                use_multi_query=multi_q,
+            )
+        elif collection:
+            kb_chunks = retrieve(
+                query=search_query,
+                collection_name=collection,
+                top_k=top_k,
+                use_multi_query=multi_q,
+            )
+        else:
+            kb_chunks = retrieve(
+                query=search_query,
+                top_k=top_k,
+                use_multi_query=multi_q,
+            )
+    else:
+        # No attachments — standard retrieval
+        search_collection_name = collection if not agent_collections else None
+        search_collection_names = agent_collections if agent_collections else None
+        kb_chunks = retrieve(
+            query=search_query,
+            collection_name=search_collection_name,
+            collection_names=search_collection_names,
+            top_k=top_k,
+            use_multi_query=multi_q,
+        )
+        if not kb_chunks and agent_collections:
+            kb_chunks = retrieve(query=search_query, top_k=top_k, use_multi_query=multi_q)
+
+    return att_chunks, kb_chunks
+
+
 def start_session(collection: str | None = None, agent_id: str | None = None) -> dict:
     """Create a new chat session, optionally linked to an agent."""
     return create_session(collection=collection, agent_id=agent_id)
@@ -183,59 +248,7 @@ def chat(
     recent = get_recent_context(session_id, max_messages=6)
     search_query = _build_search_query(question, recent)
 
-    # Determine collection search scope from agent + attachments
-    agent_collections = agent.get("collections", []) if agent else []
-    multi_q = agent.get("use_multi_query", True) if agent else True
-    session_meta = get_session_metadata(session_id)
-    attachment_collection = session_meta.get("attachment_collection")
-
-    # Retrieve: separate passes for attachments and KB for better coverage
-    att_chunks = []
-    kb_chunks = []
-
-    if attachment_collection:
-        # Pass 1: Get generous amount of attachment chunks (no multi-query for speed)
-        att_chunks = retrieve(
-            query=search_query,
-            collection_name=attachment_collection,
-            top_k=min(top_k * 2, 30),
-            use_multi_query=False,
-        )
-        # Pass 2: KB chunks — from selected collection, agent collections, or global search
-        if agent_collections:
-            kb_chunks = retrieve(
-                query=search_query,
-                collection_names=agent_collections,
-                top_k=top_k,
-                use_multi_query=multi_q,
-            )
-        elif collection:
-            kb_chunks = retrieve(
-                query=search_query,
-                collection_name=collection,
-                top_k=top_k,
-                use_multi_query=multi_q,
-            )
-        else:
-            kb_chunks = retrieve(
-                query=search_query,
-                top_k=top_k,
-                use_multi_query=multi_q,
-            )
-    else:
-        # No attachments — standard retrieval
-        search_collection_name = collection if not agent_collections else None
-        search_collection_names = agent_collections if agent_collections else None
-        kb_chunks = retrieve(
-            query=search_query,
-            collection_name=search_collection_name,
-            collection_names=search_collection_names,
-            top_k=top_k,
-            use_multi_query=multi_q,
-        )
-        if not kb_chunks and agent_collections:
-            kb_chunks = retrieve(query=search_query, top_k=top_k, use_multi_query=multi_q)
-
+    att_chunks, kb_chunks = _retrieve_chunks(search_query, collection, agent, session_id, top_k)
     chunks = att_chunks + kb_chunks
 
     # 3. Build prompt
@@ -358,55 +371,7 @@ def chat_stream(
     recent = get_recent_context(session_id, max_messages=6)
     search_query = _build_search_query(question, recent)
 
-    agent_collections = agent.get("collections", []) if agent else []
-    multi_q = agent.get("use_multi_query", True) if agent else True
-    session_meta = get_session_metadata(session_id)
-    attachment_collection = session_meta.get("attachment_collection")
-
-    # Retrieve: separate passes for attachments and KB
-    att_chunks = []
-    kb_chunks = []
-
-    if attachment_collection:
-        att_chunks = retrieve(
-            query=search_query,
-            collection_name=attachment_collection,
-            top_k=min(top_k * 2, 30),
-            use_multi_query=False,
-        )
-        if agent_collections:
-            kb_chunks = retrieve(
-                query=search_query,
-                collection_names=agent_collections,
-                top_k=top_k,
-                use_multi_query=multi_q,
-            )
-        elif collection:
-            kb_chunks = retrieve(
-                query=search_query,
-                collection_name=collection,
-                top_k=top_k,
-                use_multi_query=multi_q,
-            )
-        else:
-            kb_chunks = retrieve(
-                query=search_query,
-                top_k=top_k,
-                use_multi_query=multi_q,
-            )
-    else:
-        search_collection_name = collection if not agent_collections else None
-        search_collection_names = agent_collections if agent_collections else None
-        kb_chunks = retrieve(
-            query=search_query,
-            collection_name=search_collection_name,
-            collection_names=search_collection_names,
-            top_k=top_k,
-            use_multi_query=multi_q,
-        )
-        if not kb_chunks and agent_collections:
-            kb_chunks = retrieve(query=search_query, top_k=top_k, use_multi_query=multi_q)
-
+    att_chunks, kb_chunks = _retrieve_chunks(search_query, collection, agent, session_id, top_k)
     chunks = att_chunks + kb_chunks
 
     # Build source references

@@ -110,11 +110,12 @@ def send_message(session_id: str, body: ChatRequest):
         )
         return result
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        logger.warning(f"Chat session error: {e}")
+        raise HTTPException(status_code=404, detail="Sessie niet gevonden")
     except RuntimeError as e:
         # LLM provider errors (rate limit, all providers down)
         logger.warning(f"LLM provider error: {e}")
-        raise HTTPException(status_code=503, detail=str(e))
+        raise HTTPException(status_code=503, detail="LLM service tijdelijk niet beschikbaar. Probeer het later opnieuw.")
     except Exception as e:
         logger.error(f"Chat failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Er is een fout opgetreden bij het genereren van het antwoord.")
@@ -140,11 +141,12 @@ def send_message_stream(session_id: str, body: ChatRequest):
                 else:
                     yield f"event: {event_type}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
         except ValueError as e:
-            yield f"event: error\ndata: {json.dumps({'detail': str(e)})}\n\n"
+            logger.warning(f"Chat stream session error: {e}")
+            yield f"event: error\ndata: {json.dumps({'detail': 'Sessie niet gevonden'})}\n\n"
         except RuntimeError as e:
-            # LLM provider errors (rate limit, all providers down) — pass message to user
+            # LLM provider errors (rate limit, all providers down)
             logger.warning(f"LLM provider error: {e}")
-            yield f"event: error\ndata: {json.dumps({'detail': str(e)}, ensure_ascii=False)}\n\n"
+            yield f"event: error\ndata: {json.dumps({'detail': 'LLM service tijdelijk niet beschikbaar. Probeer het later opnieuw.'})}\n\n"
         except Exception as e:
             logger.error(f"Chat streaming failed: {e}", exc_info=True)
             yield f"event: error\ndata: {json.dumps({'detail': 'Er is een fout opgetreden bij het genereren van het antwoord.'})}\n\n"

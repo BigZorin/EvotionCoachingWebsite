@@ -108,6 +108,14 @@ async def lifespan(app: FastAPI):
 
     logger.info(f"Active LLM provider: {get_active_provider()}")
 
+    # Pre-load cross-encoder model so first query isn't slow
+    try:
+        from app.retrieval.retriever import _get_cross_encoder
+        _get_cross_encoder()
+        logger.info("Cross-encoder model pre-loaded")
+    except Exception as e:
+        logger.warning(f"Cross-encoder pre-load failed (will lazy-load on first query): {e}")
+
     # Auth safety: if auth is enabled but no token is set, refuse to start unprotected
     if settings.auth_enabled and not settings.auth_token:
         logger.critical(
@@ -198,7 +206,7 @@ async def auth_middleware(request: Request, call_next):
         or path in ("/", "")
         or path.startswith("/ui")
         or path in PUBLIC_PATHS
-        or path.startswith("/api/v1/health/")
+        or path == "/api/v1/health/system-info"
     ):
         return await call_next(request)
 
