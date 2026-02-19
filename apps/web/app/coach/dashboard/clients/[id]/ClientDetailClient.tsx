@@ -161,17 +161,18 @@ export default function ClientDetailClient({ clientId }: { clientId: string }) {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1e1839]" />
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-evotion-primary border-t-transparent" />
+        <p className="text-sm text-muted-foreground">Client laden...</p>
       </div>
     )
   }
 
   if (!client) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">Client niet gevonden</p>
-        <Link href="/coach/dashboard/clients" className="text-[#1e1839] hover:underline mt-2 inline-block">← Terug naar clients</Link>
+      <div className="text-center py-16">
+        <p className="text-muted-foreground">Client niet gevonden</p>
+        <Link href="/coach/dashboard/clients" className="text-evotion-primary hover:underline mt-3 inline-block text-sm">Terug naar clients</Link>
       </div>
     )
   }
@@ -215,19 +216,32 @@ export default function ClientDetailClient({ clientId }: { clientId: string }) {
         onReject={handleReject}
       />
 
-      {/* Tab navigation */}
-      <div className="flex gap-1 overflow-x-auto pb-1">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition ${
-              activeTab === tab.id ? "bg-[#1e1839] text-white" : "text-gray-600 hover:bg-gray-100"
-            }`}
-          >
-            <tab.icon className="h-4 w-4" /> {tab.label}
-          </button>
-        ))}
+      {/* Tab navigation - sticky with underline style */}
+      <div className="sticky top-0 z-20 bg-background -mx-4 px-4 sm:-mx-6 sm:px-6">
+        <div className="relative">
+          {/* Fade edges for mobile scroll */}
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none sm:hidden" />
+          <div className="flex overflow-x-auto scrollbar-hide border-b border-border">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
+                  activeTab === tab.id
+                    ? "text-evotion-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <tab.icon className="h-4 w-4" />
+                {tab.label}
+                {/* Active underline indicator */}
+                {activeTab === tab.id && (
+                  <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-evotion-primary rounded-full" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Tab content */}

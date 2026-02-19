@@ -2,7 +2,18 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { ArrowLeft, Clock, X, Check, TrendingDown, TrendingUp } from "lucide-react"
+import {
+  ArrowLeft,
+  Clock,
+  X,
+  Scale,
+  Flame,
+  CalendarCheck,
+  Target,
+  Timer,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react"
 
 interface ClientHeaderProps {
   client: any
@@ -18,6 +29,13 @@ interface ClientHeaderProps {
   approvalLoading: boolean
   onApprove: () => void
   onReject: (reason?: string) => void
+}
+
+function complianceColor(value: number, total: number) {
+  const pct = total > 0 ? (value / total) * 100 : 0
+  if (pct >= 75) return "text-emerald-600"
+  if (pct >= 50) return "text-amber-600"
+  return "text-destructive"
 }
 
 export default function ClientHeader({
@@ -39,6 +57,7 @@ export default function ClientHeader({
   const [rejectReason, setRejectReason] = useState("")
 
   const lastActive = client.last_sign_in_at ? new Date(client.last_sign_in_at) : null
+  const daysSinceActive = lastActive ? Math.floor((Date.now() - lastActive.getTime()) / 86400000) : null
 
   const handleReject = () => {
     onReject(rejectReason || undefined)
@@ -47,17 +66,22 @@ export default function ClientHeader({
   }
 
   return (
-    <>
-      <Link href="/coach/dashboard/clients" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition">
-        <ArrowLeft className="w-4 h-4" /> Terug naar clients
+    <div className="flex flex-col gap-4">
+      {/* Back link */}
+      <Link
+        href="/coach/dashboard/clients"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit group"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+        Terug naar clients
       </Link>
 
       {/* Approval Banner */}
       {clientApprovalStatus === "pending" && (
-        <div className="bg-evotion-primary/5 border border-evotion-primary/20 rounded-xl p-5">
+        <div className="bg-evotion-primary/[0.03] border border-evotion-primary/15 rounded-xl p-5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-evotion-primary/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-evotion-primary/10 flex items-center justify-center flex-shrink-0">
                 <Clock className="w-5 h-5 text-evotion-primary" />
               </div>
               <div>
@@ -84,7 +108,7 @@ export default function ClientHeader({
                   </button>
                   <button
                     onClick={() => { setShowRejectInput(false); setRejectReason("") }}
-                    className="p-2 text-muted-foreground hover:text-foreground"
+                    className="p-2 text-muted-foreground hover:text-foreground transition"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -113,10 +137,10 @@ export default function ClientHeader({
       )}
 
       {clientApprovalStatus === "rejected" && (
-        <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-5">
+        <div className="bg-destructive/5 border border-destructive/15 rounded-xl p-5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center flex-shrink-0">
                 <X className="w-5 h-5 text-destructive" />
               </div>
               <div>
@@ -135,57 +159,137 @@ export default function ClientHeader({
         </div>
       )}
 
-      {/* Client Header */}
+      {/* Client Header Card */}
       <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-        <div className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="w-16 h-16 rounded-full object-cover ring-2 ring-border" />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-evotion-primary flex items-center justify-center text-2xl font-bold text-white ring-2 ring-evotion-primary/20">
-                {(clientName[0] || "C").toUpperCase()}
+        {/* Top section: avatar, name, activity badge */}
+        <div className="p-6 pb-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              {/* Avatar with gradient ring */}
+              <div className="relative flex-shrink-0">
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt=""
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-[3px] ring-evotion-secondary/40 ring-offset-2 ring-offset-card"
+                  />
+                ) : (
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-evotion-primary flex items-center justify-center text-2xl sm:text-3xl font-bold text-white ring-[3px] ring-evotion-secondary/40 ring-offset-2 ring-offset-card">
+                    {(clientName[0] || "C").toUpperCase()}
+                  </div>
+                )}
               </div>
-            )}
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">{clientName}</h1>
-              <p className="text-sm text-muted-foreground">{client.email}</p>
+              <div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">{clientName}</h1>
+                  {lastActive && (
+                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium ${
+                      daysSinceActive !== null && daysSinceActive < 1
+                        ? "bg-emerald-50 text-emerald-700"
+                        : daysSinceActive !== null && daysSinceActive < 7
+                        ? "bg-amber-50 text-amber-700"
+                        : "bg-destructive/10 text-destructive"
+                    }`}>
+                      <div className={`w-1.5 h-1.5 rounded-full ${
+                        daysSinceActive !== null && daysSinceActive < 1
+                          ? "bg-emerald-500"
+                          : daysSinceActive !== null && daysSinceActive < 7
+                          ? "bg-amber-500"
+                          : "bg-destructive"
+                      }`} />
+                      {daysSinceActive !== null && daysSinceActive < 1
+                        ? "Vandaag actief"
+                        : `${daysSinceActive}d geleden`}
+                    </div>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground mt-0.5">{client.email}</p>
+              </div>
             </div>
           </div>
-          {lastActive && (
-            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
-              (Date.now() - lastActive.getTime()) < 86400000 ? "bg-emerald-50 text-emerald-700" :
-              (Date.now() - lastActive.getTime()) < 7 * 86400000 ? "bg-amber-50 text-amber-700" : "bg-destructive/10 text-destructive"
-            }`}>
-              <div className={`w-2 h-2 rounded-full ${
-                (Date.now() - lastActive.getTime()) < 86400000 ? "bg-emerald-500" :
-                (Date.now() - lastActive.getTime()) < 7 * 86400000 ? "bg-amber-500" : "bg-destructive"
-              }`} />
-              {(Date.now() - lastActive.getTime()) < 86400000 ? "Vandaag actief" : `${Math.floor((Date.now() - lastActive.getTime()) / 86400000)}d geleden`}
-            </div>
-          )}
         </div>
 
         {/* Stats bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 border-t border-border">
-          {[
-            { label: "Weken", value: String(weeksSinceJoined), sub: null },
-            { label: "Gewicht", value: latestWeight ? `${latestWeight} kg` : "\u2014", sub: weightDiff },
-            { label: "Streak", value: `${streak}d`, sub: null },
-            { label: "Compliance", value: `${dailyCompliance}/30`, sub: null },
-            { label: "Doelen", value: `${activeGoalsCount} actief`, sub: null },
-          ].map((stat, i) => (
-            <div key={stat.label} className={`px-5 py-4 text-center ${i > 0 ? "border-l border-border" : ""} ${i >= 2 ? "hidden sm:block" : ""}`}>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{stat.label}</p>
-              <p className="text-lg font-bold text-foreground">{stat.value}</p>
-              {stat.sub && (
-                <p className={`text-xs mt-0.5 ${Number(stat.sub) < 0 ? "text-emerald-600" : "text-amber-600"}`}>
-                  {Number(stat.sub) > 0 ? "+" : ""}{stat.sub} kg
-                </p>
-              )}
+        <div className="border-t border-border bg-muted/30">
+          <div className="grid grid-cols-2 sm:grid-cols-5">
+            {/* Weken */}
+            <div className="px-4 py-4 flex items-center gap-3 border-b sm:border-b-0 sm:border-r border-border">
+              <div className="p-2 rounded-lg bg-secondary flex-shrink-0">
+                <Timer className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-foreground leading-none">{weeksSinceJoined}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Weken</p>
+              </div>
             </div>
-          ))}
+
+            {/* Gewicht */}
+            <div className="px-4 py-4 flex items-center gap-3 border-b sm:border-b-0 sm:border-r border-border">
+              <div className="p-2 rounded-lg bg-secondary flex-shrink-0">
+                <Scale className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-lg font-bold text-foreground leading-none">
+                    {latestWeight ? `${latestWeight}` : "\u2014"}
+                  </p>
+                  {latestWeight && <span className="text-xs text-muted-foreground">kg</span>}
+                  {weightDiff && Number(weightDiff) !== 0 && (
+                    Number(weightDiff) < 0 ? (
+                      <TrendingDown className="h-3.5 w-3.5 text-emerald-500 ml-0.5" />
+                    ) : (
+                      <TrendingUp className="h-3.5 w-3.5 text-amber-500 ml-0.5" />
+                    )
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Gewicht</p>
+                  {weightDiff && Number(weightDiff) !== 0 && (
+                    <span className={`text-[10px] font-medium mt-0.5 ${Number(weightDiff) < 0 ? "text-emerald-600" : "text-amber-600"}`}>
+                      ({Number(weightDiff) > 0 ? "+" : ""}{weightDiff})
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Streak */}
+            <div className="px-4 py-4 flex items-center gap-3 sm:border-r border-border">
+              <div className="p-2 rounded-lg bg-secondary flex-shrink-0">
+                <Flame className={`h-4 w-4 ${streak > 0 ? "text-orange-500" : "text-muted-foreground"}`} />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-foreground leading-none">{streak}<span className="text-xs text-muted-foreground font-normal ml-0.5">d</span></p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Streak</p>
+              </div>
+            </div>
+
+            {/* Compliance */}
+            <div className="px-4 py-4 flex items-center gap-3 sm:border-r border-border">
+              <div className="p-2 rounded-lg bg-secondary flex-shrink-0">
+                <CalendarCheck className={`h-4 w-4 ${complianceColor(dailyCompliance, 30)}`} />
+              </div>
+              <div>
+                <p className={`text-lg font-bold leading-none ${complianceColor(dailyCompliance, 30)}`}>
+                  {dailyCompliance}<span className="text-xs text-muted-foreground font-normal">/30</span>
+                </p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Compliance</p>
+              </div>
+            </div>
+
+            {/* Doelen */}
+            <div className="px-4 py-4 flex items-center gap-3 col-span-2 sm:col-span-1 border-t sm:border-t-0 border-border">
+              <div className="p-2 rounded-lg bg-secondary flex-shrink-0">
+                <Target className={`h-4 w-4 ${activeGoalsCount > 0 ? "text-evotion-primary" : "text-muted-foreground"}`} />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-foreground leading-none">{activeGoalsCount}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Doelen actief</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
