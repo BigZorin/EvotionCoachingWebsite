@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: "%s | Evotion Coaching",
   },
   description:
-    "Personal training en online coaching voor duurzame resultaten. Persoonlijke begeleiding door ervaren coaches Martin & Zorin vanuit Sneek, Friesland.",
+    "Personal training en online coaching voor duurzame resultaten. Persoonlijke begeleiding door ervaren coaches Martin & Zorin vanuit Sneek, Friesland. Behaal je fitnessdoelen met professionele ondersteuning.",
   keywords: [
     "personal training",
     "online coaching",

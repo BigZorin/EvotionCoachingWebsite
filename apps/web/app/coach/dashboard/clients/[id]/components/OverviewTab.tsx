@@ -164,16 +164,16 @@ export default function OverviewTab({
         {/* Active Training Program */}
         <button
           onClick={() => onNavigateToTab("training")}
-          className="bg-card rounded-xl border border-border p-5 text-left hover:border-evotion-primary/20 hover:shadow-sm transition group"
+          className="bg-card rounded-xl border border-border p-5 text-left hover:border-evotion-primary/30 hover:shadow-md transition-all group hover:-translate-y-px"
         >
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-evotion-primary/5">
-                <Dumbbell className="w-4 h-4 text-evotion-primary" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2.5 rounded-xl bg-evotion-primary/5 group-hover:bg-evotion-primary/10 transition-colors">
+                <Dumbbell className="w-5 h-5 text-evotion-primary" />
               </div>
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actief Programma</span>
             </div>
-            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-evotion-primary transition" />
+            <ArrowRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-evotion-primary group-hover:translate-x-0.5 transition-all" />
           </div>
           {clientPrograms.filter((p: any) => p.status?.toLowerCase() === "active").length > 0 ? (
             clientPrograms
@@ -181,10 +181,10 @@ export default function OverviewTab({
               .slice(0, 1)
               .map((p: any) => (
                 <div key={p.id}>
-                  <p className="text-sm font-medium text-foreground">
+                  <p className="text-sm font-semibold text-foreground">
                     {p.training_programs?.name || "Programma"}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground mt-1.5">
                     Sinds{" "}
                     {new Date(p.start_date).toLocaleDateString("nl-NL", {
                       day: "numeric",
@@ -196,7 +196,7 @@ export default function OverviewTab({
           ) : (
             <div>
               <p className="text-sm text-muted-foreground">Geen actief programma</p>
-              <p className="text-xs text-evotion-primary mt-1 group-hover:underline">Programma toewijzen</p>
+              <p className="text-xs text-evotion-primary font-medium mt-1.5 group-hover:underline">Programma toewijzen</p>
             </div>
           )}
         </button>
@@ -204,28 +204,28 @@ export default function OverviewTab({
         {/* Nutrition Targets */}
         <button
           onClick={() => onNavigateToTab("voeding")}
-          className="bg-card rounded-xl border border-border p-5 text-left hover:border-evotion-primary/20 hover:shadow-sm transition group"
+          className="bg-card rounded-xl border border-border p-5 text-left hover:border-amber-300/50 hover:shadow-md transition-all group hover:-translate-y-px"
         >
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-amber-50">
-                <UtensilsCrossed className="w-4 h-4 text-amber-600" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2.5 rounded-xl bg-amber-50 group-hover:bg-amber-100/70 transition-colors">
+                <UtensilsCrossed className="w-5 h-5 text-amber-600" />
               </div>
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Voedingsdoelen</span>
             </div>
-            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-evotion-primary transition" />
+            <ArrowRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-amber-600 group-hover:translate-x-0.5 transition-all" />
           </div>
           {nutritionTargets ? (
             <div>
-              <p className="text-sm font-medium text-foreground">{nutritionTargets.daily_calories} kcal</p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-sm font-semibold text-foreground">{nutritionTargets.daily_calories} kcal</p>
+              <p className="text-xs text-muted-foreground mt-1.5">
                 E{nutritionTargets.daily_protein_grams}g / K{nutritionTargets.daily_carbs_grams}g / V{nutritionTargets.daily_fat_grams}g
               </p>
             </div>
           ) : (
             <div>
               <p className="text-sm text-muted-foreground">Niet ingesteld</p>
-              <p className="text-xs text-evotion-primary mt-1 group-hover:underline">Targets instellen</p>
+              <p className="text-xs text-amber-600 font-medium mt-1.5 group-hover:underline">Targets instellen</p>
             </div>
           )}
         </button>
@@ -233,23 +233,23 @@ export default function OverviewTab({
         {/* Active Supplements */}
         <button
           onClick={() => onNavigateToTab("voeding")}
-          className="bg-card rounded-xl border border-border p-5 text-left hover:border-evotion-primary/20 hover:shadow-sm transition group"
+          className="bg-card rounded-xl border border-border p-5 text-left hover:border-emerald-300/50 hover:shadow-md transition-all group hover:-translate-y-px"
         >
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-emerald-50">
-                <Pill className="w-4 h-4 text-emerald-600" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2.5 rounded-xl bg-emerald-50 group-hover:bg-emerald-100/70 transition-colors">
+                <Pill className="w-5 h-5 text-emerald-600" />
               </div>
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Supplementen</span>
             </div>
-            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-evotion-primary transition" />
+            <ArrowRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all" />
           </div>
           {supplements.filter((s: any) => s.is_active).length > 0 ? (
             <div>
-              <p className="text-sm font-medium text-foreground">
+              <p className="text-sm font-semibold text-foreground">
                 {supplements.filter((s: any) => s.is_active).length} actief
               </p>
-              <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+              <p className="text-xs text-muted-foreground mt-1.5 line-clamp-1">
                 {supplements
                   .filter((s: any) => s.is_active)
                   .map((s: any) => s.name)
@@ -259,7 +259,7 @@ export default function OverviewTab({
           ) : (
             <div>
               <p className="text-sm text-muted-foreground">Geen supplementen</p>
-              <p className="text-xs text-evotion-primary mt-1 group-hover:underline">Supplement toevoegen</p>
+              <p className="text-xs text-emerald-600 font-medium mt-1.5 group-hover:underline">Supplement toevoegen</p>
             </div>
           )}
         </button>
@@ -297,25 +297,23 @@ export default function OverviewTab({
 
       {/* AI Generation History */}
       {aiLogs.length > 0 && (
-        <div className="bg-card rounded-xl border border-border">
+        <div className="bg-card rounded-xl border border-border shadow-sm">
           <button
             onClick={() => setAiLogsExpanded(!aiLogsExpanded)}
-            className="w-full flex items-center justify-between p-5 hover:bg-secondary/50 transition rounded-xl"
+            className="w-full flex items-center justify-between p-5 hover:bg-muted/30 transition rounded-xl"
           >
             <div className="flex items-center gap-2.5">
-              <History className="w-4 h-4 text-muted-foreground" />
+              <div className="p-2 rounded-lg bg-secondary">
+                <History className="w-4 h-4 text-muted-foreground" />
+              </div>
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 AI Generatie Historie
               </span>
-              <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full font-medium">
+              <span className="text-xs bg-evotion-primary/10 text-evotion-primary px-2 py-0.5 rounded-md font-semibold">
                 {aiLogs.length}
               </span>
             </div>
-            {aiLogsExpanded ? (
-              <ChevronDown className="w-4 h-4 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            )}
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${aiLogsExpanded ? "rotate-0" : "-rotate-90"}`} />
           </button>
           {aiLogsExpanded && (
             <div className="border-t border-border px-5 pb-5 space-y-1.5">
@@ -547,19 +545,27 @@ export default function OverviewTab({
 
       {/* Active Goals Summary */}
       {activeGoals.length > 0 && (
-        <div className="bg-card rounded-xl border border-border p-5">
+        <div className="bg-card rounded-xl border border-border p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Actieve Doelen
-            </h3>
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-evotion-primary/5">
+                <Target className="w-4 h-4 text-evotion-primary" />
+              </div>
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Actieve Doelen
+              </h3>
+              <span className="text-xs bg-evotion-primary/10 text-evotion-primary px-2 py-0.5 rounded-md font-semibold">
+                {activeGoals.length}
+              </span>
+            </div>
             <button
               onClick={() => onNavigateToTab("profiel")}
-              className="text-xs text-evotion-primary font-medium hover:underline"
+              className="text-xs text-evotion-primary font-medium hover:underline transition"
             >
               Beheren
             </button>
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             {activeGoals.map((goal) => {
               const daysLeft = goal.target_date
                 ? Math.max(0, Math.ceil((new Date(goal.target_date).getTime() - Date.now()) / 86400000))
@@ -567,15 +573,21 @@ export default function OverviewTab({
               return (
                 <div
                   key={goal.id}
-                  className="flex items-center justify-between p-3 bg-evotion-primary/5 rounded-lg"
+                  className="flex items-center justify-between p-3.5 bg-muted/50 rounded-lg border border-border/50"
                 >
                   <div className="flex items-center gap-2.5">
-                    <Target className="w-4 h-4 text-evotion-primary" />
+                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                      daysLeft !== null && daysLeft <= 7 ? "bg-amber-400" : "bg-evotion-primary"
+                    }`} />
                     <span className="text-sm font-medium text-foreground">{goal.title}</span>
                   </div>
                   {daysLeft !== null && (
-                    <span className={`text-xs font-medium ${daysLeft <= 7 ? "text-amber-600" : "text-muted-foreground"}`}>
-                      {daysLeft} dagen
+                    <span className={`text-xs font-medium px-2.5 py-1 rounded-md ${
+                      daysLeft <= 7
+                        ? "bg-amber-50 text-amber-700"
+                        : "bg-secondary text-muted-foreground"
+                    }`}>
+                      {daysLeft}d
                     </span>
                   )}
                 </div>
@@ -587,23 +599,30 @@ export default function OverviewTab({
 
       {/* Pinned Notes Summary */}
       {pinnedNotes.length > 0 && (
-        <div className="bg-amber-50/50 rounded-xl border border-amber-200/50 p-5">
+        <div className="bg-amber-50/30 rounded-xl border border-amber-200/40 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-semibold text-amber-700 flex items-center gap-1.5 uppercase tracking-wider">
-              <Pin className="w-3.5 h-3.5" /> Vastgepinde Notities
-            </h3>
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-amber-100/60">
+                <Pin className="w-4 h-4 text-amber-600" />
+              </div>
+              <h3 className="text-xs font-semibold text-amber-700 uppercase tracking-wider">
+                Vastgepinde Notities
+              </h3>
+            </div>
             <button
               onClick={() => onNavigateToTab("profiel")}
-              className="text-xs text-evotion-primary font-medium hover:underline"
+              className="text-xs text-evotion-primary font-medium hover:underline transition"
             >
               Beheren
             </button>
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2.5">
             {pinnedNotes.map((note) => (
-              <p key={note.id} className="text-sm text-amber-900 leading-relaxed">
-                {note.content}
-              </p>
+              <div key={note.id} className="p-3.5 bg-card/60 rounded-lg border border-amber-200/30">
+                <p className="text-sm text-foreground leading-relaxed">
+                  {note.content}
+                </p>
+              </div>
             ))}
           </div>
         </div>
