@@ -1,5 +1,6 @@
 import logging
 import threading
+import time
 
 from ollama import Client as OllamaClient
 
@@ -18,7 +19,7 @@ def _get_ollama_client() -> OllamaClient:
     if _ollama_client is None:
         with _ollama_lock:
             if _ollama_client is None:
-                _ollama_client = OllamaClient(host=settings.ollama_base_url, timeout=30.0)
+                _ollama_client = OllamaClient(host=settings.ollama_base_url, timeout=120.0)
     return _ollama_client
 
 
@@ -64,33 +65,49 @@ def embed_text(text: str) -> list[float]:
         ) from e
 
 
-def embed_batch(texts: list[str]) -> list[list[float]]:
+def embed_batch(texts: list[str], max_retries: int = 3) -> list[list[float]]:
     """Batch-embed texts using Ollama's native batch API.
 
     Processes in batches of EMBED_BATCH_SIZE to avoid memory issues.
+    Retries with exponential backoff on transient failures (timeout, connection).
     """
-    try:
-        client = _get_ollama_client()
-        all_embeddings = []
+    client = _get_ollama_client()
+    all_embeddings = []
 
-        for i in range(0, len(texts), EMBED_BATCH_SIZE):
-            batch = texts[i:i + EMBED_BATCH_SIZE]
-            response = client.embed(
-                model=settings.embedding_model,
-                input=batch,
+    for i in range(0, len(texts), EMBED_BATCH_SIZE):
+        batch = texts[i:i + EMBED_BATCH_SIZE]
+        last_error = None
+
+        for attempt in range(max_retries):
+            try:
+                response = client.embed(
+                    model=settings.embedding_model,
+                    input=batch,
+                )
+                all_embeddings.extend(response["embeddings"])
+                last_error = None
+                break
+            except Exception as e:
+                last_error = e
+                if attempt < max_retries - 1:
+                    wait = 2 ** attempt  # 1s, 2s, 4s
+                    logger.warning(
+                        f"Ollama embed batch {i // EMBED_BATCH_SIZE + 1} failed (attempt {attempt + 1}/{max_retries}): {e}. "
+                        f"Retrying in {wait}s..."
+                    )
+                    time.sleep(wait)
+
+        if last_error is not None:
+            logger.error(
+                f"Ollama batch embedding failed after {max_retries} attempts: {last_error}. "
+                "Refusing fallback to avoid dimension mismatch in ChromaDB."
             )
-            all_embeddings.extend(response["embeddings"])
+            raise RuntimeError(
+                f"Embedding service unavailable. Ollama ({settings.embedding_model}) is down "
+                "and fallback model has incompatible dimensions."
+            ) from last_error
 
-        return all_embeddings
-    except Exception as e:
-        logger.error(
-            f"Ollama batch embedding failed: {e}. "
-            "Refusing fallback to avoid dimension mismatch in ChromaDB."
-        )
-        raise RuntimeError(
-            f"Embedding service unavailable. Ollama ({settings.embedding_model}) is down "
-            "and fallback model has incompatible dimensions."
-        ) from e
+    return all_embeddings
 
 
 def check_ollama_embeddings() -> bool:
