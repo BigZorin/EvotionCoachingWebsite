@@ -25,8 +25,6 @@ import AISupplementPreview from "@/components/ai/AISupplementPreview"
 import AIGeneratorBanner from "./AIGeneratorBanner"
 import SubTabNavigation from "./SubTabNavigation"
 
-// ─── Props ────────────────────────────────────────────────
-
 interface NutritionTabProps {
   clientId: string
   nutritionTargets: {
@@ -42,15 +40,11 @@ interface NutritionTabProps {
   onDataRefresh: () => void
 }
 
-// ─── Sub-tab config ───────────────────────────────────────
-
 const SUB_TABS = [
   { id: "targets", label: "Targets & Logs", icon: Flame },
   { id: "supplements", label: "Supplementen", icon: Pill },
   { id: "history", label: "Geschiedenis", icon: Clock },
 ]
-
-// ─── Component ────────────────────────────────────────────
 
 export default function NutritionTab({
   clientId,
@@ -61,10 +55,8 @@ export default function NutritionTab({
   targetHistory: initialHistory,
   onDataRefresh,
 }: NutritionTabProps) {
-  // Sub-tab state
   const [activeSubTab, setActiveSubTab] = useState<"targets" | "supplements" | "history">("targets")
 
-  // Nutrition targets
   const [nutritionTargets, setNutritionTargetsLocal] = useState(initialTargets)
   const [editingTargets, setEditingTargets] = useState(false)
   const [targetForm, setTargetForm] = useState({
@@ -76,30 +68,24 @@ export default function NutritionTab({
   const [targetSaving, setTargetSaving] = useState(false)
   const [targetSaved, setTargetSaved] = useState(false)
 
-  // AI Nutrition
   const [aiNutritionResult, setAiNutritionResult] = useState<AINutritionResult | null>(null)
   const [aiNutritionLoading, setAiNutritionLoading] = useState(false)
   const [aiNutritionError, setAiNutritionError] = useState<string | null>(null)
   const [showAINutritionPreview, setShowAINutritionPreview] = useState(false)
   const [aiNutritionSaving, setAiNutritionSaving] = useState(false)
 
-  // Supplements
   const [supplements, setSupplements] = useState<any[]>(initialSupplements)
   const [showAddSupplement, setShowAddSupplement] = useState(false)
   const [newSupplement, setNewSupplement] = useState({ name: "", dosage: "", timing: "", frequency: "dagelijks" })
   const [supplementSaving, setSupplementSaving] = useState(false)
 
-  // AI Supplement
   const [aiSupplementResult, setAiSupplementResult] = useState<AISupplementResult | null>(null)
   const [aiSupplementLoading, setAiSupplementLoading] = useState(false)
   const [aiSupplementError, setAiSupplementError] = useState<string | null>(null)
   const [showAISupplementPreview, setShowAISupplementPreview] = useState(false)
   const [aiSupplementSaving, setAiSupplementSaving] = useState(false)
 
-  // History
   const [targetHistory, setTargetHistory] = useState<any[]>(initialHistory)
-
-  // ── Handlers ──────────────────────────────────────────────
 
   const handleSaveTargets = async () => {
     setTargetSaving(true)
@@ -132,7 +118,6 @@ export default function NutritionTab({
         setAiNutritionError(res.error || "Generatie mislukt")
       }
     } catch (err: any) {
-      console.error("[AI Nutrition] Client-side error:", err)
       setAiNutritionError(err?.message || "Verbinding met server mislukt. Probeer opnieuw.")
     } finally {
       setAiNutritionLoading(false)
@@ -240,11 +225,16 @@ export default function NutritionTab({
     setSupplementSaving(false)
   }
 
-  // ── Render ────────────────────────────────────────────────
+  // Group food logs by date
+  const groupedFoodLogs: Record<string, any[]> = {}
+  ;(foodLogs?.foodLogs || []).slice(0, 30).forEach((log: any) => {
+    const date = log.date || "Onbekend"
+    if (!groupedFoodLogs[date]) groupedFoodLogs[date] = []
+    groupedFoodLogs[date].push(log)
+  })
 
   return (
-    <div className="space-y-4">
-      {/* Sub-tab navigation */}
+    <div className="space-y-6">
       <SubTabNavigation
         tabs={SUB_TABS}
         active={activeSubTab}
@@ -274,12 +264,9 @@ export default function NutritionTab({
         />
       )}
 
-      {/* ═══════════════════════════════════════════════
-          SUB-TAB: Targets & Logs
-          ═══════════════════════════════════════════════ */}
+      {/* TARGETS & LOGS SUB-TAB */}
       {activeSubTab === "targets" && (
-        <div className="space-y-4">
-          {/* AI Nutrition Generator Banner */}
+        <div className="space-y-6">
           <AIGeneratorBanner
             title="AI Voedingsadvies"
             description="Bereken optimale macro-targets op basis van alle clientdata"
@@ -293,14 +280,14 @@ export default function NutritionTab({
           />
 
           {/* Nutrition Targets */}
-          <div className="bg-white rounded-xl border p-5">
+          <div className="bg-card rounded-xl border border-border p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide flex items-center gap-2">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                 <Flame className="w-4 h-4" /> Voedingsdoelen
               </h3>
               <div className="flex items-center gap-2">
                 {targetSaved && (
-                  <span className="text-xs text-green-600 font-medium flex items-center gap-1">
+                  <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
                     <Check className="w-3 h-3" /> Opgeslagen
                   </span>
                 )}
@@ -318,14 +305,14 @@ export default function NutritionTab({
                           })
                         }
                       }}
-                      className="px-3 py-1.5 text-xs text-gray-600 border rounded-lg hover:bg-gray-50"
+                      className="px-3 py-1.5 text-xs text-muted-foreground border border-border rounded-lg hover:bg-secondary transition"
                     >
                       Annuleren
                     </button>
                     <button
                       onClick={handleSaveTargets}
                       disabled={targetSaving}
-                      className="px-3 py-1.5 text-xs bg-[#1e1839] text-white rounded-lg disabled:opacity-50 flex items-center gap-1"
+                      className="px-3 py-1.5 text-xs bg-evotion-primary text-white rounded-lg disabled:opacity-50 flex items-center gap-1 hover:bg-evotion-primary/90 transition"
                     >
                       <Save className="w-3 h-3" /> Opslaan
                     </button>
@@ -333,7 +320,7 @@ export default function NutritionTab({
                 ) : (
                   <button
                     onClick={() => setEditingTargets(true)}
-                    className="px-3 py-1.5 text-xs text-gray-600 border rounded-lg hover:bg-gray-50 flex items-center gap-1"
+                    className="px-3 py-1.5 text-xs text-muted-foreground border border-border rounded-lg hover:bg-secondary flex items-center gap-1 transition"
                   >
                     <Pencil className="w-3 h-3" /> Bewerken
                   </button>
@@ -342,38 +329,38 @@ export default function NutritionTab({
             </div>
 
             {editingTargets ? (
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {([
-                  { label: "Calorieen", key: "daily_calories" as const, unit: "kcal", color: "border-orange-300 focus:ring-orange-200" },
-                  { label: "Eiwit", key: "daily_protein_grams" as const, unit: "g", color: "border-red-300 focus:ring-red-200" },
-                  { label: "Koolhydraten", key: "daily_carbs_grams" as const, unit: "g", color: "border-blue-300 focus:ring-blue-200" },
-                  { label: "Vet", key: "daily_fat_grams" as const, unit: "g", color: "border-yellow-300 focus:ring-yellow-200" },
+                  { label: "Calorieen", key: "daily_calories" as const, unit: "kcal", color: "border-amber-300 focus:ring-amber-200" },
+                  { label: "Eiwit", key: "daily_protein_grams" as const, unit: "g", color: "border-evotion-primary/30 focus:ring-evotion-primary/20" },
+                  { label: "Koolhydraten", key: "daily_carbs_grams" as const, unit: "g", color: "border-evotion-primary/30 focus:ring-evotion-primary/20" },
+                  { label: "Vet", key: "daily_fat_grams" as const, unit: "g", color: "border-amber-300 focus:ring-amber-200" },
                 ] as const).map((field) => (
                   <div key={field.key} className="text-center">
-                    <p className="text-[10px] text-gray-400 uppercase mb-1">{field.label}</p>
+                    <p className="text-xs text-muted-foreground uppercase mb-1.5">{field.label}</p>
                     <div className="relative">
                       <input
                         type="number"
                         min={0}
                         value={targetForm[field.key] || ""}
                         onChange={(e) => setTargetForm({ ...targetForm, [field.key]: parseInt(e.target.value) || 0 })}
-                        className={`w-full px-3 py-2 text-center text-lg font-bold border rounded-lg outline-none focus:ring-2 ${field.color}`}
+                        className={`w-full px-3 py-2.5 text-center text-lg font-bold border rounded-lg bg-background text-foreground outline-none focus:ring-2 ${field.color}`}
                       />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">{field.unit}</span>
+                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{field.unit}</span>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { label: "Calorieen", value: nutritionTargets?.daily_calories || foodLogs?.targets?.daily_calories, unit: "kcal", color: "text-orange-600" },
-                  { label: "Eiwit", value: nutritionTargets?.daily_protein_grams || foodLogs?.targets?.daily_protein_grams, unit: "g", color: "text-red-600" },
-                  { label: "Koolhydraten", value: nutritionTargets?.daily_carbs_grams || foodLogs?.targets?.daily_carbs_grams, unit: "g", color: "text-blue-600" },
-                  { label: "Vet", value: nutritionTargets?.daily_fat_grams || foodLogs?.targets?.daily_fat_grams, unit: "g", color: "text-yellow-600" },
+                  { label: "Calorieen", value: nutritionTargets?.daily_calories || foodLogs?.targets?.daily_calories, unit: "kcal", color: "text-amber-600" },
+                  { label: "Eiwit", value: nutritionTargets?.daily_protein_grams || foodLogs?.targets?.daily_protein_grams, unit: "g", color: "text-evotion-primary" },
+                  { label: "Koolhydraten", value: nutritionTargets?.daily_carbs_grams || foodLogs?.targets?.daily_carbs_grams, unit: "g", color: "text-evotion-primary" },
+                  { label: "Vet", value: nutritionTargets?.daily_fat_grams || foodLogs?.targets?.daily_fat_grams, unit: "g", color: "text-amber-600" },
                 ].map((t) => (
-                  <div key={t.label} className="bg-gray-50 rounded-xl p-3 text-center">
-                    <p className="text-[10px] text-gray-400 uppercase">{t.label} doel</p>
+                  <div key={t.label} className="bg-secondary/50 rounded-xl p-4 text-center">
+                    <p className="text-xs text-muted-foreground uppercase mb-1">{t.label} doel</p>
                     <p className={`text-lg font-bold ${t.color}`}>
                       {t.value || "\u2014"}{t.value ? ` ${t.unit}` : ""}
                     </p>
@@ -383,46 +370,49 @@ export default function NutritionTab({
             )}
 
             {!nutritionTargets && !foodLogs?.targets && !editingTargets && (
-              <p className="text-xs text-gray-400 mt-3 text-center">
+              <p className="text-xs text-muted-foreground mt-3 text-center">
                 Nog geen voedingsdoelen ingesteld. Klik op Bewerken om targets in te stellen.
               </p>
             )}
           </div>
 
           {/* Assigned Meal Plans */}
-          <div className="bg-white rounded-xl border p-5">
+          <div className="bg-card rounded-xl border border-border p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide flex items-center gap-2">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                 <UtensilsCrossed className="w-4 h-4" /> Toegewezen Meal Plans
               </h3>
-              <Link href="/coach/dashboard/nutrition/meal-plans" className="text-xs text-[#1e1839] hover:underline">
-                Beheren &rarr;
+              <Link href="/coach/dashboard/nutrition/meal-plans" className="text-xs text-evotion-primary font-medium hover:underline">
+                Beheren
               </Link>
             </div>
             {clientAssignments.filter((a: any) => a.is_active).length === 0 ? (
-              <div className="text-center py-4">
-                <p className="text-sm text-gray-400">Geen actief meal plan toegewezen</p>
-                <Link href="/coach/dashboard/nutrition/meal-plans" className="text-xs text-[#1e1839] hover:underline mt-1 inline-block">
-                  Wijs een meal plan toe &rarr;
+              <div className="text-center py-6">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-secondary mb-2">
+                  <UtensilsCrossed className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">Geen actief meal plan toegewezen</p>
+                <Link href="/coach/dashboard/nutrition/meal-plans" className="text-xs text-evotion-primary font-medium hover:underline mt-1 inline-block">
+                  Wijs een meal plan toe
                 </Link>
               </div>
             ) : (
               <div className="space-y-2">
                 {clientAssignments.filter((a: any) => a.is_active).map((assignment: any) => (
-                  <div key={assignment.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                  <div key={assignment.id} className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <UtensilsCrossed className="w-4 h-4 text-green-600" />
+                      <UtensilsCrossed className="w-4 h-4 text-emerald-600" />
                       <div>
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-foreground">
                           {assignment.meal_plans?.name || "Onbekend plan"}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {assignment.meal_plans?.daily_calories && `${assignment.meal_plans.daily_calories} kcal`}
-                          {assignment.start_date && ` \u00B7 Sinds ${new Date(assignment.start_date).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}`}
+                          {assignment.start_date && ` / Sinds ${new Date(assignment.start_date).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}`}
                         </p>
                       </div>
                     </div>
-                    <span className="text-xs font-medium text-green-700 bg-green-100 px-2 py-1 rounded-full">
+                    <span className="text-xs font-medium text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">
                       Actief
                     </span>
                   </div>
@@ -431,24 +421,38 @@ export default function NutritionTab({
             )}
           </div>
 
-          {/* Food Logs */}
-          <div className="bg-white rounded-xl border p-6">
-            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Recente Food Logs</h3>
-            {foodLogs?.foodLogs?.length === 0 ? (
-              <p className="text-gray-400 text-sm text-center py-6">Nog geen food logs</p>
+          {/* Food Logs - grouped by date */}
+          <div className="bg-card rounded-xl border border-border p-5">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Recente Food Logs</h3>
+            {Object.keys(groupedFoodLogs).length === 0 ? (
+              <div className="text-center py-8">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-secondary mb-3">
+                  <UtensilsCrossed className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">Nog geen food logs</p>
+              </div>
             ) : (
-              <div className="space-y-2">
-                {(foodLogs?.foodLogs || []).slice(0, 20).map((log: any) => (
-                  <div key={log.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{log.food_name}</p>
-                      <p className="text-xs text-gray-500">{log.date} &middot; {log.meal_type}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-gray-900">{log.calories} kcal</p>
-                      <p className="text-[10px] text-gray-400">
-                        E{log.protein_grams}g K{log.carbs_grams}g V{log.fat_grams}g
-                      </p>
+              <div className="space-y-4">
+                {Object.entries(groupedFoodLogs).map(([date, logs]) => (
+                  <div key={date}>
+                    <p className="text-xs font-medium text-muted-foreground mb-2 sticky top-0 bg-card">
+                      {date}
+                    </p>
+                    <div className="space-y-1.5">
+                      {logs.map((log: any) => (
+                        <div key={log.id} className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg">
+                          <div>
+                            <p className="text-sm font-medium text-foreground">{log.food_name}</p>
+                            <p className="text-xs text-muted-foreground">{log.meal_type}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-semibold text-foreground">{log.calories} kcal</p>
+                            <p className="text-xs text-muted-foreground">
+                              E{log.protein_grams}g K{log.carbs_grams}g V{log.fat_grams}g
+                            </p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
@@ -458,12 +462,9 @@ export default function NutritionTab({
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════
-          SUB-TAB: Supplementen
-          ═══════════════════════════════════════════════ */}
+      {/* SUPPLEMENTS SUB-TAB */}
       {activeSubTab === "supplements" && (
-        <div className="space-y-4">
-          {/* AI Supplement Analyzer Banner (compact) */}
+        <div className="space-y-6">
           <AIGeneratorBanner
             title="AI Supplementen Analyse"
             description="Evidence-based aanbevelingen op basis van clientdata + RAG"
@@ -476,50 +477,50 @@ export default function NutritionTab({
             variant="compact"
           />
 
-          {/* Manual add form */}
-          <div className="bg-white rounded-xl border p-5">
+          {/* Supplement list */}
+          <div className="bg-card rounded-xl border border-border p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide flex items-center gap-2">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                 <Pill className="w-4 h-4" /> Supplementen
               </h3>
               <button
                 onClick={() => setShowAddSupplement(!showAddSupplement)}
-                className="px-3 py-1.5 text-xs text-gray-600 border rounded-lg hover:bg-gray-50 flex items-center gap-1"
+                className="px-3 py-1.5 text-xs text-muted-foreground border border-border rounded-lg hover:bg-secondary flex items-center gap-1 transition"
               >
                 <Plus className="w-3 h-3" /> Toevoegen
               </button>
             </div>
 
             {showAddSupplement && (
-              <div className="border rounded-lg p-3 mb-3 space-y-2">
-                <div className="grid grid-cols-2 gap-2">
+              <div className="border border-border rounded-xl p-4 mb-4 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input
                     type="text"
                     placeholder="Supplement naam *"
                     value={newSupplement.name}
                     onChange={(e) => setNewSupplement({ ...newSupplement, name: e.target.value })}
-                    className="px-2 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-[#1e1839]/20 outline-none"
+                    className="px-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-evotion-primary/20 outline-none"
                   />
                   <input
                     type="text"
                     placeholder="Dosering * (bijv. 5g)"
                     value={newSupplement.dosage}
                     onChange={(e) => setNewSupplement({ ...newSupplement, dosage: e.target.value })}
-                    className="px-2 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-[#1e1839]/20 outline-none"
+                    className="px-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-evotion-primary/20 outline-none"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input
                     type="text"
                     placeholder="Timing (bijv. Bij ontbijt)"
                     value={newSupplement.timing}
                     onChange={(e) => setNewSupplement({ ...newSupplement, timing: e.target.value })}
-                    className="px-2 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-[#1e1839]/20 outline-none"
+                    className="px-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-evotion-primary/20 outline-none"
                   />
                   <select
                     value={newSupplement.frequency}
                     onChange={(e) => setNewSupplement({ ...newSupplement, frequency: e.target.value })}
-                    className="px-2 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-[#1e1839]/20 outline-none"
+                    className="px-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-evotion-primary/20 outline-none"
                   >
                     <option value="dagelijks">Dagelijks</option>
                     <option value="3x per week">3x per week</option>
@@ -530,14 +531,14 @@ export default function NutritionTab({
                 <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => setShowAddSupplement(false)}
-                    className="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700"
+                    className="px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition"
                   >
                     Annuleren
                   </button>
                   <button
                     onClick={handleAddSupplement}
                     disabled={supplementSaving || !newSupplement.name.trim() || !newSupplement.dosage.trim()}
-                    className="px-3 py-1.5 text-xs bg-[#1e1839] text-white rounded-lg disabled:opacity-50"
+                    className="px-4 py-2 text-xs bg-evotion-primary text-white rounded-lg disabled:opacity-50 hover:bg-evotion-primary/90 transition"
                   >
                     {supplementSaving ? "Opslaan..." : "Toevoegen"}
                   </button>
@@ -545,52 +546,60 @@ export default function NutritionTab({
               </div>
             )}
 
-            {/* Supplement list */}
             {supplements.length === 0 && !showAddSupplement ? (
-              <p className="text-xs text-gray-400 text-center py-4">
-                Nog geen supplementen ingesteld. Voeg handmatig toe of gebruik de AI analyse.
-              </p>
+              <div className="text-center py-6">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-secondary mb-2">
+                  <Pill className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Nog geen supplementen ingesteld
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Voeg handmatig toe of gebruik de AI analyse
+                </p>
+              </div>
             ) : (
               <div className="space-y-2">
                 {supplements.map((s: any) => (
                   <div
                     key={s.id}
-                    className={`flex items-center justify-between p-3 rounded-lg ${
-                      s.is_active ? "bg-emerald-50" : "bg-gray-50 opacity-60"
+                    className={`flex items-center justify-between p-4 rounded-xl border transition ${
+                      s.is_active ? "bg-emerald-50/50 border-emerald-200/50" : "bg-secondary/30 border-border opacity-60"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <Pill className={`w-4 h-4 ${s.is_active ? "text-emerald-600" : "text-gray-400"}`} />
+                      <Pill className={`w-4 h-4 flex-shrink-0 ${s.is_active ? "text-emerald-600" : "text-muted-foreground"}`} />
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium text-gray-900">{s.name}</p>
+                          <p className="text-sm font-medium text-foreground">{s.name}</p>
                           {s.source === "ai" && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-700">
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-evotion-primary/10 text-evotion-primary">
                               AI
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {s.dosage}
-                          {s.timing ? ` \u00B7 ${s.timing}` : ""}
-                          {s.frequency && s.frequency !== "dagelijks" ? ` \u00B7 ${s.frequency}` : ""}
+                          {s.timing ? ` / ${s.timing}` : ""}
+                          {s.frequency && s.frequency !== "dagelijks" ? ` / ${s.frequency}` : ""}
                         </p>
                         {s.ai_rationale && (
-                          <p className="text-[10px] text-gray-400 mt-0.5 line-clamp-1">{s.ai_rationale}</p>
+                          <p className="text-xs text-muted-foreground/70 mt-0.5 line-clamp-1">{s.ai_rationale}</p>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={async () => {
                           await toggleSupplementActive(s.id, !s.is_active)
                           const res = await getClientSupplements(clientId)
                           if (res.success && res.supplements) setSupplements(res.supplements)
                         }}
-                        className={`px-2 py-1 text-[10px] rounded ${
-                          s.is_active ? "text-gray-500 hover:text-amber-600" : "text-emerald-600 hover:text-emerald-700"
+                        className={`px-2.5 py-1 text-xs rounded-md font-medium transition ${
+                          s.is_active
+                            ? "text-amber-700 bg-amber-50 hover:bg-amber-100"
+                            : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
                         }`}
-                        title={s.is_active ? "Deactiveren" : "Activeren"}
                       >
                         {s.is_active ? "Pauze" : "Activeer"}
                       </button>
@@ -600,9 +609,9 @@ export default function NutritionTab({
                           const res = await getClientSupplements(clientId)
                           if (res.success && res.supplements) setSupplements(res.supplements)
                         }}
-                        className="p-1 text-gray-400 hover:text-red-500"
+                        className="p-1.5 text-muted-foreground hover:text-destructive rounded-md hover:bg-destructive/5 transition"
                       >
-                        <Trash2 className="w-3 h-3" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -611,9 +620,9 @@ export default function NutritionTab({
             )}
 
             {/* Medical disclaimer */}
-            <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-2.5 flex items-start gap-2">
-              <Info className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
-              <p className="text-[10px] text-amber-700 leading-relaxed">
+            <div className="mt-5 bg-amber-50/50 border border-amber-200/50 rounded-lg p-3 flex items-start gap-2.5">
+              <Info className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+              <p className="text-xs text-amber-700 leading-relaxed">
                 Supplementatie is geen vervanging voor medisch advies. Overleg altijd met je arts
                 voordat je supplementen gebruikt of wijzigt, vooral bij medicijngebruik.
               </p>
@@ -622,22 +631,22 @@ export default function NutritionTab({
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════
-          SUB-TAB: Geschiedenis
-          ═══════════════════════════════════════════════ */}
+      {/* HISTORY SUB-TAB */}
       {activeSubTab === "history" && (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {targetHistory.length === 0 ? (
-            <div className="bg-white rounded-xl border p-12 text-center">
-              <Clock className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500">Nog geen target wijzigingen</p>
-              <p className="text-xs text-gray-400 mt-1">
+            <div className="bg-card rounded-xl border border-border p-12 text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-secondary mb-3">
+                <Clock className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-foreground font-medium">Nog geen target wijzigingen</p>
+              <p className="text-xs text-muted-foreground mt-1">
                 Wijzigingen in voedingsdoelen verschijnen hier automatisch
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-xl border p-6">
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4 flex items-center gap-2">
+            <div className="bg-card rounded-xl border border-border p-5">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
                 <Clock className="w-4 h-4" /> Target Wijzigingen
               </h3>
               <div className="space-y-3">
@@ -653,43 +662,43 @@ export default function NutritionTab({
                   const hasPrevious = entry.previous_calories != null
 
                   return (
-                    <div key={entry.id} className="border rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-2">
+                    <div key={entry.id} className="border border-border rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold ${
-                              isAI ? "bg-purple-100 text-purple-700" : "bg-gray-100 text-gray-600"
+                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold ${
+                              isAI ? "bg-evotion-primary/10 text-evotion-primary" : "bg-secondary text-muted-foreground"
                             }`}
                           >
                             {isAI ? "AI" : "Handmatig"}
                           </span>
                           {isAI && entry.rag_used && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-700">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700">
                               RAG
                             </span>
                           )}
                           {isAI && entry.ai_model && (
-                            <span className="text-[10px] text-gray-400">{entry.ai_model}</span>
+                            <span className="text-xs text-muted-foreground">{entry.ai_model}</span>
                           )}
                         </div>
-                        <span className="text-xs text-gray-400">{date}</span>
+                        <span className="text-xs text-muted-foreground">{date}</span>
                       </div>
-                      <div className="grid grid-cols-4 gap-2 text-center">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                         {[
-                          { label: "Kcal", val: entry.daily_calories, prev: entry.previous_calories, color: "text-orange-600" },
-                          { label: "Eiwit", val: entry.daily_protein_grams, prev: entry.previous_protein_grams, unit: "g", color: "text-red-600" },
-                          { label: "Koolh", val: entry.daily_carbs_grams, prev: entry.previous_carbs_grams, unit: "g", color: "text-amber-600" },
-                          { label: "Vet", val: entry.daily_fat_grams, prev: entry.previous_fat_grams, unit: "g", color: "text-blue-600" },
+                          { label: "Kcal", val: entry.daily_calories, prev: entry.previous_calories, color: "text-amber-600" },
+                          { label: "Eiwit", val: entry.daily_protein_grams, prev: entry.previous_protein_grams, unit: "g", color: "text-evotion-primary" },
+                          { label: "Koolh", val: entry.daily_carbs_grams, prev: entry.previous_carbs_grams, unit: "g", color: "text-evotion-primary" },
+                          { label: "Vet", val: entry.daily_fat_grams, prev: entry.previous_fat_grams, unit: "g", color: "text-amber-600" },
                         ].map((m) => {
                           const diff = hasPrevious && m.prev != null ? m.val - m.prev : null
                           return (
-                            <div key={m.label}>
-                              <p className="text-[10px] text-gray-400 uppercase">{m.label}</p>
+                            <div key={m.label} className="bg-secondary/30 rounded-lg p-2.5">
+                              <p className="text-xs text-muted-foreground uppercase">{m.label}</p>
                               <p className={`text-sm font-bold ${m.color}`}>
                                 {m.val || "\u2014"}{m.unit || ""}
                               </p>
                               {diff != null && diff !== 0 && (
-                                <p className={`text-[10px] ${diff > 0 ? "text-green-600" : "text-red-500"}`}>
+                                <p className={`text-xs ${diff > 0 ? "text-emerald-600" : "text-destructive"}`}>
                                   {diff > 0 ? "+" : ""}{diff}{m.unit || ""}
                                 </p>
                               )}
@@ -698,7 +707,7 @@ export default function NutritionTab({
                         })}
                       </div>
                       {entry.rationale && (
-                        <p className="text-xs text-gray-500 mt-2 bg-gray-50 rounded p-2 leading-relaxed">
+                        <p className="text-xs text-muted-foreground mt-3 bg-secondary/30 rounded-lg p-3 leading-relaxed">
                           {entry.rationale}
                         </p>
                       )}

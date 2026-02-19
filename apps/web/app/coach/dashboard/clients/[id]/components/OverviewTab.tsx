@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import {
   Dumbbell, UtensilsCrossed, Pill, Sparkles, History, ChevronRight,
-  ChevronDown, Eye, Target, Pin, BarChart3, X,
+  ChevronDown, Eye, Target, Pin, BarChart3, X, ArrowRight,
 } from "lucide-react"
 import {
   generateClientSummary,
@@ -31,7 +31,6 @@ const AI_TYPE_LABELS: Record<AIGenerationType, string> = {
 
 interface OverviewTabProps {
   clientId: string
-  // Status card data
   clientPrograms: any[]
   nutritionTargets: {
     daily_calories: number
@@ -40,7 +39,6 @@ interface OverviewTabProps {
     daily_fat_grams: number
   } | null
   supplements: any[]
-  // Goals & notes (read-only summaries)
   activeGoals: Array<{ id: string; title: string; target_date?: string }>
   pinnedNotes: Array<{ id: string; content: string }>
   onNavigateToTab: (tab: string) => void
@@ -55,23 +53,19 @@ export default function OverviewTab({
   pinnedNotes,
   onNavigateToTab,
 }: OverviewTabProps) {
-  // AI Client Summary (Cockpit) state
   const [aiCockpitResult, setAiCockpitResult] = useState<AIClientSummaryResult | null>(null)
   const [aiCockpitLoading, setAiCockpitLoading] = useState(false)
   const [aiCockpitError, setAiCockpitError] = useState<string | null>(null)
 
-  // AI Weekly Review state
   const [aiReviewResult, setAiReviewResult] = useState<AIWeeklyReviewResult | null>(null)
   const [aiReviewLoading, setAiReviewLoading] = useState(false)
   const [aiReviewError, setAiReviewError] = useState<string | null>(null)
   const [aiReviewLogId, setAiReviewLogId] = useState<string | undefined>(undefined)
 
-  // AI Generation Logs state
   const [aiLogs, setAiLogs] = useState<AIGenerationLog[]>([])
   const [aiLogsExpanded, setAiLogsExpanded] = useState(false)
   const [selectedLog, setSelectedLog] = useState<AIGenerationLog | null>(null)
 
-  // Load AI generation logs on mount
   useEffect(() => {
     getAIGenerationLogs(clientId, { limit: 30 })
       .then((res) => {
@@ -86,7 +80,6 @@ export default function OverviewTab({
     })
   }
 
-  // --- AI Cockpit handler ---
   const handleGenerateCockpit = async () => {
     setAiCockpitLoading(true)
     setAiCockpitError(null)
@@ -111,7 +104,6 @@ export default function OverviewTab({
     }
   }
 
-  // --- AI Weekly Review handler ---
   const handleGenerateReview = async () => {
     setAiReviewLoading(true)
     setAiReviewError(null)
@@ -139,18 +131,17 @@ export default function OverviewTab({
     }
   }
 
-  // --- Type config for log icons ---
   const typeConfig: Record<string, { icon: any; color: string; bg: string }> = {
-    training_program: { icon: Dumbbell, color: "text-indigo-600", bg: "bg-indigo-50" },
-    nutrition_plan: { icon: UtensilsCrossed, color: "text-orange-600", bg: "bg-orange-50" },
-    weekly_review: { icon: BarChart3, color: "text-blue-600", bg: "bg-blue-50" },
+    training_program: { icon: Dumbbell, color: "text-evotion-primary", bg: "bg-evotion-primary/10" },
+    nutrition_plan: { icon: UtensilsCrossed, color: "text-amber-600", bg: "bg-amber-50" },
+    weekly_review: { icon: BarChart3, color: "text-evotion-primary", bg: "bg-evotion-primary/10" },
     supplement_analysis: { icon: Pill, color: "text-emerald-600", bg: "bg-emerald-50" },
-    client_summary: { icon: Sparkles, color: "text-purple-600", bg: "bg-purple-50" },
+    client_summary: { icon: Sparkles, color: "text-evotion-primary", bg: "bg-evotion-primary/10" },
   }
 
   return (
     <div className="space-y-6">
-      {/* ========== 1. AI Client Summary (Cockpit) ========== */}
+      {/* AI Client Summary */}
       {!aiCockpitResult && (
         <AIGeneratorBanner
           title="AI Client Samenvatting"
@@ -168,13 +159,21 @@ export default function OverviewTab({
         <AIClientCockpit result={aiCockpitResult} onClose={() => setAiCockpitResult(null)} />
       )}
 
-      {/* ========== 2. Status Summary Cards ========== */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {/* Status Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Active Training Program */}
-        <div className="bg-white rounded-xl border p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Dumbbell className="w-4 h-4 text-[#1e1839]" />
-            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Actief Programma</span>
+        <button
+          onClick={() => onNavigateToTab("training")}
+          className="bg-card rounded-xl border border-border p-5 text-left hover:border-evotion-primary/20 hover:shadow-sm transition group"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-evotion-primary/5">
+                <Dumbbell className="w-4 h-4 text-evotion-primary" />
+              </div>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actief Programma</span>
+            </div>
+            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-evotion-primary transition" />
           </div>
           {clientPrograms.filter((p: any) => p.status?.toLowerCase() === "active").length > 0 ? (
             clientPrograms
@@ -182,10 +181,10 @@ export default function OverviewTab({
               .slice(0, 1)
               .map((p: any) => (
                 <div key={p.id}>
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-foreground">
                     {p.training_programs?.name || "Programma"}
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Sinds{" "}
                     {new Date(p.start_date).toLocaleDateString("nl-NL", {
                       day: "numeric",
@@ -195,40 +194,62 @@ export default function OverviewTab({
                 </div>
               ))
           ) : (
-            <p className="text-xs text-gray-400">Geen actief programma</p>
+            <div>
+              <p className="text-sm text-muted-foreground">Geen actief programma</p>
+              <p className="text-xs text-evotion-primary mt-1 group-hover:underline">Programma toewijzen</p>
+            </div>
           )}
-        </div>
+        </button>
 
         {/* Nutrition Targets */}
-        <div className="bg-white rounded-xl border p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <UtensilsCrossed className="w-4 h-4 text-[#1e1839]" />
-            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Voedingsdoelen</span>
+        <button
+          onClick={() => onNavigateToTab("voeding")}
+          className="bg-card rounded-xl border border-border p-5 text-left hover:border-evotion-primary/20 hover:shadow-sm transition group"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-amber-50">
+                <UtensilsCrossed className="w-4 h-4 text-amber-600" />
+              </div>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Voedingsdoelen</span>
+            </div>
+            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-evotion-primary transition" />
           </div>
           {nutritionTargets ? (
             <div>
-              <p className="text-sm font-medium text-gray-900">{nutritionTargets.daily_calories} kcal</p>
-              <p className="text-xs text-gray-500 mt-0.5">
-                E{nutritionTargets.daily_protein_grams}g · K{nutritionTargets.daily_carbs_grams}g · V{nutritionTargets.daily_fat_grams}g
+              <p className="text-sm font-medium text-foreground">{nutritionTargets.daily_calories} kcal</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                E{nutritionTargets.daily_protein_grams}g / K{nutritionTargets.daily_carbs_grams}g / V{nutritionTargets.daily_fat_grams}g
               </p>
             </div>
           ) : (
-            <p className="text-xs text-gray-400">Niet ingesteld</p>
+            <div>
+              <p className="text-sm text-muted-foreground">Niet ingesteld</p>
+              <p className="text-xs text-evotion-primary mt-1 group-hover:underline">Targets instellen</p>
+            </div>
           )}
-        </div>
+        </button>
 
         {/* Active Supplements */}
-        <div className="bg-white rounded-xl border p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Pill className="w-4 h-4 text-[#1e1839]" />
-            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Supplementen</span>
+        <button
+          onClick={() => onNavigateToTab("voeding")}
+          className="bg-card rounded-xl border border-border p-5 text-left hover:border-evotion-primary/20 hover:shadow-sm transition group"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-emerald-50">
+                <Pill className="w-4 h-4 text-emerald-600" />
+              </div>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Supplementen</span>
+            </div>
+            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-evotion-primary transition" />
           </div>
           {supplements.filter((s: any) => s.is_active).length > 0 ? (
             <div>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-sm font-medium text-foreground">
                 {supplements.filter((s: any) => s.is_active).length} actief
               </p>
-              <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
                 {supplements
                   .filter((s: any) => s.is_active)
                   .map((s: any) => s.name)
@@ -236,12 +257,15 @@ export default function OverviewTab({
               </p>
             </div>
           ) : (
-            <p className="text-xs text-gray-400">Geen supplementen</p>
+            <div>
+              <p className="text-sm text-muted-foreground">Geen supplementen</p>
+              <p className="text-xs text-evotion-primary mt-1 group-hover:underline">Supplement toevoegen</p>
+            </div>
           )}
-        </div>
+        </button>
       </div>
 
-      {/* ========== 3. AI Weekly Review ========== */}
+      {/* AI Weekly Review */}
       {!aiReviewResult && (
         <AIGeneratorBanner
           title="AI Wekelijkse Review"
@@ -264,40 +288,37 @@ export default function OverviewTab({
           }}
           clientId={clientId}
           reviewLogId={aiReviewLogId}
-          onRecommendationApplied={() => {
-            // Parent can pass a reload callback if needed; for now refresh logs
-            refreshLogs()
-          }}
+          onRecommendationApplied={() => refreshLogs()}
         />
       )}
 
-      {/* ========== 4. Coaching Timeline ========== */}
+      {/* Coaching Timeline */}
       <CoachingTimeline clientId={clientId} />
 
-      {/* ========== 5. AI Generation History ========== */}
+      {/* AI Generation History */}
       {aiLogs.length > 0 && (
-        <div className="bg-white rounded-xl border">
+        <div className="bg-card rounded-xl border border-border">
           <button
             onClick={() => setAiLogsExpanded(!aiLogsExpanded)}
-            className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition rounded-xl"
+            className="w-full flex items-center justify-between p-5 hover:bg-secondary/50 transition rounded-xl"
           >
-            <div className="flex items-center gap-2">
-              <History className="w-4 h-4 text-gray-400" />
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            <div className="flex items-center gap-2.5">
+              <History className="w-4 h-4 text-muted-foreground" />
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 AI Generatie Historie
               </span>
-              <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">
+              <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full font-medium">
                 {aiLogs.length}
               </span>
             </div>
             {aiLogsExpanded ? (
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
             ) : (
-              <ChevronRight className="w-4 h-4 text-gray-400" />
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
             )}
           </button>
           {aiLogsExpanded && (
-            <div className="border-t px-4 pb-4 space-y-1.5">
+            <div className="border-t border-border px-5 pb-5 space-y-1.5">
               {aiLogs.map((log) => {
                 const cfg = typeConfig[log.generation_type] || typeConfig.client_summary
                 const LogIcon = cfg.icon
@@ -306,29 +327,27 @@ export default function OverviewTab({
                   <div key={log.id}>
                     <button
                       onClick={() => setSelectedLog(isSelected ? null : log)}
-                      className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-left transition ${
+                      className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition ${
                         isSelected
-                          ? "bg-[#1e1839]/[0.04] border border-[#1e1839]/10"
-                          : "hover:bg-gray-50"
+                          ? "bg-evotion-primary/5 border border-evotion-primary/10"
+                          : "hover:bg-secondary/50"
                       }`}
                     >
-                      <div
-                        className={`w-7 h-7 rounded-md ${cfg.bg} flex items-center justify-center shrink-0`}
-                      >
-                        <LogIcon className={`w-3.5 h-3.5 ${cfg.color}`} />
+                      <div className={`w-8 h-8 rounded-lg ${cfg.bg} flex items-center justify-center shrink-0`}>
+                        <LogIcon className={`w-4 h-4 ${cfg.color}`} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium text-gray-900">
+                          <span className="text-xs font-medium text-foreground">
                             {AI_TYPE_LABELS[log.generation_type as AIGenerationType] || log.generation_type}
                           </span>
                           {log.title && (
-                            <span className="text-[10px] text-gray-400 truncate">
-                              — {log.title}
+                            <span className="text-xs text-muted-foreground truncate">
+                              -- {log.title}
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] text-gray-400">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                           <span>
                             {new Date(log.created_at).toLocaleDateString("nl-NL", {
                               day: "numeric",
@@ -337,71 +356,49 @@ export default function OverviewTab({
                               minute: "2-digit",
                             })}
                           </span>
-                          {log.model && <span>· {log.model}</span>}
-                          {log.tokens_used && <span>· {log.tokens_used} tokens</span>}
+                          {log.model && <span>/ {log.model}</span>}
+                          {log.tokens_used && <span>/ {log.tokens_used} tokens</span>}
                           {log.rag_used && (
-                            <span className="text-emerald-500 font-medium">RAG</span>
+                            <span className="text-emerald-600 font-medium">RAG</span>
                           )}
                         </div>
                       </div>
-                      <Eye
-                        className={`w-3.5 h-3.5 shrink-0 ${
-                          isSelected ? "text-[#1e1839]" : "text-gray-300"
-                        }`}
-                      />
+                      <Eye className={`w-4 h-4 shrink-0 ${isSelected ? "text-evotion-primary" : "text-muted-foreground/30"}`} />
                     </button>
                     {isSelected && (
-                      <div className="ml-10 mt-1 mb-2 p-3 bg-gray-50 rounded-lg border text-xs text-gray-700 space-y-3 max-h-[400px] overflow-y-auto">
-                        {/* === WEEKLY REVIEW === */}
+                      <div className="ml-11 mt-1 mb-2 p-4 bg-secondary/50 rounded-lg border border-border text-xs text-foreground/80 space-y-3 max-h-[400px] overflow-y-auto">
+                        {/* WEEKLY REVIEW */}
                         {log.generation_type === "weekly_review" && (
                           <>
                             {log.result?.summary && (
-                              <p className="font-medium">{log.result.summary}</p>
+                              <p className="font-medium text-foreground">{log.result.summary}</p>
                             )}
                             {log.result?.complianceAnalysis && (
-                              <div className="space-y-1">
-                                <strong>Naleving:</strong>
+                              <div className="space-y-1.5">
+                                <strong className="text-foreground">Naleving:</strong>
                                 {log.result.complianceAnalysis.training && (
-                                  <p>
-                                    <span className="text-indigo-600 font-medium">Training:</span>{" "}
-                                    {log.result.complianceAnalysis.training}
-                                  </p>
+                                  <p><span className="text-evotion-primary font-medium">Training:</span> {log.result.complianceAnalysis.training}</p>
                                 )}
                                 {log.result.complianceAnalysis.nutrition && (
-                                  <p>
-                                    <span className="text-orange-600 font-medium">Voeding:</span>{" "}
-                                    {log.result.complianceAnalysis.nutrition}
-                                  </p>
+                                  <p><span className="text-amber-600 font-medium">Voeding:</span> {log.result.complianceAnalysis.nutrition}</p>
                                 )}
                                 {log.result.complianceAnalysis.checkIns && (
-                                  <p>
-                                    <span className="text-blue-600 font-medium">Check-ins:</span>{" "}
-                                    {log.result.complianceAnalysis.checkIns}
-                                  </p>
+                                  <p><span className="text-evotion-primary font-medium">Check-ins:</span> {log.result.complianceAnalysis.checkIns}</p>
                                 )}
                               </div>
                             )}
                             {log.result?.progressAnalysis && (
                               <div>
-                                <strong>Voortgang:</strong>
+                                <strong className="text-foreground">Voortgang:</strong>
                                 <p className="mt-0.5">{log.result.progressAnalysis}</p>
                               </div>
                             )}
                             {log.result?.flaggedConcerns?.length > 0 && (
                               <div>
-                                <strong>Aandachtspunten:</strong>
-                                <ul className="list-disc pl-4 mt-1 space-y-0.5">
+                                <strong className="text-foreground">Aandachtspunten:</strong>
+                                <ul className="list-disc pl-4 mt-1.5 space-y-1">
                                   {log.result.flaggedConcerns.map((c: any, i: number) => (
-                                    <li
-                                      key={i}
-                                      className={
-                                        c.severity === "critical"
-                                          ? "text-red-600"
-                                          : c.severity === "warning"
-                                          ? "text-amber-600"
-                                          : "text-blue-600"
-                                      }
-                                    >
+                                    <li key={i} className={c.severity === "critical" ? "text-destructive" : c.severity === "warning" ? "text-amber-600" : "text-evotion-primary"}>
                                       [{c.area}] {c.description}
                                     </li>
                                   ))}
@@ -410,17 +407,12 @@ export default function OverviewTab({
                             )}
                             {log.result?.recommendations?.length > 0 && (
                               <div>
-                                <strong>Aanbevelingen:</strong>
-                                <ul className="list-disc pl-4 mt-1 space-y-1">
+                                <strong className="text-foreground">Aanbevelingen:</strong>
+                                <ul className="list-disc pl-4 mt-1.5 space-y-1">
                                   {log.result.recommendations.map((r: any, i: number) => (
                                     <li key={i}>
                                       <span className="font-medium">[{r.area}]</span> {r.action}
-                                      {r.rationale && (
-                                        <span className="text-gray-400 block ml-0">
-                                          {" "}
-                                          {r.rationale}
-                                        </span>
-                                      )}
+                                      {r.rationale && <span className="text-muted-foreground block">{r.rationale}</span>}
                                     </li>
                                   ))}
                                 </ul>
@@ -429,38 +421,25 @@ export default function OverviewTab({
                           </>
                         )}
 
-                        {/* === CLIENT SUMMARY === */}
+                        {/* CLIENT SUMMARY */}
                         {log.generation_type === "client_summary" && (
                           <>
                             {log.result?.overallAssessment && (
-                              <p className="font-medium">{log.result.overallAssessment}</p>
+                              <p className="font-medium text-foreground">{log.result.overallAssessment}</p>
                             )}
                             {log.result?.trainingStatus?.keyInsight && (
-                              <p>
-                                <span className="text-indigo-600 font-medium">Training:</span>{" "}
-                                {log.result.trainingStatus.currentProgram &&
-                                  `${log.result.trainingStatus.currentProgram} — `}
-                                {log.result.trainingStatus.keyInsight}
-                              </p>
+                              <p><span className="text-evotion-primary font-medium">Training:</span> {log.result.trainingStatus.currentProgram && `${log.result.trainingStatus.currentProgram} -- `}{log.result.trainingStatus.keyInsight}</p>
                             )}
                             {log.result?.nutritionStatus?.keyInsight && (
-                              <p>
-                                <span className="text-orange-600 font-medium">Voeding:</span>{" "}
-                                {log.result.nutritionStatus.currentTargets &&
-                                  `${log.result.nutritionStatus.currentTargets} — `}
-                                {log.result.nutritionStatus.keyInsight}
-                              </p>
+                              <p><span className="text-amber-600 font-medium">Voeding:</span> {log.result.nutritionStatus.currentTargets && `${log.result.nutritionStatus.currentTargets} -- `}{log.result.nutritionStatus.keyInsight}</p>
                             )}
                             {log.result?.supplementStatus && (
-                              <p>
-                                <span className="text-emerald-600 font-medium">Supplementen:</span>{" "}
-                                {log.result.supplementStatus}
-                              </p>
+                              <p><span className="text-emerald-600 font-medium">Supplementen:</span> {log.result.supplementStatus}</p>
                             )}
                             {log.result?.progressHighlights?.length > 0 && (
                               <div>
-                                <strong>Highlights:</strong>
-                                <ul className="list-disc pl-4 mt-1 space-y-0.5">
+                                <strong className="text-foreground">Highlights:</strong>
+                                <ul className="list-disc pl-4 mt-1.5 space-y-0.5">
                                   {log.result.progressHighlights.map((h: string, i: number) => (
                                     <li key={i}>{h}</li>
                                   ))}
@@ -469,19 +448,10 @@ export default function OverviewTab({
                             )}
                             {log.result?.priorityActions?.length > 0 && (
                               <div>
-                                <strong>Prioriteiten:</strong>
-                                <ul className="list-disc pl-4 mt-1 space-y-0.5">
+                                <strong className="text-foreground">Prioriteiten:</strong>
+                                <ul className="list-disc pl-4 mt-1.5 space-y-0.5">
                                   {log.result.priorityActions.map((a: any, i: number) => (
-                                    <li
-                                      key={i}
-                                      className={
-                                        a.urgency === "high"
-                                          ? "text-red-600 font-medium"
-                                          : a.urgency === "medium"
-                                          ? "text-amber-600"
-                                          : ""
-                                      }
-                                    >
+                                    <li key={i} className={a.urgency === "high" ? "text-destructive font-medium" : a.urgency === "medium" ? "text-amber-600" : ""}>
                                       [{a.area}] {a.action}
                                     </li>
                                   ))}
@@ -491,44 +461,34 @@ export default function OverviewTab({
                           </>
                         )}
 
-                        {/* === NUTRITION PLAN === */}
+                        {/* NUTRITION PLAN */}
                         {log.generation_type === "nutrition_plan" && (
                           <>
                             {log.result?.targets && (
-                              <p className="font-medium">
-                                Targets: {log.result.targets.calories} kcal ·{" "}
-                                {log.result.targets.proteinGrams}g eiwit ·{" "}
-                                {log.result.targets.carbsGrams}g koolh ·{" "}
-                                {log.result.targets.fatGrams}g vet
+                              <p className="font-medium text-foreground">
+                                Targets: {log.result.targets.calories} kcal / {log.result.targets.proteinGrams}g eiwit / {log.result.targets.carbsGrams}g koolh / {log.result.targets.fatGrams}g vet
                               </p>
                             )}
                             {log.result?.rationale && <p>{log.result.rationale}</p>}
                             {log.result?.supplementAdvice && (
-                              <p>
-                                <span className="text-emerald-600 font-medium">Supplementen:</span>{" "}
-                                {log.result.supplementAdvice}
-                              </p>
+                              <p><span className="text-emerald-600 font-medium">Supplementen:</span> {log.result.supplementAdvice}</p>
                             )}
                           </>
                         )}
 
-                        {/* === TRAINING PROGRAM === */}
+                        {/* TRAINING PROGRAM */}
                         {log.generation_type === "training_program" && (
                           <>
                             {log.result?.program?.name && (
-                              <p className="font-medium">{log.result.program.name}</p>
+                              <p className="font-medium text-foreground">{log.result.program.name}</p>
                             )}
-                            {log.result?.program?.description && (
-                              <p>{log.result.program.description}</p>
-                            )}
+                            {log.result?.program?.description && <p>{log.result.program.description}</p>}
                             {log.result?.program?.blocks?.length > 0 && (
                               <div>
-                                <strong>Blokken:</strong>
-                                <ul className="list-disc pl-4 mt-1 space-y-0.5">
+                                <strong className="text-foreground">Blokken:</strong>
+                                <ul className="list-disc pl-4 mt-1.5 space-y-0.5">
                                   {log.result.program.blocks.map((b: any, i: number) => (
-                                    <li key={i}>
-                                      {b.name} — {b.days?.length || 0} dagen
-                                    </li>
+                                    <li key={i}>{b.name} -- {b.days?.length || 0} dagen</li>
                                   ))}
                                 </ul>
                               </div>
@@ -536,40 +496,31 @@ export default function OverviewTab({
                           </>
                         )}
 
-                        {/* === SUPPLEMENT ANALYSIS === */}
+                        {/* SUPPLEMENT ANALYSIS */}
                         {log.generation_type === "supplement_analysis" && (
                           <>
                             {log.result?.recommendations?.length > 0 && (
                               <div>
-                                <strong>Supplementen:</strong>
-                                <ul className="list-disc pl-4 mt-1 space-y-1">
+                                <strong className="text-foreground">Supplementen:</strong>
+                                <ul className="list-disc pl-4 mt-1.5 space-y-1.5">
                                   {log.result.recommendations.map((s: any, i: number) => (
                                     <li key={i}>
-                                      <span className="font-medium">{s.name}</span> — {s.dosage} ·{" "}
-                                      {s.timing} · {s.frequency}
-                                      {s.rationale && (
-                                        <span className="text-gray-400 block">{s.rationale}</span>
-                                      )}
-                                      {s.interactions && (
-                                        <span className="text-red-500 block">
-                                          Warning: {s.interactions}
-                                        </span>
-                                      )}
+                                      <span className="font-medium">{s.name}</span> -- {s.dosage} / {s.timing} / {s.frequency}
+                                      {s.rationale && <span className="text-muted-foreground block">{s.rationale}</span>}
+                                      {s.interactions && <span className="text-destructive block">Let op: {s.interactions}</span>}
                                     </li>
                                   ))}
                                 </ul>
                               </div>
                             )}
                             {log.result?.generalNotes && (
-                              <p>
-                                <strong>Opmerkingen:</strong> {log.result.generalNotes}
-                              </p>
+                              <p><strong className="text-foreground">Opmerkingen:</strong> {log.result.generalNotes}</p>
                             )}
                           </>
                         )}
 
                         {/* Delete button */}
-                        <div className="flex items-center justify-end gap-2 pt-1 border-t">
+                        <div className="flex items-center justify-end pt-2 border-t border-border">
                           <button
                             onClick={async (e) => {
                               e.stopPropagation()
@@ -579,7 +530,7 @@ export default function OverviewTab({
                                 setSelectedLog(null)
                               }
                             }}
-                            className="text-[10px] text-red-400 hover:text-red-600 transition"
+                            className="text-xs text-destructive/60 hover:text-destructive transition"
                           >
                             Verwijderen
                           </button>
@@ -594,66 +545,67 @@ export default function OverviewTab({
         </div>
       )}
 
-      {/* ========== 6. Active Goals Summary ========== */}
+      {/* Active Goals Summary */}
       {activeGoals.length > 0 && (
-        <div className="bg-white rounded-xl border p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
+        <div className="bg-card rounded-xl border border-border p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Actieve Doelen
             </h3>
             <button
               onClick={() => onNavigateToTab("profiel")}
-              className="text-xs text-[#1e1839] hover:underline"
+              className="text-xs text-evotion-primary font-medium hover:underline"
             >
-              Beheren →
+              Beheren
             </button>
           </div>
           <div className="space-y-2">
-            {activeGoals.map((goal) => (
-              <div
-                key={goal.id}
-                className="flex items-center justify-between p-3 bg-blue-50 rounded-lg"
-              >
-                <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm font-medium text-gray-900">{goal.title}</span>
+            {activeGoals.map((goal) => {
+              const daysLeft = goal.target_date
+                ? Math.max(0, Math.ceil((new Date(goal.target_date).getTime() - Date.now()) / 86400000))
+                : null
+              return (
+                <div
+                  key={goal.id}
+                  className="flex items-center justify-between p-3 bg-evotion-primary/5 rounded-lg"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Target className="w-4 h-4 text-evotion-primary" />
+                    <span className="text-sm font-medium text-foreground">{goal.title}</span>
+                  </div>
+                  {daysLeft !== null && (
+                    <span className={`text-xs font-medium ${daysLeft <= 7 ? "text-amber-600" : "text-muted-foreground"}`}>
+                      {daysLeft} dagen
+                    </span>
+                  )}
                 </div>
-                {goal.target_date && (
-                  <span className="text-xs text-gray-500">
-                    {Math.max(
-                      0,
-                      Math.ceil(
-                        (new Date(goal.target_date).getTime() - Date.now()) / 86400000
-                      )
-                    )}{" "}
-                    dagen
-                  </span>
-                )}
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
 
-      {/* ========== 7. Pinned Notes Summary ========== */}
+      {/* Pinned Notes Summary */}
       {pinnedNotes.length > 0 && (
-        <div className="bg-amber-50 rounded-xl border border-amber-200 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-amber-700 flex items-center gap-1.5">
-              <Pin className="w-4 h-4" /> Vastgepinde Notities
+        <div className="bg-amber-50/50 rounded-xl border border-amber-200/50 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xs font-semibold text-amber-700 flex items-center gap-1.5 uppercase tracking-wider">
+              <Pin className="w-3.5 h-3.5" /> Vastgepinde Notities
             </h3>
             <button
               onClick={() => onNavigateToTab("profiel")}
-              className="text-xs text-[#1e1839] hover:underline"
+              className="text-xs text-evotion-primary font-medium hover:underline"
             >
-              Beheren →
+              Beheren
             </button>
           </div>
-          {pinnedNotes.map((note) => (
-            <p key={note.id} className="text-sm text-amber-900 mb-2">
-              {note.content}
-            </p>
-          ))}
+          <div className="space-y-2">
+            {pinnedNotes.map((note) => (
+              <p key={note.id} className="text-sm text-amber-900 leading-relaxed">
+                {note.content}
+              </p>
+            ))}
+          </div>
         </div>
       )}
     </div>

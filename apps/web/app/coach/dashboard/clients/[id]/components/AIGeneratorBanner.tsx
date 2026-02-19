@@ -28,34 +28,27 @@ export default function AIGeneratorBanner({
   variant = "primary",
   icon,
 }: AIGeneratorBannerProps) {
-  const bgClass =
-    variant === "primary"
-      ? "bg-gradient-to-r from-[#1e1839] to-[#2a2050]"
-      : variant === "secondary"
-      ? "bg-gradient-to-r from-[#1e1839]/80 to-[#2a2050]/80"
-      : "bg-gradient-to-r from-[#1e1839] to-[#2a2050]"
-
   const isCompact = variant === "compact"
 
   return (
     <>
-      <div className={`${bgClass} rounded-xl ${isCompact ? "p-3" : "p-4"} flex items-center justify-between`}>
-        <div className="flex items-center gap-${isCompact ? '2' : '3'}">
+      <div className={`bg-evotion-primary rounded-xl ${isCompact ? "p-3" : "p-5"} flex items-center justify-between`}>
+        <div className={`flex items-center ${isCompact ? "gap-2" : "gap-3"}`}>
           {!isCompact && (
-            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
               {icon || <Sparkles className="w-5 h-5 text-white" />}
             </div>
           )}
-          {isCompact && (icon || <Sparkles className="w-4 h-4 text-white" />)}
+          {isCompact && (icon || <Sparkles className="w-4 h-4 text-white flex-shrink-0" />)}
           <div>
             <h3 className={`${isCompact ? "text-xs" : "text-sm"} font-semibold text-white`}>{title}</h3>
-            <p className={`${isCompact ? "text-[10px]" : "text-xs"} text-white/60`}>{description}</p>
+            <p className={`${isCompact ? "text-xs" : "text-xs"} text-white/60 mt-0.5`}>{description}</p>
           </div>
         </div>
         <button
           onClick={onGenerate}
           disabled={loading}
-          className={`flex items-center gap-${isCompact ? '1.5' : '2'} ${isCompact ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm"} font-medium text-[#1e1839] bg-white rounded-lg hover:bg-gray-100 transition disabled:opacity-50`}
+          className={`flex items-center ${isCompact ? "gap-1.5 px-3 py-1.5 text-xs" : "gap-2 px-4 py-2.5 text-sm"} font-medium text-evotion-primary bg-white rounded-lg hover:bg-white/90 transition disabled:opacity-50 flex-shrink-0`}
         >
           {loading ? (
             <Loader2 className={`${isCompact ? "w-3 h-3" : "w-4 h-4"} animate-spin`} />
@@ -66,22 +59,22 @@ export default function AIGeneratorBanner({
         </button>
       </div>
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 flex items-center justify-between">
+        <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3 text-sm text-destructive flex items-center justify-between">
           <span>{error}</span>
-          <button onClick={onDismissError} className="text-red-400 hover:text-red-600">
+          <button onClick={onDismissError} className="text-destructive/60 hover:text-destructive">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
       {loading && (
-        <div className="bg-white rounded-xl border p-6 animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-2/5 mb-4" />
+        <div className="bg-card rounded-xl border border-border p-6 animate-pulse">
+          <div className="h-4 bg-secondary rounded w-2/5 mb-4" />
           <div className="space-y-3">
-            <div className="h-3 bg-gray-200 rounded w-full" />
-            <div className="h-3 bg-gray-200 rounded w-4/5" />
-            <div className="h-3 bg-gray-200 rounded w-3/5" />
+            <div className="h-3 bg-secondary rounded w-full" />
+            <div className="h-3 bg-secondary rounded w-4/5" />
+            <div className="h-3 bg-secondary rounded w-3/5" />
           </div>
-          <div className="mt-4 text-xs text-gray-400 text-center">AI analyseert data...</div>
+          <div className="mt-4 text-xs text-muted-foreground text-center">AI analyseert data...</div>
         </div>
       )}
     </>

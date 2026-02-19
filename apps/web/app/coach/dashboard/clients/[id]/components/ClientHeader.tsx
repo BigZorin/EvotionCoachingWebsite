@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { ArrowLeft, Clock, X, Check } from "lucide-react"
+import { ArrowLeft, Clock, X, Check, TrendingDown, TrendingUp } from "lucide-react"
 
 interface ClientHeaderProps {
   client: any
@@ -48,24 +48,24 @@ export default function ClientHeader({
 
   return (
     <>
-      <Link href="/coach/dashboard/clients" className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
+      <Link href="/coach/dashboard/clients" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition">
         <ArrowLeft className="w-4 h-4" /> Terug naar clients
       </Link>
 
       {/* Approval Banner */}
       {clientApprovalStatus === "pending" && (
-        <div className="bg-purple-50 border border-purple-200 rounded-xl p-5">
-          <div className="flex items-center justify-between">
+        <div className="bg-evotion-primary/5 border border-evotion-primary/20 rounded-xl p-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-purple-600" />
+              <div className="w-10 h-10 rounded-full bg-evotion-primary/10 flex items-center justify-center flex-shrink-0">
+                <Clock className="w-5 h-5 text-evotion-primary" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-purple-900">Wacht op goedkeuring</h3>
-                <p className="text-xs text-purple-600">Deze client heeft de intake ingevuld en wacht op toegang tot de app.</p>
+                <h3 className="text-sm font-semibold text-foreground">Wacht op goedkeuring</h3>
+                <p className="text-xs text-muted-foreground">Deze client heeft de intake ingevuld en wacht op toegang tot de app.</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               {showRejectInput ? (
                 <div className="flex items-center gap-2">
                   <input
@@ -73,18 +73,18 @@ export default function ClientHeader({
                     placeholder="Reden (optioneel)..."
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
-                    className="px-3 py-2 text-sm border border-red-200 rounded-lg focus:ring-2 focus:ring-red-200 outline-none w-48"
+                    className="px-3 py-2 text-sm border border-destructive/30 rounded-lg bg-background text-foreground focus:ring-2 focus:ring-destructive/20 outline-none w-48"
                   />
                   <button
                     onClick={handleReject}
                     disabled={approvalLoading}
-                    className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 transition"
+                    className="px-4 py-2 text-sm bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 disabled:opacity-50 transition"
                   >
                     Bevestig
                   </button>
                   <button
                     onClick={() => { setShowRejectInput(false); setRejectReason("") }}
-                    className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700"
+                    className="p-2 text-muted-foreground hover:text-foreground"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -94,14 +94,14 @@ export default function ClientHeader({
                   <button
                     onClick={() => setShowRejectInput(true)}
                     disabled={approvalLoading}
-                    className="px-4 py-2 text-sm border border-red-200 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50 transition"
+                    className="px-4 py-2 text-sm border border-destructive/30 text-destructive rounded-lg hover:bg-destructive/5 disabled:opacity-50 transition"
                   >
                     Afwijzen
                   </button>
                   <button
                     onClick={onApprove}
                     disabled={approvalLoading}
-                    className="px-4 py-2 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 transition"
+                    className="px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition"
                   >
                     Goedkeuren
                   </button>
@@ -113,21 +113,21 @@ export default function ClientHeader({
       )}
 
       {clientApprovalStatus === "rejected" && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-5">
-          <div className="flex items-center justify-between">
+        <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                <X className="w-5 h-5 text-red-600" />
+              <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
+                <X className="w-5 h-5 text-destructive" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-red-900">Client afgewezen</h3>
-                <p className="text-xs text-red-600">Deze client heeft geen toegang tot de app.</p>
+                <h3 className="text-sm font-semibold text-foreground">Client afgewezen</h3>
+                <p className="text-xs text-muted-foreground">Deze client heeft geen toegang tot de app.</p>
               </div>
             </div>
             <button
               onClick={onApprove}
               disabled={approvalLoading}
-              className="px-4 py-2 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 transition"
+              className="px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition flex-shrink-0"
             >
               Alsnog goedkeuren
             </button>
@@ -136,40 +136,54 @@ export default function ClientHeader({
       )}
 
       {/* Client Header */}
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-        <div className="p-6 flex items-start justify-between">
+      <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+        <div className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="w-16 h-16 rounded-full object-cover" />
+              <img src={profile.avatar_url} alt="" className="w-16 h-16 rounded-full object-cover ring-2 ring-border" />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-[#1e1839] flex items-center justify-center text-2xl font-bold text-white">
+              <div className="w-16 h-16 rounded-full bg-evotion-primary flex items-center justify-center text-2xl font-bold text-white ring-2 ring-evotion-primary/20">
                 {(clientName[0] || "C").toUpperCase()}
               </div>
             )}
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{clientName}</h1>
-              <p className="text-sm text-gray-500">{client.email}</p>
+              <h1 className="text-2xl font-bold text-foreground">{clientName}</h1>
+              <p className="text-sm text-muted-foreground">{client.email}</p>
             </div>
           </div>
           {lastActive && (
             <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
-              (Date.now() - lastActive.getTime()) < 86400000 ? "bg-green-50 text-green-700" :
-              (Date.now() - lastActive.getTime()) < 7 * 86400000 ? "bg-yellow-50 text-yellow-700" : "bg-red-50 text-red-700"
+              (Date.now() - lastActive.getTime()) < 86400000 ? "bg-emerald-50 text-emerald-700" :
+              (Date.now() - lastActive.getTime()) < 7 * 86400000 ? "bg-amber-50 text-amber-700" : "bg-destructive/10 text-destructive"
             }`}>
               <div className={`w-2 h-2 rounded-full ${
-                (Date.now() - lastActive.getTime()) < 86400000 ? "bg-green-500" :
-                (Date.now() - lastActive.getTime()) < 7 * 86400000 ? "bg-yellow-500" : "bg-red-500"
+                (Date.now() - lastActive.getTime()) < 86400000 ? "bg-emerald-500" :
+                (Date.now() - lastActive.getTime()) < 7 * 86400000 ? "bg-amber-500" : "bg-destructive"
               }`} />
               {(Date.now() - lastActive.getTime()) < 86400000 ? "Vandaag actief" : `${Math.floor((Date.now() - lastActive.getTime()) / 86400000)}d geleden`}
             </div>
           )}
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 border-t divide-x bg-gray-50/50">
-          <div className="px-4 py-3 text-center"><p className="text-[10px] text-gray-400 uppercase tracking-wider">Weken</p><p className="text-lg font-bold text-gray-900">{weeksSinceJoined}</p></div>
-          <div className="px-4 py-3 text-center"><p className="text-[10px] text-gray-400 uppercase tracking-wider">Gewicht</p><p className="text-lg font-bold text-gray-900">{latestWeight ? `${latestWeight} kg` : "\u2014"}</p>{weightDiff && <p className={`text-[10px] ${Number(weightDiff) < 0 ? "text-green-600" : "text-orange-500"}`}>{Number(weightDiff) > 0 ? "+" : ""}{weightDiff} kg</p>}</div>
-          <div className="px-4 py-3 text-center"><p className="text-[10px] text-gray-400 uppercase tracking-wider">Streak</p><p className="text-lg font-bold text-gray-900">{streak}d</p></div>
-          <div className="px-4 py-3 text-center"><p className="text-[10px] text-gray-400 uppercase tracking-wider">Compliance</p><p className="text-lg font-bold text-gray-900">{dailyCompliance}/30</p></div>
-          <div className="px-4 py-3 text-center"><p className="text-[10px] text-gray-400 uppercase tracking-wider">Doelen</p><p className="text-lg font-bold text-gray-900">{activeGoalsCount} actief</p></div>
+
+        {/* Stats bar */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 border-t border-border">
+          {[
+            { label: "Weken", value: String(weeksSinceJoined), sub: null },
+            { label: "Gewicht", value: latestWeight ? `${latestWeight} kg` : "\u2014", sub: weightDiff },
+            { label: "Streak", value: `${streak}d`, sub: null },
+            { label: "Compliance", value: `${dailyCompliance}/30`, sub: null },
+            { label: "Doelen", value: `${activeGoalsCount} actief`, sub: null },
+          ].map((stat, i) => (
+            <div key={stat.label} className={`px-5 py-4 text-center ${i > 0 ? "border-l border-border" : ""} ${i >= 2 ? "hidden sm:block" : ""}`}>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{stat.label}</p>
+              <p className="text-lg font-bold text-foreground">{stat.value}</p>
+              {stat.sub && (
+                <p className={`text-xs mt-0.5 ${Number(stat.sub) < 0 ? "text-emerald-600" : "text-amber-600"}`}>
+                  {Number(stat.sub) > 0 ? "+" : ""}{stat.sub} kg
+                </p>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </>
