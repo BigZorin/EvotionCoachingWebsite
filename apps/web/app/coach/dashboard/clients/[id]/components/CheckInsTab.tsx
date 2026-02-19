@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import {
-  Calendar, ClipboardList, Weight, Smile, Moon, MessageSquare, Send, Check,
+  Calendar, ClipboardList, Weight, Smile, Moon, MessageSquare, Send, Check, Settings,
 } from "lucide-react"
 import { submitCoachFeedback, updateClientCheckInDay } from "@/app/actions/admin-clients"
 import {
@@ -41,6 +41,7 @@ export default function CheckInsTab({
   const [daySaved, setDaySaved] = useState(false)
   const [templateAssigning, setTemplateAssigning] = useState(false)
   const [clientTemplateAssignments, setClientTemplateAssignments] = useState<any[]>(initialTemplateAssignments)
+  const [showSettings, setShowSettings] = useState(false)
 
   const handleFeedback = async (checkInId: string, type: "daily" | "weekly") => {
     const text = feedbackText[checkInId]
@@ -79,7 +80,23 @@ export default function CheckInsTab({
 
       {/* WEEKLY SUB-TAB */}
       {activeSubTab === "weekly" && (
-        <div className="space-y-6">
+        <div className="space-y-4">
+          {/* Settings toggle */}
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+              showSettings
+                ? "bg-evotion-primary/5 text-evotion-primary"
+                : "bg-muted/50 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Settings className="w-3.5 h-3.5" />
+            Instellingen
+          </button>
+
+          {/* Collapsible settings section */}
+          {showSettings && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
           {/* Check-in Template Assignment */}
           <div className="bg-card rounded-xl border border-border p-5">
             <div className="flex items-center justify-between mb-4">
@@ -181,6 +198,10 @@ export default function CheckInsTab({
               ))}
             </div>
           </div>
+
+          {/* end collapsible settings */}
+            </div>
+          )}
 
           {/* Weekly Check-ins List */}
           <div>
