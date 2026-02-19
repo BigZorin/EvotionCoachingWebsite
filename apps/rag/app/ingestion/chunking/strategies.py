@@ -1,6 +1,9 @@
+import re
 from dataclasses import dataclass
 
 from app.config import settings
+
+_TIMESTAMP_RE = re.compile(r"\[(\d{1,2}:\d{2}(?::\d{2})?)\]")
 
 
 @dataclass
@@ -156,6 +159,41 @@ class TabularChunker:
         return self.recursive.chunk(text, base_metadata)
 
 
+class YouTubeChunker:
+    """Chunker for YouTube transcripts that extracts timestamp metadata."""
+
+    def __init__(self):
+        self.recursive = RecursiveCharacterChunker()
+
+    def chunk(self, text: str, base_metadata: dict | None = None) -> list[Chunk]:
+        chunks = self.recursive.chunk(text, base_metadata)
+
+        for chunk in chunks:
+            match = _TIMESTAMP_RE.search(chunk.content)
+            if match:
+                ts = match.group(1)
+                chunk.metadata["start_time"] = ts
+                seconds = _timestamp_to_seconds(ts)
+                chunk.metadata["start_seconds"] = seconds
+                video_id = chunk.metadata.get("video_id", "")
+                if video_id:
+                    chunk.metadata["youtube_link"] = (
+                        f"https://www.youtube.com/watch?v={video_id}&t={seconds}"
+                    )
+
+        return chunks
+
+
+def _timestamp_to_seconds(ts: str) -> int:
+    """Convert MM:SS or H:MM:SS to seconds."""
+    parts = ts.split(":")
+    if len(parts) == 3:
+        return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+    if len(parts) == 2:
+        return int(parts[0]) * 60 + int(parts[1])
+    return 0
+
+
 def get_chunker(file_type: str) -> RecursiveCharacterChunker:
     """Get the appropriate chunker based on file type."""
     chunkers = {
@@ -164,5 +202,6 @@ def get_chunker(file_type: str) -> RecursiveCharacterChunker:
         "csv": TabularChunker(),
         "xlsx": TabularChunker(),
         "xls": TabularChunker(),
+        "youtube": YouTubeChunker(),
     }
     return chunkers.get(file_type, RecursiveCharacterChunker())

@@ -40,14 +40,17 @@ OLLAMA_EMBEDDING_DIM = 768
 FALLBACK_EMBEDDING_DIM = 384
 
 
+EMBED_BATCH_SIZE = 50  # Max texts per Ollama batch call to avoid OOM
+
+
 def embed_text(text: str) -> list[float]:
     try:
         client = _get_ollama_client()
-        response = client.embeddings(
+        response = client.embed(
             model=settings.embedding_model,
-            prompt=text,
+            input=text,
         )
-        return response["embedding"]
+        return response["embeddings"][0]
     except Exception as e:
         logger.error(
             f"Ollama embedding failed: {e}. "
@@ -62,16 +65,23 @@ def embed_text(text: str) -> list[float]:
 
 
 def embed_batch(texts: list[str]) -> list[list[float]]:
+    """Batch-embed texts using Ollama's native batch API.
+
+    Processes in batches of EMBED_BATCH_SIZE to avoid memory issues.
+    """
     try:
         client = _get_ollama_client()
-        embeddings = []
-        for text in texts:
-            response = client.embeddings(
+        all_embeddings = []
+
+        for i in range(0, len(texts), EMBED_BATCH_SIZE):
+            batch = texts[i:i + EMBED_BATCH_SIZE]
+            response = client.embed(
                 model=settings.embedding_model,
-                prompt=text,
+                input=batch,
             )
-            embeddings.append(response["embedding"])
-        return embeddings
+            all_embeddings.extend(response["embeddings"])
+
+        return all_embeddings
     except Exception as e:
         logger.error(
             f"Ollama batch embedding failed: {e}. "
@@ -86,7 +96,7 @@ def embed_batch(texts: list[str]) -> list[list[float]]:
 def check_ollama_embeddings() -> bool:
     try:
         client = _get_ollama_client()
-        client.embeddings(model=settings.embedding_model, prompt="test")
+        client.embed(model=settings.embedding_model, input="test")
         return True
     except Exception:
         return False

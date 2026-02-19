@@ -1,5 +1,6 @@
 import hashlib
 import logging
+import re
 import uuid
 from pathlib import Path
 
@@ -10,6 +11,8 @@ from app.ingestion.processors.registry import registry
 
 logger = logging.getLogger(__name__)
 
+_PAGE_MARKER_RE = re.compile(r"<!-- PAGE (\d+) -->")
+
 
 def compute_file_hash(file_path: Path) -> str:
     sha256 = hashlib.sha256()
@@ -17,6 +20,68 @@ def compute_file_hash(file_path: Path) -> str:
         for block in iter(lambda: f.read(8192), b""):
             sha256.update(block)
     return sha256.hexdigest()
+
+
+def _check_duplicate(content_hash: str, collection_name: str) -> dict | None:
+    """Check if a document with this content_hash already exists.
+
+    Returns existing document info if duplicate, None otherwise.
+    """
+    try:
+        collection = get_or_create_collection(collection_name)
+        if collection.count() == 0:
+            return None
+
+        results = collection.get(
+            where={"content_hash": content_hash},
+            limit=1,
+            include=["metadatas"],
+        )
+
+        if results["ids"]:
+            meta = results["metadatas"][0]
+            return {
+                "document_id": meta.get("document_id", ""),
+                "source_file": meta.get("source_file", ""),
+                "total_chunks": meta.get("total_chunks", 0),
+            }
+        return None
+    except Exception as e:
+        logger.warning(f"Duplicate check failed: {e}")
+        return None
+
+
+def _assign_page_numbers(chunks: list[Chunk], full_text: str) -> None:
+    """Assign page_number to each chunk based on <!-- PAGE N --> markers.
+
+    Finds each chunk's position in the full text and determines which
+    page marker most recently preceded it. Then strips markers from
+    chunk content so they don't appear in stored text.
+    """
+    markers = [(m.start(), int(m.group(1))) for m in _PAGE_MARKER_RE.finditer(full_text)]
+    if not markers:
+        return
+
+    for chunk in chunks:
+        # Find chunk position in the full text
+        clean = _PAGE_MARKER_RE.sub("", chunk.content).strip()
+        search = clean[:80]
+        pos = full_text.find(search)
+        if pos == -1:
+            search = clean[:40]
+            pos = full_text.find(search)
+
+        if pos >= 0:
+            page_num = markers[0][1]
+            for marker_pos, marker_page in markers:
+                if marker_pos <= pos:
+                    page_num = marker_page
+                else:
+                    break
+            chunk.metadata["page_number"] = page_num
+
+        # Strip page markers from stored text
+        chunk.content = _PAGE_MARKER_RE.sub("", chunk.content).strip()
 
 
 def ingest_file(
@@ -38,6 +103,20 @@ def ingest_file(
     document_id = str(uuid.uuid4())
     file_hash = compute_file_hash(file_path)
 
+    # Check for duplicate content before expensive processing
+    existing = _check_duplicate(file_hash, collection_name)
+    if existing:
+        logger.info(f"Duplicate detected: {file_path.name} matches document {existing['document_id']}")
+        return {
+            "document_id": existing["document_id"],
+            "filename": file_path.name,
+            "file_type": file_path.suffix,
+            "chunks_created": 0,
+            "collection": collection_name,
+            "content_hash": file_hash,
+            "status": "duplicate",
+        }
+
     logger.info(f"Ingesting {file_path.name} -> collection '{collection_name}'")
 
     # 1. Get processor and extract text
@@ -51,6 +130,11 @@ def ingest_file(
         file_type = block.metadata.get("file_type", "unknown")
         chunker = get_chunker(file_type)
         chunks = chunker.chunk(block.content, base_metadata=block.metadata)
+
+        # For PDFs: assign page numbers from markers, then strip markers
+        if block.metadata.get("has_page_markers"):
+            _assign_page_numbers(chunks, block.content)
+
         all_chunks.extend(chunks)
 
     if not all_chunks:
@@ -131,6 +215,20 @@ def ingest_text_blocks(
     content_hash = hashlib.sha256(
         "".join(b.content for b in text_blocks).encode()
     ).hexdigest()
+
+    # Check for duplicate content
+    existing = _check_duplicate(content_hash, collection_name)
+    if existing:
+        logger.info(f"Duplicate detected: {source_name} matches document {existing['document_id']}")
+        return {
+            "document_id": existing["document_id"],
+            "filename": source_name,
+            "file_type": "url",
+            "chunks_created": 0,
+            "collection": collection_name,
+            "content_hash": content_hash,
+            "status": "duplicate",
+        }
 
     logger.info(f"Ingesting {source_name} -> collection '{collection_name}'")
 
@@ -241,6 +339,10 @@ def _build_embedding_text(content: str, metadata: dict) -> str:
     title = metadata.get("title", "")
     if title and title != source:
         parts.append(f"Titel: {title}")
+
+    page = metadata.get("page_number")
+    if page:
+        parts.append(f"Pagina: {page}")
 
     if parts:
         header = " | ".join(parts)
