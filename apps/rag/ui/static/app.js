@@ -1378,6 +1378,9 @@ function renderFolders(collectionName) {
     f.parent_id === currentFolderId
   );
 
+  // Natural sort so week2 < week10 (not alphabetical)
+  childFolders.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+
   childFolders.forEach(folder => {
     const el = document.createElement('div');
     el.className = 'folder-item';
