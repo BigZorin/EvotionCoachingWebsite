@@ -156,10 +156,10 @@ export default function OverviewTab({
   // Build alerts
   const alerts: { type: "warning" | "info"; icon: any; message: string; action?: string; tab?: string }[] = []
   if (pendingFeedback > 0) {
-    alerts.push({ type: "warning", icon: MessageSquare, message: `${pendingFeedback} check-in(s) zonder feedback`, action: "Bekijk", tab: "coaching" })
+    alerts.push({ type: "warning", icon: MessageSquare, message: `${pendingFeedback} check-in(s) zonder feedback`, action: "Bekijk", tab: "checkins" })
   }
   if (compliancePct < 50) {
-    alerts.push({ type: "warning", icon: AlertTriangle, message: `Lage compliance: ${compliancePct}%`, action: "Bekijk", tab: "coaching" })
+    alerts.push({ type: "warning", icon: AlertTriangle, message: `Lage compliance: ${compliancePct}%`, action: "Bekijk", tab: "checkins" })
   }
   const expiringGoals = activeGoals.filter(g => {
     if (!g.target_date) return false
@@ -167,18 +167,18 @@ export default function OverviewTab({
     return days >= 0 && days <= 7
   })
   if (expiringGoals.length > 0) {
-    alerts.push({ type: "warning", icon: Target, message: `${expiringGoals.length} doel(en) verlopen binnen 7 dagen`, action: "Bekijk", tab: "profiel" })
+    alerts.push({ type: "warning", icon: Target, message: `${expiringGoals.length} doel(en) verlopen binnen 7 dagen`, action: "Bekijk", tab: "notities" })
   }
   if (!hasActiveProgram) {
-    alerts.push({ type: "info", icon: Dumbbell, message: "Geen actief trainingsprogramma", action: "Toewijzen", tab: "coaching" })
+    alerts.push({ type: "info", icon: Dumbbell, message: "Geen actief trainingsprogramma", action: "Toewijzen", tab: "training" })
   }
 
   const typeConfig: Record<string, { icon: any; color: string; bg: string }> = {
-    training_program: { icon: Dumbbell, color: "text-evotion-primary", bg: "bg-evotion-primary/10" },
+    training_program: { icon: Dumbbell, color: "text-primary", bg: "bg-primary/10" },
     nutrition_plan: { icon: UtensilsCrossed, color: "text-amber-600", bg: "bg-amber-50" },
-    weekly_review: { icon: BarChart3, color: "text-evotion-primary", bg: "bg-evotion-primary/10" },
+    weekly_review: { icon: BarChart3, color: "text-primary", bg: "bg-primary/10" },
     supplement_analysis: { icon: Pill, color: "text-emerald-600", bg: "bg-emerald-50" },
-    client_summary: { icon: Sparkles, color: "text-evotion-primary", bg: "bg-evotion-primary/10" },
+    client_summary: { icon: Sparkles, color: "text-primary", bg: "bg-primary/10" },
   }
 
   return (
@@ -208,7 +208,7 @@ export default function OverviewTab({
                   </span>
                 </div>
                 {alert.action && (
-                  <span className="text-xs font-medium text-evotion-primary group-hover:underline flex-shrink-0">
+                  <span className="text-xs font-medium text-primary group-hover:underline flex-shrink-0">
                     {alert.action}
                   </span>
                 )}
@@ -229,7 +229,7 @@ export default function OverviewTab({
               </p>
             ))}
           </div>
-          <button onClick={() => onNavigateToTab("profiel")} className="text-[11px] text-evotion-primary font-medium hover:underline flex-shrink-0">
+          <button onClick={() => onNavigateToTab("notities")} className="text-[11px] text-primary font-medium hover:underline flex-shrink-0">
             Bewerk
           </button>
         </div>
@@ -238,13 +238,13 @@ export default function OverviewTab({
       {/* ── Hero Stats Row ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Compliance Donut */}
-        <button onClick={() => onNavigateToTab("coaching")} className="bg-card rounded-xl border border-border p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-all group">
+        <button onClick={() => onNavigateToTab("checkins")} className="bg-card rounded-xl border border-border p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-all group">
           <ComplianceRing value={compliancePct} size={80} strokeWidth={8} />
           <p className="text-xs text-muted-foreground mt-2 font-medium uppercase tracking-wider">Compliance</p>
         </button>
 
         {/* Weight */}
-        <button onClick={() => onNavigateToTab("gezondheid")} className="bg-card rounded-xl border border-border p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-all group">
+        <button onClick={() => onNavigateToTab("metingen")} className="bg-card rounded-xl border border-border p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-all group">
           <div className="flex items-center gap-1.5 mb-1">
             <Scale className="w-5 h-5 text-muted-foreground" />
           </div>
@@ -261,15 +261,15 @@ export default function OverviewTab({
         </button>
 
         {/* Streak */}
-        <button onClick={() => onNavigateToTab("coaching")} className="bg-card rounded-xl border border-border p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-all group">
+        <button onClick={() => onNavigateToTab("checkins")} className="bg-card rounded-xl border border-border p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-all group">
           <Flame className={`w-7 h-7 mb-1 ${streak > 0 ? "text-orange-500" : "text-muted-foreground/25"}`} />
           <p className="text-2xl font-bold text-foreground tabular-nums">{streak}</p>
           <p className="text-xs text-muted-foreground">dagen streak</p>
         </button>
 
         {/* Workouts this month */}
-        <button onClick={() => onNavigateToTab("coaching")} className="bg-card rounded-xl border border-border p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-all group">
-          <Dumbbell className={`w-6 h-6 mb-1 ${workouts.length > 0 ? "text-evotion-primary" : "text-muted-foreground/25"}`} />
+        <button onClick={() => onNavigateToTab("training")} className="bg-card rounded-xl border border-border p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-all group">
+          <Dumbbell className={`w-6 h-6 mb-1 ${workouts.length > 0 ? "text-primary" : "text-muted-foreground/25"}`} />
           <p className="text-2xl font-bold text-foreground tabular-nums">{workouts.length}</p>
           <p className="text-xs text-muted-foreground">workouts</p>
         </button>
@@ -283,7 +283,7 @@ export default function OverviewTab({
               <Scale className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm font-semibold text-foreground">Gewichtsverloop</span>
             </div>
-            <button onClick={() => onNavigateToTab("gezondheid")} className="text-xs text-evotion-primary font-medium hover:underline">
+            <button onClick={() => onNavigateToTab("metingen")} className="text-xs text-primary font-medium hover:underline">
               Details
             </button>
           </div>
@@ -294,8 +294,8 @@ export default function OverviewTab({
       {/* ── Quick Status Row ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <QuickCard
-          icon={Dumbbell} iconBg="bg-evotion-primary/5" iconColor="text-evotion-primary"
-          label="Training" onClick={() => onNavigateToTab("coaching")}
+          icon={Dumbbell} iconBg="bg-primary/5" iconColor="text-primary"
+          label="Training" onClick={() => onNavigateToTab("training")}
         >
           {hasActiveProgram ? (
             <>
@@ -311,7 +311,7 @@ export default function OverviewTab({
 
         <QuickCard
           icon={UtensilsCrossed} iconBg="bg-amber-50" iconColor="text-amber-600"
-          label="Voeding" onClick={() => onNavigateToTab("coaching")}
+          label="Voeding" onClick={() => onNavigateToTab("voeding")}
         >
           {nutritionTargets ? (
             <>
@@ -327,7 +327,7 @@ export default function OverviewTab({
 
         <QuickCard
           icon={Pill} iconBg="bg-emerald-50" iconColor="text-emerald-600"
-          label="Supplementen" onClick={() => onNavigateToTab("coaching")}
+          label="Supplementen" onClick={() => onNavigateToTab("voeding")}
         >
           {supplements.filter(s => s.is_active).length > 0 ? (
             <>
@@ -347,11 +347,11 @@ export default function OverviewTab({
         <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Target className="w-4 h-4 text-evotion-primary" />
+              <Target className="w-4 h-4 text-primary" />
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Doelen</span>
-              <span className="text-[10px] bg-evotion-primary/10 text-evotion-primary px-1.5 py-0.5 rounded font-bold">{activeGoals.length}</span>
+              <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-bold">{activeGoals.length}</span>
             </div>
-            <button onClick={() => onNavigateToTab("profiel")} className="text-[11px] text-evotion-primary font-medium hover:underline">
+            <button onClick={() => onNavigateToTab("notities")} className="text-[11px] text-primary font-medium hover:underline">
               Beheren
             </button>
           </div>
@@ -363,7 +363,7 @@ export default function OverviewTab({
               return (
                 <div key={goal.id} className="flex items-center justify-between py-2 px-3 bg-muted/40 rounded-lg">
                   <div className="flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full ${daysLeft !== null && daysLeft <= 7 ? "bg-amber-400" : "bg-evotion-primary"}`} />
+                    <div className={`w-1.5 h-1.5 rounded-full ${daysLeft !== null && daysLeft <= 7 ? "bg-amber-400" : "bg-primary"}`} />
                     <span className="text-sm text-foreground">{goal.title}</span>
                   </div>
                   {daysLeft !== null && (
@@ -447,7 +447,7 @@ export default function OverviewTab({
                     <button
                       onClick={() => setSelectedLog(isSelected ? null : log)}
                       className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-left transition ${
-                        isSelected ? "bg-evotion-primary/5 border border-evotion-primary/10" : "hover:bg-secondary/50"
+                        isSelected ? "bg-primary/5 border border-evotion-primary/10" : "hover:bg-secondary/50"
                       }`}
                     >
                       <div className={`w-7 h-7 rounded-lg ${cfg.bg} flex items-center justify-center shrink-0`}>
@@ -462,7 +462,7 @@ export default function OverviewTab({
                           {log.model && <span>/ {log.model}</span>}
                         </div>
                       </div>
-                      <Eye className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-evotion-primary" : "text-muted-foreground/30"}`} />
+                      <Eye className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-primary" : "text-muted-foreground/30"}`} />
                     </button>
                     {isSelected && (
                       <AILogDetail log={log} onDelete={async () => {
@@ -609,9 +609,9 @@ function AILogDetail({ log, onDelete }: { log: AIGenerationLog; onDelete: () => 
           {log.result?.summary && <p className="font-medium text-foreground">{log.result.summary}</p>}
           {log.result?.complianceAnalysis && (
             <div className="space-y-1">
-              {log.result.complianceAnalysis.training && <p><span className="text-evotion-primary font-medium">Training:</span> {log.result.complianceAnalysis.training}</p>}
+              {log.result.complianceAnalysis.training && <p><span className="text-primary font-medium">Training:</span> {log.result.complianceAnalysis.training}</p>}
               {log.result.complianceAnalysis.nutrition && <p><span className="text-amber-600 font-medium">Voeding:</span> {log.result.complianceAnalysis.nutrition}</p>}
-              {log.result.complianceAnalysis.checkIns && <p><span className="text-evotion-primary font-medium">Check-ins:</span> {log.result.complianceAnalysis.checkIns}</p>}
+              {log.result.complianceAnalysis.checkIns && <p><span className="text-primary font-medium">Check-ins:</span> {log.result.complianceAnalysis.checkIns}</p>}
             </div>
           )}
           {log.result?.progressAnalysis && <p><strong className="text-foreground">Voortgang:</strong> {log.result.progressAnalysis}</p>}
@@ -634,7 +634,7 @@ function AILogDetail({ log, onDelete }: { log: AIGenerationLog; onDelete: () => 
       {log.generation_type === "client_summary" && (
         <>
           {log.result?.overallAssessment && <p className="font-medium text-foreground">{log.result.overallAssessment}</p>}
-          {log.result?.trainingStatus?.keyInsight && <p><span className="text-evotion-primary font-medium">Training:</span> {log.result.trainingStatus.keyInsight}</p>}
+          {log.result?.trainingStatus?.keyInsight && <p><span className="text-primary font-medium">Training:</span> {log.result.trainingStatus.keyInsight}</p>}
           {log.result?.nutritionStatus?.keyInsight && <p><span className="text-amber-600 font-medium">Voeding:</span> {log.result.nutritionStatus.keyInsight}</p>}
           {log.result?.supplementStatus && <p><span className="text-emerald-600 font-medium">Supplementen:</span> {log.result.supplementStatus}</p>}
           {log.result?.priorityActions?.length > 0 && (

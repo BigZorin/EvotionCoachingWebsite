@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import {
-  LayoutDashboard, MessageSquareText, HeartPulse, UserCircle, Loader2,
+  Activity, FileText, Dumbbell, Apple, ClipboardCheck, Scale,
+  Sparkles, MessageCircle, Settings, Loader2,
 } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -25,24 +26,39 @@ import {
 
 import ClientHeader from "./components/ClientHeader"
 import OverviewTab from "./components/OverviewTab"
-import CoachingTab from "./components/CoachingTab"
+import IntakeTab from "./components/IntakeTab"
+import TrainingTab from "./components/TrainingTab"
+import NutritionTab from "./components/NutritionTab"
+import CheckInsTab from "./components/CheckInsTab"
 import HealthTab from "./components/HealthTab"
-import ProfileTab from "./components/ProfileTab"
+import AiCoachTab from "./components/AiCoachTab"
+import NotitiesTab from "./components/NotitiesTab"
+import InstellingenTab from "./components/InstellingenTab"
 
 /*
- * 4 logical tabs instead of 7 flat ones:
- * 1. Overzicht  = dashboard / alerts / timeline
- * 2. Coaching   = check-ins + training + voeding (sub-tabs)
- * 3. Gezondheid = weight, wellbeing, wearable
- * 4. Profiel    = intake + photos + notes + goals
+ * 9 flat tabs matching V0 design:
+ * 1. Overzicht   = dashboard / alerts / timeline
+ * 2. Intake      = intake form + AI analysis
+ * 3. Training    = programs + workouts
+ * 4. Voeding     = nutrition targets + food logs + supplements
+ * 5. Check-ins   = weekly + daily check-ins
+ * 6. Metingen    = weight, wellbeing, wearable (health)
+ * 7. AI Coach    = AI generators + history
+ * 8. Notities    = coach notes + goals + photos
+ * 9. Instellingen = check-in settings + client info
  */
-type TabId = "overzicht" | "coaching" | "gezondheid" | "profiel"
+type TabId = "overzicht" | "intake" | "training" | "voeding" | "checkins" | "metingen" | "ai-coach" | "notities" | "instellingen"
 
-const TABS: { id: TabId; label: string; icon: any }[] = [
-  { id: "overzicht", label: "Overzicht", icon: LayoutDashboard },
-  { id: "coaching", label: "Coaching", icon: MessageSquareText },
-  { id: "gezondheid", label: "Gezondheid", icon: HeartPulse },
-  { id: "profiel", label: "Profiel", icon: UserCircle },
+const TABS: { id: TabId; label: string; icon: any; badge?: number }[] = [
+  { id: "overzicht", label: "Overzicht", icon: Activity },
+  { id: "intake", label: "Intake", icon: FileText },
+  { id: "training", label: "Training", icon: Dumbbell },
+  { id: "voeding", label: "Voeding", icon: Apple },
+  { id: "checkins", label: "Check-ins", icon: ClipboardCheck },
+  { id: "metingen", label: "Metingen", icon: Scale },
+  { id: "ai-coach", label: "AI Coach", icon: Sparkles },
+  { id: "notities", label: "Notities", icon: MessageCircle },
+  { id: "instellingen", label: "Instellingen", icon: Settings },
 ]
 
 export default function ClientDetailClient({ clientId }: { clientId: string }) {
@@ -175,7 +191,7 @@ export default function ClientDetailClient({ clientId }: { clientId: string }) {
     return (
       <div className="text-center py-16">
         <p className="text-muted-foreground">Client niet gevonden</p>
-        <Link href="/coach/dashboard/clients" className="text-evotion-primary hover:underline mt-3 inline-block text-sm">Terug naar clients</Link>
+        <Link href="/coach/dashboard/clients" className="text-primary hover:underline mt-3 inline-block text-sm">Terug naar clients</Link>
       </div>
     )
   }
@@ -201,7 +217,7 @@ export default function ClientDetailClient({ clientId }: { clientId: string }) {
 
   const activeGoals = goals.filter((g) => g.status === "active")
 
-  // Count pending check-ins for coaching badge
+  // Count pending check-ins for badge
   const pendingCheckIns = weeklyCheckIns.filter(ci => !ci.coach_feedback).length
 
   return (
@@ -222,19 +238,19 @@ export default function ClientDetailClient({ clientId }: { clientId: string }) {
         onReject={handleReject}
       />
 
-      {/* Tab navigation */}
+      {/* Tab navigation — V0 style with icons */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabId)}>
-        <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-b rounded-none">
+        <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-b rounded-none overflow-x-auto">
           {TABS.map((tab) => (
             <TabsTrigger
               key={tab.id}
               value={tab.id}
-              className="relative rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium gap-2"
+              className="relative rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-primary px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors gap-1.5 shrink-0"
             >
-              <tab.icon className="h-4 w-4" />
-              {tab.label}
-              {tab.id === "coaching" && pendingCheckIns > 0 && (
-                <span className="ml-1 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold bg-primary text-primary-foreground rounded-full min-w-[18px]">
+              <tab.icon className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{tab.label}</span>
+              {tab.id === "checkins" && pendingCheckIns > 0 && (
+                <span className="flex size-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
                   {pendingCheckIns}
                 </span>
               )}
@@ -259,18 +275,29 @@ export default function ClientDetailClient({ clientId }: { clientId: string }) {
         />
       )}
 
-      {activeTab === "coaching" && (
-        <CoachingTab
+      {activeTab === "intake" && (
+        <IntakeTab
           clientId={clientId}
           clientName={clientName}
           intake={intake}
-          weeklyCheckIns={weeklyCheckIns}
-          dailyCheckIns={dailyCheckIns}
-          weeklyCheckInDay={weeklyCheckInDay}
-          clientTemplateAssignments={clientTemplateAssignments}
-          coachTemplates={coachTemplates}
+          onIntakeReset={() => { setIntake(null) }}
+          onPlanComplete={() => loadData()}
+          onDataRefresh={() => loadData()}
+        />
+      )}
+
+      {activeTab === "training" && (
+        <TrainingTab
+          clientId={clientId}
           workouts={workouts}
           clientPrograms={clientPrograms}
+          onDataRefresh={() => loadData()}
+        />
+      )}
+
+      {activeTab === "voeding" && (
+        <NutritionTab
+          clientId={clientId}
           nutritionTargets={nutritionTargets}
           foodLogs={foodLogs}
           clientAssignments={clientAssignments}
@@ -280,7 +307,19 @@ export default function ClientDetailClient({ clientId }: { clientId: string }) {
         />
       )}
 
-      {activeTab === "gezondheid" && (
+      {activeTab === "checkins" && (
+        <CheckInsTab
+          clientId={clientId}
+          weeklyCheckIns={weeklyCheckIns}
+          dailyCheckIns={dailyCheckIns}
+          weeklyCheckInDay={weeklyCheckInDay}
+          clientTemplateAssignments={clientTemplateAssignments}
+          coachTemplates={coachTemplates}
+          onDataRefresh={() => loadData()}
+        />
+      )}
+
+      {activeTab === "metingen" && (
         <HealthTab
           clientId={clientId}
           healthData={healthData}
@@ -289,18 +328,46 @@ export default function ClientDetailClient({ clientId }: { clientId: string }) {
         />
       )}
 
-      {activeTab === "profiel" && (
-        <ProfileTab
+      {activeTab === "ai-coach" && (
+        <AiCoachTab
           clientId={clientId}
           clientName={clientName}
-          intake={intake}
-          photos={photos}
+          onNavigateToTab={(tab) => setActiveTab(tab as TabId)}
+        />
+      )}
+
+      {activeTab === "notities" && (
+        <NotitiesTab
+          clientId={clientId}
+          clientName={clientName}
           notes={notes}
           goals={goals}
+          photos={photos}
           onDataRefresh={() => loadData()}
-          onIntakeReset={() => { setIntake(null) }}
-          onPlanComplete={() => loadData()}
         />
+      )}
+
+      {activeTab === "instellingen" && (
+        <InstellingenTab
+          clientId={clientId}
+          profile={profile}
+          client={client}
+          weeklyCheckInDay={weeklyCheckInDay}
+          clientTemplateAssignments={clientTemplateAssignments}
+          coachTemplates={coachTemplates}
+          onDataRefresh={() => loadData()}
+        />
+      )}
+
+      {/* Floating AI button — visible on all tabs except AI Coach */}
+      {activeTab !== "ai-coach" && (
+        <button
+          onClick={() => setActiveTab("ai-coach")}
+          className="fixed bottom-6 right-6 z-50 flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-all hover:scale-105"
+          aria-label="AI Coach openen"
+        >
+          <Sparkles className="size-5" />
+        </button>
       )}
     </div>
   )
