@@ -20,6 +20,10 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 FROM base AS builder
 WORKDIR /app
 
+# NEXT_PUBLIC_ vars must be available at build time (inlined into client JS)
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+
 # Copy deps
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
@@ -32,7 +36,7 @@ COPY . .
 # Generate Prisma client
 RUN cd packages/database && npx prisma generate
 
-# Build Next.js
+# Build Next.js (ARGs are available as env vars during build)
 RUN cd apps/web && npx next build
 
 # --- Runner stage ---
