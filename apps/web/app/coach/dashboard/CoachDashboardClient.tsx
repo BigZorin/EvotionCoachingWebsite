@@ -9,8 +9,12 @@ import { Progress } from "@/components/ui/progress"
 import {
   getCoachClientsOverview,
   getDashboardRecentCheckIns,
+  getComplianceChartData,
+  getClientActivityChartData,
   type EnrichedClient,
   type RecentCheckIn,
+  type ComplianceChartPoint,
+  type ActivityChartPoint,
 } from "@/app/actions/admin-clients"
 import {
   Users,
@@ -36,25 +40,9 @@ import {
   Bar,
 } from "recharts"
 
-// Placeholder chart data — will be replaced with real Supabase aggregations
-const complianceData = [
-  { week: "Wk 1", training: 88, voeding: 72 },
-  { week: "Wk 2", training: 91, voeding: 76 },
-  { week: "Wk 3", training: 85, voeding: 79 },
-  { week: "Wk 4", training: 93, voeding: 81 },
-  { week: "Wk 5", training: 90, voeding: 78 },
-  { week: "Wk 6", training: 95, voeding: 84 },
-]
-
-const clientActiviteitData = [
-  { dag: "Ma", checkins: 18, workouts: 22 },
-  { dag: "Di", checkins: 24, workouts: 19 },
-  { dag: "Wo", checkins: 12, workouts: 26 },
-  { dag: "Do", checkins: 20, workouts: 21 },
-  { dag: "Vr", checkins: 28, workouts: 18 },
-  { dag: "Za", checkins: 15, workouts: 30 },
-  { dag: "Zo", checkins: 8, workouts: 14 },
-]
+// Fallback empty data for charts when no data is available
+const emptyComplianceData: ComplianceChartPoint[] = []
+const emptyActivityData: ActivityChartPoint[] = []
 
 function timeAgo(dateStr: string): string {
   const now = new Date()
@@ -73,6 +61,8 @@ function timeAgo(dateStr: string): string {
 export default function CoachDashboardClient() {
   const [clients, setClients] = useState<EnrichedClient[]>([])
   const [recentCheckIns, setRecentCheckIns] = useState<RecentCheckIn[]>([])
+  const [complianceData, setComplianceData] = useState<ComplianceChartPoint[]>(emptyComplianceData)
+  const [clientActiviteitData, setClientActiviteitData] = useState<ActivityChartPoint[]>(emptyActivityData)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -81,9 +71,11 @@ export default function CoachDashboardClient() {
       setIsLoading(true)
       setError(null)
       try {
-        const [clientsResult, checkInsResult] = await Promise.all([
+        const [clientsResult, checkInsResult, complianceResult, activityResult] = await Promise.all([
           getCoachClientsOverview(),
           getDashboardRecentCheckIns(6),
+          getComplianceChartData(),
+          getClientActivityChartData(),
         ])
         if (clientsResult?.success && clientsResult.clients) {
           setClients(clientsResult.clients)
@@ -92,6 +84,12 @@ export default function CoachDashboardClient() {
         }
         if (checkInsResult?.success && checkInsResult.checkIns) {
           setRecentCheckIns(checkInsResult.checkIns)
+        }
+        if (complianceResult?.success && complianceResult.data) {
+          setComplianceData(complianceResult.data)
+        }
+        if (activityResult?.success && activityResult.data) {
+          setClientActiviteitData(activityResult.data)
         }
       } catch (err: any) {
         console.error("Error loading dashboard:", err)

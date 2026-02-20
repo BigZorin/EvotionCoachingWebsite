@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Plus,
   Search,
@@ -19,6 +19,9 @@ import {
   Pencil,
   Copy,
   Share2,
+  Loader2,
+  FileDown,
+  LayoutTemplate,
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -32,163 +35,16 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
+import {
+  getContentItems,
+  deleteContentItem,
+  duplicateContentItem,
+  type ContentItem,
+} from "@/app/actions/content"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-// These types will map to the Supabase `content_items` table:
-//   id          uuid  PK
-//   coach_id    uuid  FK → profiles.id
-//   title       text
-//   description text
-//   type        enum  ('video', 'artikel', 'afbeelding')
-//   category    text  (e.g. 'Training', 'Voeding', 'Mindset', 'Herstel')
-//   url         text  (storage URL or external link)
-//   thumbnail   text  (storage URL for thumbnail/preview)
-//   duration    text  (e.g. '12:30' for videos, '5 min leestijd' for articles)
-//   views       int   default 0
-//   status      enum  ('gepubliceerd', 'concept')
-//   created_at  timestamptz
-//   updated_at  timestamptz
 
-type ContentType = "video" | "artikel" | "afbeelding"
-type ContentStatus = "gepubliceerd" | "concept"
-
-interface ContentItem {
-  id: string
-  title: string
-  description: string
-  type: ContentType
-  category: string
-  thumbnail: string | null
-  duration: string
-  views: number
-  status: ContentStatus
-  createdAt: string
-}
-
-// ─── Placeholder data ─────────────────────────────────────────────────────────
-// Replace with Supabase query: supabase.from('content_items').select('*').eq('coach_id', coachId).order('created_at', { ascending: false })
-const PLACEHOLDER_CONTENT: ContentItem[] = [
-  {
-    id: "1",
-    title: "Opwarming routine voor krachttraining",
-    description: "Een volledige opwarming van 10 minuten die je voor elke krachttraining kunt gebruiken.",
-    type: "video",
-    category: "Training",
-    thumbnail: null,
-    duration: "10:24",
-    views: 342,
-    status: "gepubliceerd",
-    createdAt: "2026-02-18",
-  },
-  {
-    id: "2",
-    title: "Meal prep guide: eiwitrijke maaltijden",
-    description: "Stap-voor-stap handleiding voor het bereiden van 5 eiwitrijke maaltijden.",
-    type: "artikel",
-    category: "Voeding",
-    thumbnail: null,
-    duration: "8 min leestijd",
-    views: 218,
-    status: "gepubliceerd",
-    createdAt: "2026-02-15",
-  },
-  {
-    id: "3",
-    title: "Correcte deadlift techniek",
-    description: "Uitleg van de juiste techniek voor de conventionele deadlift met veelgemaakte fouten.",
-    type: "video",
-    category: "Training",
-    thumbnail: null,
-    duration: "15:42",
-    views: 567,
-    status: "gepubliceerd",
-    createdAt: "2026-02-12",
-  },
-  {
-    id: "4",
-    title: "Slaaphygiene infographic",
-    description: "Visuele gids met 10 tips voor betere slaapkwaliteit en herstel.",
-    type: "afbeelding",
-    category: "Herstel",
-    thumbnail: null,
-    duration: "Infographic",
-    views: 156,
-    status: "gepubliceerd",
-    createdAt: "2026-02-10",
-  },
-  {
-    id: "5",
-    title: "Supplementen gids 2026",
-    description: "Overzicht van evidence-based supplementen voor sporters en hun dosering.",
-    type: "artikel",
-    category: "Voeding",
-    thumbnail: null,
-    duration: "12 min leestijd",
-    views: 431,
-    status: "gepubliceerd",
-    createdAt: "2026-02-08",
-  },
-  {
-    id: "6",
-    title: "Schouder mobiliteit oefeningen",
-    description: "5 oefeningen om je schoudermobiliteit te verbeteren voor beter presteren.",
-    type: "video",
-    category: "Herstel",
-    thumbnail: null,
-    duration: "8:15",
-    views: 289,
-    status: "gepubliceerd",
-    createdAt: "2026-02-05",
-  },
-  {
-    id: "7",
-    title: "Macro's berekenen voor bulken",
-    description: "Hoe je je macronutrienten berekent voor een succesvolle bulk-fase.",
-    type: "artikel",
-    category: "Voeding",
-    thumbnail: null,
-    duration: "6 min leestijd",
-    views: 194,
-    status: "concept",
-    createdAt: "2026-02-03",
-  },
-  {
-    id: "8",
-    title: "Progressiemodel poster",
-    description: "Visueel overzicht van progressieve overbelasting principes.",
-    type: "afbeelding",
-    category: "Training",
-    thumbnail: null,
-    duration: "Poster",
-    views: 87,
-    status: "concept",
-    createdAt: "2026-02-01",
-  },
-  {
-    id: "9",
-    title: "Mindset & motivatie: doelen stellen",
-    description: "Video over het SMART-framework voor het stellen van fitnessdoelen.",
-    type: "video",
-    category: "Mindset",
-    thumbnail: null,
-    duration: "11:08",
-    views: 203,
-    status: "gepubliceerd",
-    createdAt: "2026-01-28",
-  },
-  {
-    id: "10",
-    title: "Stress management technieken",
-    description: "Praktische ademhalings- en ontspanningstechnieken voor dagelijks gebruik.",
-    type: "afbeelding",
-    category: "Mindset",
-    thumbnail: null,
-    duration: "Infographic",
-    views: 145,
-    status: "gepubliceerd",
-    createdAt: "2026-01-25",
-  },
-]
+type ContentType = "video" | "article" | "image" | "pdf" | "template"
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -199,17 +55,29 @@ const TYPE_CONFIG: Record<ContentType, { icon: typeof Video; label: string; colo
     color: "text-blue-600 dark:text-blue-400",
     bgColor: "bg-blue-50 dark:bg-blue-950/50",
   },
-  artikel: {
+  article: {
     icon: FileText,
     label: "Artikel",
     color: "text-amber-600 dark:text-amber-400",
     bgColor: "bg-amber-50 dark:bg-amber-950/50",
   },
-  afbeelding: {
+  image: {
     icon: Image,
     label: "Afbeelding",
     color: "text-emerald-600 dark:text-emerald-400",
     bgColor: "bg-emerald-50 dark:bg-emerald-950/50",
+  },
+  pdf: {
+    icon: FileDown,
+    label: "PDF",
+    color: "text-red-600 dark:text-red-400",
+    bgColor: "bg-red-50 dark:bg-red-950/50",
+  },
+  template: {
+    icon: LayoutTemplate,
+    label: "Template",
+    color: "text-purple-600 dark:text-purple-400",
+    bgColor: "bg-purple-50 dark:bg-purple-950/50",
   },
 }
 
@@ -235,31 +103,65 @@ function formatDate(dateStr: string): string {
 export default function ContentPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("alle")
+  const [contentItems, setContentItems] = useState<ContentItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null)
+
+  useEffect(() => {
+    loadContent()
+  }, [])
+
+  async function loadContent() {
+    setIsLoading(true)
+    const result = await getContentItems()
+    if (result.success && result.data) {
+      setContentItems(result.data)
+    }
+    setIsLoading(false)
+  }
+
+  async function handleDelete(id: string) {
+    setActionLoadingId(id)
+    const result = await deleteContentItem(id)
+    if (result.success) {
+      await loadContent()
+    }
+    setActionLoadingId(null)
+  }
+
+  async function handleDuplicate(id: string) {
+    setActionLoadingId(id)
+    const result = await duplicateContentItem(id)
+    if (result.success) {
+      await loadContent()
+    }
+    setActionLoadingId(null)
+  }
 
   // Filter content by search query and active tab
-  const filteredContent = PLACEHOLDER_CONTENT.filter((item) => {
+  const filteredContent = contentItems.filter((item) => {
     const matchesSearch =
       searchQuery === "" ||
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.category.toLowerCase().includes(searchQuery.toLowerCase())
+      (item.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.category || "").toLowerCase().includes(searchQuery.toLowerCase())
 
     const matchesTab =
       activeTab === "alle" ||
       (activeTab === "videos" && item.type === "video") ||
-      (activeTab === "artikelen" && item.type === "artikel") ||
-      (activeTab === "afbeeldingen" && item.type === "afbeelding")
+      (activeTab === "artikelen" && item.type === "article") ||
+      (activeTab === "afbeeldingen" && item.type === "image")
 
     return matchesSearch && matchesTab
   })
 
   // Stats for header cards
   const stats = {
-    totaal: PLACEHOLDER_CONTENT.length,
-    videos: PLACEHOLDER_CONTENT.filter((i) => i.type === "video").length,
-    artikelen: PLACEHOLDER_CONTENT.filter((i) => i.type === "artikel").length,
-    afbeeldingen: PLACEHOLDER_CONTENT.filter((i) => i.type === "afbeelding").length,
-    totaalViews: PLACEHOLDER_CONTENT.reduce((sum, i) => sum + i.views, 0),
+    totaal: contentItems.length,
+    videos: contentItems.filter((i) => i.type === "video").length,
+    artikelen: contentItems.filter((i) => i.type === "article").length,
+    afbeeldingen: contentItems.filter((i) => i.type === "image").length,
+    totaalViews: contentItems.reduce((sum, i) => sum + i.views, 0),
   }
 
   return (
@@ -292,7 +194,7 @@ export default function ContentPage() {
               <BookOpen className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats.totaal}</p>
+              <p className="text-2xl font-bold">{isLoading ? "-" : stats.totaal}</p>
               <p className="text-xs text-muted-foreground">Totaal items</p>
             </div>
           </CardContent>
@@ -303,7 +205,7 @@ export default function ContentPage() {
               <Video className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats.videos}</p>
+              <p className="text-2xl font-bold">{isLoading ? "-" : stats.videos}</p>
               <p className="text-xs text-muted-foreground">Video&apos;s</p>
             </div>
           </CardContent>
@@ -314,7 +216,7 @@ export default function ContentPage() {
               <FileText className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats.artikelen}</p>
+              <p className="text-2xl font-bold">{isLoading ? "-" : stats.artikelen}</p>
               <p className="text-xs text-muted-foreground">Artikelen</p>
             </div>
           </CardContent>
@@ -325,7 +227,7 @@ export default function ContentPage() {
               <Eye className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{formatViews(stats.totaalViews)}</p>
+              <p className="text-2xl font-bold">{isLoading ? "-" : formatViews(stats.totaalViews)}</p>
               <p className="text-xs text-muted-foreground">Totaal views</p>
             </div>
           </CardContent>
@@ -394,12 +296,19 @@ export default function ContentPage() {
 
         {/* ── Content grid ─────────────────────────────────────────────────── */}
         <TabsContent value={activeTab} className="mt-4">
-          {filteredContent.length === 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/60 mb-3" />
+              <p className="text-sm text-muted-foreground">Content laden...</p>
+            </div>
+          ) : filteredContent.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Search className="h-10 w-10 text-muted-foreground/40 mb-3" />
               <p className="font-medium text-muted-foreground">Geen content gevonden</p>
               <p className="text-sm text-muted-foreground/70 mt-1">
-                Pas je zoekopdracht of filters aan.
+                {contentItems.length === 0
+                  ? "Maak je eerste content item aan om te beginnen."
+                  : "Pas je zoekopdracht of filters aan."}
               </p>
             </div>
           ) : (
@@ -407,12 +316,13 @@ export default function ContentPage() {
               {filteredContent.map((item) => {
                 const typeConfig = TYPE_CONFIG[item.type]
                 const TypeIcon = typeConfig.icon
-                const categoryClass = CATEGORY_VARIANT[item.category] || ""
+                const categoryClass = CATEGORY_VARIANT[item.category || ""] || ""
+                const isActionLoading = actionLoadingId === item.id
 
                 return (
                   <Card
                     key={item.id}
-                    className="group relative overflow-hidden transition-shadow hover:shadow-md py-0"
+                    className={`group relative overflow-hidden transition-shadow hover:shadow-md py-0 ${isActionLoading ? "opacity-50 pointer-events-none" : ""}`}
                   >
                     {/* Thumbnail / placeholder area */}
                     <div
@@ -428,8 +338,14 @@ export default function ContentPage() {
                           </div>
                         </div>
                       )}
+                      {/* Loading overlay */}
+                      {isActionLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-black/30">
+                          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                        </div>
+                      )}
                       {/* Status badge */}
-                      {item.status === "concept" && (
+                      {item.status === "draft" && (
                         <Badge
                           variant="secondary"
                           className="absolute top-3 left-3 text-[10px] bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800"
@@ -464,6 +380,7 @@ export default function ContentPage() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                              disabled={isActionLoading}
                             >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
@@ -473,7 +390,7 @@ export default function ContentPage() {
                               <Pencil className="h-4 w-4 mr-2" />
                               Bewerken
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDuplicate(item.id)}>
                               <Copy className="h-4 w-4 mr-2" />
                               Dupliceren
                             </DropdownMenuItem>
@@ -486,7 +403,10 @@ export default function ContentPage() {
                               Link kopieren
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive focus:text-destructive">
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => handleDelete(item.id)}
+                            >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Verwijderen
                             </DropdownMenuItem>
@@ -496,16 +416,20 @@ export default function ContentPage() {
 
                       {/* Meta row */}
                       <div className="mt-3 flex items-center gap-3 flex-wrap">
-                        <Badge
-                          variant="outline"
-                          className={`text-[10px] font-medium ${categoryClass}`}
-                        >
-                          {item.category}
-                        </Badge>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          <span>{item.duration}</span>
-                        </div>
+                        {item.category && (
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] font-medium ${categoryClass}`}
+                          >
+                            {item.category}
+                          </Badge>
+                        )}
+                        {item.duration && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span>{item.duration}</span>
+                          </div>
+                        )}
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Eye className="h-3 w-3" />
                           <span>{formatViews(item.views)} views</span>
@@ -514,7 +438,7 @@ export default function ContentPage() {
 
                       {/* Date */}
                       <p className="text-[11px] text-muted-foreground/60 mt-2">
-                        {formatDate(item.createdAt)}
+                        {formatDate(item.created_at)}
                       </p>
                     </CardContent>
                   </Card>

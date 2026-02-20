@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import HomeStackNavigator from './HomeStackNavigator';
 import WorkoutsStackNavigator from './WorkoutsStackNavigator';
 import NutritionStackNavigator from './NutritionStackNavigator';
-import CoursesScreen from '../screens/Courses/CoursesScreen';
+import CoursesStackNavigator from './CoursesStackNavigator';
 import MoreStackNavigator from './MoreStackNavigator';
 import { theme } from '../constants/theme';
 
@@ -63,7 +63,7 @@ export default function AppNavigator() {
       />
       <Tab.Screen
         name="Leren"
-        component={CoursesScreen}
+        component={CoursesStackNavigator}
         options={{
           title: 'Leren',
           tabBarLabel: 'Leren',

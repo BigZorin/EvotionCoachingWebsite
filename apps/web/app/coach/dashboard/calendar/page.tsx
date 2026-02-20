@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import {
   Plus,
   ChevronLeft,
@@ -16,6 +16,7 @@ import {
   RefreshCw,
   X,
   LinkIcon,
+  Loader2,
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -39,44 +40,59 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 
+import {
+  getCoachSessions,
+  createSession,
+  updateSessionStatus,
+  deleteSession,
+  getCoachAvailability,
+  updateCoachAvailability,
+  getWeekStats,
+  type ClientSession,
+  type AvailabilitySlot,
+  type WeekStats,
+  type SessionType,
+  type SessionMode,
+} from "@/app/actions/scheduling"
+import { getClients } from "@/app/actions/admin-clients"
+
 // ============================================================================
-// PLACEHOLDER DATA — Vervang met echte agenda-data uit Supabase + Google Calendar API
-//
-// COACH-SCOPED DATA:
-//   De coach ziet ALLEEN zijn/haar eigen sessies en beschikbaarheid.
-//   Filter: WHERE client_sessions.coach_id = auth.uid()
-//   Filter: WHERE coach_availability.coach_id = auth.uid()
-//
-// Supabase tabellen (gefilterd op coach_id):
-//   - client_sessions (id, coach_id, client_id, type, status, start_time, end_time, modus, locatie, notities)
-//     type: "pt_sessie" | "video_call"
-//     status: "gepland" | "bevestigd" | "voltooid" | "no_show" | "geannuleerd"
-//     modus: "locatie" (fysiek PT) | "video" (online call)
-//   - coach_availability (id, coach_id, dag_van_week, start_tijd, eind_tijd, actief)
-//     Coach stelt wekelijkse beschikbaarheid in. Wordt getoond aan clienten in de app.
-//   - coach_google_calendar (id, coach_id, access_token, refresh_token, calendar_id, last_sync)
-//     OAuth2 tokens voor twee-weg sync. Webhook voor real-time updates.
-//
-// RLS Policies:
-//   client_sessions: SELECT/INSERT/UPDATE WHERE coach_id = auth.uid()
-//   coach_availability: SELECT/INSERT/UPDATE/DELETE WHERE coach_id = auth.uid()
-//   coach_google_calendar: SELECT/UPDATE WHERE coach_id = auth.uid()
-//
-// Google Calendar integratie (twee-weg sync):
-//   - OAuth2 flow: coach klikt "Verbind Google Calendar" -> redirect naar Google consent -> callback slaat tokens op
-//   - Sync naar GCal: nieuwe sessie in CoachHub -> create event in Google Calendar
-//   - Sync vanuit GCal: Google webhook -> Supabase Edge Function -> blokkeer tijdslot
-//   - Beschikbaarheid: coach_availability MINUS bezette GCal events = vrije slots voor clienten
-//
-// Client booking flow (app-zijde, later):
-//   - Client ziet vrije slots (berekend uit coach_availability - bezette sessies - GCal events)
-//   - Client selecteert type (PT sessie / Video call), datum + tijd
-//   - Sessie wordt aangemaakt in client_sessions + event in Google Calendar
+// DATE HELPERS
+// ============================================================================
+
+function addDays(date: Date, days: number): Date {
+  const d = new Date(date)
+  d.setDate(d.getDate() + days)
+  return d
+}
+
+function getMondayOfWeek(date: Date): Date {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = day === 0 ? -6 : 1 - day
+  d.setDate(d.getDate() + diff)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+function isSameDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  )
+}
+
+function formatTime(dateStr: string): string {
+  const d = new Date(dateStr)
+  return d.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })
+}
+
+// ============================================================================
+// CONSTANTS
 // ============================================================================
 
 const dagen = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"]
-const datums = [24, 25, 26, 27, 28, 1, 2]
-const huidigeDag = 2 // Woensdag is de "vandaag" in deze placeholder
 
 const tijdslots = [
   "07:00",
@@ -93,158 +109,309 @@ const tijdslots = [
   "18:00",
 ]
 
-const sessies = [
-  {
-    id: "1",
-    titel: "Sarah van Dijk",
-    initialen: "SD",
-    type: "PT Sessie",
-    startTijd: "10:00",
-    eindTijd: "11:00",
-    dag: 2,
-    slotStart: 3,
-    duur: 2,
-    kleur: "bg-orange-500/15 border-orange-500/30 text-orange-600",
-    modus: "locatie" as const,
-    status: "bevestigd" as const,
-  },
-  {
-    id: "2",
-    titel: "Tom Bakker",
-    initialen: "TB",
-    type: "Video Call",
-    startTijd: "11:30",
-    eindTijd: "12:00",
-    dag: 2,
-    slotStart: 4,
-    duur: 1,
-    kleur: "bg-violet-500/15 border-violet-500/30 text-violet-600",
-    modus: "video" as const,
-    status: "bevestigd" as const,
-  },
-  {
-    id: "3",
-    titel: "Lisa de Vries",
-    initialen: "LV",
-    type: "PT Sessie",
-    startTijd: "14:00",
-    eindTijd: "15:00",
-    dag: 2,
-    slotStart: 7,
-    duur: 2,
-    kleur: "bg-orange-500/15 border-orange-500/30 text-orange-600",
-    modus: "locatie" as const,
-    status: "gepland" as const,
-  },
-  {
-    id: "4",
-    titel: "Lisa de Vries",
-    initialen: "LV",
-    type: "Video Call",
-    startTijd: "16:00",
-    eindTijd: "16:30",
-    dag: 2,
-    slotStart: 9,
-    duur: 1,
-    kleur: "bg-violet-500/15 border-violet-500/30 text-violet-600",
-    modus: "video" as const,
-    status: "bevestigd" as const,
-  },
-  {
-    id: "5",
-    titel: "Emma Jansen",
-    initialen: "EJ",
-    type: "PT Sessie",
-    startTijd: "09:00",
-    eindTijd: "10:00",
-    dag: 3,
-    slotStart: 2,
-    duur: 2,
-    kleur: "bg-orange-500/15 border-orange-500/30 text-orange-600",
-    modus: "locatie" as const,
-    status: "gepland" as const,
-  },
-  {
-    id: "6",
-    titel: "Marco Visser",
-    initialen: "MV",
-    type: "Video Call",
-    startTijd: "08:00",
-    eindTijd: "08:30",
-    dag: 4,
-    slotStart: 1,
-    duur: 1,
-    kleur: "bg-violet-500/15 border-violet-500/30 text-violet-600",
-    modus: "video" as const,
-    status: "bevestigd" as const,
-  },
-  {
-    id: "7",
-    titel: "Anna Groot",
-    initialen: "AG",
-    type: "PT Sessie",
-    startTijd: "15:00",
-    eindTijd: "16:00",
-    dag: 5,
-    slotStart: 8,
-    duur: 2,
-    kleur: "bg-orange-500/15 border-orange-500/30 text-orange-600",
-    modus: "locatie" as const,
-    status: "bevestigd" as const,
-  },
+const dagNamen: Record<number, string> = {
+  0: "Zondag",
+  1: "Maandag",
+  2: "Dinsdag",
+  3: "Woensdag",
+  4: "Donderdag",
+  5: "Vrijdag",
+  6: "Zaterdag",
+}
+
+const maandNamen = [
+  "Januari",
+  "Februari",
+  "Maart",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Augustus",
+  "September",
+  "Oktober",
+  "November",
+  "December",
 ]
 
-const agendaVandaag = [
-  {
-    tijd: "10:00",
-    naam: "Sarah van Dijk",
-    initialen: "SD",
-    type: "PT Sessie",
-    modus: "locatie" as const,
-    status: "bevestigd",
-  },
-  {
-    tijd: "11:30",
-    naam: "Tom Bakker",
-    initialen: "TB",
-    type: "Video Call",
-    modus: "video" as const,
-    status: "bevestigd",
-  },
-  {
-    tijd: "14:00",
-    naam: "Lisa de Vries",
-    initialen: "LV",
-    type: "PT Sessie",
-    modus: "locatie" as const,
-    status: "gepland",
-  },
-  {
-    tijd: "16:00",
-    naam: "Lisa de Vries",
-    initialen: "LV",
-    type: "Video Call",
-    modus: "video" as const,
-    status: "bevestigd",
-  },
-]
+const typeLabels: Record<SessionType, string> = {
+  pt_session: "PT Sessie",
+  video_call: "Video Call",
+  check_in_gesprek: "Check-in gesprek",
+  programma_review: "Programma review",
+}
 
-// Placeholder beschikbaarheid — Supabase: coach_availability tabel
-const beschikbaarheid = [
-  { dag: "Maandag", start: "08:00", eind: "18:00", actief: true },
-  { dag: "Dinsdag", start: "08:00", eind: "18:00", actief: true },
-  { dag: "Woensdag", start: "08:00", eind: "18:00", actief: true },
-  { dag: "Donderdag", start: "08:00", eind: "17:00", actief: true },
-  { dag: "Vrijdag", start: "09:00", eind: "15:00", actief: true },
-  { dag: "Zaterdag", start: "09:00", eind: "12:00", actief: false },
-  { dag: "Zondag", start: "", eind: "", actief: false },
-]
+const statusLabels: Record<string, string> = {
+  scheduled: "gepland",
+  confirmed: "bevestigd",
+  completed: "voltooid",
+  no_show: "no-show",
+  cancelled: "geannuleerd",
+}
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
 
 export default function CalendarPage() {
+  // Dialog states
   const [beschikbaarheidOpen, setBeschikbaarheidOpen] = useState(false)
   const [gcalDialogOpen, setGcalDialogOpen] = useState(false)
-  const [gcalVerbonden, setGcalVerbonden] = useState(false) // Supabase: coach_google_calendar record exists
+  const [gcalVerbonden, setGcalVerbonden] = useState(false)
   const [nieuweSessieOpen, setNieuweSessieOpen] = useState(false)
+
+  // Data state
+  const [sessions, setSessions] = useState<ClientSession[]>([])
+  const [availability, setAvailability] = useState<AvailabilitySlot[]>([])
+  const [weekStats, setWeekStats] = useState<WeekStats | null>(null)
+  const [clients, setClients] = useState<
+    Array<{ id: string; name: string; initials: string }>
+  >([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(
+    getMondayOfWeek(new Date())
+  )
+
+  // New session form state
+  const [newSessionType, setNewSessionType] =
+    useState<SessionType>("pt_session")
+  const [newSessionClient, setNewSessionClient] = useState("")
+  const [newSessionDate, setNewSessionDate] = useState("")
+  const [newSessionTime, setNewSessionTime] = useState("")
+  const [newSessionDuration, setNewSessionDuration] = useState("60")
+  const [newSessionSaving, setNewSessionSaving] = useState(false)
+
+  // Availability form state
+  const [availabilityForm, setAvailabilityForm] = useState<
+    Array<{
+      dag: string
+      dayOfWeek: number
+      start: string
+      eind: string
+      actief: boolean
+    }>
+  >([
+    { dag: "Maandag", dayOfWeek: 1, start: "08:00", eind: "18:00", actief: true },
+    { dag: "Dinsdag", dayOfWeek: 2, start: "08:00", eind: "18:00", actief: true },
+    { dag: "Woensdag", dayOfWeek: 3, start: "08:00", eind: "18:00", actief: true },
+    { dag: "Donderdag", dayOfWeek: 4, start: "08:00", eind: "17:00", actief: true },
+    { dag: "Vrijdag", dayOfWeek: 5, start: "09:00", eind: "15:00", actief: true },
+    { dag: "Zaterdag", dayOfWeek: 6, start: "09:00", eind: "12:00", actief: false },
+    { dag: "Zondag", dayOfWeek: 0, start: "", eind: "", actief: false },
+  ])
+  const [availabilitySaving, setAvailabilitySaving] = useState(false)
+
+  // Computed: week dates (Ma-Zo) from currentWeekStart
+  const weekDates: Date[] = Array.from({ length: 7 }, (_, i) =>
+    addDays(currentWeekStart, i)
+  )
+  const datums = weekDates.map((d) => d.getDate())
+
+  // Computed: which day index is today (0=Ma .. 6=Zo), or -1 if not in this week
+  const today = new Date()
+  const huidigeDag = weekDates.findIndex((d) => isSameDay(d, today))
+
+  // Computed: month/year display
+  const firstMonth = currentWeekStart.getMonth()
+  const lastMonth = weekDates[6].getMonth()
+  const firstYear = currentWeekStart.getFullYear()
+  const lastYear = weekDates[6].getFullYear()
+  const monthYearLabel =
+    firstMonth === lastMonth
+      ? `${maandNamen[firstMonth]} ${firstYear}`
+      : firstYear === lastYear
+        ? `${maandNamen[firstMonth]} / ${maandNamen[lastMonth]} ${firstYear}`
+        : `${maandNamen[firstMonth]} ${firstYear} / ${maandNamen[lastMonth]} ${lastYear}`
+
+  // Computed: today's agenda (sessions for today, sorted)
+  const todaySessions = sessions
+    .filter((s) => {
+      const d = new Date(s.start_time)
+      return isSameDay(d, today)
+    })
+    .sort(
+      (a, b) =>
+        new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+    )
+
+  // Computed: today display label
+  const todayDagNaam = dagNamen[today.getDay()]
+  const todayLabel = `${todayDagNaam}, ${today.getDate()} ${maandNamen[today.getMonth()].substring(0, 3).toLowerCase()}`
+
+  // ================================================================
+  // DATA LOADING
+  // ================================================================
+
+  const loadWeekData = useCallback(async () => {
+    setIsLoading(true)
+    const weekStartStr = currentWeekStart.toISOString()
+
+    const [sessionsRes, availRes, statsRes, clientsRes] = await Promise.all([
+      getCoachSessions(weekStartStr),
+      getCoachAvailability(),
+      getWeekStats(weekStartStr),
+      getClients(),
+    ])
+
+    if (sessionsRes.success && sessionsRes.data) {
+      setSessions(sessionsRes.data)
+    } else {
+      setSessions([])
+    }
+
+    if (availRes.success && availRes.data) {
+      setAvailability(availRes.data)
+      // Build availability form from DB data
+      const dayMap = new Map(
+        availRes.data.map((slot) => [slot.day_of_week, slot])
+      )
+      setAvailabilityForm((prev) =>
+        prev.map((row) => {
+          const slot = dayMap.get(row.dayOfWeek)
+          if (slot) {
+            return {
+              ...row,
+              start: slot.start_time,
+              eind: slot.end_time,
+              actief: slot.active,
+            }
+          }
+          return row
+        })
+      )
+    }
+
+    if (statsRes.success && statsRes.data) {
+      setWeekStats(statsRes.data)
+    } else {
+      setWeekStats(null)
+    }
+
+    if (clientsRes.success && clientsRes.clients) {
+      setClients(
+        clientsRes.clients.map((c) => {
+          const name =
+            c.raw_user_meta_data?.full_name || c.email || "Naamloos"
+          const parts = name.split(" ")
+          const initials = (
+            (parts[0]?.[0] || "") + (parts[parts.length - 1]?.[0] || "")
+          ).toUpperCase()
+          return { id: c.id, name, initials }
+        })
+      )
+    }
+
+    setIsLoading(false)
+  }, [currentWeekStart])
+
+  useEffect(() => {
+    loadWeekData()
+  }, [loadWeekData])
+
+  // ================================================================
+  // HANDLERS
+  // ================================================================
+
+  function goToPreviousWeek() {
+    setCurrentWeekStart((prev) => addDays(prev, -7))
+  }
+
+  function goToNextWeek() {
+    setCurrentWeekStart((prev) => addDays(prev, 7))
+  }
+
+  function goToToday() {
+    setCurrentWeekStart(getMondayOfWeek(new Date()))
+  }
+
+  async function handleCreateSession() {
+    if (!newSessionClient || !newSessionDate || !newSessionTime) return
+    setNewSessionSaving(true)
+
+    const startDateTime = new Date(`${newSessionDate}T${newSessionTime}:00`)
+    const durationMs = parseInt(newSessionDuration) * 60 * 1000
+    const endDateTime = new Date(startDateTime.getTime() + durationMs)
+
+    const mode: SessionMode =
+      newSessionType === "video_call" ? "video" : "in_person"
+
+    const result = await createSession({
+      clientId: newSessionClient,
+      type: newSessionType,
+      startTime: startDateTime.toISOString(),
+      endTime: endDateTime.toISOString(),
+      mode,
+    })
+
+    setNewSessionSaving(false)
+
+    if (result.success) {
+      setNieuweSessieOpen(false)
+      // Reset form
+      setNewSessionType("pt_session")
+      setNewSessionClient("")
+      setNewSessionDate("")
+      setNewSessionTime("")
+      setNewSessionDuration("60")
+      // Reload data
+      await loadWeekData()
+    }
+  }
+
+  async function handleSaveAvailability() {
+    setAvailabilitySaving(true)
+
+    const slots = availabilityForm.map((row) => ({
+      dayOfWeek: row.dayOfWeek,
+      startTime: row.start || "08:00",
+      endTime: row.eind || "18:00",
+      active: row.actief,
+    }))
+
+    await updateCoachAvailability(slots)
+    setAvailabilitySaving(false)
+    setBeschikbaarheidOpen(false)
+    // Reload to confirm
+    await loadWeekData()
+  }
+
+  // ================================================================
+  // SESSION -> GRID MAPPING HELPERS
+  // ================================================================
+
+  function getSessionForSlot(dagIdx: number, tijdIdx: number) {
+    const slotDate = weekDates[dagIdx]
+    if (!slotDate) return null
+
+    const slotHour = 7 + tijdIdx // tijdslots start at 07:00
+
+    return sessions.find((s) => {
+      const start = new Date(s.start_time)
+      if (!isSameDay(start, slotDate)) return false
+      return start.getHours() === slotHour && start.getMinutes() < 30
+    })
+  }
+
+  function getSessionGridProps(session: ClientSession) {
+    const start = new Date(session.start_time)
+    const end = new Date(session.end_time)
+    const durationHours = (end.getTime() - start.getTime()) / 3600000
+    // Each time slot is 64px high (h-16)
+    const heightSlots = Math.max(durationHours, 0.5)
+    const heightPx = heightSlots * 64 - 4
+
+    const isVideo =
+      session.mode === "video" || session.type === "video_call"
+    const kleur = isVideo
+      ? "bg-violet-500/15 border-violet-500/30 text-violet-600"
+      : "bg-orange-500/15 border-orange-500/30 text-orange-600"
+
+    return { heightPx, isVideo, kleur }
+  }
+
+  // ================================================================
+  // RENDER
+  // ================================================================
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -323,15 +490,20 @@ export default function CalendarPage() {
       )}
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
-        {/* Kalender grid — 3/4 breedte */}
+        {/* Kalender grid -- 3/4 breedte */}
         <Card className="border-border shadow-sm xl:col-span-3 overflow-hidden p-0 gap-0">
           <CardHeader className="pb-0 pt-4 px-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold text-foreground">
-                Februari 2026
+                {monthYearLabel}
               </CardTitle>
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="size-8">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8"
+                  onClick={goToPreviousWeek}
+                >
                   <ChevronLeft className="size-4" />
                   <span className="sr-only">Vorige week</span>
                 </Button>
@@ -339,10 +511,16 @@ export default function CalendarPage() {
                   variant="outline"
                   size="sm"
                   className="h-8 text-xs border-border"
+                  onClick={goToToday}
                 >
                   Vandaag
                 </Button>
-                <Button variant="ghost" size="icon" className="size-8">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8"
+                  onClick={goToNextWeek}
+                >
                   <ChevronRight className="size-4" />
                   <span className="sr-only">Volgende week</span>
                 </Button>
@@ -375,58 +553,67 @@ export default function CalendarPage() {
             </div>
             {/* Tijdgrid */}
             <div className="max-h-[480px] overflow-y-auto">
-              <div className="grid grid-cols-8">
-                {tijdslots.map((tijd, tijdIdx) => (
-                  <div key={tijd} className="contents">
-                    <div className="flex items-start justify-end pr-2 pt-1 h-16 border-b border-border/50">
-                      <span className="text-[11px] text-muted-foreground">
-                        {tijd}
-                      </span>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-64">
+                  <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-8">
+                  {tijdslots.map((tijd, tijdIdx) => (
+                    <div key={tijd} className="contents">
+                      <div className="flex items-start justify-end pr-2 pt-1 h-16 border-b border-border/50">
+                        <span className="text-[11px] text-muted-foreground">
+                          {tijd}
+                        </span>
+                      </div>
+                      {dagen.map((_, dagIdx) => {
+                        const sessie = getSessionForSlot(dagIdx, tijdIdx)
+                        return (
+                          <div
+                            key={`${tijd}-${dagIdx}`}
+                            className={`relative h-16 border-b border-r border-border/50 ${
+                              dagIdx === huidigeDag ? "bg-primary/[0.02]" : ""
+                            }`}
+                          >
+                            {sessie && (() => {
+                              const { heightPx, isVideo, kleur } =
+                                getSessionGridProps(sessie)
+                              return (
+                                <div
+                                  className={`absolute inset-x-0.5 top-0.5 rounded-md border px-2 py-1 cursor-pointer hover:opacity-90 transition-opacity ${kleur}`}
+                                  style={{
+                                    height: `${heightPx}px`,
+                                  }}
+                                >
+                                  <div className="flex items-center gap-1">
+                                    {isVideo ? (
+                                      <Video className="size-2.5 shrink-0" />
+                                    ) : (
+                                      <MapPin className="size-2.5 shrink-0" />
+                                    )}
+                                    <p className="text-[11px] font-semibold truncate">
+                                      {sessie.client_name}
+                                    </p>
+                                  </div>
+                                  <p className="text-[10px] opacity-75 truncate">
+                                    {formatTime(sessie.start_time)} -{" "}
+                                    {formatTime(sessie.end_time)}
+                                  </p>
+                                </div>
+                              )
+                            })()}
+                          </div>
+                        )
+                      })}
                     </div>
-                    {dagen.map((_, dagIdx) => {
-                      const sessie = sessies.find(
-                        (s) => s.dag === dagIdx && s.slotStart === tijdIdx
-                      )
-                      return (
-                        <div
-                          key={`${tijd}-${dagIdx}`}
-                          className={`relative h-16 border-b border-r border-border/50 ${
-                            dagIdx === huidigeDag ? "bg-primary/[0.02]" : ""
-                          }`}
-                        >
-                          {sessie && (
-                            <div
-                              className={`absolute inset-x-0.5 top-0.5 rounded-md border px-2 py-1 cursor-pointer hover:opacity-90 transition-opacity ${sessie.kleur}`}
-                              style={{
-                                height: `${sessie.duur * 64 - 4}px`,
-                              }}
-                            >
-                              <div className="flex items-center gap-1">
-                                {sessie.modus === "video" ? (
-                                  <Video className="size-2.5 shrink-0" />
-                                ) : (
-                                  <MapPin className="size-2.5 shrink-0" />
-                                )}
-                                <p className="text-[11px] font-semibold truncate">
-                                  {sessie.titel}
-                                </p>
-                              </div>
-                              <p className="text-[10px] opacity-75 truncate">
-                                {sessie.startTijd} - {sessie.eindTijd}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Rechter kolom — 1/4 breedte */}
+        {/* Rechter kolom -- 1/4 breedte */}
         <div className="flex flex-col gap-4">
           {/* Agenda vandaag */}
           <Card className="border-border shadow-sm p-0 gap-0">
@@ -434,56 +621,69 @@ export default function CalendarPage() {
               <CardTitle className="text-sm font-semibold text-foreground">
                 Vandaag
               </CardTitle>
-              <p className="text-xs text-muted-foreground">
-                Woensdag, 26 feb
-              </p>
+              <p className="text-xs text-muted-foreground">{todayLabel}</p>
             </CardHeader>
             <CardContent className="px-4 pb-4">
-              <div className="flex flex-col gap-2.5">
-                {agendaVandaag.map((sessie, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-3 rounded-lg border border-border p-2.5 hover:border-primary/30 transition-colors cursor-pointer"
-                  >
-                    <div
-                      className={`size-8 rounded-md flex items-center justify-center shrink-0 ${
-                        sessie.modus === "locatie"
-                          ? "bg-orange-500/10"
-                          : "bg-primary/10"
-                      }`}
-                    >
-                      {sessie.modus === "video" ? (
-                        <Video className="size-3.5 text-primary" />
-                      ) : (
-                        <MapPin className="size-3.5 text-orange-500" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate">
-                        {sessie.naam}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {sessie.type}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-0.5">
-                      <span className="text-xs font-medium text-foreground">
-                        {sessie.tijd}
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className={`text-[9px] px-1.5 py-0 ${
-                          sessie.status === "bevestigd"
-                            ? "border-emerald-500/30 text-emerald-600"
-                            : "border-border text-muted-foreground"
-                        }`}
+              {isLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="size-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : todaySessions.length === 0 ? (
+                <p className="text-xs text-muted-foreground py-4 text-center">
+                  Geen sessies vandaag
+                </p>
+              ) : (
+                <div className="flex flex-col gap-2.5">
+                  {todaySessions.map((sessie) => {
+                    const isVideo =
+                      sessie.mode === "video" ||
+                      sessie.type === "video_call"
+                    return (
+                      <div
+                        key={sessie.id}
+                        className="flex items-center gap-3 rounded-lg border border-border p-2.5 hover:border-primary/30 transition-colors cursor-pointer"
                       >
-                        {sessie.status}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                        <div
+                          className={`size-8 rounded-md flex items-center justify-center shrink-0 ${
+                            isVideo ? "bg-primary/10" : "bg-orange-500/10"
+                          }`}
+                        >
+                          {isVideo ? (
+                            <Video className="size-3.5 text-primary" />
+                          ) : (
+                            <MapPin className="size-3.5 text-orange-500" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-foreground truncate">
+                            {sessie.client_name}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {typeLabels[sessie.type] || sessie.type}
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-end gap-0.5">
+                          <span className="text-xs font-medium text-foreground">
+                            {formatTime(sessie.start_time)}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className={`text-[9px] px-1.5 py-0 ${
+                              sessie.status === "confirmed"
+                                ? "border-emerald-500/30 text-emerald-600"
+                                : sessie.status === "completed"
+                                  ? "border-emerald-500/30 text-emerald-600"
+                                  : "border-border text-muted-foreground"
+                            }`}
+                          >
+                            {statusLabels[sessie.status] || sessie.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -495,54 +695,60 @@ export default function CalendarPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4">
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">
-                    Totaal sessies
-                  </span>
-                  <span className="text-sm font-semibold text-foreground">
-                    12
-                  </span>
+              {isLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="size-5 animate-spin text-muted-foreground" />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">
-                    PT Sessies
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="size-3 text-orange-500" />
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">
+                      Totaal sessies
+                    </span>
                     <span className="text-sm font-semibold text-foreground">
-                      7
+                      {weekStats?.totalSessions ?? 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">
+                      PT Sessies
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="size-3 text-orange-500" />
+                      <span className="text-sm font-semibold text-foreground">
+                        {weekStats?.byType?.pt_session ?? 0}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">
+                      Video Calls
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <Video className="size-3 text-primary" />
+                      <span className="text-sm font-semibold text-foreground">
+                        {weekStats?.byType?.video_call ?? 0}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="border-t border-border pt-3 flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">
+                      Opkomst
+                    </span>
+                    <span className="text-sm font-semibold text-emerald-600">
+                      {weekStats?.attendanceRate ?? 100}%
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">
+                      No-shows
+                    </span>
+                    <span className="text-sm font-semibold text-foreground">
+                      {weekStats?.noShows ?? 0}
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">
-                    Video Calls
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <Video className="size-3 text-primary" />
-                    <span className="text-sm font-semibold text-foreground">
-                      5
-                    </span>
-                  </div>
-                </div>
-                <div className="border-t border-border pt-3 flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">
-                    Opkomst
-                  </span>
-                  <span className="text-sm font-semibold text-emerald-600">
-                    94%
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">
-                    No-shows
-                  </span>
-                  <span className="text-sm font-semibold text-foreground">
-                    1
-                  </span>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 
@@ -717,7 +923,7 @@ export default function CalendarPage() {
           </DialogHeader>
 
           <div className="flex flex-col gap-2 py-2">
-            {beschikbaarheid.map((dag) => (
+            {availabilityForm.map((dag, idx) => (
               <div key={dag.dag} className="flex items-center gap-3">
                 <div className="w-24 shrink-0">
                   <span
@@ -726,18 +932,41 @@ export default function CalendarPage() {
                     {dag.dag}
                   </span>
                 </div>
-                <Switch defaultChecked={dag.actief} />
+                <Switch
+                  checked={dag.actief}
+                  onCheckedChange={(checked) => {
+                    setAvailabilityForm((prev) => {
+                      const next = [...prev]
+                      next[idx] = { ...next[idx], actief: checked }
+                      return next
+                    })
+                  }}
+                />
                 {dag.actief ? (
                   <div className="flex items-center gap-2 flex-1">
                     <Input
                       type="time"
-                      defaultValue={dag.start}
+                      value={dag.start}
+                      onChange={(e) => {
+                        setAvailabilityForm((prev) => {
+                          const next = [...prev]
+                          next[idx] = { ...next[idx], start: e.target.value }
+                          return next
+                        })
+                      }}
                       className="h-8 text-xs w-28"
                     />
                     <span className="text-xs text-muted-foreground">tot</span>
                     <Input
                       type="time"
-                      defaultValue={dag.eind}
+                      value={dag.eind}
+                      onChange={(e) => {
+                        setAvailabilityForm((prev) => {
+                          const next = [...prev]
+                          next[idx] = { ...next[idx], eind: e.target.value }
+                          return next
+                        })
+                      }}
                       className="h-8 text-xs w-28"
                     />
                   </div>
@@ -761,8 +990,12 @@ export default function CalendarPage() {
             <Button
               size="sm"
               className="bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => setBeschikbaarheidOpen(false)}
+              onClick={handleSaveAvailability}
+              disabled={availabilitySaving}
             >
+              {availabilitySaving ? (
+                <Loader2 className="size-3.5 animate-spin mr-1.5" />
+              ) : null}
               Opslaan
             </Button>
           </DialogFooter>
@@ -788,12 +1021,15 @@ export default function CalendarPage() {
               <label className="text-xs font-medium text-foreground">
                 Type sessie
               </label>
-              <Select defaultValue="pt_sessie">
+              <Select
+                value={newSessionType}
+                onValueChange={(v) => setNewSessionType(v as SessionType)}
+              >
                 <SelectTrigger className="text-sm h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pt_sessie">
+                  <SelectItem value="pt_session">
                     <div className="flex items-center gap-2">
                       <MapPin className="size-3.5 text-orange-500" />
                       PT Sessie (fysiek)
@@ -805,6 +1041,18 @@ export default function CalendarPage() {
                       Video Call (online)
                     </div>
                   </SelectItem>
+                  <SelectItem value="check_in_gesprek">
+                    <div className="flex items-center gap-2">
+                      <Users className="size-3.5 text-primary" />
+                      Check-in gesprek
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="programma_review">
+                    <div className="flex items-center gap-2">
+                      <Clock className="size-3.5 text-primary" />
+                      Programma review
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -813,17 +1061,24 @@ export default function CalendarPage() {
               <label className="text-xs font-medium text-foreground">
                 Client
               </label>
-              <Select>
+              <Select
+                value={newSessionClient}
+                onValueChange={setNewSessionClient}
+              >
                 <SelectTrigger className="text-sm h-9">
                   <SelectValue placeholder="Selecteer een client..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* Placeholder: fetch van Supabase profiles WHERE coach_id = auth.uid() */}
-                  <SelectItem value="sarah">Sarah van Dijk</SelectItem>
-                  <SelectItem value="tom">Tom Bakker</SelectItem>
-                  <SelectItem value="lisa">Lisa de Vries</SelectItem>
-                  <SelectItem value="emma">Emma Jansen</SelectItem>
-                  <SelectItem value="marco">Marco Visser</SelectItem>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name}
+                    </SelectItem>
+                  ))}
+                  {clients.length === 0 && (
+                    <SelectItem value="_none" disabled>
+                      Geen clienten gevonden
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -833,13 +1088,23 @@ export default function CalendarPage() {
                 <label className="text-xs font-medium text-foreground">
                   Datum
                 </label>
-                <Input type="date" className="text-sm h-9" />
+                <Input
+                  type="date"
+                  className="text-sm h-9"
+                  value={newSessionDate}
+                  onChange={(e) => setNewSessionDate(e.target.value)}
+                />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-medium text-foreground">
                   Tijd
                 </label>
-                <Input type="time" className="text-sm h-9" />
+                <Input
+                  type="time"
+                  className="text-sm h-9"
+                  value={newSessionTime}
+                  onChange={(e) => setNewSessionTime(e.target.value)}
+                />
               </div>
             </div>
 
@@ -847,7 +1112,10 @@ export default function CalendarPage() {
               <label className="text-xs font-medium text-foreground">
                 Duur
               </label>
-              <Select defaultValue="60">
+              <Select
+                value={newSessionDuration}
+                onValueChange={setNewSessionDuration}
+              >
                 <SelectTrigger className="text-sm h-9">
                   <SelectValue />
                 </SelectTrigger>
@@ -872,8 +1140,17 @@ export default function CalendarPage() {
             <Button
               size="sm"
               className="bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => setNieuweSessieOpen(false)}
+              onClick={handleCreateSession}
+              disabled={
+                newSessionSaving ||
+                !newSessionClient ||
+                !newSessionDate ||
+                !newSessionTime
+              }
             >
+              {newSessionSaving ? (
+                <Loader2 className="size-3.5 animate-spin mr-1.5" />
+              ) : null}
               Sessie inplannen
             </Button>
           </DialogFooter>
