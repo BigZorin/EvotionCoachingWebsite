@@ -13,8 +13,8 @@ COPY apps/web/package.json ./apps/web/package.json
 COPY packages/database/package.json ./packages/database/package.json
 COPY packages/auth/package.json ./packages/auth/package.json
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies (ignore scripts - prisma generate runs in builder stage)
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # --- Builder stage ---
 FROM base AS builder
