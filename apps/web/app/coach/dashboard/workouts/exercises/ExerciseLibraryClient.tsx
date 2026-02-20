@@ -379,7 +379,7 @@ export default function ExerciseLibraryClient() {
       </div>
 
       {/* Filters */}
-      <Card className="bg-white border-gray-200">
+      <Card className="bg-card border-border">
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Search */}
@@ -391,7 +391,7 @@ export default function ExerciseLibraryClient() {
                   placeholder="Zoek op naam of beschrijving..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-white border-gray-200"
+                  className="pl-10 bg-card border-border"
                 />
               </div>
             </div>
@@ -400,7 +400,7 @@ export default function ExerciseLibraryClient() {
             <div>
               <Label>Categorie</Label>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="bg-white border-gray-200">
+                <SelectTrigger className="bg-card border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -421,7 +421,7 @@ export default function ExerciseLibraryClient() {
                 value={difficultyFilter}
                 onValueChange={setDifficultyFilter}
               >
-                <SelectTrigger className="bg-white border-gray-200">
+                <SelectTrigger className="bg-card border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -459,7 +459,7 @@ export default function ExerciseLibraryClient() {
 
       {/* Exercise Grid */}
       {filteredExercises.length === 0 ? (
-        <Card className="bg-white border-gray-200">
+        <Card className="bg-card border-border">
           <CardContent className="flex flex-col items-center justify-center min-h-[300px] space-y-4">
             <Dumbbell className="w-16 h-16 text-muted-foreground" />
             <div className="text-center space-y-2">
@@ -477,7 +477,7 @@ export default function ExerciseLibraryClient() {
           {filteredExercises.map((exercise) => (
             <Card
               key={exercise.id}
-              className="bg-white border-gray-200 hover:border-gray-300 transition-all"
+              className="bg-card border-border hover:border-primary/30 transition-all"
             >
               <CardHeader className="p-0">
                 {exercise.thumbnailUrl || exercise.videoUrl ? (

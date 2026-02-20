@@ -132,7 +132,7 @@ export default function EditRecipeClient() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1e1839]"></div>
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
       </div>
     )
   }
@@ -144,15 +144,15 @@ export default function EditRecipeClient() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Recept Bewerken</h1>
-          <p className="text-gray-600">{title}</p>
+          <h1 className="text-3xl font-bold text-foreground">Recept Bewerken</h1>
+          <p className="text-muted-foreground">{title}</p>
         </div>
       </div>
 
       {/* Basic Info */}
-      <Card className="bg-white border-gray-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Basisgegevens</h2>
+          <h2 className="text-lg font-semibold text-foreground">Basisgegevens</h2>
           <div className="space-y-2">
             <Label>Titel *</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -183,9 +183,9 @@ export default function EditRecipeClient() {
       </Card>
 
       {/* Macros */}
-      <Card className="bg-white border-gray-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Voedingswaarden (per portie)</h2>
+          <h2 className="text-lg font-semibold text-foreground">Voedingswaarden (per portie)</h2>
           <div className="grid grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label>Calorieën</Label>
@@ -208,10 +208,10 @@ export default function EditRecipeClient() {
       </Card>
 
       {/* Ingredients */}
-      <Card className="bg-white border-gray-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Ingrediënten</h2>
+            <h2 className="text-lg font-semibold text-foreground">Ingrediënten</h2>
             <Button variant="outline" size="sm" onClick={addIngredient}>
               <Plus className="h-4 w-4 mr-1" /> Toevoegen
             </Button>
@@ -222,7 +222,7 @@ export default function EditRecipeClient() {
                 <Input placeholder="Ingredient" value={ing.name} onChange={(e) => updateIng(idx, "name", e.target.value)} className="flex-1" />
                 <Input type="number" placeholder="Hoev." value={ing.amount} onChange={(e) => updateIng(idx, "amount", e.target.value)} className="w-28" />
                 <Input placeholder="Eenheid" value={ing.unit} onChange={(e) => updateIng(idx, "unit", e.target.value)} className="w-24" />
-                <Button variant="ghost" size="sm" onClick={() => removeIngredient(idx)} className="text-gray-400 hover:text-red-500">
+                <Button variant="ghost" size="sm" onClick={() => removeIngredient(idx)} className="text-muted-foreground hover:text-red-500">
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -232,15 +232,15 @@ export default function EditRecipeClient() {
       </Card>
 
       {/* Tags */}
-      <Card className="bg-white border-gray-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Tags</h2>
+          <h2 className="text-lg font-semibold text-foreground">Tags</h2>
           <div className="flex flex-wrap gap-2">
             {COMMON_TAGS.map((tag) => (
               <Badge
                 key={tag}
                 variant={tags.includes(tag) ? "default" : "outline"}
-                className={`cursor-pointer ${tags.includes(tag) ? "bg-[#1e1839] hover:bg-[#2a2054]" : "hover:bg-gray-100"}`}
+                className={`cursor-pointer ${tags.includes(tag) ? "bg-primary hover:bg-primary/90" : "hover:bg-secondary"}`}
                 onClick={() => toggleTag(tag)}
               >
                 {tag}
@@ -251,9 +251,9 @@ export default function EditRecipeClient() {
       </Card>
 
       {/* Instructions */}
-      <Card className="bg-white border-gray-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Bereidingswijze</h2>
+          <h2 className="text-lg font-semibold text-foreground">Bereidingswijze</h2>
           <Textarea value={instructions} onChange={(e) => setInstructions(e.target.value)} rows={8} />
         </CardContent>
       </Card>
@@ -261,7 +261,7 @@ export default function EditRecipeClient() {
       {/* Save */}
       <div className="flex justify-end gap-3 pb-8">
         <Button variant="outline" onClick={() => router.back()}>Annuleren</Button>
-        <Button onClick={handleSave} disabled={saving || !title.trim()} className="bg-[#1e1839] hover:bg-[#2a2054] text-white">
+        <Button onClick={handleSave} disabled={saving || !title.trim()} className="bg-primary hover:bg-primary/90 text-primary-foreground">
           <Save className="h-4 w-4 mr-2" />
           {saving ? "Opslaan..." : "Wijzigingen Opslaan"}
         </Button>

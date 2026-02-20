@@ -196,13 +196,13 @@ export default function TemplateBuilderClient() {
       <div className="flex items-center gap-4 mb-8">
         <Link
           href="/coach/dashboard/check-ins/templates"
-          className="p-2 hover:bg-gray-100 rounded-lg transition"
+          className="p-2 hover:bg-secondary rounded-lg transition"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Nieuw Template</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-foreground">Nieuw Template</h1>
+          <p className="text-sm text-muted-foreground">
             Definieer de vragen voor je check-in formulier
           </p>
         </div>
@@ -217,13 +217,13 @@ export default function TemplateBuilderClient() {
 
       {/* Template settings */}
       <div className="bg-white rounded-xl border p-6 shadow-sm mb-6">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
           Template instellingen
         </h2>
 
         <div className="grid gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Template naam *
             </label>
             <input
@@ -231,12 +231,12 @@ export default function TemplateBuilderClient() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Bijv. Wekelijkse voortgang check-in"
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1e1839]/20 focus:border-[#1e1839] outline-none"
+              className="w-full px-3 py-2 border rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-ring outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Beschrijving
             </label>
             <input
@@ -244,19 +244,19 @@ export default function TemplateBuilderClient() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Korte beschrijving van dit template..."
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1e1839]/20 focus:border-[#1e1839] outline-none"
+              className="w-full px-3 py-2 border rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-ring outline-none"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 Type check-in
               </label>
               <select
                 value={checkInType}
                 onChange={(e) => setCheckInType(e.target.value as "daily" | "weekly")}
-                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1e1839]/20 focus:border-[#1e1839] outline-none"
+                className="w-full px-3 py-2 border rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-ring outline-none"
               >
                 <option value="weekly">Wekelijks</option>
                 <option value="daily">Dagelijks</option>
@@ -268,9 +268,9 @@ export default function TemplateBuilderClient() {
                   type="checkbox"
                   checked={isDefault}
                   onChange={(e) => setIsDefault(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 text-[#1e1839] focus:ring-[#1e1839]"
+                  className="w-4 h-4 rounded border-border text-primary focus-visible:ring-ring"
                 />
-                <span className="text-sm text-gray-700">
+                <span className="text-sm text-foreground">
                   Standaard template (voor alle clients zonder toewijzing)
                 </span>
               </label>
@@ -282,7 +282,7 @@ export default function TemplateBuilderClient() {
       {/* Questions */}
       <div className="space-y-4 mb-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
             Vragen ({questions.length})
           </h2>
         </div>
@@ -298,15 +298,15 @@ export default function TemplateBuilderClient() {
                 <button
                   onClick={() => moveQuestion(index, "up")}
                   disabled={index === 0}
-                  className="p-0.5 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                  className="p-0.5 text-muted-foreground hover:text-muted-foreground disabled:opacity-30"
                 >
                   <ChevronUp className="h-4 w-4" />
                 </button>
-                <GripVertical className="h-4 w-4 text-gray-300" />
+                <GripVertical className="h-4 w-4 text-muted-foreground/50" />
                 <button
                   onClick={() => moveQuestion(index, "down")}
                   disabled={index === questions.length - 1}
-                  className="p-0.5 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                  className="p-0.5 text-muted-foreground hover:text-muted-foreground disabled:opacity-30"
                 >
                   <ChevronDown className="h-4 w-4" />
                 </button>
@@ -315,7 +315,7 @@ export default function TemplateBuilderClient() {
               <div className="flex-1 space-y-3">
                 {/* Question number + text */}
                 <div className="flex items-start gap-3">
-                  <span className="text-sm font-bold text-gray-400 mt-2">
+                  <span className="text-sm font-bold text-muted-foreground mt-2">
                     {index + 1}.
                   </span>
                   <input
@@ -325,14 +325,14 @@ export default function TemplateBuilderClient() {
                       updateQuestion(q.id, { question: e.target.value })
                     }
                     placeholder="Typ je vraag..."
-                    className="flex-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1e1839]/20 focus:border-[#1e1839] outline-none"
+                    className="flex-1 px-3 py-2 border rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-ring outline-none"
                   />
                 </div>
 
                 {/* Type + settings */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pl-7">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">
+                    <label className="block text-xs text-muted-foreground mb-1">
                       Type
                     </label>
                     <select
@@ -342,7 +342,7 @@ export default function TemplateBuilderClient() {
                           questionType: e.target.value as QuestionType,
                         })
                       }
-                      className="w-full px-2 py-1.5 border rounded text-xs focus:ring-1 focus:ring-[#1e1839]/20 outline-none"
+                      className="w-full px-2 py-1.5 border rounded text-xs focus-visible:ring-1 focus-visible:ring-ring outline-none"
                     >
                       {QUESTION_TYPES.map((t) => (
                         <option key={t.value} value={t.value}>
@@ -350,12 +350,12 @@ export default function TemplateBuilderClient() {
                         </option>
                       ))}
                     </select>
-                    <p className="text-[10px] text-gray-400 mt-0.5">
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
                       {QUESTION_TYPES.find(t => t.value === q.questionType)?.description}
                     </p>
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">
+                    <label className="block text-xs text-muted-foreground mb-1">
                       Dataveld
                     </label>
                     <select
@@ -363,7 +363,7 @@ export default function TemplateBuilderClient() {
                       onChange={(e) =>
                         updateQuestion(q.id, { fieldKey: e.target.value })
                       }
-                      className="w-full px-2 py-1.5 border rounded text-xs focus:ring-1 focus:ring-[#1e1839]/20 outline-none"
+                      className="w-full px-2 py-1.5 border rounded text-xs focus-visible:ring-1 focus-visible:ring-ring outline-none"
                     >
                       {FIELD_KEY_OPTIONS.map((f) => (
                         <option key={f.value} value={f.value}>
@@ -375,7 +375,7 @@ export default function TemplateBuilderClient() {
                   <div className="flex items-end gap-3">
                     {q.questionType === "number" && (
                       <div className="flex-1">
-                        <label className="block text-xs text-gray-500 mb-1">
+                        <label className="block text-xs text-muted-foreground mb-1">
                           Eenheid
                         </label>
                         <input
@@ -385,7 +385,7 @@ export default function TemplateBuilderClient() {
                             updateQuestion(q.id, { unit: e.target.value })
                           }
                           placeholder="kg"
-                          className="w-full px-2 py-1.5 border rounded text-xs focus:ring-1 focus:ring-[#1e1839]/20 outline-none"
+                          className="w-full px-2 py-1.5 border rounded text-xs focus-visible:ring-1 focus-visible:ring-ring outline-none"
                         />
                       </div>
                     )}
@@ -396,9 +396,9 @@ export default function TemplateBuilderClient() {
                         onChange={(e) =>
                           updateQuestion(q.id, { isRequired: e.target.checked })
                         }
-                        className="w-3.5 h-3.5 rounded border-gray-300 text-[#1e1839]"
+                        className="w-3.5 h-3.5 rounded border-border text-primary"
                       />
-                      <span className="text-xs text-gray-600">Verplicht</span>
+                      <span className="text-xs text-muted-foreground">Verplicht</span>
                     </label>
                   </div>
                 </div>
@@ -406,7 +406,7 @@ export default function TemplateBuilderClient() {
                 {/* Scale labels */}
                 {q.questionType === "scale" && (
                   <div className="pl-7">
-                    <label className="block text-xs text-gray-500 mb-1">
+                    <label className="block text-xs text-muted-foreground mb-1">
                       Schaal labels
                     </label>
                     <div className="flex gap-2">
@@ -418,7 +418,7 @@ export default function TemplateBuilderClient() {
                           onChange={(e) =>
                             updateScaleLabel(q.id, i, e.target.value)
                           }
-                          className="flex-1 px-2 py-1 border rounded text-xs text-center focus:ring-1 focus:ring-[#1e1839]/20 outline-none"
+                          className="flex-1 px-2 py-1 border rounded text-xs text-center focus-visible:ring-1 focus-visible:ring-ring outline-none"
                           placeholder={`${i + 1}`}
                         />
                       ))}
@@ -429,10 +429,10 @@ export default function TemplateBuilderClient() {
                 {/* Multiple choice options */}
                 {q.questionType === "multiple_choice" && (
                   <div className="pl-7 space-y-2">
-                    <label className="block text-xs text-gray-500">Opties</label>
+                    <label className="block text-xs text-muted-foreground">Opties</label>
                     {q.options.map((option, optIdx) => (
                       <div key={optIdx} className="flex items-center gap-2">
-                        <span className="text-xs text-gray-400 w-4">
+                        <span className="text-xs text-muted-foreground w-4">
                           {String.fromCharCode(65 + optIdx)}.
                         </span>
                         <input
@@ -441,12 +441,12 @@ export default function TemplateBuilderClient() {
                           onChange={(e) =>
                             updateOption(q.id, optIdx, e.target.value)
                           }
-                          className="flex-1 px-2 py-1 border rounded text-xs focus:ring-1 focus:ring-[#1e1839]/20 outline-none"
+                          className="flex-1 px-2 py-1 border rounded text-xs focus-visible:ring-1 focus-visible:ring-ring outline-none"
                         />
                         {q.options.length > 2 && (
                           <button
                             onClick={() => removeOption(q.id, optIdx)}
-                            className="p-1 text-gray-400 hover:text-red-500"
+                            className="p-1 text-muted-foreground hover:text-red-500"
                           >
                             <Trash2 className="h-3 w-3" />
                           </button>
@@ -455,7 +455,7 @@ export default function TemplateBuilderClient() {
                     ))}
                     <button
                       onClick={() => addOption(q.id)}
-                      className="text-xs text-[#1e1839] hover:underline flex items-center gap-1"
+                      className="text-xs text-primary hover:underline flex items-center gap-1"
                     >
                       <Plus className="h-3 w-3" /> Optie toevoegen
                     </button>
@@ -466,7 +466,7 @@ export default function TemplateBuilderClient() {
               {/* Delete button */}
               <button
                 onClick={() => removeQuestion(q.id)}
-                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -477,7 +477,7 @@ export default function TemplateBuilderClient() {
         {/* Add question button */}
         <button
           onClick={addQuestion}
-          className="w-full py-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-[#1e1839] hover:text-[#1e1839] transition flex items-center justify-center gap-2 text-sm font-medium"
+          className="w-full py-4 border-2 border-dashed border-border rounded-xl text-muted-foreground hover:border-primary hover:text-primary transition flex items-center justify-center gap-2 text-sm font-medium"
         >
           <Plus className="h-5 w-5" />
           Vraag toevoegen
@@ -485,17 +485,17 @@ export default function TemplateBuilderClient() {
       </div>
 
       {/* Save button */}
-      <div className="sticky bottom-0 bg-gray-50 -mx-6 px-6 py-4 border-t flex items-center justify-end gap-3">
+      <div className="sticky bottom-0 bg-secondary/50 -mx-6 px-6 py-4 border-t flex items-center justify-end gap-3">
         <Link
           href="/coach/dashboard/check-ins/templates"
-          className="px-4 py-2.5 text-sm text-gray-600 hover:text-gray-800 transition"
+          className="px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground transition"
         >
           Annuleren
         </Link>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-2.5 bg-[#1e1839] text-white rounded-lg hover:bg-[#2a2054] transition text-sm font-medium disabled:opacity-60"
+          className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-sm font-medium disabled:opacity-60"
         >
           <Save className="h-4 w-4" />
           {saving ? "Opslaan..." : "Template opslaan"}

@@ -70,7 +70,7 @@ export default function RecipeDetailClient() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1e1839]"></div>
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
       </div>
     )
   }
@@ -78,7 +78,7 @@ export default function RecipeDetailClient() {
   if (!recipe) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600">Recept niet gevonden</p>
+        <p className="text-muted-foreground">Recept niet gevonden</p>
         <Button variant="outline" onClick={() => router.back()} className="mt-4">
           Terug
         </Button>
@@ -96,7 +96,7 @@ export default function RecipeDetailClient() {
           <Button variant="outline" size="sm" onClick={() => router.back()}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-3xl font-bold text-gray-900">{recipe.title}</h1>
+          <h1 className="text-3xl font-bold text-foreground">{recipe.title}</h1>
           {recipe.source === "spoonacular" && (
             <Badge variant="secondary">Spoonacular</Badge>
           )}
@@ -113,7 +113,7 @@ export default function RecipeDetailClient() {
             variant="outline"
             onClick={handleDelete}
             disabled={deleting}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="text-destructive hover:text-destructive hover:bg-destructive/5"
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Verwijderen
@@ -126,7 +126,7 @@ export default function RecipeDetailClient() {
         <div className="lg:col-span-2 space-y-6">
           {/* Image */}
           {recipe.image_url && (
-            <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
+            <div className="aspect-video rounded-lg overflow-hidden bg-secondary">
               <img
                 src={recipe.image_url}
                 alt={recipe.title}
@@ -137,24 +137,24 @@ export default function RecipeDetailClient() {
 
           {/* Description */}
           {recipe.description && (
-            <Card className="bg-white border-gray-200 shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-6">
-                <p className="text-gray-700">{recipe.description}</p>
+                <p className="text-foreground">{recipe.description}</p>
               </CardContent>
             </Card>
           )}
 
           {/* Ingredients */}
           {recipe.recipe_ingredients?.length > 0 && (
-            <Card className="bg-white border-gray-200 shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Ingrediënten</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-4">Ingrediënten</h2>
                 <ul className="space-y-2">
                   {recipe.recipe_ingredients
                     .sort((a, b) => a.order_index - b.order_index)
                     .map((ing) => (
-                      <li key={ing.id} className="flex items-center gap-2 text-gray-700">
-                        <span className="w-1.5 h-1.5 bg-[#1e1839] rounded-full shrink-0" />
+                      <li key={ing.id} className="flex items-center gap-2 text-foreground">
+                        <span className="w-1.5 h-1.5 bg-primary rounded-full shrink-0" />
                         {ing.amount && (
                           <span className="font-medium">
                             {ing.amount} {ing.unit}
@@ -170,10 +170,10 @@ export default function RecipeDetailClient() {
 
           {/* Instructions */}
           {recipe.instructions && (
-            <Card className="bg-white border-gray-200 shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Bereidingswijze</h2>
-                <div className="text-gray-700 whitespace-pre-line">{recipe.instructions}</div>
+                <h2 className="text-lg font-semibold text-foreground mb-4">Bereidingswijze</h2>
+                <div className="text-foreground whitespace-pre-line">{recipe.instructions}</div>
               </CardContent>
             </Card>
           )}
@@ -182,13 +182,13 @@ export default function RecipeDetailClient() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Macros */}
-          <Card className="bg-white border-gray-200 shadow-sm">
+          <Card className="bg-card border-border shadow-sm">
             <CardContent className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Voedingswaarden</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-4">Voedingswaarden</h2>
               <div className="space-y-3">
                 {recipe.calories != null && (
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-gray-600">
+                    <span className="flex items-center gap-2 text-muted-foreground">
                       <Flame className="h-4 w-4 text-orange-500" />
                       Calorieën
                     </span>
@@ -197,19 +197,19 @@ export default function RecipeDetailClient() {
                 )}
                 {recipe.protein_grams != null && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Eiwit</span>
+                    <span className="text-muted-foreground">Eiwit</span>
                     <span className="font-semibold">{recipe.protein_grams}g</span>
                   </div>
                 )}
                 {recipe.carbs_grams != null && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Koolhydraten</span>
+                    <span className="text-muted-foreground">Koolhydraten</span>
                     <span className="font-semibold">{recipe.carbs_grams}g</span>
                   </div>
                 )}
                 {recipe.fat_grams != null && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Vet</span>
+                    <span className="text-muted-foreground">Vet</span>
                     <span className="font-semibold">{recipe.fat_grams}g</span>
                   </div>
                 )}
@@ -218,11 +218,11 @@ export default function RecipeDetailClient() {
           </Card>
 
           {/* Info */}
-          <Card className="bg-white border-gray-200 shadow-sm">
+          <Card className="bg-card border-border shadow-sm">
             <CardContent className="p-6 space-y-3">
               {recipe.servings && (
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-gray-600">
+                  <span className="flex items-center gap-2 text-muted-foreground">
                     <Users className="h-4 w-4" />
                     Porties
                   </span>
@@ -231,7 +231,7 @@ export default function RecipeDetailClient() {
               )}
               {totalTime > 0 && (
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-gray-600">
+                  <span className="flex items-center gap-2 text-muted-foreground">
                     <Clock className="h-4 w-4" />
                     Totale tijd
                   </span>
@@ -243,9 +243,9 @@ export default function RecipeDetailClient() {
 
           {/* Tags */}
           {recipe.tags && recipe.tags.length > 0 && (
-            <Card className="bg-white border-gray-200 shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">Tags</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-3">Tags</h2>
                 <div className="flex flex-wrap gap-2">
                   {recipe.tags.map((tag) => (
                     <Badge key={tag} variant="outline">

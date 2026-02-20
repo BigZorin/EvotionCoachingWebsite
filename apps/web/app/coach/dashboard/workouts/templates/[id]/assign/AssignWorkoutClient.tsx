@@ -120,67 +120,67 @@ export default function AssignWorkoutClient({ templateId }: { templateId: string
         <Button
           variant="ghost"
           onClick={() => router.back()}
-          className="mb-4 text-gray-600 hover:text-gray-900"
+          className="mb-4 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Terug
         </Button>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Workout Toewijzen</h1>
-        <p className="text-gray-600">Wijs deze workout toe aan een client</p>
+        <h1 className="text-3xl font-bold text-foreground mb-2">Workout Toewijzen</h1>
+        <p className="text-muted-foreground">Wijs deze workout toe aan een client</p>
           </div>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="text-gray-900 text-xl flex items-center gap-3">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1e1839]"></div>
+              <div className="text-foreground text-xl flex items-center gap-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                 Laden...
               </div>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-12">
               <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Er is een fout opgetreden</h3>
-              <p className="text-gray-600">{error}</p>
+              <h3 className="text-xl font-semibold text-foreground mb-2">Er is een fout opgetreden</h3>
+              <p className="text-muted-foreground">{error}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column - Workout Details */}
-              <Card className="bg-white border-gray-200 shadow-sm">
+              <Card className="bg-card border-border shadow-sm">
                 <CardContent className="p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Workout Details</h2>
+                  <h2 className="text-lg font-semibold text-foreground mb-4">Workout Details</h2>
 
                   {template && (
                     <div className="space-y-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-500">NAAM</p>
-                        <p className="text-lg font-semibold text-gray-900">{template.name}</p>
+                        <p className="text-sm font-medium text-muted-foreground">NAAM</p>
+                        <p className="text-lg font-semibold text-foreground">{template.name}</p>
                       </div>
 
                       {template.description && (
                         <div>
-                          <p className="text-sm font-medium text-gray-500">BESCHRIJVING</p>
-                          <p className="text-gray-700">{template.description}</p>
+                          <p className="text-sm font-medium text-muted-foreground">BESCHRIJVING</p>
+                          <p className="text-foreground">{template.description}</p>
                         </div>
                       )}
 
                       {template.durationMinutes && (
                         <div>
-                          <p className="text-sm font-medium text-gray-500">DUUR</p>
-                          <p className="text-gray-700">{template.durationMinutes} minuten</p>
+                          <p className="text-sm font-medium text-muted-foreground">DUUR</p>
+                          <p className="text-foreground">{template.durationMinutes} minuten</p>
                         </div>
                       )}
 
                       <div>
-                        <p className="text-sm font-medium text-gray-500 mb-2">
+                        <p className="text-sm font-medium text-muted-foreground mb-2">
                           OEFENINGEN ({template.exercises.length})
                         </p>
                         <div className="space-y-2">
                           {template.exercises.map((ex, index) => (
                             <div key={index} className="flex items-center gap-2 text-sm">
-                              <span className="w-1.5 h-1.5 bg-[#1e1839] rounded-full"></span>
-                              <span className="text-gray-700">{ex.exercise.name}</span>
+                              <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
+                              <span className="text-foreground">{ex.exercise.name}</span>
                               {ex.sets && ex.reps && (
-                                <span className="text-gray-500">({ex.sets}x{ex.reps})</span>
+                                <span className="text-muted-foreground">({ex.sets}x{ex.reps})</span>
                               )}
                             </div>
                           ))}
@@ -192,9 +192,9 @@ export default function AssignWorkoutClient({ templateId }: { templateId: string
               </Card>
 
               {/* Right Column - Assignment Form */}
-              <Card className="bg-white border-gray-200 shadow-sm">
+              <Card className="bg-card border-border shadow-sm">
                 <CardContent className="p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Toewijzen Aan</h2>
+                  <h2 className="text-lg font-semibold text-foreground mb-4">Toewijzen Aan</h2>
 
                   <div className="space-y-4">
                     <div>
@@ -226,7 +226,7 @@ export default function AssignWorkoutClient({ templateId }: { templateId: string
                         type="date"
                         value={scheduledDate}
                         onChange={(e) => setScheduledDate(e.target.value)}
-                        className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e1839]"
+                        className="mt-1 w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus-visible:ring-ring"
                       />
                     </div>
 
@@ -245,7 +245,7 @@ export default function AssignWorkoutClient({ templateId }: { templateId: string
                     <Button
                       onClick={handleAssign}
                       disabled={isAssigning || !selectedClientId}
-                      className="w-full bg-[#1e1839] hover:bg-[#2a2054] text-white"
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                     >
                       {isAssigning ? (
                         <>

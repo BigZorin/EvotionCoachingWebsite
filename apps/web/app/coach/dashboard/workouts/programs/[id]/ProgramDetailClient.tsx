@@ -216,7 +216,7 @@ export default function ProgramDetailClient({ programId }: { programId: string }
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -224,7 +224,7 @@ export default function ProgramDetailClient({ programId }: { programId: string }
   if (!program) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-500">Programma niet gevonden</p>
+        <p className="text-muted-foreground">Programma niet gevonden</p>
         <Button variant="outline" className="mt-4" onClick={() => router.back()}>
           Terug
         </Button>
@@ -256,7 +256,7 @@ export default function ProgramDetailClient({ programId }: { programId: string }
         <Button
           onClick={handleSave}
           disabled={isSaving}
-          className="bg-[#1e1839] hover:bg-[#2a2054] text-white"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
           Opslaan
@@ -273,14 +273,14 @@ export default function ProgramDetailClient({ programId }: { programId: string }
             <div>
               <Label>Banner</Label>
               <div className="mt-2">
-                <div className="w-full h-36 rounded-lg overflow-hidden bg-gradient-to-br from-[#1e1839] to-[#3d2d6b] flex items-center justify-center">
+                <div className="w-full h-36 rounded-lg overflow-hidden bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
                   {bannerUrl ? (
                     <img src={bannerUrl} alt="Banner" className="w-full h-full object-cover" />
                   ) : (
                     <ImageIcon className="w-10 h-10 text-white/30" />
                   )}
                 </div>
-                <label className="mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                <label className="mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-card border border-border rounded-lg cursor-pointer hover:bg-secondary/50">
                   {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                   <span className="text-sm">{isUploading ? "Uploaden..." : "Wijzig banner"}</span>
                   <input type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} disabled={isUploading} />
@@ -299,14 +299,14 @@ export default function ProgramDetailClient({ programId }: { programId: string }
             </div>
 
             {/* Stats */}
-            <div className="pt-2 border-t space-y-2 text-sm text-gray-500">
+            <div className="pt-2 border-t space-y-2 text-sm text-muted-foreground">
               <div className="flex justify-between">
                 <span>Blokken</span>
-                <span className="font-medium text-gray-900">{blocks.length}</span>
+                <span className="font-medium text-foreground">{blocks.length}</span>
               </div>
               <div className="flex justify-between">
                 <span>Totaal workouts</span>
-                <span className="font-medium text-gray-900">
+                <span className="font-medium text-foreground">
                   {blocks.reduce((sum: number, b: any) => sum + (b.block_workouts?.length || 0), 0)}
                 </span>
               </div>
@@ -327,8 +327,8 @@ export default function ProgramDetailClient({ programId }: { programId: string }
           {blocks.length === 0 && (
             <Card>
               <CardContent className="p-8 text-center">
-                <Dumbbell className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-500">Voeg een blok toe om workouts te organiseren</p>
+                <Dumbbell className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">Voeg een blok toe om workouts te organiseren</p>
                 <Button variant="outline" size="sm" onClick={handleAddBlock} className="mt-4">
                   <Plus className="w-4 h-4 mr-1" />
                   Eerste Blok
@@ -341,21 +341,21 @@ export default function ProgramDetailClient({ programId }: { programId: string }
             <Card key={block.id} className="overflow-hidden">
               {/* Block header */}
               <div
-                className="flex items-center gap-3 px-4 py-3 bg-gray-50 border-b cursor-pointer"
+                className="flex items-center gap-3 px-4 py-3 bg-secondary/50 border-b cursor-pointer"
                 onClick={() => toggleBlock(block.id)}
               >
                 <div className="flex flex-col gap-0.5">
                   <button
                     onClick={(e) => { e.stopPropagation(); handleMoveBlock(blockIndex, "up") }}
                     disabled={blockIndex === 0}
-                    className="text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                    className="text-muted-foreground hover:text-foreground disabled:opacity-30"
                   >
                     <ChevronUp className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleMoveBlock(blockIndex, "down") }}
                     disabled={blockIndex === blocks.length - 1}
-                    className="text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                    className="text-muted-foreground hover:text-foreground disabled:opacity-30"
                   >
                     <ChevronDown className="w-3.5 h-3.5" />
                   </button>
@@ -365,7 +365,7 @@ export default function ProgramDetailClient({ programId }: { programId: string }
 
                 <div className="flex-1 min-w-0">
                   <span className="font-medium text-sm">{block.name}</span>
-                  <span className="text-xs text-gray-500 ml-2">
+                  <span className="text-xs text-muted-foreground ml-2">
                     {block.duration_weeks} weken · {block.block_workouts?.length || 0} workouts
                   </span>
                 </div>
@@ -428,39 +428,39 @@ export default function ProgramDetailClient({ programId }: { programId: string }
                     </div>
 
                     {(!block.block_workouts || block.block_workouts.length === 0) && (
-                      <p className="text-sm text-gray-400 text-center py-4">Nog geen workouts</p>
+                      <p className="text-sm text-muted-foreground text-center py-4">Nog geen workouts</p>
                     )}
 
                     <div className="space-y-2">
                       {(block.block_workouts || []).map((bw: any, wIndex: number) => (
                         <div
                           key={bw.id}
-                          className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg"
+                          className="flex items-center gap-2 px-3 py-2 bg-card border border-border rounded-lg"
                         >
                           <div className="flex flex-col gap-0.5">
                             <button
                               onClick={() => handleMoveWorkout(block.id, wIndex, "up")}
                               disabled={wIndex === 0}
-                              className="text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                              className="text-muted-foreground hover:text-foreground disabled:opacity-30"
                             >
                               <ChevronUp className="w-3 h-3" />
                             </button>
                             <button
                               onClick={() => handleMoveWorkout(block.id, wIndex, "down")}
                               disabled={wIndex === (block.block_workouts?.length || 0) - 1}
-                              className="text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                              className="text-muted-foreground hover:text-foreground disabled:opacity-30"
                             >
                               <ChevronDown className="w-3 h-3" />
                             </button>
                           </div>
 
-                          <Dumbbell className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          <Dumbbell className="w-4 h-4 text-muted-foreground flex-shrink-0" />
 
                           <div className="flex-1 min-w-0">
                             <span className="text-sm font-medium">
                               {bw.workout_templates?.name || "Onbekende template"}
                             </span>
-                            <span className="text-xs text-gray-400 ml-2">
+                            <span className="text-xs text-muted-foreground ml-2">
                               {bw.workout_templates?.workout_template_exercises?.length || 0} oefeningen
                             </span>
                           </div>
@@ -473,7 +473,7 @@ export default function ProgramDetailClient({ programId }: { programId: string }
 
                           <button
                             onClick={() => handleRemoveWorkout(bw.id)}
-                            className="text-gray-400 hover:text-red-600 transition-colors"
+                            className="text-muted-foreground hover:text-red-600 transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

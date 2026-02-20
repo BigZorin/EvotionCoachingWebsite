@@ -155,16 +155,16 @@ export default function CreateMealPlanClient() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Nieuw Meal Plan</h1>
-          <p className="text-gray-600">Stel een weekschema samen met recepten</p>
+          <h1 className="text-3xl font-bold text-foreground">Nieuw Meal Plan</h1>
+          <p className="text-muted-foreground">Stel een weekschema samen met recepten</p>
         </div>
       </div>
 
       {/* Basic info + macros */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white border-gray-200 shadow-sm">
+        <Card className="bg-card border-border shadow-sm">
           <CardContent className="p-6 space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900">Basisgegevens</h2>
+            <h2 className="text-lg font-semibold text-foreground">Basisgegevens</h2>
             <div className="space-y-2">
               <Label>Naam *</Label>
               <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Bijv. Cut Schema Week 1" />
@@ -176,9 +176,9 @@ export default function CreateMealPlanClient() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-gray-200 shadow-sm">
+        <Card className="bg-card border-border shadow-sm">
           <CardContent className="p-6 space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900">Macro Targets (per dag)</h2>
+            <h2 className="text-lg font-semibold text-foreground">Macro Targets (per dag)</h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Calorieën</Label>
@@ -202,16 +202,16 @@ export default function CreateMealPlanClient() {
       </div>
 
       {/* Week grid */}
-      <Card className="bg-white border-gray-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Weekoverzicht</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">Weekoverzicht</h2>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
                 <tr>
-                  <th className="text-left text-sm font-medium text-gray-500 p-2 w-24"></th>
+                  <th className="text-left text-sm font-medium text-muted-foreground p-2 w-24"></th>
                   {DAYS.map((day) => (
-                    <th key={day.num} className="text-center text-sm font-medium text-gray-700 p-2 min-w-[140px]">
+                    <th key={day.num} className="text-center text-sm font-medium text-foreground p-2 min-w-[140px]">
                       <div>{day.label}</div>
                       {getDayCalories(day.num) > 0 && (
                         <div className="text-xs text-orange-600 font-normal mt-1">
@@ -224,14 +224,14 @@ export default function CreateMealPlanClient() {
               </thead>
               <tbody>
                 {MEAL_TYPES.map((meal) => (
-                  <tr key={meal.key} className="border-t border-gray-100">
-                    <td className="text-sm font-medium text-gray-600 p-2 align-top">{meal.label}</td>
+                  <tr key={meal.key} className="border-t border-border">
+                    <td className="text-sm font-medium text-muted-foreground p-2 align-top">{meal.label}</td>
                     {DAYS.map((day) => {
                       const entry = getEntry(day.num, meal.key)
                       return (
                         <td key={day.num} className="p-2 align-top">
                           {entry?.recipe ? (
-                            <div className="bg-gray-50 rounded-lg p-2 relative group">
+                            <div className="bg-secondary/50 rounded-lg p-2 relative group">
                               <button
                                 onClick={() => removeEntry(day.num, meal.key)}
                                 className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
@@ -241,7 +241,7 @@ export default function CreateMealPlanClient() {
                               {entry.recipe.image_url && (
                                 <img src={entry.recipe.image_url} alt="" className="w-full h-16 object-cover rounded mb-1" />
                               )}
-                              <p className="text-xs font-medium text-gray-900 line-clamp-2">{entry.recipe.title}</p>
+                              <p className="text-xs font-medium text-foreground line-clamp-2">{entry.recipe.title}</p>
                               {entry.recipe.calories && (
                                 <p className="text-xs text-orange-600 mt-1">{entry.recipe.calories} kcal</p>
                               )}
@@ -249,7 +249,7 @@ export default function CreateMealPlanClient() {
                           ) : (
                             <button
                               onClick={() => openPicker(day.num, meal.key)}
-                              className="w-full h-20 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center text-gray-400 hover:border-[#1e1839] hover:text-[#1e1839] transition-colors"
+                              className="w-full h-20 border-2 border-dashed border-border rounded-lg flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                             >
                               <Plus className="h-5 w-5" />
                             </button>
@@ -268,7 +268,7 @@ export default function CreateMealPlanClient() {
       {/* Save */}
       <div className="flex justify-end gap-3 pb-8">
         <Button variant="outline" onClick={() => router.back()}>Annuleren</Button>
-        <Button onClick={handleSave} disabled={saving || !name.trim()} className="bg-[#1e1839] hover:bg-[#2a2054] text-white">
+        <Button onClick={handleSave} disabled={saving || !name.trim()} className="bg-primary hover:bg-primary/90 text-primary-foreground">
           <Save className="h-4 w-4 mr-2" />
           {saving ? "Opslaan..." : "Meal Plan Opslaan"}
         </Button>
@@ -281,7 +281,7 @@ export default function CreateMealPlanClient() {
             <DialogTitle>Kies een recept</DialogTitle>
           </DialogHeader>
           <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Zoek recept..."
               value={recipeSearch}
@@ -291,8 +291,8 @@ export default function CreateMealPlanClient() {
           </div>
           <div className="overflow-y-auto flex-1 space-y-2">
             {filteredRecipes.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <ChefHat className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+              <div className="text-center py-8 text-muted-foreground">
+                <ChefHat className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
                 <p>Geen recepten gevonden</p>
                 <p className="text-sm mt-1">Maak eerst recepten aan of importeer ze</p>
               </div>
@@ -301,19 +301,19 @@ export default function CreateMealPlanClient() {
                 <button
                   key={recipe.id}
                   onClick={() => selectRecipe(recipe)}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors text-left"
                 >
                   {recipe.image_url ? (
                     <img src={recipe.image_url} alt="" className="w-12 h-12 rounded object-cover shrink-0" />
                   ) : (
-                    <div className="w-12 h-12 rounded bg-gray-100 flex items-center justify-center shrink-0">
-                      <ChefHat className="h-5 w-5 text-gray-300" />
+                    <div className="w-12 h-12 rounded bg-secondary flex items-center justify-center shrink-0">
+                      <ChefHat className="h-5 w-5 text-muted-foreground/50" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 truncate">{recipe.title}</p>
+                    <p className="font-medium text-foreground truncate">{recipe.title}</p>
                     {recipe.calories && (
-                      <p className="text-xs text-gray-500 flex items-center gap-1">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <Flame className="h-3 w-3 text-orange-500" />
                         {recipe.calories} kcal
                         {recipe.protein_grams && <span>· P: {recipe.protein_grams}g</span>}

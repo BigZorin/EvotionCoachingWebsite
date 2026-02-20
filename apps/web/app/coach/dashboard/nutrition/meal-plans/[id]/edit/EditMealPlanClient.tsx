@@ -127,7 +127,7 @@ export default function EditMealPlanClient() {
   }
 
   if (isLoading) {
-    return <div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1e1839]"></div></div>
+    return <div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div></div>
   }
 
   return (
@@ -135,22 +135,22 @@ export default function EditMealPlanClient() {
       <div className="flex items-center gap-4">
         <Button variant="outline" size="sm" onClick={() => router.back()}><ArrowLeft className="h-4 w-4" /></Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Meal Plan Bewerken</h1>
-          <p className="text-gray-600">{name}</p>
+          <h1 className="text-3xl font-bold text-foreground">Meal Plan Bewerken</h1>
+          <p className="text-muted-foreground">{name}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white border-gray-200 shadow-sm">
+        <Card className="bg-card border-border shadow-sm">
           <CardContent className="p-6 space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900">Basisgegevens</h2>
+            <h2 className="text-lg font-semibold text-foreground">Basisgegevens</h2>
             <div className="space-y-2"><Label>Naam *</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
             <div className="space-y-2"><Label>Beschrijving</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} /></div>
           </CardContent>
         </Card>
-        <Card className="bg-white border-gray-200 shadow-sm">
+        <Card className="bg-card border-border shadow-sm">
           <CardContent className="p-6 space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900">Macro Targets (per dag)</h2>
+            <h2 className="text-lg font-semibold text-foreground">Macro Targets (per dag)</h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Calorieën</Label><Input type="number" value={dailyCalories} onChange={(e) => setDailyCalories(e.target.value)} /></div>
               <div className="space-y-2"><Label>Eiwit (g)</Label><Input type="number" value={protein} onChange={(e) => setProtein(e.target.value)} /></div>
@@ -162,16 +162,16 @@ export default function EditMealPlanClient() {
       </div>
 
       {/* Week grid */}
-      <Card className="bg-white border-gray-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Weekoverzicht</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">Weekoverzicht</h2>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
                 <tr>
-                  <th className="text-left text-sm font-medium text-gray-500 p-2 w-24"></th>
+                  <th className="text-left text-sm font-medium text-muted-foreground p-2 w-24"></th>
                   {DAYS.map((day) => (
-                    <th key={day.num} className="text-center text-sm font-medium text-gray-700 p-2 min-w-[140px]">
+                    <th key={day.num} className="text-center text-sm font-medium text-foreground p-2 min-w-[140px]">
                       {day.label}
                       {getDayCalories(day.num) > 0 && <div className="text-xs text-orange-600 font-normal mt-1">{getDayCalories(day.num)} kcal</div>}
                     </th>
@@ -180,21 +180,21 @@ export default function EditMealPlanClient() {
               </thead>
               <tbody>
                 {MEAL_TYPES.map((meal) => (
-                  <tr key={meal.key} className="border-t border-gray-100">
-                    <td className="text-sm font-medium text-gray-600 p-2 align-top">{meal.label}</td>
+                  <tr key={meal.key} className="border-t border-border">
+                    <td className="text-sm font-medium text-muted-foreground p-2 align-top">{meal.label}</td>
                     {DAYS.map((day) => {
                       const entry = getEntry(day.num, meal.key)
                       return (
                         <td key={day.num} className="p-2 align-top">
                           {entry?.recipe ? (
-                            <div className="bg-gray-50 rounded-lg p-2 relative group">
+                            <div className="bg-secondary/50 rounded-lg p-2 relative group">
                               <button onClick={() => removeEntry(day.num, meal.key)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><X className="h-3 w-3" /></button>
                               {entry.recipe.image_url && <img src={entry.recipe.image_url} alt="" className="w-full h-16 object-cover rounded mb-1" />}
-                              <p className="text-xs font-medium text-gray-900 line-clamp-2">{entry.recipe.title}</p>
+                              <p className="text-xs font-medium text-foreground line-clamp-2">{entry.recipe.title}</p>
                               {entry.recipe.calories && <p className="text-xs text-orange-600 mt-1">{entry.recipe.calories} kcal</p>}
                             </div>
                           ) : (
-                            <button onClick={() => openPicker(day.num, meal.key)} className="w-full h-20 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center text-gray-400 hover:border-[#1e1839] hover:text-[#1e1839] transition-colors">
+                            <button onClick={() => openPicker(day.num, meal.key)} className="w-full h-20 border-2 border-dashed border-border rounded-lg flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors">
                               <Plus className="h-5 w-5" />
                             </button>
                           )}
@@ -211,7 +211,7 @@ export default function EditMealPlanClient() {
 
       <div className="flex justify-end gap-3 pb-8">
         <Button variant="outline" onClick={() => router.back()}>Annuleren</Button>
-        <Button onClick={handleSave} disabled={saving || !name.trim()} className="bg-[#1e1839] hover:bg-[#2a2054] text-white">
+        <Button onClick={handleSave} disabled={saving || !name.trim()} className="bg-primary hover:bg-primary/90 text-primary-foreground">
           <Save className="h-4 w-4 mr-2" />{saving ? "Opslaan..." : "Wijzigingen Opslaan"}
         </Button>
       </div>
@@ -220,18 +220,18 @@ export default function EditMealPlanClient() {
         <DialogContent className="max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
           <DialogHeader><DialogTitle>Kies een recept</DialogTitle></DialogHeader>
           <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Zoek recept..." value={recipeSearch} onChange={(e) => setRecipeSearch(e.target.value)} className="pl-10" />
           </div>
           <div className="overflow-y-auto flex-1 space-y-2">
             {filteredRecipes.length === 0 ? (
-              <div className="text-center py-8 text-gray-500"><ChefHat className="h-8 w-8 mx-auto mb-2 text-gray-300" /><p>Geen recepten</p></div>
+              <div className="text-center py-8 text-muted-foreground"><ChefHat className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" /><p>Geen recepten</p></div>
             ) : filteredRecipes.map((recipe) => (
-              <button key={recipe.id} onClick={() => selectRecipe(recipe)} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left">
-                {recipe.image_url ? <img src={recipe.image_url} alt="" className="w-12 h-12 rounded object-cover shrink-0" /> : <div className="w-12 h-12 rounded bg-gray-100 flex items-center justify-center shrink-0"><ChefHat className="h-5 w-5 text-gray-300" /></div>}
+              <button key={recipe.id} onClick={() => selectRecipe(recipe)} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors text-left">
+                {recipe.image_url ? <img src={recipe.image_url} alt="" className="w-12 h-12 rounded object-cover shrink-0" /> : <div className="w-12 h-12 rounded bg-secondary flex items-center justify-center shrink-0"><ChefHat className="h-5 w-5 text-muted-foreground/50" /></div>}
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{recipe.title}</p>
-                  {recipe.calories && <p className="text-xs text-gray-500"><Flame className="h-3 w-3 inline text-orange-500" /> {recipe.calories} kcal</p>}
+                  <p className="font-medium text-foreground truncate">{recipe.title}</p>
+                  {recipe.calories && <p className="text-xs text-muted-foreground"><Flame className="h-3 w-3 inline text-orange-500" /> {recipe.calories} kcal</p>}
                 </div>
               </button>
             ))}

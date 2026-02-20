@@ -100,7 +100,7 @@ export default function HabitManagerClient({ clientId }: { clientId: string }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1e1839]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     )
   }
@@ -112,18 +112,18 @@ export default function HabitManagerClient({ clientId }: { clientId: string }) {
         <div className="flex items-center gap-4">
           <Link
             href={`/coach/dashboard/clients/${clientId}`}
-            className="p-2 hover:bg-gray-100 rounded-lg transition"
+            className="p-2 hover:bg-secondary rounded-lg transition"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Gewoontes</h1>
-            <p className="text-sm text-gray-500">Beheer dagelijkse gewoontes voor deze client</p>
+            <h1 className="text-2xl font-bold text-foreground">Gewoontes</h1>
+            <p className="text-sm text-muted-foreground">Beheer dagelijkse gewoontes voor deze client</p>
           </div>
         </div>
         <button
           onClick={() => setShowCreateForm(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#1e1839] text-white rounded-lg hover:bg-[#2d2550] transition"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition"
         >
           <Plus className="h-4 w-4" />
           Nieuwe Gewoonte
@@ -132,33 +132,33 @@ export default function HabitManagerClient({ clientId }: { clientId: string }) {
 
       {/* Create form */}
       {showCreateForm && (
-        <div className="bg-white rounded-xl border p-6 mb-6 shadow-sm">
-          <h3 className="font-semibold text-gray-900 mb-4">Nieuwe Gewoonte</h3>
+        <div className="bg-card rounded-xl border p-6 mb-6 shadow-sm">
+          <h3 className="font-semibold text-foreground mb-4">Nieuwe Gewoonte</h3>
           <div className="space-y-3">
             <input
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="Naam (bijv. 10.000 stappen)"
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1e1839]/20"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus-visible:ring-ring"
             />
             <input
               type="text"
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
               placeholder="Beschrijving (optioneel)"
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1e1839]/20"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus-visible:ring-ring"
             />
             <div className="flex gap-2">
               <button
                 onClick={handleCreate}
-                className="px-4 py-2 bg-[#1e1839] text-white rounded-lg hover:bg-[#2d2550] transition"
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition"
               >
                 Opslaan
               </button>
               <button
                 onClick={() => { setShowCreateForm(false); setNewName(""); setNewDescription(""); }}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                className="px-4 py-2 bg-secondary text-foreground rounded-lg hover:bg-secondary transition"
               >
                 Annuleren
               </button>
@@ -169,16 +169,16 @@ export default function HabitManagerClient({ clientId }: { clientId: string }) {
 
       {/* Habits list */}
       {habits.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border">
-          <p className="text-gray-500 text-lg mb-2">Nog geen gewoontes</p>
-          <p className="text-gray-400 text-sm">Maak een gewoonte aan om de client dagelijks te laten bijhouden.</p>
+        <div className="text-center py-16 bg-card rounded-xl border">
+          <p className="text-muted-foreground text-lg mb-2">Nog geen gewoontes</p>
+          <p className="text-muted-foreground text-sm">Maak een gewoonte aan om de client dagelijks te laten bijhouden.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {habits.map((habit) => (
             <div
               key={habit.id}
-              className={`bg-white rounded-xl border p-5 shadow-sm ${!habit.is_active ? 'opacity-60' : ''}`}
+              className={`bg-card rounded-xl border p-5 shadow-sm ${!habit.is_active ? 'opacity-60' : ''}`}
             >
               {editingId === habit.id ? (
                 <div className="space-y-3">
@@ -186,25 +186,25 @@ export default function HabitManagerClient({ clientId }: { clientId: string }) {
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1e1839]/20"
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus-visible:ring-ring"
                   />
                   <input
                     type="text"
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                     placeholder="Beschrijving"
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1e1839]/20"
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus-visible:ring-ring"
                   />
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleUpdate(habit.id)}
-                      className="p-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200"
+                      className="p-2 bg-emerald-500/10 text-emerald-600 rounded-lg hover:bg-emerald-500/20"
                     >
                       <Check className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setEditingId(null)}
-                      className="p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                      className="p-2 bg-secondary text-foreground rounded-lg hover:bg-secondary"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -214,7 +214,7 @@ export default function HabitManagerClient({ clientId }: { clientId: string }) {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
-                      <h3 className="font-semibold text-gray-900">{habit.name}</h3>
+                      <h3 className="font-semibold text-foreground">{habit.name}</h3>
                       {getStreak(habit.id) > 0 && (
                         <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full text-xs font-medium">
                           <Flame className="h-3 w-3" />
@@ -222,13 +222,13 @@ export default function HabitManagerClient({ clientId }: { clientId: string }) {
                         </span>
                       )}
                       {!habit.is_active && (
-                        <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs">Inactief</span>
+                        <span className="px-2 py-0.5 bg-secondary text-muted-foreground rounded-full text-xs">Inactief</span>
                       )}
                     </div>
                     {habit.description && (
-                      <p className="text-sm text-gray-500 mt-1">{habit.description}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{habit.description}</p>
                     )}
-                    <div className="flex gap-4 mt-3 text-xs text-gray-400">
+                    <div className="flex gap-4 mt-3 text-xs text-muted-foreground">
                       <span>Compliance (30d): {getCompletionRate(habit.id)}%</span>
                       <span>Langste streak: {getLongestStreak(habit.id)} dagen</span>
                     </div>
@@ -240,15 +240,15 @@ export default function HabitManagerClient({ clientId }: { clientId: string }) {
                         setEditName(habit.name)
                         setEditDescription(habit.description || "")
                       }}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition"
+                      className="p-2 hover:bg-secondary rounded-lg transition"
                       title="Bewerken"
                     >
-                      <Edit2 className="h-4 w-4 text-gray-400" />
+                      <Edit2 className="h-4 w-4 text-muted-foreground" />
                     </button>
                     <button
                       onClick={() => handleToggleActive(habit.id, habit.is_active)}
-                      className={`p-2 hover:bg-gray-100 rounded-lg transition text-xs ${
-                        habit.is_active ? 'text-gray-400' : 'text-green-600'
+                      className={`p-2 hover:bg-secondary rounded-lg transition text-xs ${
+                        habit.is_active ? 'text-muted-foreground' : 'text-emerald-600'
                       }`}
                       title={habit.is_active ? "Deactiveren" : "Activeren"}
                     >
@@ -256,10 +256,10 @@ export default function HabitManagerClient({ clientId }: { clientId: string }) {
                     </button>
                     <button
                       onClick={() => handleDelete(habit.id)}
-                      className="p-2 hover:bg-red-50 rounded-lg transition"
+                      className="p-2 hover:bg-destructive/5 rounded-lg transition"
                       title="Verwijderen"
                     >
-                      <Trash2 className="h-4 w-4 text-red-400" />
+                      <Trash2 className="h-4 w-4 text-destructive" />
                     </button>
                   </div>
                 </div>

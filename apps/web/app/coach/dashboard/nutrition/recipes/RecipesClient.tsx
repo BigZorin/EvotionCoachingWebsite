@@ -90,8 +90,8 @@ export default function RecipesClient() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Recepten</h1>
-          <p className="text-gray-600">Beheer je receptenbibliotheek</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Recepten</h1>
+          <p className="text-muted-foreground">Beheer je receptenbibliotheek</p>
         </div>
         <div className="flex gap-3">
           <Button
@@ -103,7 +103,7 @@ export default function RecipesClient() {
           </Button>
           <Button
             onClick={() => router.push("/coach/dashboard/nutrition/recipes/create")}
-            className="bg-[#1e1839] hover:bg-[#2a2054] text-white"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nieuw Recept
@@ -113,7 +113,7 @@ export default function RecipesClient() {
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Zoek op naam of tag..."
           value={search}
@@ -125,25 +125,25 @@ export default function RecipesClient() {
       {/* Content */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="text-gray-900 text-xl flex items-center gap-3">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1e1839]"></div>
+          <div className="text-foreground text-xl flex items-center gap-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
             Laden...
           </div>
         </div>
       ) : error ? (
         <div className="flex flex-col items-center justify-center py-12">
           <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Fout</h3>
-          <p className="text-gray-600">{error}</p>
+          <h3 className="text-xl font-semibold text-foreground mb-2">Fout</h3>
+          <p className="text-muted-foreground">{error}</p>
         </div>
       ) : filtered.length === 0 ? (
-        <Card className="bg-white border-gray-200 shadow-sm">
+        <Card className="bg-card border-border shadow-sm">
           <CardContent className="p-12 text-center">
-            <ChefHat className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <ChefHat className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-foreground mb-2">
               {search ? "Geen resultaten" : "Geen Recepten"}
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-muted-foreground mb-6">
               {search
                 ? "Probeer een andere zoekterm"
                 : "Maak je eerste recept aan of importeer uit Spoonacular."}
@@ -159,7 +159,7 @@ export default function RecipesClient() {
                 </Button>
                 <Button
                   onClick={() => router.push("/coach/dashboard/nutrition/recipes/create")}
-                  className="bg-[#1e1839] hover:bg-[#2a2054] text-white"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Nieuw Recept
@@ -173,11 +173,11 @@ export default function RecipesClient() {
           {filtered.map((recipe) => (
             <Card
               key={recipe.id}
-              className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+              className="bg-card border-border shadow-sm hover:shadow-md transition-shadow overflow-hidden"
             >
               {/* Image */}
               {recipe.image_url ? (
-                <div className="aspect-video w-full overflow-hidden bg-gray-100">
+                <div className="aspect-video w-full overflow-hidden bg-secondary">
                   <img
                     src={recipe.image_url}
                     alt={recipe.title}
@@ -185,15 +185,15 @@ export default function RecipesClient() {
                   />
                 </div>
               ) : (
-                <div className="aspect-video w-full bg-gray-100 flex items-center justify-center">
-                  <ChefHat className="h-12 w-12 text-gray-300" />
+                <div className="aspect-video w-full bg-secondary flex items-center justify-center">
+                  <ChefHat className="h-12 w-12 text-muted-foreground/50" />
                 </div>
               )}
 
               <CardContent className="p-5">
                 {/* Title + Source badge */}
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 flex-1">
+                  <h3 className="text-lg font-semibold text-foreground line-clamp-2 flex-1">
                     {recipe.title}
                   </h3>
                   {recipe.source === "spoonacular" && (
@@ -211,20 +211,20 @@ export default function RecipesClient() {
                       {recipe.calories} kcal
                     </span>
                     {recipe.protein_grams != null && (
-                      <span className="text-gray-600">P: {recipe.protein_grams}g</span>
+                      <span className="text-muted-foreground">P: {recipe.protein_grams}g</span>
                     )}
                     {recipe.carbs_grams != null && (
-                      <span className="text-gray-600">K: {recipe.carbs_grams}g</span>
+                      <span className="text-muted-foreground">K: {recipe.carbs_grams}g</span>
                     )}
                     {recipe.fat_grams != null && (
-                      <span className="text-gray-600">V: {recipe.fat_grams}g</span>
+                      <span className="text-muted-foreground">V: {recipe.fat_grams}g</span>
                     )}
                   </div>
                 )}
 
                 {/* Time */}
                 {(recipe.prep_time_min || recipe.cook_time_min) && (
-                  <div className="flex items-center gap-1 text-sm text-gray-500 mb-3">
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
                     <Clock className="h-3.5 w-3.5" />
                     {(recipe.prep_time_min || 0) + (recipe.cook_time_min || 0)} min
                   </div>
@@ -269,7 +269,7 @@ export default function RecipesClient() {
                     size="sm"
                     onClick={() => handleDelete(recipe.id)}
                     disabled={deletingId === recipe.id}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/5"
                   >
                     {deletingId === recipe.id ? (
                       <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-red-600" />

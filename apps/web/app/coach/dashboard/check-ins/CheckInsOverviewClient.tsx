@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   getClients,
   getClientDailyCheckIns,
@@ -28,6 +29,7 @@ import {
   Moon,
   Smile,
   Weight,
+  Loader2,
 } from "lucide-react"
 
 const MOOD_LABELS: Record<number, string> = { 1: "Slecht", 2: "Matig", 3: "Oké", 4: "Goed", 5: "Top" }
@@ -127,8 +129,8 @@ export default function CheckInsOverviewClient() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-900 text-xl flex items-center gap-3">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1e1839]"></div>
+        <div className="text-foreground text-xl flex items-center gap-3">
+          <Loader2 className="size-5 animate-spin" />
           Laden...
         </div>
       </div>
@@ -138,34 +140,34 @@ export default function CheckInsOverviewClient() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Check-ins Overzicht</h1>
-        <p className="text-gray-600 mt-1">Bekijk dagelijkse en wekelijkse check-ins van je clients</p>
+        <h1 className="text-xl font-bold text-foreground">Check-ins Overzicht</h1>
+        <p className="text-muted-foreground mt-1">Bekijk dagelijkse en wekelijkse check-ins van je clients</p>
       </div>
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-white border-gray-200">
+        <Card className="bg-card shadow-sm border-border">
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-green-600">{clientsWithDailyToday.length}</p>
-            <p className="text-xs text-gray-500 mt-1">Dagelijks ingevuld</p>
+            <p className="text-2xl font-bold text-emerald-600">{clientsWithDailyToday.length}</p>
+            <p className="text-xs text-muted-foreground mt-1">Dagelijks ingevuld</p>
           </CardContent>
         </Card>
-        <Card className="bg-white border-gray-200">
+        <Card className="bg-card shadow-sm border-border">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-orange-500">{clientsWithoutDailyToday.length}</p>
-            <p className="text-xs text-gray-500 mt-1">Dagelijks open</p>
+            <p className="text-xs text-muted-foreground mt-1">Dagelijks open</p>
           </CardContent>
         </Card>
-        <Card className="bg-white border-gray-200">
+        <Card className="bg-card shadow-sm border-border">
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-green-600">{clientsWithWeeklyThisWeek.length}</p>
-            <p className="text-xs text-gray-500 mt-1">Wekelijks ingevuld</p>
+            <p className="text-2xl font-bold text-emerald-600">{clientsWithWeeklyThisWeek.length}</p>
+            <p className="text-xs text-muted-foreground mt-1">Wekelijks ingevuld</p>
           </CardContent>
         </Card>
-        <Card className="bg-white border-gray-200">
+        <Card className="bg-card shadow-sm border-border">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-orange-500">{clientsWithoutWeeklyThisWeek.length}</p>
-            <p className="text-xs text-gray-500 mt-1">Wekelijks open</p>
+            <p className="text-xs text-muted-foreground mt-1">Wekelijks open</p>
           </CardContent>
         </Card>
       </div>
@@ -180,67 +182,69 @@ export default function CheckInsOverviewClient() {
         <TabsContent value="daily" className="space-y-6">
           {/* Submitted today */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+              <CheckCircle className="size-4 text-emerald-500" />
               Ingevuld vandaag ({clientsWithDailyToday.length})
             </h3>
             {clientsWithDailyToday.length === 0 ? (
-              <p className="text-gray-400 text-sm py-4">Nog geen check-ins vandaag</p>
+              <p className="text-muted-foreground text-sm py-4">Nog geen check-ins vandaag</p>
             ) : (
               <div className="space-y-2">
                 {clientsWithDailyToday.map((client) => {
                   const ci = client.todayDailyCheckIn!
                   const isExpanded = expandedDaily.has(client.id)
                   return (
-                    <Card key={client.id} className="bg-white border-gray-200">
+                    <Card key={client.id} className="bg-card shadow-sm border-border">
                       <CardContent className="p-0">
                         <button
-                          className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                          className="w-full flex items-center justify-between p-4 hover:bg-secondary/50 transition-colors"
                           onClick={() => toggleExpandDaily(client.id)}
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-sm font-semibold text-green-700">
-                              {(client.raw_user_meta_data?.full_name?.[0] || client.email[0]).toUpperCase()}
-                            </div>
+                            <Avatar className="size-9 border border-border">
+                              <AvatarFallback className="text-xs font-semibold bg-emerald-500/10 text-emerald-600">
+                                {(client.raw_user_meta_data?.full_name?.[0] || client.email[0]).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
                             <div className="text-left">
-                              <p className="font-medium text-gray-900 text-sm">
+                              <p className="font-medium text-foreground text-sm">
                                 {client.raw_user_meta_data?.full_name || client.email}
                               </p>
                               <div className="flex items-center gap-3 mt-0.5">
                                 {ci.weight && (
-                                  <span className="text-xs text-gray-500 flex items-center gap-1">
-                                    <Weight className="w-3 h-3" /> {ci.weight} kg
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Weight className="size-3" /> {ci.weight} kg
                                   </span>
                                 )}
                                 {ci.mood && (
-                                  <span className="text-xs text-gray-500 flex items-center gap-1">
-                                    <Smile className="w-3 h-3" /> {MOOD_LABELS[ci.mood]}
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Smile className="size-3" /> {MOOD_LABELS[ci.mood]}
                                   </span>
                                 )}
                                 {ci.sleep_quality && (
-                                  <span className="text-xs text-gray-500 flex items-center gap-1">
-                                    <Moon className="w-3 h-3" /> {SLEEP_LABELS[ci.sleep_quality]}
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Moon className="size-3" /> {SLEEP_LABELS[ci.sleep_quality]}
                                   </span>
                                 )}
                               </div>
                             </div>
                           </div>
-                          {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                          {isExpanded ? <ChevronUp className="size-4 text-muted-foreground" /> : <ChevronDown className="size-4 text-muted-foreground" />}
                         </button>
                         {isExpanded && (
-                          <div className="px-4 pb-4 border-t border-gray-100 pt-3 space-y-3">
+                          <div className="px-4 pb-4 border-t border-border pt-3 space-y-3">
                             {ci.notes && (
-                              <div className="bg-gray-50 rounded-lg p-3">
-                                <p className="text-xs text-gray-500 mb-1">Notities</p>
-                                <p className="text-sm text-gray-700">{ci.notes}</p>
+                              <div className="bg-secondary/50 rounded-lg p-3">
+                                <p className="text-xs text-muted-foreground mb-1">Notities</p>
+                                <p className="text-sm text-foreground">{ci.notes}</p>
                               </div>
                             )}
                             {ci.coach_feedback && (
-                              <div className="bg-blue-50 rounded-lg p-3">
-                                <p className="text-xs text-blue-600 mb-1 flex items-center gap-1">
-                                  <MessageSquare className="w-3 h-3" /> Jouw feedback
+                              <div className="bg-primary/5 rounded-lg p-3">
+                                <p className="text-xs text-primary mb-1 flex items-center gap-1">
+                                  <MessageSquare className="size-3" /> Jouw feedback
                                 </p>
-                                <p className="text-sm text-blue-800">{ci.coach_feedback}</p>
+                                <p className="text-sm text-primary">{ci.coach_feedback}</p>
                               </div>
                             )}
                             <div className="flex gap-2">
@@ -254,14 +258,14 @@ export default function CheckInsOverviewClient() {
                                 size="sm"
                                 onClick={() => handleFeedback(ci.id, "daily")}
                                 disabled={!feedbackText[ci.id]?.trim() || feedbackSending === ci.id}
-                                className="bg-[#1e1839] hover:bg-[#2a2054] self-end"
+                                className="bg-primary hover:bg-primary/90 text-primary-foreground self-end"
                               >
-                                <Send className="w-4 h-4" />
+                                <Send className="size-4" />
                               </Button>
                             </div>
                             <Link
                               href={`/coach/dashboard/clients/${client.id}`}
-                              className="text-xs text-[#1e1839] hover:underline font-medium"
+                              className="text-xs text-primary hover:underline font-medium"
                             >
                               Bekijk volledig profiel →
                             </Link>
@@ -277,27 +281,29 @@ export default function CheckInsOverviewClient() {
 
           {/* Not submitted today */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <XCircle className="w-4 h-4 text-orange-500" />
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+              <XCircle className="size-4 text-orange-500" />
               Nog niet ingevuld ({clientsWithoutDailyToday.length})
             </h3>
             {clientsWithoutDailyToday.length === 0 ? (
-              <p className="text-green-600 text-sm py-4">Alle clients hebben vandaag ingecheckt!</p>
+              <p className="text-emerald-600 text-sm py-4">Alle clients hebben vandaag ingecheckt!</p>
             ) : (
               <div className="space-y-2">
                 {clientsWithoutDailyToday.map((client) => (
-                  <Card key={client.id} className="bg-white border-gray-200">
+                  <Card key={client.id} className="bg-card shadow-sm border-border">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center text-sm font-semibold text-orange-700">
-                            {(client.raw_user_meta_data?.full_name?.[0] || client.email[0]).toUpperCase()}
-                          </div>
+                          <Avatar className="size-9 border border-border">
+                            <AvatarFallback className="text-xs font-semibold bg-orange-500/10 text-orange-600">
+                              {(client.raw_user_meta_data?.full_name?.[0] || client.email[0]).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
                           <div>
-                            <p className="font-medium text-gray-900 text-sm">
+                            <p className="font-medium text-foreground text-sm">
                               {client.raw_user_meta_data?.full_name || client.email}
                             </p>
-                            <p className="text-xs text-gray-400">
+                            <p className="text-xs text-muted-foreground">
                               {client.latestDailyCheckIn
                                 ? `Laatste: ${new Date(client.latestDailyCheckIn.check_in_date).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}`
                                 : "Nog nooit ingecheckt"}
@@ -306,7 +312,7 @@ export default function CheckInsOverviewClient() {
                         </div>
                         <Link
                           href={`/coach/dashboard/clients/${client.id}`}
-                          className="text-xs text-[#1e1839] hover:underline font-medium"
+                          className="text-xs text-primary hover:underline font-medium"
                         >
                           Bekijk →
                         </Link>
@@ -322,30 +328,32 @@ export default function CheckInsOverviewClient() {
         {/* Weekly Tab */}
         <TabsContent value="weekly" className="space-y-6">
           <div>
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+              <CheckCircle className="size-4 text-emerald-500" />
               Ingevuld deze week — Week {currentWeek} ({clientsWithWeeklyThisWeek.length})
             </h3>
             {clientsWithWeeklyThisWeek.length === 0 ? (
-              <p className="text-gray-400 text-sm py-4">Nog geen wekelijkse check-ins deze week</p>
+              <p className="text-muted-foreground text-sm py-4">Nog geen wekelijkse check-ins deze week</p>
             ) : (
               <div className="space-y-2">
                 {clientsWithWeeklyThisWeek.map((client) => {
                   const ci = client.latestCheckIn!
                   const isExpanded = expandedWeekly.has(client.id)
                   return (
-                    <Card key={client.id} className="bg-white border-gray-200">
+                    <Card key={client.id} className="bg-card shadow-sm border-border">
                       <CardContent className="p-0">
                         <button
-                          className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                          className="w-full flex items-center justify-between p-4 hover:bg-secondary/50 transition-colors"
                           onClick={() => toggleExpandWeekly(client.id)}
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-sm font-semibold text-green-700">
-                              {(client.raw_user_meta_data?.full_name?.[0] || client.email[0]).toUpperCase()}
-                            </div>
+                            <Avatar className="size-9 border border-border">
+                              <AvatarFallback className="text-xs font-semibold bg-emerald-500/10 text-emerald-600">
+                                {(client.raw_user_meta_data?.full_name?.[0] || client.email[0]).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
                             <div className="text-left">
-                              <p className="font-medium text-gray-900 text-sm">
+                              <p className="font-medium text-foreground text-sm">
                                 {client.raw_user_meta_data?.full_name || client.email}
                               </p>
                               <div className="flex items-center gap-3 mt-0.5">
@@ -354,36 +362,36 @@ export default function CheckInsOverviewClient() {
                               </div>
                             </div>
                           </div>
-                          {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                          {isExpanded ? <ChevronUp className="size-4 text-muted-foreground" /> : <ChevronDown className="size-4 text-muted-foreground" />}
                         </button>
                         {isExpanded && (
-                          <div className="px-4 pb-4 border-t border-gray-100 pt-3 space-y-3">
+                          <div className="px-4 pb-4 border-t border-border pt-3 space-y-3">
                             <div className="grid grid-cols-3 gap-2">
-                              <div className="bg-gray-50 rounded-lg p-2 text-center">
-                                <p className="text-xs text-gray-500">Energie</p>
+                              <div className="bg-secondary/50 rounded-lg p-2 text-center">
+                                <p className="text-xs text-muted-foreground">Energie</p>
                                 <p className="text-sm font-semibold">{ci.energy_level ?? "—"}/5</p>
                               </div>
-                              <div className="bg-gray-50 rounded-lg p-2 text-center">
-                                <p className="text-xs text-gray-500">Slaap</p>
+                              <div className="bg-secondary/50 rounded-lg p-2 text-center">
+                                <p className="text-xs text-muted-foreground">Slaap</p>
                                 <p className="text-sm font-semibold">{ci.sleep_quality ?? "—"}/5</p>
                               </div>
-                              <div className="bg-gray-50 rounded-lg p-2 text-center">
-                                <p className="text-xs text-gray-500">Stress</p>
+                              <div className="bg-secondary/50 rounded-lg p-2 text-center">
+                                <p className="text-xs text-muted-foreground">Stress</p>
                                 <p className="text-sm font-semibold">{ci.stress_level ?? "—"}/5</p>
                               </div>
-                              <div className="bg-gray-50 rounded-lg p-2 text-center">
-                                <p className="text-xs text-gray-500">Voeding</p>
+                              <div className="bg-secondary/50 rounded-lg p-2 text-center">
+                                <p className="text-xs text-muted-foreground">Voeding</p>
                                 <p className="text-sm font-semibold">{ci.nutrition_adherence ?? "—"}/5</p>
                               </div>
-                              <div className="bg-gray-50 rounded-lg p-2 text-center">
-                                <p className="text-xs text-gray-500">Training</p>
+                              <div className="bg-secondary/50 rounded-lg p-2 text-center">
+                                <p className="text-xs text-muted-foreground">Training</p>
                                 <p className="text-sm font-semibold">{ci.training_adherence ?? "—"}/5</p>
                               </div>
                             </div>
                             {ci.notes && (
-                              <div className="bg-gray-50 rounded-lg p-3">
-                                <p className="text-xs text-gray-500 mb-1">Notities</p>
-                                <p className="text-sm text-gray-700">{ci.notes}</p>
+                              <div className="bg-secondary/50 rounded-lg p-3">
+                                <p className="text-xs text-muted-foreground mb-1">Notities</p>
+                                <p className="text-sm text-foreground">{ci.notes}</p>
                               </div>
                             )}
                             <div className="flex gap-2">
@@ -397,14 +405,14 @@ export default function CheckInsOverviewClient() {
                                 size="sm"
                                 onClick={() => handleFeedback(ci.id, "weekly")}
                                 disabled={!feedbackText[ci.id]?.trim() || feedbackSending === ci.id}
-                                className="bg-[#1e1839] hover:bg-[#2a2054] self-end"
+                                className="bg-primary hover:bg-primary/90 text-primary-foreground self-end"
                               >
-                                <Send className="w-4 h-4" />
+                                <Send className="size-4" />
                               </Button>
                             </div>
                             <Link
                               href={`/coach/dashboard/clients/${client.id}`}
-                              className="text-xs text-[#1e1839] hover:underline font-medium"
+                              className="text-xs text-primary hover:underline font-medium"
                             >
                               Bekijk volledig profiel →
                             </Link>
@@ -419,24 +427,26 @@ export default function CheckInsOverviewClient() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <XCircle className="w-4 h-4 text-orange-500" />
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+              <XCircle className="size-4 text-orange-500" />
               Nog niet ingevuld deze week ({clientsWithoutWeeklyThisWeek.length})
             </h3>
             <div className="space-y-2">
               {clientsWithoutWeeklyThisWeek.map((client) => (
-                <Card key={client.id} className="bg-white border-gray-200">
+                <Card key={client.id} className="bg-card shadow-sm border-border">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center text-sm font-semibold text-orange-700">
-                          {(client.raw_user_meta_data?.full_name?.[0] || client.email[0]).toUpperCase()}
-                        </div>
+                        <Avatar className="size-9 border border-border">
+                          <AvatarFallback className="text-xs font-semibold bg-orange-500/10 text-orange-600">
+                            {(client.raw_user_meta_data?.full_name?.[0] || client.email[0]).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
                         <div>
-                          <p className="font-medium text-gray-900 text-sm">
+                          <p className="font-medium text-foreground text-sm">
                             {client.raw_user_meta_data?.full_name || client.email}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-muted-foreground">
                             {client.latestCheckIn
                               ? `Laatste: Week ${client.latestCheckIn.week_number}`
                               : "Nog nooit ingecheckt"}
@@ -445,7 +455,7 @@ export default function CheckInsOverviewClient() {
                       </div>
                       <Link
                         href={`/coach/dashboard/clients/${client.id}`}
-                        className="text-xs text-[#1e1839] hover:underline font-medium"
+                        className="text-xs text-primary hover:underline font-medium"
                       >
                         Bekijk →
                       </Link>

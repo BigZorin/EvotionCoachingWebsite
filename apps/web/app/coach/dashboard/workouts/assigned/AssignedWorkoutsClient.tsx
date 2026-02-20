@@ -80,32 +80,32 @@ export default function AssignedWorkoutsClient() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Toegewezen Workouts</h1>
-            <p className="text-gray-600">Overzicht van alle workouts die je hebt toegewezen aan clients</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Toegewezen Workouts</h1>
+            <p className="text-muted-foreground">Overzicht van alle workouts die je hebt toegewezen aan clients</p>
           </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <Card className="bg-white border-gray-200 shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">TOTAAL TOEGEWEZEN</p>
-                    <p className="text-4xl font-bold text-gray-900">{assignments.length}</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">TOTAAL TOEGEWEZEN</p>
+                    <p className="text-4xl font-bold text-foreground">{assignments.length}</p>
                   </div>
-                  <div className="p-3 bg-[#1e1839] rounded-lg">
+                  <div className="p-3 bg-primary rounded-lg">
                     <Calendar className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-gray-200 shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">NOG TE DOEN</p>
-                    <p className="text-4xl font-bold text-gray-900">{upcomingCount}</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">NOG TE DOEN</p>
+                    <p className="text-4xl font-bold text-foreground">{upcomingCount}</p>
                   </div>
                   <div className="p-3 bg-blue-100 rounded-lg">
                     <Clock className="h-6 w-6 text-blue-600" />
@@ -114,12 +114,12 @@ export default function AssignedWorkoutsClient() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-gray-200 shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">VOLTOOID</p>
-                    <p className="text-4xl font-bold text-gray-900">{completedCount}</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">VOLTOOID</p>
+                    <p className="text-4xl font-bold text-foreground">{completedCount}</p>
                   </div>
                   <div className="p-3 bg-green-100 rounded-lg">
                     <CheckCircle className="h-6 w-6 text-green-600" />
@@ -131,13 +131,13 @@ export default function AssignedWorkoutsClient() {
 
           {/* Filter Buttons */}
           <div className="mb-6 flex items-center gap-3">
-            <Filter className="h-5 w-5 text-gray-500" />
+            <Filter className="h-5 w-5 text-muted-foreground" />
             <div className="flex gap-2">
               <Button
                 variant={filter === "all" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setFilter("all")}
-                className={filter === "all" ? "bg-[#1e1839] hover:bg-[#2a2054]" : ""}
+                className={filter === "all" ? "bg-primary hover:bg-primary/90" : ""}
               >
                 Alles ({assignments.length})
               </Button>
@@ -145,7 +145,7 @@ export default function AssignedWorkoutsClient() {
                 variant={filter === "upcoming" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setFilter("upcoming")}
-                className={filter === "upcoming" ? "bg-[#1e1839] hover:bg-[#2a2054]" : ""}
+                className={filter === "upcoming" ? "bg-primary hover:bg-primary/90" : ""}
               >
                 Nog te doen ({upcomingCount})
               </Button>
@@ -153,7 +153,7 @@ export default function AssignedWorkoutsClient() {
                 variant={filter === "completed" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setFilter("completed")}
-                className={filter === "completed" ? "bg-[#1e1839] hover:bg-[#2a2054]" : ""}
+                className={filter === "completed" ? "bg-primary hover:bg-primary/90" : ""}
               >
                 Voltooid ({completedCount})
               </Button>
@@ -163,8 +163,8 @@ export default function AssignedWorkoutsClient() {
           {/* Loading State */}
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="text-gray-900 text-xl flex items-center gap-3">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1e1839]"></div>
+              <div className="text-foreground text-xl flex items-center gap-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                 Laden...
               </div>
             </div>
@@ -172,16 +172,16 @@ export default function AssignedWorkoutsClient() {
             /* Error State */
             <div className="flex flex-col items-center justify-center py-12">
               <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Er is een fout opgetreden</h3>
-              <p className="text-gray-600">{error}</p>
+              <h3 className="text-xl font-semibold text-foreground mb-2">Er is een fout opgetreden</h3>
+              <p className="text-muted-foreground">{error}</p>
             </div>
           ) : filteredAssignments.length === 0 ? (
             /* Empty State */
-            <Card className="bg-white border-gray-200 shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-12 text-center">
-                <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Geen Toegewezen Workouts</h3>
-                <p className="text-gray-600 mb-6">
+                <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-foreground mb-2">Geen Toegewezen Workouts</h3>
+                <p className="text-muted-foreground mb-6">
                   {filter === "all"
                     ? "Je hebt nog geen workouts toegewezen aan clients."
                     : filter === "upcoming"
@@ -191,7 +191,7 @@ export default function AssignedWorkoutsClient() {
                 {filter === "all" && (
                   <Button
                     onClick={() => router.push("/coach/dashboard/workouts/templates")}
-                    className="bg-[#1e1839] hover:bg-[#2a2054] text-white"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
                     Ga naar Templates
                   </Button>
@@ -204,7 +204,7 @@ export default function AssignedWorkoutsClient() {
               {filteredAssignments.map((assignment) => (
                 <Card
                   key={assignment.id}
-                  className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                  className="bg-card border-border shadow-sm hover:shadow-md transition-shadow"
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
@@ -225,7 +225,7 @@ export default function AssignedWorkoutsClient() {
 
                           {/* Scheduled Date */}
                           {assignment.scheduledDate && (
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-muted-foreground">
                               {new Date(assignment.scheduledDate).toLocaleDateString("nl-NL", {
                                 weekday: "short",
                                 day: "numeric",
@@ -235,11 +235,11 @@ export default function AssignedWorkoutsClient() {
                           )}
                         </div>
 
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h3 className="text-lg font-semibold text-foreground mb-2">
                           {assignment.workoutTemplate.name}
                         </h3>
 
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4" />
                             <span>
@@ -258,7 +258,7 @@ export default function AssignedWorkoutsClient() {
                         </div>
 
                         {assignment.notes && (
-                          <p className="mt-3 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                          <p className="mt-3 text-sm text-muted-foreground bg-secondary/50 p-3 rounded-lg">
                             <span className="font-medium">Notities:</span> {assignment.notes}
                           </p>
                         )}

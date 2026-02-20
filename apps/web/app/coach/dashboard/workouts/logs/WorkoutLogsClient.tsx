@@ -87,18 +87,18 @@ export default function WorkoutLogsClient() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Workout Logs</h1>
-            <p className="text-gray-600">Bekijk voltooide workouts en client performance</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Workout Logs</h1>
+            <p className="text-muted-foreground">Bekijk voltooide workouts en client performance</p>
           </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <Card className="bg-white border-gray-200 shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">TOTAAL VOLTOOID</p>
-                    <p className="text-4xl font-bold text-gray-900">{totalWorkouts}</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">TOTAAL VOLTOOID</p>
+                    <p className="text-4xl font-bold text-foreground">{totalWorkouts}</p>
                   </div>
                   <div className="p-3 bg-green-100 rounded-lg">
                     <CheckCircle className="h-6 w-6 text-green-600" />
@@ -107,27 +107,27 @@ export default function WorkoutLogsClient() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-gray-200 shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">LAATSTE 7 DAGEN</p>
-                    <p className="text-4xl font-bold text-gray-900">{last7Days}</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">LAATSTE 7 DAGEN</p>
+                    <p className="text-4xl font-bold text-foreground">{last7Days}</p>
                   </div>
-                  <div className="p-3 bg-[#1e1839] rounded-lg">
+                  <div className="p-3 bg-primary rounded-lg">
                     <TrendingUp className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-gray-200 shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">GEM. DUUR</p>
-                    <p className="text-4xl font-bold text-gray-900">{avgDuration}</p>
-                    <p className="text-sm text-gray-500">minuten</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">GEM. DUUR</p>
+                    <p className="text-4xl font-bold text-foreground">{avgDuration}</p>
+                    <p className="text-sm text-muted-foreground">minuten</p>
                   </div>
                   <div className="p-3 bg-blue-100 rounded-lg">
                     <Clock className="h-6 w-6 text-blue-600" />
@@ -140,8 +140,8 @@ export default function WorkoutLogsClient() {
           {/* Loading State */}
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="text-gray-900 text-xl flex items-center gap-3">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1e1839]"></div>
+              <div className="text-foreground text-xl flex items-center gap-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                 Laden...
               </div>
             </div>
@@ -149,16 +149,16 @@ export default function WorkoutLogsClient() {
             /* Error State */
             <div className="flex flex-col items-center justify-center py-12">
               <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Er is een fout opgetreden</h3>
-              <p className="text-gray-600">{error}</p>
+              <h3 className="text-xl font-semibold text-foreground mb-2">Er is een fout opgetreden</h3>
+              <p className="text-muted-foreground">{error}</p>
             </div>
           ) : logs.length === 0 ? (
             /* Empty State */
-            <Card className="bg-white border-gray-200 shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-12 text-center">
-                <CheckCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Nog Geen Voltooide Workouts</h3>
-                <p className="text-gray-600">
+                <CheckCircle className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-foreground mb-2">Nog Geen Voltooide Workouts</h3>
+                <p className="text-muted-foreground">
                   Zodra clients workouts voltooien, verschijnen ze hier.
                 </p>
               </CardContent>
@@ -176,7 +176,7 @@ export default function WorkoutLogsClient() {
                 return (
                   <Card
                     key={log.id}
-                    className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                    className="bg-card border-border shadow-sm hover:shadow-md transition-shadow"
                   >
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">
@@ -186,7 +186,7 @@ export default function WorkoutLogsClient() {
                               <CheckCircle className="h-3 w-3" />
                               Voltooid
                             </span>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-muted-foreground">
                               {new Date(log.completedAt).toLocaleDateString("nl-NL", {
                                 weekday: "long",
                                 day: "numeric",
@@ -198,11 +198,11 @@ export default function WorkoutLogsClient() {
                             </span>
                           </div>
 
-                          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                          <h3 className="text-lg font-semibold text-foreground mb-3">
                             {log.clientWorkout.workoutTemplate.name}
                           </h3>
 
-                          <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                             <div className="flex items-center gap-2">
                               <User className="h-4 w-4" />
                               <span>{clientName}</span>
@@ -217,8 +217,8 @@ export default function WorkoutLogsClient() {
                           </div>
 
                           {log.notes && (
-                            <div className="bg-gray-50 p-3 rounded-lg">
-                              <p className="text-sm text-gray-700">
+                            <div className="bg-secondary/50 p-3 rounded-lg">
+                              <p className="text-sm text-foreground">
                                 <span className="font-medium">Client notities:</span> {log.notes}
                               </p>
                             </div>
@@ -226,16 +226,16 @@ export default function WorkoutLogsClient() {
 
                           {log.exerciseLogs && Array.isArray(log.exerciseLogs) && log.exerciseLogs.length > 0 && (
                             <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                              <p className="text-sm font-medium text-gray-700 mb-2">Exercise Details:</p>
+                              <p className="text-sm font-medium text-foreground mb-2">Exercise Details:</p>
                               <div className="space-y-1">
                                 {log.exerciseLogs.slice(0, 3).map((ex: any, idx: number) => (
-                                  <p key={idx} className="text-sm text-gray-600">
+                                  <p key={idx} className="text-sm text-muted-foreground">
                                     • {ex.exerciseName || "Exercise"}: {ex.sets || 0}x{ex.reps || 0}
                                     {ex.weight && ` @ ${ex.weight}kg`}
                                   </p>
                                 ))}
                                 {log.exerciseLogs.length > 3 && (
-                                  <p className="text-sm text-gray-500 italic">
+                                  <p className="text-sm text-muted-foreground italic">
                                     +{log.exerciseLogs.length - 3} meer...
                                   </p>
                                 )}
@@ -246,7 +246,7 @@ export default function WorkoutLogsClient() {
 
                         <button
                           onClick={() => router.push(`/coach/dashboard/clients/${client.id}`)}
-                          className="text-sm text-[#1e1839] hover:underline"
+                          className="text-sm text-primary hover:underline"
                         >
                           Bekijk Client →
                         </button>
