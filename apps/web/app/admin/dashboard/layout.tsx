@@ -2,7 +2,9 @@ import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import AdminSidebar from "./AdminSidebar"
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader"
 
 export const metadata: Metadata = {
   title: "Admin Dashboard - Evotion",
@@ -55,14 +57,19 @@ export default async function AdminDashboardLayout({
     }
   }
 
+  // Read sidebar cookie for persisted state
+  const sidebarState = cookieStore.get("sidebar_state")
+  const defaultOpen = sidebarState?.value !== "false"
+
   return (
-    <div className="flex h-screen bg-gray-50">
+    <SidebarProvider defaultOpen={defaultOpen}>
       <AdminSidebar />
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-8">
+      <SidebarInset>
+        <DashboardHeader />
+        <div className="flex-1 overflow-y-auto p-6">
           {children}
         </div>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

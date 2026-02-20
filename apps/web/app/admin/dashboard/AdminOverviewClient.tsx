@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import {
   getClients,
   getAllUsers,
@@ -18,6 +20,10 @@ import {
   Globe,
   Dumbbell,
   ChevronRight,
+  ArrowUpRight,
+  TrendingUp,
+  Activity,
+  Loader2,
 } from "lucide-react"
 
 export default function AdminOverviewClient() {
@@ -53,186 +59,212 @@ export default function AdminOverviewClient() {
   const totalCoaches = users.filter(u => u.role === "COACH").length
   const totalAdmins = users.filter(u => u.role === "ADMIN").length
 
+  // Recent clients (signed up in last 7 days)
+  const recentClients = clients
+    .filter(c => {
+      const created = new Date(c.created_at)
+      return (Date.now() - created.getTime()) / 86400000 < 7
+    })
+    .slice(0, 5)
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1e1839]" />
+      <div className="flex items-center justify-center py-20">
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span>Dashboard laden...</span>
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <AlertCircle className="w-12 h-12 text-red-400 mb-3" />
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">Fout bij laden</h3>
-        <p className="text-sm text-gray-500">{error}</p>
+      <div className="flex flex-col items-center justify-center py-20">
+        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+        <h3 className="text-lg font-semibold mb-2">Fout bij laden</h3>
+        <p className="text-sm text-muted-foreground">{error}</p>
       </div>
     )
   }
 
+  const kpiCards = [
+    {
+      label: "Totaal Gebruikers",
+      value: String(users.length),
+      detail: `${totalAdmins} admin · ${totalCoaches} coaches`,
+      icon: Shield,
+    },
+    {
+      label: "Actieve Clients",
+      value: String(approvedClients),
+      detail: `${clients.length} totaal`,
+      icon: UserCheck,
+    },
+    {
+      label: "Wachtrij",
+      value: String(pendingClients),
+      detail: "Wacht op goedkeuring",
+      icon: Hourglass,
+      highlight: pendingClients > 0,
+    },
+    {
+      label: "Coaches",
+      value: String(totalCoaches),
+      detail: "Actieve coaches",
+      icon: Dumbbell,
+    },
+  ]
+
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-        <p className="text-gray-600">Overzicht van het hele systeem</p>
+    <div className="flex flex-col gap-6">
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {kpiCards.map((kpi) => (
+          <Card key={kpi.label} className={`shadow-sm ${kpi.highlight ? "ring-2 ring-primary/20" : ""}`}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-muted-foreground">{kpi.label}</span>
+                <kpi.icon className="size-4 text-muted-foreground" />
+              </div>
+              <p className="text-2xl font-bold">{kpi.value}</p>
+              <p className="text-xs text-muted-foreground mt-1">{kpi.detail}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-white border shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">TOTAAL GEBRUIKERS</p>
-                <p className="text-4xl font-bold text-gray-900">{users.length}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {totalAdmins} admin{totalAdmins !== 1 ? "s" : ""} · {totalCoaches} coach{totalCoaches !== 1 ? "es" : ""}
-                </p>
-              </div>
-              <div className="p-3 bg-[#1e1839] rounded-lg">
-                <Shield className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">CLIENTS</p>
-                <p className="text-4xl font-bold text-gray-900">{clients.length}</p>
-                <p className="text-xs text-gray-500 mt-1">{approvedClients} goedgekeurd</p>
-              </div>
-              <div className="p-3 bg-green-100 rounded-lg">
-                <UserCheck className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className={`bg-white border shadow-sm hover:shadow-md transition-shadow ${pendingClients > 0 ? "ring-2 ring-purple-200" : ""}`}>
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">WACHTRIJ</p>
-                <p className={`text-4xl font-bold ${pendingClients > 0 ? "text-purple-600" : "text-gray-900"}`}>{pendingClients}</p>
-                <p className="text-xs text-gray-500 mt-1">Wacht op goedkeuring</p>
-              </div>
-              <div className={`p-3 rounded-lg ${pendingClients > 0 ? "bg-purple-100" : "bg-gray-100"}`}>
-                <Hourglass className={`h-6 w-6 ${pendingClients > 0 ? "text-purple-600" : "text-gray-400"}`} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">COACHES</p>
-                <p className="text-4xl font-bold text-gray-900">{totalCoaches}</p>
-                <p className="text-xs text-gray-500 mt-1">Actieve coaches</p>
-              </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Dumbbell className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Links */}
-      <Card className="bg-white border shadow-sm">
-        <CardContent className="p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Snelle Acties</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Link
-              href="/admin/dashboard/clients"
-              className="p-5 bg-gradient-to-br from-[#1e1839] to-[#2a2054] hover:from-[#2a2054] hover:to-[#1e1839] rounded-xl text-left transition-all shadow-sm hover:shadow-md block"
-            >
-              <Users className="h-7 w-7 text-white mb-3" />
-              <h3 className="text-white font-semibold mb-1">Clients Beheren</h3>
-              <p className="text-sm text-white/70">Goedkeuring & coach toewijzing</p>
-              {pendingClients > 0 && (
-                <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-purple-500 text-white rounded-full">
-                  {pendingClients} in wachtrij
-                </span>
-              )}
-            </Link>
-
-            <Link
-              href="/admin/dashboard/users"
-              className="p-5 bg-white hover:bg-gray-50 rounded-xl text-left transition-all shadow-sm hover:shadow-md border border-gray-200 block"
-            >
-              <Shield className="h-7 w-7 text-[#1e1839] mb-3" />
-              <h3 className="text-gray-900 font-semibold mb-1">Gebruikers</h3>
-              <p className="text-sm text-gray-600">Rollen & permissies beheren</p>
-            </Link>
-
-            <Link
-              href="/coach/dashboard"
-              className="p-5 bg-white hover:bg-gray-50 rounded-xl text-left transition-all shadow-sm hover:shadow-md border border-gray-200 block"
-            >
-              <Dumbbell className="h-7 w-7 text-[#1e1839] mb-3" />
-              <h3 className="text-gray-900 font-semibold mb-1">Coach Dashboard</h3>
-              <p className="text-sm text-gray-600">Client details & coaching</p>
-            </Link>
-
-            <Link
-              href="/admin/dashboard/analytics"
-              className="p-5 bg-white hover:bg-gray-50 rounded-xl text-left transition-all shadow-sm hover:shadow-md border border-gray-200 block"
-            >
-              <Globe className="h-7 w-7 text-[#1e1839] mb-3" />
-              <h3 className="text-gray-900 font-semibold mb-1">Website Analytics</h3>
-              <p className="text-sm text-gray-600">Bezoekers & conversies</p>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Pending clients quick list */}
-      {pendingClients > 0 && (
-        <Card className="bg-white border shadow-sm border-purple-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <Hourglass className="h-5 w-5 text-purple-600" />
-                Wachtende Clients
-              </h2>
-              <Link href="/admin/dashboard/clients" className="text-sm text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1">
-                Bekijk alle <ChevronRight className="w-4 h-4" />
+      {/* Quick Actions + Pending Queue */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {/* Quick Actions */}
+        <Card className="shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-semibold">Snelle acties</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-2">
+              <Link
+                href="/admin/dashboard/clients"
+                className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-secondary/50"
+              >
+                <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10">
+                  <Users className="size-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">Clients beheren</p>
+                  <p className="text-xs text-muted-foreground">Goedkeuring & toewijzing</p>
+                </div>
+                {pendingClients > 0 && (
+                  <Badge className="bg-primary/10 text-primary text-[10px]">{pendingClients} wachtend</Badge>
+                )}
+              </Link>
+              <Link
+                href="/admin/dashboard/users"
+                className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-secondary/50"
+              >
+                <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10">
+                  <Shield className="size-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">Gebruikers</p>
+                  <p className="text-xs text-muted-foreground">Rollen & permissies</p>
+                </div>
+              </Link>
+              <Link
+                href="/coach/dashboard"
+                className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-secondary/50"
+              >
+                <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10">
+                  <Dumbbell className="size-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">Coach Dashboard</p>
+                  <p className="text-xs text-muted-foreground">Client details & coaching</p>
+                </div>
+              </Link>
+              <Link
+                href="/admin/dashboard/analytics"
+                className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-secondary/50"
+              >
+                <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10">
+                  <Globe className="size-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">Website Analytics</p>
+                  <p className="text-xs text-muted-foreground">Bezoekers & conversies</p>
+                </div>
               </Link>
             </div>
-            <div className="space-y-2">
-              {clients
-                .filter(c => c.client_status === "pending")
-                .slice(0, 5)
-                .map(client => (
-                  <div key={client.id} className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 border border-purple-100">
-                    <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center text-purple-700 text-sm font-bold">
-                      {(client.raw_user_meta_data?.full_name || client.email)[0].toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {client.raw_user_meta_data?.full_name || "Naamloos"}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">{client.email}</p>
-                    </div>
-                    <Link
-                      href="/admin/dashboard/clients"
-                      className="px-3 py-1.5 text-xs font-medium bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-                    >
-                      Bekijk
-                    </Link>
-                  </div>
-                ))}
-            </div>
           </CardContent>
         </Card>
-      )}
+
+        {/* Pending / Recent Activity */}
+        <Card className="shadow-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-semibold">
+                {pendingClients > 0 ? "Wachtende clients" : "Recente aanmeldingen"}
+              </CardTitle>
+              <Link
+                href="/admin/dashboard/clients"
+                className="text-xs text-primary hover:underline flex items-center gap-0.5"
+              >
+                Bekijk alle <ChevronRight className="size-3" />
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {pendingClients > 0 ? (
+              <div className="flex flex-col gap-2">
+                {clients
+                  .filter(c => c.client_status === "pending")
+                  .slice(0, 5)
+                  .map(client => (
+                    <div key={client.id} className="flex items-center gap-3 rounded-lg bg-primary/5 border border-primary/10 p-3">
+                      <Avatar className="size-8">
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                          {(client.raw_user_meta_data?.full_name || client.email)[0].toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {client.raw_user_meta_data?.full_name || "Naamloos"}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">{client.email}</p>
+                      </div>
+                      <Badge className="bg-primary text-primary-foreground text-[10px]">Wachtend</Badge>
+                    </div>
+                  ))}
+              </div>
+            ) : recentClients.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                {recentClients.map(client => (
+                  <div key={client.id} className="flex items-center gap-3 rounded-lg border p-3">
+                    <Avatar className="size-8">
+                      <AvatarFallback className="bg-secondary text-secondary-foreground text-xs font-semibold">
+                        {(client.raw_user_meta_data?.full_name || client.email)[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {client.raw_user_meta_data?.full_name || "Naamloos"}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">{client.email}</p>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">
+                      {new Date(client.created_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                Geen recente aanmeldingen
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

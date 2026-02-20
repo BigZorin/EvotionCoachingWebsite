@@ -1059,6 +1059,111 @@ export async function getCoachClientsOverview(): Promise<{ success: boolean; cli
 }
 
 // ============================================================
+// DASHBOARD: RECENT CHECK-INS FEED
+// ============================================================
+
+export interface RecentCheckIn {
+  id: string
+  user_id: string
+  client_name: string
+  client_initials: string
+  created_at: string
+  type: "weekly" | "daily"
+  has_coach_feedback: boolean
+  weight: number | null
+  note: string | null
+}
+
+export async function getDashboardRecentCheckIns(limit = 8): Promise<{ success: boolean; checkIns?: RecentCheckIn[]; error?: string }> {
+  try {
+    const currentUser = await getCurrentUser()
+    if (!currentUser || (currentUser.role !== 'ADMIN' && currentUser.role !== 'COACH')) {
+      return { success: false, error: "Unauthorized" }
+    }
+    const supabase = await getSupabaseAdmin()
+
+    // Get coach's assigned clients
+    const { data: relationships } = await supabase
+      .from("coaching_relationships")
+      .select("client_id")
+      .eq("coach_id", currentUser.id)
+      .eq("status", "ACTIVE")
+    const assignedIds = new Set((relationships || []).map(r => r.client_id))
+    if (assignedIds.size === 0) return { success: true, checkIns: [] }
+
+    // Fetch recent weekly + daily check-ins
+    const [weeklyResult, dailyResult, profilesResult] = await Promise.all([
+      supabase
+        .from("check_ins")
+        .select("id, user_id, created_at, weight, coach_feedback, notes")
+        .in("user_id", Array.from(assignedIds))
+        .order("created_at", { ascending: false })
+        .limit(limit),
+      supabase
+        .from("daily_check_ins")
+        .select("id, user_id, check_in_date, weight, coach_feedback, notes")
+        .in("user_id", Array.from(assignedIds))
+        .order("check_in_date", { ascending: false })
+        .limit(limit),
+      supabase
+        .from("profiles")
+        .select("user_id, first_name, last_name")
+        .in("user_id", Array.from(assignedIds)),
+    ])
+
+    const profiles = new Map((profilesResult.data || []).map(p => [p.user_id, p]))
+
+    const allCheckIns: RecentCheckIn[] = []
+
+    for (const ci of weeklyResult.data || []) {
+      const profile = profiles.get(ci.user_id)
+      const name = profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() : "Onbekend"
+      const initials = profile
+        ? `${(profile.first_name || "")[0] || ""}${(profile.last_name || "")[0] || ""}`.toUpperCase()
+        : "?"
+      allCheckIns.push({
+        id: ci.id,
+        user_id: ci.user_id,
+        client_name: name,
+        client_initials: initials,
+        created_at: ci.created_at,
+        type: "weekly",
+        has_coach_feedback: !!ci.coach_feedback,
+        weight: ci.weight,
+        note: ci.notes || null,
+      })
+    }
+
+    for (const ci of dailyResult.data || []) {
+      const profile = profiles.get(ci.user_id)
+      const name = profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() : "Onbekend"
+      const initials = profile
+        ? `${(profile.first_name || "")[0] || ""}${(profile.last_name || "")[0] || ""}`.toUpperCase()
+        : "?"
+      allCheckIns.push({
+        id: ci.id,
+        user_id: ci.user_id,
+        client_name: name,
+        client_initials: initials,
+        created_at: ci.check_in_date,
+        type: "daily",
+        has_coach_feedback: !!ci.coach_feedback,
+        weight: ci.weight,
+        note: ci.notes || null,
+      })
+    }
+
+    // Sort by date descending, take limit
+    allCheckIns.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+    return { success: true, checkIns: allCheckIns.slice(0, limit) }
+  } catch (error) {
+    console.error("Error in getDashboardRecentCheckIns:", error)
+    return { success: false, error: "Failed to fetch recent check-ins" }
+  }
+}
+
+// ============================================================
 // CLIENT CHECK-IN SETTINGS
 // ============================================================
 

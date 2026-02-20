@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import {
-  LayoutDashboard, MessageSquareText, HeartPulse, UserCircle,
+  LayoutDashboard, MessageSquareText, HeartPulse, UserCircle, Loader2,
 } from "lucide-react"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   getClientProfile, getClientCheckIns, getClientDailyCheckIns,
   getClientWorkouts, getClientFoodLogs, getClientHealthSummary,
@@ -161,9 +162,11 @@ export default function ClientDetailClient({ clientId }: { clientId: string }) {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 gap-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-evotion-primary border-t-transparent" />
-        <p className="text-sm text-muted-foreground">Client laden...</p>
+      <div className="flex items-center justify-center py-20">
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span>Client laden...</span>
+        </div>
       </div>
     )
   }
@@ -219,35 +222,26 @@ export default function ClientDetailClient({ clientId }: { clientId: string }) {
         onReject={handleReject}
       />
 
-      {/* 4-tab navigation - sticky with underline style */}
-      <div className="sticky top-0 z-20 bg-background -mx-4 px-4 sm:-mx-6 sm:px-6">
-        <div className="flex border-b border-border">
+      {/* Tab navigation */}
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabId)}>
+        <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-b rounded-none">
           {TABS.map((tab) => (
-            <button
+            <TabsTrigger
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`relative flex items-center gap-2 px-5 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
-                activeTab === tab.id
-                  ? "text-evotion-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              value={tab.id}
+              className="relative rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium gap-2"
             >
               <tab.icon className="h-4 w-4" />
               {tab.label}
-              {/* Badge for pending items */}
               {tab.id === "coaching" && pendingCheckIns > 0 && (
-                <span className="ml-1 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold bg-evotion-primary text-white rounded-full min-w-[18px]">
+                <span className="ml-1 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold bg-primary text-primary-foreground rounded-full min-w-[18px]">
                   {pendingCheckIns}
                 </span>
               )}
-              {/* Active underline indicator */}
-              {activeTab === tab.id && (
-                <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-evotion-primary rounded-full" />
-              )}
-            </button>
+            </TabsTrigger>
           ))}
-        </div>
-      </div>
+        </TabsList>
+      </Tabs>
 
       {/* Tab content */}
       {activeTab === "overzicht" && (
