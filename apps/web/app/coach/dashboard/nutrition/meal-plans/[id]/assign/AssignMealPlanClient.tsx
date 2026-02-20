@@ -96,7 +96,7 @@ export default function AssignMealPlanClient() {
   }
 
   if (isLoading) {
-    return <div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1e1839]"></div></div>
+    return <div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div></div>
   }
 
   return (
@@ -106,18 +106,18 @@ export default function AssignMealPlanClient() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Meal Plan Toewijzen</h1>
-          <p className="text-gray-600">{planName}</p>
+          <h1 className="text-3xl font-bold text-foreground">Meal Plan Toewijzen</h1>
+          <p className="text-muted-foreground">{planName}</p>
         </div>
       </div>
 
       {/* Client selection */}
-      <Card className="bg-white border-gray-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Selecteer Clients</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">Selecteer Clients</h2>
           <div className="space-y-2 max-h-80 overflow-y-auto">
             {clients.length === 0 ? (
-              <p className="text-gray-500 py-4 text-center">Geen clients gevonden</p>
+              <p className="text-muted-foreground py-4 text-center">Geen clients gevonden</p>
             ) : (
               clients.map((client) => {
                 const alreadyAssigned = assignedClientIds.has(client.user_id)
@@ -129,32 +129,32 @@ export default function AssignMealPlanClient() {
                     disabled={alreadyAssigned}
                     className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left ${
                       alreadyAssigned
-                        ? "bg-green-50 opacity-60 cursor-default"
+                        ? "bg-emerald-500/5 opacity-60 cursor-default"
                         : isSelected
-                        ? "bg-[#1e1839]/5 border-2 border-[#1e1839]"
-                        : "hover:bg-gray-50 border-2 border-transparent"
+                        ? "bg-primary/5 border-2 border-primary"
+                        : "hover:bg-secondary/50 border-2 border-transparent"
                     }`}
                   >
                     {client.avatar_url ? (
                       <img src={client.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-medium">
+                      <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-muted-foreground font-medium">
                         {(client.first_name?.[0] || "").toUpperCase()}
                       </div>
                     )}
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-foreground">
                         {client.first_name} {client.last_name}
                       </p>
                     </div>
                     {alreadyAssigned && (
-                      <span className="text-xs text-green-600 font-medium flex items-center gap-1">
+                      <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
                         <Check className="h-3.5 w-3.5" /> Toegewezen
                       </span>
                     )}
                     {isSelected && !alreadyAssigned && (
-                      <div className="w-5 h-5 bg-[#1e1839] rounded flex items-center justify-center">
-                        <Check className="h-3.5 w-3.5 text-white" />
+                      <div className="w-5 h-5 bg-primary rounded flex items-center justify-center">
+                        <Check className="h-3.5 w-3.5 text-primary-foreground" />
                       </div>
                     )}
                   </button>
@@ -166,9 +166,9 @@ export default function AssignMealPlanClient() {
       </Card>
 
       {/* Options */}
-      <Card className="bg-white border-gray-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Opties</h2>
+          <h2 className="text-lg font-semibold text-foreground">Opties</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Startdatum</Label>
@@ -197,7 +197,7 @@ export default function AssignMealPlanClient() {
         <Button
           onClick={handleAssign}
           disabled={assigning || selectedClients.size === 0}
-          className="bg-[#1e1839] hover:bg-[#2a2054] text-white"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           {assigning ? (
             <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Toewijzen...</>

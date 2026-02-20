@@ -2,7 +2,11 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { ArrowLeft, Clock, X, Mail, Calendar } from "lucide-react"
+import { ArrowLeft, Clock, X, Mail, Calendar, MessageCircle, Sparkles, Scale, Flame, TrendingDown, TrendingUp, Target } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
 
 interface ClientHeaderProps {
   client: any
@@ -24,7 +28,12 @@ export default function ClientHeader({
   client,
   profile,
   clientName,
+  latestWeight,
+  weightDiff,
   weeksSinceJoined,
+  streak,
+  dailyCompliance,
+  activeGoalsCount,
   clientApprovalStatus,
   approvalLoading,
   onApprove,
@@ -42,7 +51,6 @@ export default function ClientHeader({
     setRejectReason("")
   }
 
-  // Activity color
   const activityColor = daysSinceActive !== null && daysSinceActive < 1
     ? "bg-emerald-500"
     : daysSinceActive !== null && daysSinceActive < 7
@@ -52,18 +60,22 @@ export default function ClientHeader({
   const activityLabel = daysSinceActive !== null && daysSinceActive < 1
     ? "Actief vandaag"
     : daysSinceActive !== null
-    ? `${daysSinceActive}d geleden actief`
+    ? `${daysSinceActive}d geleden`
     : "Onbekend"
 
+  const initials = clientName
+    ? clientName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)
+    : "C"
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       {/* Back */}
       <Link
         href="/coach/dashboard/clients"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit group"
       >
         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-        Clients
+        Terug naar cliënten
       </Link>
 
       {/* Approval Banner */}
@@ -83,21 +95,21 @@ export default function ClientHeader({
                   onChange={(e) => setRejectReason(e.target.value)}
                   className="px-2.5 py-1.5 text-xs border border-destructive/30 rounded-md bg-background text-foreground focus:ring-1 focus:ring-destructive/20 outline-none w-32"
                 />
-                <button onClick={handleReject} disabled={approvalLoading} className="px-3 py-1.5 text-xs bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90 disabled:opacity-50 transition font-medium">
+                <Button size="sm" variant="destructive" onClick={handleReject} disabled={approvalLoading} className="h-7 text-xs">
                   Bevestig
-                </button>
+                </Button>
                 <button onClick={() => { setShowRejectInput(false); setRejectReason("") }} className="p-1 text-muted-foreground hover:text-foreground transition">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : (
               <>
-                <button onClick={() => setShowRejectInput(true)} disabled={approvalLoading} className="px-3 py-1.5 text-xs border border-destructive/30 text-destructive rounded-md hover:bg-destructive/5 disabled:opacity-50 transition font-medium">
+                <Button size="sm" variant="outline" onClick={() => setShowRejectInput(true)} disabled={approvalLoading} className="h-7 text-xs border-destructive/30 text-destructive hover:bg-destructive/5">
                   Afwijzen
-                </button>
-                <button onClick={onApprove} disabled={approvalLoading} className="px-3 py-1.5 text-xs bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50 transition font-medium">
+                </Button>
+                <Button size="sm" onClick={onApprove} disabled={approvalLoading} className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
                   Goedkeuren
-                </button>
+                </Button>
               </>
             )}
           </div>
@@ -110,46 +122,111 @@ export default function ClientHeader({
             <X className="w-4 h-4 text-destructive flex-shrink-0" />
             <span className="text-sm text-destructive font-medium">Client afgewezen</span>
           </div>
-          <button onClick={onApprove} disabled={approvalLoading} className="px-3 py-1.5 text-xs bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50 transition font-medium flex-shrink-0">
+          <Button size="sm" onClick={onApprove} disabled={approvalLoading} className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
             Alsnog goedkeuren
-          </button>
+          </Button>
         </div>
       )}
 
-      {/* Client Identity */}
-      <div className="flex items-center gap-4">
-        {/* Avatar with activity dot */}
-        <div className="relative flex-shrink-0">
-          {profile?.avatar_url ? (
-            <img
-              src={profile.avatar_url}
-              alt=""
-              className="w-14 h-14 rounded-full object-cover ring-2 ring-border ring-offset-2 ring-offset-background"
-            />
-          ) : (
-            <div className="w-14 h-14 rounded-full bg-evotion-primary flex items-center justify-center text-xl font-bold text-white ring-2 ring-border ring-offset-2 ring-offset-background">
-              {(clientName[0] || "C").toUpperCase()}
+      {/* Client Identity + Actions */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="relative flex-shrink-0">
+            <Avatar className="size-14 ring-2 ring-border ring-offset-2 ring-offset-background">
+              {profile?.avatar_url ? (
+                <AvatarImage src={profile.avatar_url} alt={clientName} />
+              ) : null}
+              <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-[2.5px] border-background ${activityColor}`} />
+          </div>
+
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold tracking-tight truncate">{clientName}</h1>
+            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1 truncate">
+                <Mail className="w-3 h-3 flex-shrink-0" />
+                {client.email}
+              </span>
+              <span className="flex items-center gap-1 flex-shrink-0">
+                <Calendar className="w-3 h-3" />
+                {weeksSinceJoined}w lid
+              </span>
+              <span className="flex items-center gap-1 flex-shrink-0">
+                <div className={`w-1.5 h-1.5 rounded-full ${activityColor}`} />
+                {activityLabel}
+              </span>
             </div>
-          )}
-          <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-[2.5px] border-background ${activityColor}`} />
+          </div>
         </div>
 
-        {/* Name + meta */}
-        <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-bold text-foreground tracking-tight truncate">{clientName}</h1>
-          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1 truncate">
-              <Mail className="w-3 h-3 flex-shrink-0" />
-              {client.email}
-            </span>
-            <span className="flex items-center gap-1 flex-shrink-0">
-              <Calendar className="w-3 h-3" />
-              {weeksSinceJoined}w lid
-            </span>
-            <span className="flex items-center gap-1 flex-shrink-0">
-              <div className={`w-1.5 h-1.5 rounded-full ${activityColor}`} />
-              {activityLabel}
-            </span>
+        {/* Quick actions */}
+        <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/coach/dashboard/messages">
+              <MessageCircle className="size-4 mr-1.5" />
+              Bericht
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* Quick-stats strip */}
+      <div className="flex flex-wrap items-center gap-4 rounded-lg bg-secondary/50 border px-4 py-3">
+        {/* Weight */}
+        <div className="flex items-center gap-2">
+          <Scale className="size-4 text-muted-foreground" />
+          <div>
+            <p className="text-sm font-semibold">
+              {latestWeight ? `${latestWeight} kg` : "--"}
+            </p>
+            {weightDiff && (
+              <div className="flex items-center gap-0.5 text-[10px]">
+                {parseFloat(weightDiff) < 0 ? (
+                  <TrendingDown className="size-3 text-emerald-500" />
+                ) : parseFloat(weightDiff) > 0 ? (
+                  <TrendingUp className="size-3 text-destructive" />
+                ) : null}
+                <span className="text-muted-foreground">{weightDiff} kg</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="w-px h-8 bg-border" />
+
+        {/* Compliance */}
+        <div className="flex items-center gap-2">
+          <div className="min-w-[80px]">
+            <div className="flex justify-between text-[10px] mb-1">
+              <span className="text-muted-foreground">Compliance (30d)</span>
+              <span className="font-semibold">{dailyCompliance}</span>
+            </div>
+            <Progress value={Math.min(dailyCompliance * 3.3, 100)} className="h-1.5" />
+          </div>
+        </div>
+
+        <div className="w-px h-8 bg-border" />
+
+        {/* Streak */}
+        <div className="flex items-center gap-1.5">
+          <Flame className={`size-4 ${streak > 0 ? "text-orange-500" : "text-muted-foreground/30"}`} />
+          <div>
+            <p className="text-sm font-semibold">{streak}d</p>
+            <p className="text-[10px] text-muted-foreground">Streak</p>
+          </div>
+        </div>
+
+        <div className="w-px h-8 bg-border" />
+
+        {/* Goals */}
+        <div className="flex items-center gap-1.5">
+          <Target className={`size-4 ${activeGoalsCount > 0 ? "text-primary" : "text-muted-foreground/30"}`} />
+          <div>
+            <p className="text-sm font-semibold">{activeGoalsCount}</p>
+            <p className="text-[10px] text-muted-foreground">Doelen</p>
           </div>
         </div>
       </div>

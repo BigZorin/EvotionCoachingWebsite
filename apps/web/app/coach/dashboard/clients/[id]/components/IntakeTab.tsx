@@ -15,6 +15,7 @@ interface IntakeTabProps {
   intake: any | null
   onIntakeReset: () => void
   onPlanComplete: () => void
+  onDataRefresh: () => void
 }
 
 /** Convert LLM markdown/plain-text output to styled HTML, line by line */
@@ -76,7 +77,7 @@ function formatAnalysisMarkdown(raw: string): string {
     .replace(/\*([^*]+)\*/g, "<em>$1</em>")
 }
 
-export default function IntakeTab({ clientId, clientName, intake, onIntakeReset, onPlanComplete }: IntakeTabProps) {
+export default function IntakeTab({ clientId, clientName, intake, onIntakeReset, onPlanComplete, onDataRefresh }: IntakeTabProps) {
   const [aiAnalysis, setAiAnalysis] = useState<IntakeAnalysis | null>(null)
   const [aiAnalyzing, setAiAnalyzing] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
@@ -156,7 +157,7 @@ export default function IntakeTab({ clientId, clientName, intake, onIntakeReset,
             <button
               onClick={handleAiAnalysis}
               disabled={aiAnalyzing}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm text-white bg-evotion-primary rounded-lg hover:bg-evotion-primary/90 disabled:opacity-50 transition"
+              className="flex items-center gap-1.5 px-3 py-2 text-sm text-white bg-primary rounded-lg hover:bg-primary/90 disabled:opacity-50 transition"
             >
               <Sparkles className="w-4 h-4" />
               {aiAnalyzing ? "Analyseren..." : "AI Analyse"}
@@ -188,10 +189,10 @@ export default function IntakeTab({ clientId, clientName, intake, onIntakeReset,
 
       {/* AI Analysis Results */}
       {aiAnalysis && (
-        <div className="bg-evotion-primary/[0.03] border border-evotion-primary/10 rounded-xl p-6">
+        <div className="bg-primary/[0.03] border border-primary/10 rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-evotion-primary flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
                 <Sparkles className="w-4.5 h-4.5 text-white" />
               </div>
               <div>
@@ -209,7 +210,7 @@ export default function IntakeTab({ clientId, clientName, intake, onIntakeReset,
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div className="prose prose-sm max-w-none prose-headings:text-evotion-primary prose-headings:font-semibold prose-h2:text-base prose-h2:mt-5 prose-h2:mb-2 prose-h2:border-b prose-h2:border-evotion-primary/10 prose-h2:pb-1 prose-p:text-foreground/80 prose-li:text-foreground/80 prose-strong:text-foreground prose-ul:my-1">
+          <div className="prose prose-sm max-w-none prose-headings:text-primary prose-headings:font-semibold prose-h2:text-base prose-h2:mt-5 prose-h2:mb-2 prose-h2:border-b prose-h2:border-primary/10 prose-h2:pb-1 prose-p:text-foreground/80 prose-li:text-foreground/80 prose-strong:text-foreground prose-ul:my-1">
             <div dangerouslySetInnerHTML={{ __html: formatAnalysisMarkdown(aiAnalysis.analysis) }} />
           </div>
         </div>
@@ -217,9 +218,9 @@ export default function IntakeTab({ clientId, clientName, intake, onIntakeReset,
 
       {/* AI Analyzing Skeleton */}
       {aiAnalyzing && (
-        <div className="bg-evotion-primary/[0.03] border border-evotion-primary/10 rounded-xl p-6">
+        <div className="bg-primary/[0.03] border border-primary/10 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-xl bg-evotion-primary flex items-center justify-center animate-pulse">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center animate-pulse">
               <Sparkles className="w-4.5 h-4.5 text-white" />
             </div>
             <div>
@@ -250,7 +251,7 @@ export default function IntakeTab({ clientId, clientName, intake, onIntakeReset,
           </div>
           <button
             onClick={() => setShowPlanWizard(true)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-evotion-primary rounded-lg hover:bg-evotion-primary/90 transition flex-shrink-0"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition flex-shrink-0"
           >
             <Sparkles className="w-4 h-4" />
             Genereer Plan
@@ -298,8 +299,8 @@ export default function IntakeTab({ clientId, clientName, intake, onIntakeReset,
           {/* Doelen & Ervaring */}
           <div className="bg-card rounded-xl border border-border p-5">
             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-              <div className="p-1.5 rounded-md bg-evotion-primary/5">
-                <Target className="w-3.5 h-3.5 text-evotion-primary" />
+              <div className="p-1.5 rounded-md bg-primary/5">
+                <Target className="w-3.5 h-3.5 text-primary" />
               </div>
               Doelen & Ervaring
             </h4>
@@ -309,7 +310,7 @@ export default function IntakeTab({ clientId, clientName, intake, onIntakeReset,
                   <p className="text-xs text-muted-foreground mb-1.5">Doelen</p>
                   <div className="flex flex-wrap gap-2">
                     {intake.goals.split(", ").map((goal: string) => (
-                      <span key={goal} className="px-3 py-1 bg-evotion-primary/10 text-evotion-primary rounded-full text-sm font-medium">{goal}</span>
+                      <span key={goal} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">{goal}</span>
                     ))}
                   </div>
                 </div>

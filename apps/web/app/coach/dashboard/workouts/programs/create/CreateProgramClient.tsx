@@ -603,9 +603,9 @@ export default function CreateProgramClient() {
   // ============================================
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-secondary/30">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-white border-b px-6 py-3 flex items-center gap-4">
+      <div className="sticky top-0 z-20 bg-card border-b px-6 py-3 flex items-center gap-4">
         <Button variant="ghost" size="sm" onClick={() => router.back()}>
           <ArrowLeft className="w-4 h-4 mr-1" />
           Terug
@@ -616,7 +616,7 @@ export default function CreateProgramClient() {
         <Button
           onClick={handleSave}
           disabled={isSaving || !name.trim()}
-          className="bg-[#1e1839] hover:bg-[#2a2054] text-white"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           {isSaving ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -634,9 +634,9 @@ export default function CreateProgramClient() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Banner */}
               <div>
-                <Label className="text-sm font-medium text-gray-700">Banner</Label>
+                <Label className="text-sm font-medium text-foreground">Banner</Label>
                 <div className="mt-2 relative">
-                  <div className="w-full h-32 rounded-lg overflow-hidden bg-gradient-to-br from-[#1e1839] to-[#3d2d6b] flex items-center justify-center">
+                  <div className="w-full h-32 rounded-lg overflow-hidden bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
                     {bannerUrl ? (
                       <img
                         src={bannerUrl}
@@ -647,7 +647,7 @@ export default function CreateProgramClient() {
                       <ImageIcon className="w-8 h-8 text-white/30" />
                     )}
                   </div>
-                  <label className="mt-2 flex items-center justify-center gap-2 px-3 py-1.5 bg-white border rounded-md cursor-pointer hover:bg-gray-50 text-sm">
+                  <label className="mt-2 flex items-center justify-center gap-2 px-3 py-1.5 bg-card border rounded-md cursor-pointer hover:bg-secondary/50 text-sm">
                     {isUploading ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     ) : (
@@ -718,7 +718,7 @@ export default function CreateProgramClient() {
                 <span className="text-sm font-medium">
                   Use blocks / phases
                 </span>
-                <span className="text-xs text-gray-500 ml-2">
+                <span className="text-xs text-muted-foreground ml-2">
                   For periodization (e.g. Foundation → Strength → Peak)
                 </span>
               </div>
@@ -740,8 +740,8 @@ export default function CreateProgramClient() {
                       }}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                         bi === activeBlockIndex
-                          ? "bg-[#1e1839] text-white"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary text-foreground hover:bg-secondary"
                       }`}
                     >
                       {block.name}
@@ -749,7 +749,7 @@ export default function CreateProgramClient() {
                     {blocks.length > 1 && (
                       <button
                         onClick={() => removeBlock(bi)}
-                        className="ml-1 text-gray-400 hover:text-red-500 transition-colors"
+                        className="ml-1 text-muted-foreground hover:text-red-500 transition-colors"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -820,11 +820,11 @@ export default function CreateProgramClient() {
                     onClick={() => setActiveDayIndex(di)}
                     className={`px-4 py-2 rounded-t-lg text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${
                       di === activeDayIndex
-                        ? "bg-white text-[#1e1839] border border-b-0 border-gray-200 shadow-sm"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        ? "bg-card text-primary border border-b-0 border-border shadow-sm"
+                        : "bg-secondary text-muted-foreground hover:bg-secondary"
                     }`}
                   >
-                    {day.isRestDay && <Moon className="w-3.5 h-3.5 text-gray-400" />}
+                    {day.isRestDay && <Moon className="w-3.5 h-3.5 text-muted-foreground" />}
                     {day.name || `Day ${di + 1}`}
                     {day.isRestDay && (
                       <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
@@ -835,7 +835,7 @@ export default function CreateProgramClient() {
                   {currentBlock.days.length > 1 && (
                     <button
                       onClick={() => removeDay(di)}
-                      className="ml-0.5 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all"
+                      className="ml-0.5 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-red-500 transition-all"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -860,12 +860,12 @@ export default function CreateProgramClient() {
                       className="fixed inset-0 z-10"
                       onClick={() => setShowAddDayMenu(false)}
                     />
-                    <div className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg z-20 py-1 w-48">
+                    <div className="absolute top-full left-0 mt-1 bg-card border rounded-lg shadow-lg z-20 py-1 w-48">
                       <button
                         onClick={() => addDay(false)}
-                        className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-secondary/50 flex items-center gap-2"
                       >
-                        <Plus className="w-4 h-4 text-gray-400" />
+                        <Plus className="w-4 h-4 text-muted-foreground" />
                         Create New Day
                       </button>
                       <button
@@ -873,16 +873,16 @@ export default function CreateProgramClient() {
                           setShowAddDayMenu(false)
                           setShowImportModal(true)
                         }}
-                        className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-secondary/50 flex items-center gap-2"
                       >
-                        <FileDown className="w-4 h-4 text-gray-400" />
+                        <FileDown className="w-4 h-4 text-muted-foreground" />
                         Import From Template
                       </button>
                       <button
                         onClick={() => addDay(true)}
-                        className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-secondary/50 flex items-center gap-2"
                       >
-                        <Coffee className="w-4 h-4 text-gray-400" />
+                        <Coffee className="w-4 h-4 text-muted-foreground" />
                         Add Rest Day
                       </button>
                     </div>
@@ -898,7 +898,7 @@ export default function CreateProgramClient() {
                   {/* Day name */}
                   <div className="flex items-center gap-4">
                     <div className="flex-1">
-                      <Label className="text-xs text-gray-500">Day Name</Label>
+                      <Label className="text-xs text-muted-foreground">Day Name</Label>
                       <Input
                         value={currentDay.name}
                         onChange={(e) => updateDayField("name", e.target.value)}
@@ -911,9 +911,9 @@ export default function CreateProgramClient() {
                   {currentDay.isRestDay ? (
                     /* Rest day display */
                     <div className="py-12 text-center">
-                      <Coffee className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                      <h3 className="text-lg font-medium text-gray-500">Rest Day</h3>
-                      <p className="text-sm text-gray-400 mt-1">
+                      <Coffee className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
+                      <h3 className="text-lg font-medium text-muted-foreground">Rest Day</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
                         Recovery and regeneration
                       </p>
                     </div>
@@ -943,7 +943,7 @@ export default function CreateProgramClient() {
                               className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-semibold transition-colors ${
                                 activeSection === sectionKey
                                   ? meta.bg
-                                  : "bg-gray-50 border-gray-200"
+                                  : "bg-secondary/50 border-border"
                               }`}
                             >
                               <Icon className={`w-4 h-4 ${meta.color}`} />
@@ -988,7 +988,7 @@ export default function CreateProgramClient() {
                                 className={`w-full py-3 border-2 border-dashed rounded-lg text-sm flex items-center justify-center gap-2 transition-colors ${
                                   activeSection === sectionKey
                                     ? "border-purple-300 text-purple-500 bg-purple-50/50"
-                                    : "border-gray-200 text-gray-400 hover:border-gray-300"
+                                    : "border-border text-muted-foreground hover:border-border"
                                 }`}
                               >
                                 <Plus className="w-4 h-4" />
@@ -1004,7 +1004,7 @@ export default function CreateProgramClient() {
                   {/* Day instructions */}
                   {!currentDay.isRestDay && (
                     <div>
-                      <Label className="text-xs text-gray-500">Instructions / Notes</Label>
+                      <Label className="text-xs text-muted-foreground">Instructions / Notes</Label>
                       <Textarea
                         value={currentDay.instructions}
                         onChange={(e) => updateDayField("instructions", e.target.value)}
@@ -1023,13 +1023,13 @@ export default function CreateProgramClient() {
           <div className="w-72 flex-shrink-0 hidden lg:block">
             <div className="sticky top-[73px]">
               <Card className="overflow-hidden">
-                <div className="p-3 border-b bg-gray-50">
+                <div className="p-3 border-b bg-secondary/50">
                   <h3 className="text-sm font-semibold flex items-center gap-2">
-                    <Dumbbell className="w-4 h-4 text-gray-500" />
+                    <Dumbbell className="w-4 h-4 text-muted-foreground" />
                     Exercise Library
                   </h3>
                   <div className="mt-2 relative">
-                    <Search className="absolute left-2.5 top-2 w-3.5 h-3.5 text-gray-400" />
+                    <Search className="absolute left-2.5 top-2 w-3.5 h-3.5 text-muted-foreground" />
                     <Input
                       value={exerciseSearch}
                       onChange={(e) => setExerciseSearch(e.target.value)}
@@ -1059,7 +1059,7 @@ export default function CreateProgramClient() {
 
                 <div className="max-h-[calc(100vh-280px)] overflow-y-auto">
                   {filteredExercises.length === 0 && (
-                    <p className="text-center text-sm text-gray-400 py-6">
+                    <p className="text-center text-sm text-muted-foreground py-6">
                       No exercises found
                     </p>
                   )}
@@ -1067,9 +1067,9 @@ export default function CreateProgramClient() {
                     <button
                       key={exercise.id}
                       onClick={() => addExerciseToDay(exercise)}
-                      className="w-full px-3 py-2.5 text-left hover:bg-purple-50 border-b border-gray-100 flex items-center gap-3 transition-colors group"
+                      className="w-full px-3 py-2.5 text-left hover:bg-purple-50 border-b border-border flex items-center gap-3 transition-colors group"
                     >
-                      <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      <div className="w-10 h-10 rounded-md bg-secondary flex items-center justify-center flex-shrink-0 overflow-hidden">
                         {exercise.thumbnailUrl ? (
                           <img
                             src={exercise.thumbnailUrl}
@@ -1077,18 +1077,18 @@ export default function CreateProgramClient() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <Dumbbell className="w-4 h-4 text-gray-400" />
+                          <Dumbbell className="w-4 h-4 text-muted-foreground" />
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium truncate">
                           {exercise.name}
                         </p>
-                        <p className="text-xs text-gray-400 capitalize">
+                        <p className="text-xs text-muted-foreground capitalize">
                           {exercise.category.toLowerCase()}
                         </p>
                       </div>
-                      <Plus className="w-4 h-4 text-gray-300 group-hover:text-purple-500 transition-colors flex-shrink-0" />
+                      <Plus className="w-4 h-4 text-muted-foreground/50 group-hover:text-purple-500 transition-colors flex-shrink-0" />
                     </button>
                   ))}
                 </div>
@@ -1106,7 +1106,7 @@ export default function CreateProgramClient() {
           </DialogHeader>
           <div className="max-h-[400px] overflow-y-auto space-y-2 mt-2">
             {templates.length === 0 && (
-              <p className="text-center text-sm text-gray-400 py-8">
+              <p className="text-center text-sm text-muted-foreground py-8">
                 No workout templates available
               </p>
             )}
@@ -1114,7 +1114,7 @@ export default function CreateProgramClient() {
               <button
                 key={template.id}
                 onClick={() => importTemplate(template)}
-                className="w-full p-3 text-left border rounded-lg hover:bg-gray-50 transition-colors"
+                className="w-full p-3 text-left border rounded-lg hover:bg-secondary/50 transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-sm">{template.name}</span>
@@ -1123,7 +1123,7 @@ export default function CreateProgramClient() {
                   </Badge>
                 </div>
                 {template.description && (
-                  <p className="text-xs text-gray-400 mt-1 truncate">
+                  <p className="text-xs text-muted-foreground mt-1 truncate">
                     {template.description}
                   </p>
                 )}
@@ -1157,7 +1157,7 @@ export default function CreateProgramClient() {
                 className="max-w-full max-h-full"
               />
             ) : (
-              <p className="text-gray-500 text-sm">No video available</p>
+              <p className="text-muted-foreground text-sm">No video available</p>
             )}
           </div>
         </DialogContent>
@@ -1192,31 +1192,31 @@ function ExerciseRow({
   onPreview: () => void
 }) {
   return (
-    <div className="border rounded-lg bg-white overflow-hidden">
+    <div className="border rounded-lg bg-card overflow-hidden">
       {/* Top row: handle, letter, name, actions */}
-      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50/50 border-b">
+      <div className="flex items-center gap-2 px-3 py-2 bg-secondary/30 border-b">
         <div className="flex flex-col gap-0.5">
           <button
             onClick={onMoveUp}
             disabled={isFirst}
-            className="text-gray-400 hover:text-gray-600 disabled:opacity-20"
+            className="text-muted-foreground hover:text-muted-foreground disabled:opacity-20"
           >
             <ChevronUp className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={onMoveDown}
             disabled={isLast}
-            className="text-gray-400 hover:text-gray-600 disabled:opacity-20"
+            className="text-muted-foreground hover:text-muted-foreground disabled:opacity-20"
           >
             <ChevronDown className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <span className="w-6 h-6 rounded bg-[#1e1839] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+        <span className="w-6 h-6 rounded bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center flex-shrink-0">
           {letter}
         </span>
 
-        <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+        <div className="w-8 h-8 rounded bg-secondary flex items-center justify-center flex-shrink-0 overflow-hidden">
           {exercise.thumbnailUrl ? (
             <img
               src={exercise.thumbnailUrl}
@@ -1224,7 +1224,7 @@ function ExerciseRow({
               className="w-full h-full object-cover"
             />
           ) : (
-            <Dumbbell className="w-3.5 h-3.5 text-gray-400" />
+            <Dumbbell className="w-3.5 h-3.5 text-muted-foreground" />
           )}
         </div>
 
@@ -1235,7 +1235,7 @@ function ExerciseRow({
         {(exercise.gifUrl || exercise.thumbnailUrl) && (
           <button
             onClick={onPreview}
-            className="text-gray-400 hover:text-purple-600 transition-colors"
+            className="text-muted-foreground hover:text-purple-600 transition-colors"
           >
             <Video className="w-4 h-4" />
           </button>
@@ -1243,7 +1243,7 @@ function ExerciseRow({
 
         <button
           onClick={onRemove}
-          className="text-gray-400 hover:text-red-600 transition-colors"
+          className="text-muted-foreground hover:text-red-600 transition-colors"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -1254,7 +1254,7 @@ function ExerciseRow({
         {/* Row 1: Sets, Reps, Rest */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <label className="text-xs text-gray-500 w-8">Sets</label>
+            <label className="text-xs text-muted-foreground w-8">Sets</label>
             <Input
               type="number"
               min={0}
@@ -1266,7 +1266,7 @@ function ExerciseRow({
             />
           </div>
           <div className="flex items-center gap-1.5">
-            <label className="text-xs text-gray-500 w-8">Reps</label>
+            <label className="text-xs text-muted-foreground w-8">Reps</label>
             <Input
               value={exercise.reps}
               onChange={(e) => onUpdate("reps", e.target.value)}
@@ -1275,7 +1275,7 @@ function ExerciseRow({
             />
           </div>
           <div className="flex items-center gap-1.5">
-            <label className="text-xs text-gray-500 w-8">Rest</label>
+            <label className="text-xs text-muted-foreground w-8">Rest</label>
             <Input
               type="number"
               min={0}
@@ -1289,14 +1289,14 @@ function ExerciseRow({
               className="w-16 h-7 text-sm text-center"
               placeholder="sec"
             />
-            <span className="text-xs text-gray-400">s</span>
+            <span className="text-xs text-muted-foreground">s</span>
           </div>
         </div>
 
         {/* Row 2: RIR, RPE, Intensity, Tempo */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <label className="text-xs text-gray-500 w-8">RIR</label>
+            <label className="text-xs text-muted-foreground w-8">RIR</label>
             <Input
               type="number"
               min={0}
@@ -1312,7 +1312,7 @@ function ExerciseRow({
             />
           </div>
           <div className="flex items-center gap-1.5">
-            <label className="text-xs text-gray-500 w-8">RPE</label>
+            <label className="text-xs text-muted-foreground w-8">RPE</label>
             <Input
               type="number"
               min={0}
@@ -1328,7 +1328,7 @@ function ExerciseRow({
             />
           </div>
           <div className="flex items-center gap-1.5">
-            <label className="text-xs text-gray-500 w-6">kg</label>
+            <label className="text-xs text-muted-foreground w-6">kg</label>
             <Input
               type="number"
               min={0}
@@ -1343,7 +1343,7 @@ function ExerciseRow({
             />
           </div>
           <div className="flex items-center gap-1.5">
-            <label className="text-xs text-gray-500">Tempo</label>
+            <label className="text-xs text-muted-foreground">Tempo</label>
             <Input
               value={exercise.tempo}
               onChange={(e) => onUpdate("tempo", e.target.value)}
@@ -1355,7 +1355,7 @@ function ExerciseRow({
 
         {/* Row 3: Notes */}
         <div className="flex items-center gap-1.5">
-          <label className="text-xs text-gray-500 w-8">Notes</label>
+          <label className="text-xs text-muted-foreground w-8">Notes</label>
           <Input
             value={exercise.notes}
             onChange={(e) => onUpdate("notes", e.target.value)}

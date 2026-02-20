@@ -91,8 +91,8 @@ export default function FoodLogsClient() {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Food Logs</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="text-2xl font-bold text-foreground">Food Logs</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           Voedingsregistraties van je clients
         </p>
       </div>
@@ -102,45 +102,45 @@ export default function FoodLogsClient() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => changeDate(-1)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition"
+            className="p-2 hover:bg-secondary rounded-lg transition"
           >
-            <ChevronLeft className="h-5 w-5 text-gray-600" />
+            <ChevronLeft className="h-5 w-5 text-muted-foreground" />
           </button>
-          <span className="text-lg font-semibold text-gray-900 min-w-[200px] text-center">
+          <span className="text-lg font-semibold text-foreground min-w-[200px] text-center">
             {formatDate(selectedDate)}
           </span>
           <button
             onClick={() => changeDate(1)}
             disabled={selectedDate === getToday()}
-            className="p-2 hover:bg-gray-100 rounded-lg transition disabled:opacity-30"
+            className="p-2 hover:bg-secondary rounded-lg transition disabled:opacity-30"
           >
-            <ChevronRight className="h-5 w-5 text-gray-600" />
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
           </button>
         </div>
 
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Zoek client..."
-            className="pl-9 pr-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-[#1e1839]/20 focus:border-[#1e1839] outline-none"
+            className="pl-9 pr-3 py-2 text-sm border rounded-lg focus:ring-2 focus-visible:ring-ring focus:border-primary outline-none"
           />
         </div>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1e1839]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       ) : filteredClients.length === 0 ? (
-        <div className="bg-white rounded-xl border p-12 text-center">
-          <UtensilsCrossed className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+        <div className="bg-card rounded-xl border p-12 text-center">
+          <UtensilsCrossed className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+          <h3 className="text-lg font-semibold text-foreground mb-1">
             Geen logs gevonden
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Er zijn geen voedingsregistraties voor deze datum
           </p>
         </div>
@@ -171,26 +171,26 @@ export default function FoodLogsClient() {
             return (
               <div
                 key={clientName}
-                className="bg-white rounded-xl border shadow-sm overflow-hidden"
+                className="bg-card rounded-xl border shadow-sm overflow-hidden"
               >
                 {/* Client header */}
-                <div className="px-5 py-4 border-b bg-gray-50/50 flex items-center justify-between">
+                <div className="px-5 py-4 border-b bg-secondary/30 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-[#1e1839] flex items-center justify-center text-white text-sm font-bold">
+                    <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold">
                       {clientName[0]?.toUpperCase() || "C"}
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">{clientName}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="font-semibold text-foreground">{clientName}</p>
+                      <p className="text-xs text-muted-foreground">
                         {clientLogs.length} items gelogd
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold text-gray-900">
+                    <p className="text-lg font-bold text-foreground">
                       {Math.round(totalCals)} kcal
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       E{Math.round(totalProtein)}g | K{Math.round(totalCarbs)}g | V
                       {Math.round(totalFat)}g
                     </p>
@@ -207,7 +207,7 @@ export default function FoodLogsClient() {
 
                     return (
                       <div key={mealType} className="px-5 py-3">
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                           {MEAL_LABELS[mealType]}
                         </p>
                         {mealLogs.map((log) => (
@@ -216,10 +216,10 @@ export default function FoodLogsClient() {
                             className="flex items-center justify-between py-1.5"
                           >
                             <div>
-                              <p className="text-sm text-gray-900">
+                              <p className="text-sm text-foreground">
                                 {log.food_name}
                               </p>
-                              <p className="text-xs text-gray-400">
+                              <p className="text-xs text-muted-foreground">
                                 {log.number_of_servings &&
                                 log.number_of_servings !== 1
                                   ? `${log.number_of_servings}x `
@@ -231,7 +231,7 @@ export default function FoodLogsClient() {
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="text-sm font-medium text-gray-700">
+                              <p className="text-sm font-medium text-foreground">
                                 {Math.round(
                                   (log.calories || 0) *
                                     (log.number_of_servings || 1)

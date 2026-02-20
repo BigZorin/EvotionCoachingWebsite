@@ -106,15 +106,15 @@ export default function CreateRecipeClient() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Nieuw Recept</h1>
-          <p className="text-gray-600">Voeg een nieuw recept toe aan je bibliotheek</p>
+          <h1 className="text-3xl font-bold text-foreground">Nieuw Recept</h1>
+          <p className="text-muted-foreground">Voeg een nieuw recept toe aan je bibliotheek</p>
         </div>
       </div>
 
       {/* Basic Info */}
-      <Card className="bg-white border-gray-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Basisgegevens</h2>
+          <h2 className="text-lg font-semibold text-foreground">Basisgegevens</h2>
 
           <div className="space-y-2">
             <Label>Titel *</Label>
@@ -177,9 +177,9 @@ export default function CreateRecipeClient() {
       </Card>
 
       {/* Macros */}
-      <Card className="bg-white border-gray-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Voedingswaarden (per portie)</h2>
+          <h2 className="text-lg font-semibold text-foreground">Voedingswaarden (per portie)</h2>
           <div className="grid grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label>Calorieën</Label>
@@ -222,10 +222,10 @@ export default function CreateRecipeClient() {
       </Card>
 
       {/* Ingredients */}
-      <Card className="bg-white border-gray-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Ingrediënten</h2>
+            <h2 className="text-lg font-semibold text-foreground">Ingrediënten</h2>
             <Button variant="outline" size="sm" onClick={addIngredient}>
               <Plus className="h-4 w-4 mr-1" />
               Toevoegen
@@ -258,7 +258,7 @@ export default function CreateRecipeClient() {
                   variant="ghost"
                   size="sm"
                   onClick={() => removeIngredient(idx)}
-                  className="text-gray-400 hover:text-red-500"
+                  className="text-muted-foreground hover:text-red-500"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -269,9 +269,9 @@ export default function CreateRecipeClient() {
       </Card>
 
       {/* Tags */}
-      <Card className="bg-white border-gray-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Tags</h2>
+          <h2 className="text-lg font-semibold text-foreground">Tags</h2>
           <div className="flex flex-wrap gap-2">
             {COMMON_TAGS.map((tag) => (
               <Badge
@@ -279,8 +279,8 @@ export default function CreateRecipeClient() {
                 variant={tags.includes(tag) ? "default" : "outline"}
                 className={`cursor-pointer ${
                   tags.includes(tag)
-                    ? "bg-[#1e1839] hover:bg-[#2a2054]"
-                    : "hover:bg-gray-100"
+                    ? "bg-primary hover:bg-primary/90"
+                    : "hover:bg-secondary"
                 }`}
                 onClick={() => toggleTag(tag)}
               >
@@ -292,9 +292,9 @@ export default function CreateRecipeClient() {
       </Card>
 
       {/* Instructions */}
-      <Card className="bg-white border-gray-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Bereidingswijze</h2>
+          <h2 className="text-lg font-semibold text-foreground">Bereidingswijze</h2>
           <Textarea
             value={instructions}
             onChange={(e) => setInstructions(e.target.value)}
@@ -312,7 +312,7 @@ export default function CreateRecipeClient() {
         <Button
           onClick={handleSave}
           disabled={saving || !title.trim()}
-          className="bg-[#1e1839] hover:bg-[#2a2054] text-white"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           <Save className="h-4 w-4 mr-2" />
           {saving ? "Opslaan..." : "Recept Opslaan"}

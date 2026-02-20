@@ -126,17 +126,17 @@ export default function ImportRecipeClient() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Recepten Importeren</h1>
-          <p className="text-gray-600">Zoek en importeer recepten uit Spoonacular (365.000+ recepten)</p>
+          <h1 className="text-3xl font-bold text-foreground">Recepten Importeren</h1>
+          <p className="text-muted-foreground">Zoek en importeer recepten uit Spoonacular (365.000+ recepten)</p>
         </div>
       </div>
 
       {/* Search */}
-      <Card className="bg-white border-gray-200 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6">
           <div className="flex gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Zoek recepten, bijv. 'chicken pasta', 'overnight oats'..."
                 value={query}
@@ -148,7 +148,7 @@ export default function ImportRecipeClient() {
             <select
               value={diet}
               onChange={(e) => setDiet(e.target.value)}
-              className="border border-gray-200 rounded-md px-3 py-2 text-sm bg-white"
+              className="border border-border rounded-md px-3 py-2 text-sm bg-card"
             >
               {DIET_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -159,7 +159,7 @@ export default function ImportRecipeClient() {
             <Button
               onClick={handleSearch}
               disabled={isSearching || !query.trim()}
-              className="bg-[#1e1839] hover:bg-[#2a2054] text-white"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {isSearching ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -176,7 +176,7 @@ export default function ImportRecipeClient() {
 
       {/* Error */}
       {error && (
-        <div className="flex items-center gap-3 p-4 bg-red-50 text-red-700 rounded-lg">
+        <div className="flex items-center gap-3 p-4 bg-destructive/5 text-destructive rounded-lg">
           <AlertCircle className="h-5 w-5 shrink-0" />
           <p>{error}</p>
         </div>
@@ -185,17 +185,17 @@ export default function ImportRecipeClient() {
       {/* Results */}
       {results.length > 0 && (
         <>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             {totalResults} resultaten gevonden
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {results.map((recipe) => (
               <Card
                 key={recipe.id}
-                className="bg-white border-gray-200 shadow-sm overflow-hidden"
+                className="bg-card border-border shadow-sm overflow-hidden"
               >
                 {recipe.image && (
-                  <div className="aspect-video w-full overflow-hidden bg-gray-100">
+                  <div className="aspect-video w-full overflow-hidden bg-secondary">
                     <img
                       src={recipe.image}
                       alt={recipe.title}
@@ -204,7 +204,7 @@ export default function ImportRecipeClient() {
                   </div>
                 )}
                 <CardContent className="p-5">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                  <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2">
                     {recipe.title}
                   </h3>
 
@@ -214,9 +214,9 @@ export default function ImportRecipeClient() {
                         <Flame className="h-3.5 w-3.5" />
                         {recipe.calories} kcal
                       </span>
-                      {recipe.protein && <span className="text-gray-600">P: {recipe.protein}</span>}
-                      {recipe.carbs && <span className="text-gray-600">K: {recipe.carbs}</span>}
-                      {recipe.fat && <span className="text-gray-600">V: {recipe.fat}</span>}
+                      {recipe.protein && <span className="text-muted-foreground">P: {recipe.protein}</span>}
+                      {recipe.carbs && <span className="text-muted-foreground">K: {recipe.carbs}</span>}
+                      {recipe.fat && <span className="text-muted-foreground">V: {recipe.fat}</span>}
                     </div>
                   )}
 
@@ -224,8 +224,8 @@ export default function ImportRecipeClient() {
                     className={`w-full ${
                       importedIds.has(recipe.id)
                         ? "bg-green-600 hover:bg-green-700"
-                        : "bg-[#1e1839] hover:bg-[#2a2054]"
-                    } text-white`}
+                        : "bg-primary hover:bg-primary/90"
+                    } text-primary-foreground`}
                     disabled={importingId === recipe.id || importedIds.has(recipe.id)}
                     onClick={() => handleImport(recipe)}
                   >

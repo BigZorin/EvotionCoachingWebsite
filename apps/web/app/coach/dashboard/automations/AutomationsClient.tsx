@@ -174,7 +174,7 @@ export default function AutomationsClient() {
       case "inactivity":
         return (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Dagen inactief
             </label>
             <input
@@ -185,14 +185,14 @@ export default function AutomationsClient() {
               onChange={(e) =>
                 setFormConditions({ ...formConditions, days_inactive: parseInt(e.target.value) })
               }
-              className="w-24 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1e1839]/20 focus:border-[#1e1839] outline-none"
+              className="w-24 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
           </div>
         )
       case "streak_celebration":
         return (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Streak milestones (komma-gescheiden)
             </label>
             <input
@@ -205,14 +205,14 @@ export default function AutomationsClient() {
                 })
               }
               placeholder="7, 14, 30, 60, 90"
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1e1839]/20 focus:border-[#1e1839] outline-none"
+              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
           </div>
         )
       case "checkin_reminder":
         return (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Check-in type
             </label>
             <select
@@ -220,7 +220,7 @@ export default function AutomationsClient() {
               onChange={(e) =>
                 setFormConditions({ ...formConditions, check_in_type: e.target.value })
               }
-              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1e1839]/20 focus:border-[#1e1839] outline-none"
+              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             >
               <option value="daily">Dagelijks</option>
               <option value="weekly">Wekelijks</option>
@@ -235,7 +235,7 @@ export default function AutomationsClient() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1e1839]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     )
   }
@@ -245,14 +245,14 @@ export default function AutomationsClient() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Automations</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Automations</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Automatische herinneringen en triggers voor je clients
           </p>
         </div>
         <button
           onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#1e1839] text-white rounded-xl hover:bg-[#2a2054] transition text-sm font-medium"
+          className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition text-sm font-medium"
         >
           {showCreate ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
           {showCreate ? "Annuleren" : "Nieuwe automatie"}
@@ -261,35 +261,35 @@ export default function AutomationsClient() {
 
       {/* Create form */}
       {showCreate && (
-        <div className="bg-white rounded-xl border p-6 mb-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Nieuwe automatie</h2>
+        <div className="bg-card rounded-xl border p-6 mb-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Nieuwe automatie</h2>
 
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Naam</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Naam</label>
               <input
                 type="text"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 placeholder="Bijv. Dagelijkse check-in herinnering"
-                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1e1839]/20 focus:border-[#1e1839] outline-none"
+                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Beschrijving</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Beschrijving</label>
               <input
                 type="text"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 placeholder="Optionele beschrijving"
-                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1e1839]/20 focus:border-[#1e1839] outline-none"
+                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
               />
             </div>
           </div>
 
           {/* Trigger type */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Trigger</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Trigger</label>
             <div className="grid grid-cols-3 gap-2">
               {TRIGGER_TYPES.map((trigger) => {
                 const Icon = trigger.icon
@@ -302,18 +302,18 @@ export default function AutomationsClient() {
                     }}
                     className={`flex items-start gap-3 p-3 rounded-lg border text-left transition ${
                       formTrigger === trigger.value
-                        ? "border-[#1e1839] bg-[#1e1839]/5"
-                        : "border-gray-200 hover:border-gray-300"
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-border"
                     }`}
                   >
                     <Icon
                       className={`h-5 w-5 mt-0.5 flex-shrink-0 ${
-                        formTrigger === trigger.value ? "text-[#1e1839]" : "text-gray-400"
+                        formTrigger === trigger.value ? "text-primary" : "text-muted-foreground"
                       }`}
                     />
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{trigger.label}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{trigger.description}</p>
+                      <p className="text-sm font-medium text-foreground">{trigger.label}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{trigger.description}</p>
                     </div>
                   </button>
                 )
@@ -329,16 +329,16 @@ export default function AutomationsClient() {
           {/* Schedule */}
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tijd</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Tijd</label>
               <input
                 type="time"
                 value={formTime}
                 onChange={(e) => setFormTime(e.target.value)}
-                className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1e1839]/20 focus:border-[#1e1839] outline-none"
+                className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Dagen</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Dagen</label>
               <div className="flex gap-1">
                 {DAYS.map((day) => (
                   <button
@@ -352,8 +352,8 @@ export default function AutomationsClient() {
                     }
                     className={`w-9 h-9 rounded-lg text-xs font-medium transition ${
                       formDays.includes(day.value)
-                        ? "bg-[#1e1839] text-white"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary text-muted-foreground hover:bg-secondary"
                     }`}
                   >
                     {day.label}
@@ -366,11 +366,11 @@ export default function AutomationsClient() {
           {/* Action */}
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Actie type</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Actie type</label>
               <select
                 value={formActionType}
                 onChange={(e) => setFormActionType(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1e1839]/20 focus:border-[#1e1839] outline-none"
+                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
               >
                 {ACTION_TYPES.map((at) => (
                   <option key={at.value} value={at.value}>
@@ -380,7 +380,7 @@ export default function AutomationsClient() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 Notificatie titel
               </label>
               <input
@@ -388,15 +388,15 @@ export default function AutomationsClient() {
                 value={formTitle}
                 onChange={(e) => setFormTitle(e.target.value)}
                 placeholder="Bijv. Tijd voor je check-in!"
-                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1e1839]/20 focus:border-[#1e1839] outline-none"
+                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
               />
             </div>
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Bericht{" "}
-              <span className="text-gray-400 font-normal">
+              <span className="text-muted-foreground font-normal">
                 (gebruik {"{name}"} voor client naam, {"{days}"} voor aantal dagen)
               </span>
             </label>
@@ -405,7 +405,7 @@ export default function AutomationsClient() {
               onChange={(e) => setFormMessage(e.target.value)}
               placeholder="Hey {name}, vergeet je check-in niet vandaag!"
               rows={3}
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#1e1839]/20 focus:border-[#1e1839] outline-none resize-none"
+              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
             />
           </div>
 
@@ -413,7 +413,7 @@ export default function AutomationsClient() {
             <button
               onClick={handleCreate}
               disabled={!formName.trim() || !formMessage.trim() || creating}
-              className="px-6 py-2.5 bg-[#1e1839] text-white rounded-xl hover:bg-[#2a2054] transition text-sm font-medium disabled:opacity-50"
+              className="px-6 py-2.5 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition text-sm font-medium disabled:opacity-50"
             >
               {creating ? "Aanmaken..." : "Automatie aanmaken"}
             </button>
@@ -423,15 +423,15 @@ export default function AutomationsClient() {
 
       {/* Placeholder info */}
       {rules.length === 0 && !showCreate && (
-        <div className="bg-white rounded-xl border p-12 text-center shadow-sm">
-          <Zap className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">Geen automations</h3>
-          <p className="text-sm text-gray-500 mb-4">
+        <div className="bg-card rounded-xl border p-12 text-center shadow-sm">
+          <Zap className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+          <h3 className="text-lg font-semibold text-foreground mb-1">Geen automations</h3>
+          <p className="text-sm text-muted-foreground mb-4">
             Maak automatische herinneringen aan om je clients betrokken te houden
           </p>
           <button
             onClick={() => setShowCreate(true)}
-            className="px-4 py-2 bg-[#1e1839] text-white rounded-xl hover:bg-[#2a2054] transition text-sm font-medium"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition text-sm font-medium"
           >
             Eerste automatie aanmaken
           </button>
@@ -446,36 +446,36 @@ export default function AutomationsClient() {
           const isExpanded = expandedLogs === rule.id
 
           return (
-            <div key={rule.id} className="bg-white rounded-xl border shadow-sm overflow-hidden">
+            <div key={rule.id} className="bg-card rounded-xl border shadow-sm overflow-hidden">
               <div className="p-5">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3">
                     <div
                       className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                         rule.is_active
-                          ? "bg-[#1e1839]/10 text-[#1e1839]"
-                          : "bg-gray-100 text-gray-400"
+                          ? "bg-primary/10 text-primary"
+                          : "bg-secondary text-muted-foreground"
                       }`}
                     >
                       <TriggerIcon className="h-5 w-5" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-gray-900">{rule.name}</h3>
+                        <h3 className="font-semibold text-foreground">{rule.name}</h3>
                         <span
                           className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                             rule.is_active
                               ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-500"
+                              : "bg-secondary text-muted-foreground"
                           }`}
                         >
                           {rule.is_active ? "Actief" : "Inactief"}
                         </span>
                       </div>
                       {rule.description && (
-                        <p className="text-sm text-gray-500 mt-0.5">{rule.description}</p>
+                        <p className="text-sm text-muted-foreground mt-0.5">{rule.description}</p>
                       )}
-                      <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
+                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           {trigger?.label}
@@ -503,7 +503,7 @@ export default function AutomationsClient() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleToggleLogs(rule.id)}
-                      className="p-2 text-gray-400 hover:text-gray-600 transition"
+                      className="p-2 text-muted-foreground hover:text-muted-foreground transition"
                       title="Logs bekijken"
                     >
                       {isExpanded ? (
@@ -517,7 +517,7 @@ export default function AutomationsClient() {
                       className={`p-2 rounded-lg transition ${
                         rule.is_active
                           ? "text-green-600 hover:bg-green-50"
-                          : "text-gray-400 hover:bg-gray-50"
+                          : "text-muted-foreground hover:bg-secondary/50"
                       }`}
                       title={rule.is_active ? "Deactiveren" : "Activeren"}
                     >
@@ -529,7 +529,7 @@ export default function AutomationsClient() {
                     </button>
                     <button
                       onClick={() => handleDelete(rule.id)}
-                      className="p-2 text-gray-400 hover:text-red-500 transition"
+                      className="p-2 text-muted-foreground hover:text-red-500 transition"
                       title="Verwijderen"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -539,23 +539,23 @@ export default function AutomationsClient() {
 
                 {/* Message preview */}
                 {rule.action_message && (
-                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-gray-500 mb-1">Bericht</p>
-                    <p className="text-sm text-gray-700">{rule.action_message}</p>
+                  <div className="mt-3 p-3 bg-secondary/50 rounded-lg">
+                    <p className="text-xs text-muted-foreground mb-1">Bericht</p>
+                    <p className="text-sm text-foreground">{rule.action_message}</p>
                   </div>
                 )}
               </div>
 
               {/* Logs */}
               {isExpanded && (
-                <div className="border-t bg-gray-50 px-5 py-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Recente logs</h4>
+                <div className="border-t bg-secondary/50 px-5 py-4">
+                  <h4 className="text-sm font-medium text-foreground mb-2">Recente logs</h4>
                   {logsLoading ? (
                     <div className="text-center py-4">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#1e1839] mx-auto"></div>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mx-auto"></div>
                     </div>
                   ) : logs.length === 0 ? (
-                    <p className="text-sm text-gray-400 text-center py-4">
+                    <p className="text-sm text-muted-foreground text-center py-4">
                       Nog geen triggers uitgevoerd
                     </p>
                   ) : (
@@ -565,7 +565,7 @@ export default function AutomationsClient() {
                           key={log.id}
                           className="flex items-center justify-between py-1.5 text-sm"
                         >
-                          <span className="text-gray-600">
+                          <span className="text-muted-foreground">
                             {formatDate(log.triggered_at)}
                           </span>
                           <span

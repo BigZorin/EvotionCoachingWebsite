@@ -194,18 +194,18 @@ export default function CreateWorkoutTemplateClient() {
           <Button
             variant="ghost"
             onClick={() => router.back()}
-            className="mb-4 text-gray-600 hover:text-gray-900"
+            className="mb-4 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Terug
           </Button>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Nieuwe Workout Template</h1>
-          <p className="text-gray-600">Maak een workout template die je kunt toewijzen aan clients</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Nieuwe Workout Template</h1>
+          <p className="text-muted-foreground">Maak een workout template die je kunt toewijzen aan clients</p>
         </div>
         <Button
           onClick={handleSave}
           disabled={isSaving}
-          className="bg-[#1e1839] hover:bg-[#2a2054] text-white"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           {isSaving ? (
             <>
@@ -224,9 +224,9 @@ export default function CreateWorkoutTemplateClient() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Template Info */}
         <div className="lg:col-span-1">
-          <Card className="bg-white border-gray-200 shadow-sm">
+          <Card className="bg-card border-border shadow-sm">
             <CardContent className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Template Info</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-4">Template Info</h2>
 
               <div className="space-y-4">
                 <div>
@@ -266,7 +266,7 @@ export default function CreateWorkoutTemplateClient() {
               </div>
 
               {/* Add Exercise */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="mt-6 pt-6 border-t border-border">
                 <Label htmlFor="add-exercise">Voeg Oefening Toe</Label>
                 <Select onValueChange={(value) => addExercise(value)}>
                   <SelectTrigger className="mt-1">
@@ -286,7 +286,7 @@ export default function CreateWorkoutTemplateClient() {
                         <SelectItem key={exercise.id} value={exercise.id}>
                           {exercise.name}
                           {exercise.category && (
-                            <span className="text-gray-500 ml-2">({exercise.category})</span>
+                            <span className="text-muted-foreground ml-2">({exercise.category})</span>
                           )}
                         </SelectItem>
                       ))
@@ -300,16 +300,16 @@ export default function CreateWorkoutTemplateClient() {
 
         {/* Right Column - Exercise List */}
         <div className="lg:col-span-2">
-          <Card className="bg-white border-gray-200 shadow-sm">
+          <Card className="bg-card border-border shadow-sm">
             <CardContent className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <h2 className="text-lg font-semibold text-foreground mb-4">
                 Oefeningen ({templateExercises.length})
               </h2>
 
               {templateExercises.length === 0 ? (
                 <div className="text-center py-12">
-                  <Dumbbell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">
+                  <Dumbbell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
                     Nog geen oefeningen toegevoegd. Selecteer een oefening om te beginnen.
                   </p>
                 </div>
@@ -318,7 +318,7 @@ export default function CreateWorkoutTemplateClient() {
                   {templateExercises.map((exercise, index) => (
                     <div
                       key={index}
-                      className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                      className="p-4 bg-secondary/50 rounded-lg border border-border"
                     >
                       <div className="flex items-start gap-3">
                         {/* Move buttons */}
@@ -326,14 +326,14 @@ export default function CreateWorkoutTemplateClient() {
                           <button
                             onClick={() => moveExercise(index, "up")}
                             disabled={index === 0}
-                            className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                            className="p-1 text-muted-foreground hover:text-muted-foreground disabled:opacity-30"
                           >
                             <ChevronUp className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => moveExercise(index, "down")}
                             disabled={index === templateExercises.length - 1}
-                            className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                            className="p-1 text-muted-foreground hover:text-muted-foreground disabled:opacity-30"
                           >
                             <ChevronDown className="h-4 w-4" />
                           </button>
@@ -342,7 +342,7 @@ export default function CreateWorkoutTemplateClient() {
                         {/* Exercise Details */}
                         <div className="flex-1 space-y-3">
                           <div className="flex items-center justify-between">
-                            <h3 className="font-semibold text-gray-900">{exercise.exerciseName}</h3>
+                            <h3 className="font-semibold text-foreground">{exercise.exerciseName}</h3>
                             <button
                               onClick={() => removeExercise(index)}
                               className="p-1 text-red-500 hover:text-red-700"
@@ -389,9 +389,9 @@ export default function CreateWorkoutTemplateClient() {
                           </div>
 
                           {/* Intensity Type + Prescription */}
-                          <div className="p-3 bg-white rounded-md border border-gray-200 space-y-3">
+                          <div className="p-3 bg-card rounded-md border border-border space-y-3">
                             <div>
-                              <Label className="text-xs font-semibold text-gray-700">Intensiteit</Label>
+                              <Label className="text-xs font-semibold text-foreground">Intensiteit</Label>
                               <Select
                                 value={exercise.intensityType}
                                 onValueChange={(value) =>
@@ -447,14 +447,14 @@ export default function CreateWorkoutTemplateClient() {
                                             : val <= 7
                                             ? "bg-yellow-500 text-white"
                                             : "bg-red-500 text-white"
-                                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                          : "bg-secondary text-muted-foreground hover:bg-secondary"
                                       }`}
                                     >
                                       {val}
                                     </button>
                                   ))}
                                 </div>
-                                <p className="text-[11px] text-gray-400 mt-1">
+                                <p className="text-[11px] text-muted-foreground mt-1">
                                   {exercise.prescribedRpe
                                     ? exercise.prescribedRpe <= 5
                                       ? "Licht — veel reps over"
@@ -480,15 +480,15 @@ export default function CreateWorkoutTemplateClient() {
                                       onClick={() => updateExercise(index, "prescribedRir", val)}
                                       className={`flex-1 py-2 rounded text-sm font-semibold transition-colors ${
                                         exercise.prescribedRir === val
-                                          ? "bg-[#1e1839] text-white"
-                                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                          ? "bg-primary text-primary-foreground"
+                                          : "bg-secondary text-muted-foreground hover:bg-secondary"
                                       }`}
                                     >
                                       {val}
                                     </button>
                                   ))}
                                 </div>
-                                <p className="text-[11px] text-gray-400 mt-1">
+                                <p className="text-[11px] text-muted-foreground mt-1">
                                   {exercise.prescribedRir != null
                                     ? exercise.prescribedRir === 0
                                       ? "Tot falen — geen reps over"
@@ -517,13 +517,13 @@ export default function CreateWorkoutTemplateClient() {
                                     placeholder="75"
                                     className="w-24"
                                   />
-                                  <span className="text-sm text-gray-500">% van 1RM</span>
+                                  <span className="text-sm text-muted-foreground">% van 1RM</span>
                                 </div>
                               </div>
                             )}
 
                             {exercise.intensityType === "bodyweight" && (
-                              <p className="text-sm text-gray-500 italic">
+                              <p className="text-sm text-muted-foreground italic">
                                 Geen gewicht nodig — client traint met lichaamsgewicht.
                               </p>
                             )}
@@ -539,7 +539,7 @@ export default function CreateWorkoutTemplateClient() {
                                 placeholder="3-1-2-0"
                                 className="mt-1"
                               />
-                              <p className="text-[11px] text-gray-400 mt-0.5">
+                              <p className="text-[11px] text-muted-foreground mt-0.5">
                                 Exc-pauze-conc-pauze (sec)
                               </p>
                             </div>

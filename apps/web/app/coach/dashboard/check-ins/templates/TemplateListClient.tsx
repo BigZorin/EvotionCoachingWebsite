@@ -59,7 +59,7 @@ export default function TemplateListClient() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1e1839]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     )
   }
@@ -67,17 +67,17 @@ export default function TemplateListClient() {
   const renderTemplateCard = (template: CheckInTemplate) => (
     <div
       key={template.id}
-      className={`bg-white rounded-xl border p-5 shadow-sm transition ${
+      className={`bg-card rounded-xl border p-5 shadow-sm transition ${
         !template.is_active ? "opacity-60" : ""
       }`}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          <FileText className="h-5 w-5 text-[#1e1839]" />
+          <FileText className="h-5 w-5 text-primary" />
           <div>
-            <h3 className="font-semibold text-gray-900">{template.name}</h3>
+            <h3 className="font-semibold text-foreground">{template.name}</h3>
             {template.description && (
-              <p className="text-sm text-gray-500 mt-0.5">{template.description}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{template.description}</p>
             )}
           </div>
         </div>
@@ -91,7 +91,7 @@ export default function TemplateListClient() {
             className={`px-2 py-0.5 text-xs font-medium rounded-full ${
               template.is_active
                 ? "bg-green-100 text-green-700"
-                : "bg-gray-100 text-gray-500"
+                : "bg-secondary text-muted-foreground"
             }`}
           >
             {template.is_active ? "Actief" : "Inactief"}
@@ -99,7 +99,7 @@ export default function TemplateListClient() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
         <span className="flex items-center gap-1">
           <Clock className="h-3.5 w-3.5" />
           {(template.questions || []).length} vragen
@@ -115,22 +115,22 @@ export default function TemplateListClient() {
 
       {/* Question preview */}
       {template.questions && template.questions.length > 0 && (
-        <div className="bg-gray-50 rounded-lg p-3 mb-4">
-          <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
+        <div className="bg-secondary/50 rounded-lg p-3 mb-4">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
             Vragen
           </p>
           <ul className="space-y-1">
             {template.questions.slice(0, 4).map((q: any, idx: number) => (
-              <li key={q.id} className="text-sm text-gray-600 flex items-start gap-2">
-                <span className="text-gray-400 text-xs mt-0.5">{idx + 1}.</span>
+              <li key={q.id} className="text-sm text-muted-foreground flex items-start gap-2">
+                <span className="text-muted-foreground text-xs mt-0.5">{idx + 1}.</span>
                 <span>{q.question}</span>
-                <span className="ml-auto text-xs text-gray-400 capitalize">
+                <span className="ml-auto text-xs text-muted-foreground capitalize">
                   {q.question_type.replace("_", "/")}
                 </span>
               </li>
             ))}
             {template.questions.length > 4 && (
-              <li className="text-xs text-gray-400 italic">
+              <li className="text-xs text-muted-foreground italic">
                 +{template.questions.length - 4} meer...
               </li>
             )}
@@ -141,7 +141,7 @@ export default function TemplateListClient() {
       <div className="flex items-center gap-2 pt-2 border-t">
         <button
           onClick={() => handleToggleActive(template)}
-          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 px-2 py-1.5 rounded hover:bg-gray-100 transition"
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground px-2 py-1.5 rounded hover:bg-secondary transition"
         >
           {template.is_active ? (
             <ToggleRight className="h-4 w-4 text-green-600" />
@@ -152,7 +152,7 @@ export default function TemplateListClient() {
         </button>
         <button
           onClick={() => handleToggleDefault(template)}
-          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 px-2 py-1.5 rounded hover:bg-gray-100 transition"
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground px-2 py-1.5 rounded hover:bg-secondary transition"
         >
           <Star className={`h-4 w-4 ${template.is_default ? "text-amber-500" : ""}`} />
           {template.is_default ? "Niet standaard" : "Maak standaard"}
@@ -176,22 +176,22 @@ export default function TemplateListClient() {
         <div className="flex items-center gap-4">
           <Link
             href="/coach/dashboard/check-ins"
-            className="p-2 hover:bg-gray-100 rounded-lg transition"
+            className="p-2 hover:bg-secondary rounded-lg transition"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-foreground">
               Check-in Templates
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Maak custom check-in formulieren voor je clients
             </p>
           </div>
         </div>
         <Link
           href="/coach/dashboard/check-ins/templates/create"
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#1e1839] text-white rounded-lg hover:bg-[#2a2054] transition text-sm font-medium"
+          className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition text-sm font-medium"
         >
           <Plus className="h-4 w-4" />
           Nieuw template
@@ -199,15 +199,15 @@ export default function TemplateListClient() {
       </div>
 
       {templates.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border">
-          <FileText className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 text-lg mb-2">Nog geen templates</p>
-          <p className="text-gray-400 text-sm mb-6">
+        <div className="text-center py-16 bg-card rounded-xl border">
+          <FileText className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+          <p className="text-muted-foreground text-lg mb-2">Nog geen templates</p>
+          <p className="text-muted-foreground text-sm mb-6">
             Maak een custom check-in formulier om aan clients toe te wijzen.
           </p>
           <Link
             href="/coach/dashboard/check-ins/templates/create"
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1e1839] text-white rounded-lg hover:bg-[#2a2054] transition text-sm font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition text-sm font-medium"
           >
             <Plus className="h-4 w-4" />
             Maak je eerste template
@@ -218,7 +218,7 @@ export default function TemplateListClient() {
           {/* Weekly templates */}
           {weeklyTemplates.length > 0 && (
             <div>
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                 Wekelijkse Check-ins
               </h2>
               <div className="space-y-3">
@@ -230,7 +230,7 @@ export default function TemplateListClient() {
           {/* Daily templates */}
           {dailyTemplates.length > 0 && (
             <div>
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                 Dagelijkse Check-ins
               </h2>
               <div className="space-y-3">

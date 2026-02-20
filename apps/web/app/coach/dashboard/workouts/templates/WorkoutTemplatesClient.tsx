@@ -97,7 +97,7 @@ export default function WorkoutTemplatesClient() {
         </div>
         <Button
           onClick={() => router.push("/coach/dashboard/workouts/templates/create")}
-          className="bg-[#1e1839] hover:bg-[#2a2054] text-white"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           <Plus className="h-4 w-4 mr-2" />
           Nieuwe Template
@@ -107,8 +107,8 @@ export default function WorkoutTemplatesClient() {
           {/* Loading State */}
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="text-gray-900 text-xl flex items-center gap-3">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1e1839]"></div>
+              <div className="text-foreground text-xl flex items-center gap-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                 Laden...
               </div>
             </div>
@@ -116,21 +116,21 @@ export default function WorkoutTemplatesClient() {
             /* Error State */
             <div className="flex flex-col items-center justify-center py-12">
               <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Er is een fout opgetreden</h3>
-              <p className="text-gray-600">{error}</p>
+              <h3 className="text-xl font-semibold text-foreground mb-2">Er is een fout opgetreden</h3>
+              <p className="text-muted-foreground">{error}</p>
             </div>
           ) : templates.length === 0 ? (
             /* Empty State */
-            <Card className="bg-white border-gray-200 shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-12 text-center">
-                <Dumbbell className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Geen Workout Templates</h3>
-                <p className="text-gray-600 mb-6">
+                <Dumbbell className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-foreground mb-2">Geen Workout Templates</h3>
+                <p className="text-muted-foreground mb-6">
                   Je hebt nog geen workout templates gemaakt. Maak je eerste template aan om te beginnen.
                 </p>
                 <Button
                   onClick={() => router.push("/coach/dashboard/workouts/templates/create")}
-                  className="bg-[#1e1839] hover:bg-[#2a2054] text-white"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Maak je eerste template
@@ -143,17 +143,17 @@ export default function WorkoutTemplatesClient() {
               {templates.map((template) => (
                 <Card
                   key={template.id}
-                  className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                  className="bg-card border-border shadow-sm hover:shadow-md transition-shadow"
                 >
                   <CardContent className="p-6">
                     {/* Template Header */}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                        <h3 className="text-lg font-semibold text-foreground mb-1">
                           {template.name}
                         </h3>
                         {template.description && (
-                          <p className="text-sm text-gray-600 line-clamp-2">
+                          <p className="text-sm text-muted-foreground line-clamp-2">
                             {template.description}
                           </p>
                         )}
@@ -163,35 +163,35 @@ export default function WorkoutTemplatesClient() {
                     {/* Template Stats */}
                     <div className="flex items-center gap-4 mb-4">
                       <div className="flex items-center gap-2">
-                        <Dumbbell className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm text-gray-600">
+                        <Dumbbell className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">
                           {template.exercises.length} {template.exercises.length === 1 ? 'oefening' : 'oefeningen'}
                         </span>
                       </div>
                       {template.durationMinutes && (
                         <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm text-gray-600">{template.durationMinutes} min</span>
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">{template.durationMinutes} min</span>
                         </div>
                       )}
                     </div>
 
                     {/* Exercise Preview */}
                     {template.exercises.length > 0 && (
-                      <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                        <p className="text-xs font-medium text-gray-500 mb-2">OEFENINGEN</p>
+                      <div className="mb-4 p-3 bg-secondary/50 rounded-lg">
+                        <p className="text-xs font-medium text-muted-foreground mb-2">OEFENINGEN</p>
                         <ul className="space-y-1">
                           {template.exercises.slice(0, 3).map((ex) => (
-                            <li key={ex.id} className="text-sm text-gray-700 flex items-center gap-2">
-                              <span className="w-1.5 h-1.5 bg-[#1e1839] rounded-full"></span>
+                            <li key={ex.id} className="text-sm text-foreground flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
                               {ex.exercise.name}
                               {ex.sets && ex.reps && (
-                                <span className="text-gray-500">({ex.sets}x{ex.reps})</span>
+                                <span className="text-muted-foreground">({ex.sets}x{ex.reps})</span>
                               )}
                             </li>
                           ))}
                           {template.exercises.length > 3 && (
-                            <li className="text-sm text-gray-500 italic">
+                            <li className="text-sm text-muted-foreground italic">
                               +{template.exercises.length - 3} meer...
                             </li>
                           )}
@@ -222,10 +222,10 @@ export default function WorkoutTemplatesClient() {
                         size="sm"
                         onClick={() => handleDelete(template.id)}
                         disabled={deletingId === template.id}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/5"
                       >
                         {deletingId === template.id ? (
-                          <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-red-600"></div>
+                          <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-destructive"></div>
                         ) : (
                           <Trash2 className="h-3.5 w-3.5" />
                         )}

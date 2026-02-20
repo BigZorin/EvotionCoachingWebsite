@@ -1,9 +1,20 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
+import Link from "next/link"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Progress } from "@/components/ui/progress"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { getMealPlans, deleteMealPlan } from "@/app/actions/nutrition"
 import {
   UtensilsCrossed,
@@ -11,10 +22,14 @@ import {
   Edit,
   Trash2,
   UserPlus,
-  Flame,
+  Users,
   AlertCircle,
   Calendar,
   ChefHat,
+  Loader2,
+  MoreHorizontal,
+  Copy,
+  Utensils,
 } from "lucide-react"
 
 type MealPlanEntry = {
@@ -42,8 +57,24 @@ type MealPlan = {
   created_at: string
 }
 
+function MacroBalk({ label, waarde, max, kleur }: { label: string; waarde: number; max: number; kleur: string }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex justify-between text-xs">
+        <span className="text-muted-foreground">{label}</span>
+        <span className="font-medium text-foreground">{waarde}g</span>
+      </div>
+      <div className="h-1.5 w-full rounded-full bg-secondary">
+        <div
+          className={`h-full rounded-full ${kleur}`}
+          style={{ width: `${Math.min((waarde / max) * 100, 100)}%` }}
+        />
+      </div>
+    </div>
+  )
+}
+
 export default function MealPlansClient() {
-  const router = useRouter()
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -71,7 +102,7 @@ export default function MealPlansClient() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Weet je zeker dat je dit meal plan wilt verwijderen?")) return
+    if (!confirm("Weet je zeker dat je dit voedingsplan wilt verwijderen?")) return
     setDeletingId(id)
     try {
       const result = await deleteMealPlan(id)
@@ -91,91 +122,174 @@ export default function MealPlansClient() {
   const getDayCount = (plan: MealPlan) =>
     new Set((plan.meal_plan_entries || []).map((e) => e.day_of_week)).size
 
-  return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Meal Plans</h1>
-          <p className="text-gray-600">Beheer je weekschema's en wijs ze toe aan clients</p>
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span>Voedingsplannen laden...</span>
         </div>
-        <Button
-          onClick={() => router.push("/coach/dashboard/nutrition/meal-plans/create")}
-          className="bg-[#1e1839] hover:bg-[#2a2054] text-white"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Nieuw Meal Plan
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-xl font-bold">Voeding</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">Beheer voedingsplannen en volg cliëntvoeding</p>
+        </div>
+        <Button asChild>
+          <Link href="/coach/dashboard/nutrition/meal-plans/create">
+            <Plus className="size-4 mr-1.5" />
+            Voedingsplan aanmaken
+          </Link>
         </Button>
       </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1e1839]"></div>
-        </div>
-      ) : error ? (
-        <div className="flex flex-col items-center justify-center py-12">
-          <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-          <p className="text-gray-600">{error}</p>
-        </div>
-      ) : mealPlans.length === 0 ? (
-        <Card className="bg-white border-gray-200 shadow-sm">
-          <CardContent className="p-12 text-center">
-            <UtensilsCrossed className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Geen Meal Plans</h3>
-            <p className="text-gray-600 mb-6">Maak je eerste weekschema om recepten per dag te plannen.</p>
-            <Button
-              onClick={() => router.push("/coach/dashboard/nutrition/meal-plans/create")}
-              className="bg-[#1e1839] hover:bg-[#2a2054] text-white"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Eerste meal plan
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mealPlans.map((plan) => (
-            <Card key={plan.id} className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">{plan.name}</h3>
-                {plan.description && (
-                  <p className="text-sm text-gray-600 line-clamp-2 mb-3">{plan.description}</p>
-                )}
-
-                {plan.daily_calories && (
-                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Flame className="h-4 w-4 text-orange-500" />
-                      <span className="text-sm font-medium">{plan.daily_calories} kcal/dag</span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
-                      {plan.protein_grams && <div>P: <span className="font-medium">{plan.protein_grams}g</span></div>}
-                      {plan.carbs_grams && <div>K: <span className="font-medium">{plan.carbs_grams}g</span></div>}
-                      {plan.fat_grams && <div>V: <span className="font-medium">{plan.fat_grams}g</span></div>}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
-                  <span className="flex items-center gap-1"><ChefHat className="h-4 w-4" /> {getRecipeCount(plan)} recepten</span>
-                  <span className="flex items-center gap-1"><Calendar className="h-4 w-4" /> {getDayCount(plan)} dagen</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="flex-1" onClick={() => router.push(`/coach/dashboard/nutrition/meal-plans/${plan.id}/assign`)}>
-                    <UserPlus className="h-3.5 w-3.5 mr-1" /> Toewijzen
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => router.push(`/coach/dashboard/nutrition/meal-plans/${plan.id}/edit`)}>
-                    <Edit className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleDelete(plan.id)} disabled={deletingId === plan.id} className="text-red-600 hover:text-red-700 hover:bg-red-50">
-                    {deletingId === plan.id ? <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-red-600" /> : <Trash2 className="h-3.5 w-3.5" />}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+      {error && (
+        <div className="flex items-center gap-2 p-4 bg-destructive/10 text-destructive rounded-lg">
+          <AlertCircle className="size-5" />
+          <span className="text-sm">{error}</span>
         </div>
       )}
+
+      <Tabs defaultValue="plannen">
+        <TabsList>
+          <TabsTrigger value="plannen">Voedingsplannen ({mealPlans.length})</TabsTrigger>
+          <TabsTrigger value="tracking">Cliënt tracking</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="plannen" className="mt-4">
+          {mealPlans.length === 0 && !error ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <UtensilsCrossed className="size-10 text-muted-foreground/30 mb-3" />
+              <h3 className="font-semibold mb-1">Nog geen voedingsplannen</h3>
+              <p className="text-sm text-muted-foreground mb-6 max-w-md">
+                Maak je eerste voedingsplan met macro-targets en recepten om aan cliënten toe te wijzen.
+              </p>
+              <Button asChild>
+                <Link href="/coach/dashboard/nutrition/meal-plans/create">
+                  <Plus className="size-4 mr-1.5" />
+                  Maak voedingsplan
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {mealPlans.map((plan) => (
+                <Card key={plan.id} className="border-border shadow-sm hover:border-primary/30 transition-all cursor-pointer group">
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                          <Utensils className="size-5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold group-hover:text-primary transition-colors">
+                            {plan.name}
+                          </p>
+                          <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px] mt-0.5">
+                            Actief
+                          </Badge>
+                        </div>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground">
+                            <MoreHorizontal className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link href={`/coach/dashboard/nutrition/meal-plans/${plan.id}/edit`}>
+                              <Edit className="mr-2 size-4" />
+                              Plan bewerken
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/coach/dashboard/nutrition/meal-plans/${plan.id}/assign`}>
+                              <UserPlus className="mr-2 size-4" />
+                              Toewijzen aan cliënt
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => handleDelete(plan.id)}
+                            disabled={deletingId === plan.id}
+                          >
+                            <Trash2 className="mr-2 size-4" />
+                            Verwijderen
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    {plan.description && (
+                      <p className="mt-3 text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                        {plan.description}
+                      </p>
+                    )}
+
+                    <div className="mt-4 flex items-center justify-between text-xs">
+                      <span className="font-semibold">
+                        {plan.daily_calories ? `${plan.daily_calories} kcal` : "—"}
+                      </span>
+                      <div className="flex items-center gap-3 text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <ChefHat className="size-3.5" />
+                          {getRecipeCount(plan)} recepten
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="size-3.5" />
+                          {getDayCount(plan)} dagen
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Macro bars */}
+                    {(plan.protein_grams || plan.carbs_grams || plan.fat_grams) && (
+                      <div className="mt-3 flex flex-col gap-2">
+                        {plan.protein_grams && (
+                          <MacroBalk label="Eiwit" waarde={plan.protein_grams} max={250} kleur="bg-primary" />
+                        )}
+                        {plan.carbs_grams && (
+                          <MacroBalk label="Koolhydraten" waarde={plan.carbs_grams} max={400} kleur="bg-blue-500" />
+                        )}
+                        {plan.fat_grams && (
+                          <MacroBalk label="Vet" waarde={plan.fat_grams} max={100} kleur="bg-amber-500" />
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="tracking" className="mt-4">
+          <Card className="shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold">Voedingsnaleving cliënten</CardTitle>
+              <p className="text-xs text-muted-foreground">Weekgemiddelden en tracking compliance</p>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Users className="size-10 text-muted-foreground/30 mb-3" />
+                <h3 className="font-semibold mb-1">Cliënt tracking</h3>
+                <p className="text-sm text-muted-foreground max-w-md">
+                  Wanneer cliënten hun voeding gaan loggen in de app, verschijnt hier een
+                  overzicht van hun naleving en macro-tracking per week.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

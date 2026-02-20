@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   getClients,
   getClientDailyCheckIns,
@@ -18,6 +19,7 @@ import {
   ArrowRight,
   Flame,
   Weight,
+  Loader2,
 } from "lucide-react"
 
 export default function ProgressOverviewClient() {
@@ -58,8 +60,8 @@ export default function ProgressOverviewClient() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-900 text-xl flex items-center gap-3">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1e1839]"></div>
+        <div className="text-foreground text-xl flex items-center gap-3">
+          <Loader2 className="size-5 animate-spin" />
           Laden...
         </div>
       </div>
@@ -132,57 +134,59 @@ export default function ProgressOverviewClient() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Voortgang</h1>
-        <p className="text-gray-600 mt-1">Trends, compliance en red flags over alle clients</p>
+        <h1 className="text-xl font-bold text-foreground">Voortgang</h1>
+        <p className="text-muted-foreground mt-1">Trends, compliance en red flags over alle clients</p>
       </div>
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-white border-gray-200">
+        <Card className="shadow-sm">
           <CardContent className="p-4 text-center">
-            <p className="text-3xl font-bold text-[#1e1839]">{avgCompliance}%</p>
-            <p className="text-xs text-gray-500 mt-1">Gem. compliance (30d)</p>
+            <p className="text-2xl font-bold text-primary">{avgCompliance}%</p>
+            <p className="text-xs text-muted-foreground mt-1">Gem. compliance (30d)</p>
           </CardContent>
         </Card>
-        <Card className="bg-white border-gray-200">
+        <Card className="shadow-sm">
           <CardContent className="p-4 text-center">
-            <p className="text-3xl font-bold text-green-600">{todaySubmitted}/{clients.length}</p>
-            <p className="text-xs text-gray-500 mt-1">Vandaag ingecheckt</p>
+            <p className="text-2xl font-bold text-green-600">{todaySubmitted}/{clients.length}</p>
+            <p className="text-xs text-muted-foreground mt-1">Vandaag ingecheckt</p>
           </CardContent>
         </Card>
-        <Card className="bg-white border-gray-200">
+        <Card className="shadow-sm">
           <CardContent className="p-4 text-center">
-            <p className="text-3xl font-bold text-orange-500">{redFlags.length}</p>
-            <p className="text-xs text-gray-500 mt-1">Red flags (3+ dagen)</p>
+            <p className="text-2xl font-bold text-orange-500">{redFlags.length}</p>
+            <p className="text-xs text-muted-foreground mt-1">Red flags (3+ dagen)</p>
           </CardContent>
         </Card>
-        <Card className="bg-white border-gray-200">
+        <Card className="shadow-sm">
           <CardContent className="p-4 text-center">
-            <p className="text-3xl font-bold text-blue-600">
+            <p className="text-2xl font-bold text-blue-600">
               {sortedByStreak.length > 0 ? sortedByStreak[0].streak : 0}
             </p>
-            <p className="text-xs text-gray-500 mt-1">Langste streak</p>
+            <p className="text-xs text-muted-foreground mt-1">Langste streak</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Red flags */}
       {redFlags.length > 0 && (
-        <Card className="bg-orange-50 border-orange-200">
+        <Card className="bg-orange-500/5 border-orange-500/20 shadow-sm">
           <CardContent className="p-5">
-            <h3 className="text-sm font-semibold text-orange-700 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4" />
+            <h3 className="text-sm font-semibold text-orange-600 uppercase tracking-wide mb-3 flex items-center gap-2">
+              <AlertTriangle className="size-4" />
               Aandacht nodig — {redFlags.length} client{redFlags.length !== 1 ? "s" : ""} niet actief
             </h3>
             <div className="space-y-2">
               {redFlags.map(({ client, daysSinceLast }) => (
-                <div key={client.id} className="flex items-center justify-between bg-white rounded-lg p-3">
+                <div key={client.id} className="flex items-center justify-between bg-card rounded-lg p-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-sm font-semibold text-orange-700">
-                      {(client.raw_user_meta_data?.full_name?.[0] || client.email[0]).toUpperCase()}
-                    </div>
+                    <Avatar className="size-8 border border-border">
+                      <AvatarFallback className="bg-orange-500/10 text-orange-600 font-semibold text-sm">
+                        {(client.raw_user_meta_data?.full_name?.[0] || client.email[0]).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-foreground">
                         {client.raw_user_meta_data?.full_name || client.email}
                       </p>
                       <p className="text-xs text-orange-600">
@@ -192,9 +196,9 @@ export default function ProgressOverviewClient() {
                   </div>
                   <Link
                     href={`/coach/dashboard/clients/${client.id}`}
-                    className="text-xs text-[#1e1839] hover:underline font-medium flex items-center gap-1"
+                    className="text-xs text-primary hover:underline font-medium flex items-center gap-1"
                   >
-                    Bekijk <ArrowRight className="w-3 h-3" />
+                    Bekijk <ArrowRight className="size-4" />
                   </Link>
                 </div>
               ))}
@@ -204,9 +208,9 @@ export default function ProgressOverviewClient() {
       )}
 
       {/* Client ranking by consistency */}
-      <Card className="bg-white border-gray-200">
+      <Card className="shadow-sm">
         <CardContent className="p-5">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
             Client Ranking — Consistentie
           </h3>
           <div className="space-y-2">
@@ -214,42 +218,44 @@ export default function ProgressOverviewClient() {
               <Link
                 key={client.id}
                 href={`/coach/dashboard/clients/${client.id}`}
-                className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary/50 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-mono text-gray-400 w-5 text-right">{index + 1}</span>
-                  <div className="w-9 h-9 rounded-full bg-[#1e1839] flex items-center justify-center text-sm font-semibold text-white">
-                    {(client.raw_user_meta_data?.full_name?.[0] || client.email[0]).toUpperCase()}
-                  </div>
+                  <span className="text-xs font-mono text-muted-foreground w-5 text-right">{index + 1}</span>
+                  <Avatar className="size-9 border border-border">
+                    <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-sm">
+                      {(client.raw_user_meta_data?.full_name?.[0] || client.email[0]).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-foreground">
                       {client.raw_user_meta_data?.full_name || client.email}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-xs text-gray-500 flex items-center gap-1">
-                        <Flame className="w-3 h-3 text-orange-500" /> {streak}d streak
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Flame className="size-4 text-orange-500" /> {streak}d streak
                       </span>
-                      <span className="text-xs text-gray-500">{compliance}% compliance</span>
+                      <span className="text-xs text-muted-foreground">{compliance}% compliance</span>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   {latestWeight && (
                     <Badge variant="secondary" className="text-xs">
-                      <Weight className="w-3 h-3 mr-1" />
+                      <Weight className="size-4 mr-1" />
                       {latestWeight} kg
                     </Badge>
                   )}
                   {weightDiff !== null && (
                     <Badge
                       variant="outline"
-                      className={`text-xs ${weightDiff <= 0 ? "text-green-600 border-green-200" : "text-orange-600 border-orange-200"}`}
+                      className={`text-xs ${weightDiff <= 0 ? "text-green-600 border-green-200" : "text-orange-600 border-orange-500/20"}`}
                     >
-                      {weightDiff <= 0 ? <TrendingDown className="w-3 h-3 mr-1" /> : <TrendingUp className="w-3 h-3 mr-1" />}
+                      {weightDiff <= 0 ? <TrendingDown className="size-4 mr-1" /> : <TrendingUp className="size-4 mr-1" />}
                       {weightDiff > 0 ? "+" : ""}{weightDiff.toFixed(1)} kg
                     </Badge>
                   )}
-                  <ArrowRight className="w-4 h-4 text-gray-400" />
+                  <ArrowRight className="size-4 text-muted-foreground" />
                 </div>
               </Link>
             ))}

@@ -1059,6 +1059,111 @@ export async function getCoachClientsOverview(): Promise<{ success: boolean; cli
 }
 
 // ============================================================
+// DASHBOARD: RECENT CHECK-INS FEED
+// ============================================================
+
+export interface RecentCheckIn {
+  id: string
+  user_id: string
+  client_name: string
+  client_initials: string
+  created_at: string
+  type: "weekly" | "daily"
+  has_coach_feedback: boolean
+  weight: number | null
+  note: string | null
+}
+
+export async function getDashboardRecentCheckIns(limit = 8): Promise<{ success: boolean; checkIns?: RecentCheckIn[]; error?: string }> {
+  try {
+    const currentUser = await getCurrentUser()
+    if (!currentUser || (currentUser.role !== 'ADMIN' && currentUser.role !== 'COACH')) {
+      return { success: false, error: "Unauthorized" }
+    }
+    const supabase = await getSupabaseAdmin()
+
+    // Get coach's assigned clients
+    const { data: relationships } = await supabase
+      .from("coaching_relationships")
+      .select("client_id")
+      .eq("coach_id", currentUser.id)
+      .eq("status", "ACTIVE")
+    const assignedIds = new Set((relationships || []).map(r => r.client_id))
+    if (assignedIds.size === 0) return { success: true, checkIns: [] }
+
+    // Fetch recent weekly + daily check-ins
+    const [weeklyResult, dailyResult, profilesResult] = await Promise.all([
+      supabase
+        .from("check_ins")
+        .select("id, user_id, created_at, weight, coach_feedback, notes")
+        .in("user_id", Array.from(assignedIds))
+        .order("created_at", { ascending: false })
+        .limit(limit),
+      supabase
+        .from("daily_check_ins")
+        .select("id, user_id, check_in_date, weight, coach_feedback, notes")
+        .in("user_id", Array.from(assignedIds))
+        .order("check_in_date", { ascending: false })
+        .limit(limit),
+      supabase
+        .from("profiles")
+        .select("user_id, first_name, last_name")
+        .in("user_id", Array.from(assignedIds)),
+    ])
+
+    const profiles = new Map((profilesResult.data || []).map(p => [p.user_id, p]))
+
+    const allCheckIns: RecentCheckIn[] = []
+
+    for (const ci of weeklyResult.data || []) {
+      const profile = profiles.get(ci.user_id)
+      const name = profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() : "Onbekend"
+      const initials = profile
+        ? `${(profile.first_name || "")[0] || ""}${(profile.last_name || "")[0] || ""}`.toUpperCase()
+        : "?"
+      allCheckIns.push({
+        id: ci.id,
+        user_id: ci.user_id,
+        client_name: name,
+        client_initials: initials,
+        created_at: ci.created_at,
+        type: "weekly",
+        has_coach_feedback: !!ci.coach_feedback,
+        weight: ci.weight,
+        note: ci.notes || null,
+      })
+    }
+
+    for (const ci of dailyResult.data || []) {
+      const profile = profiles.get(ci.user_id)
+      const name = profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() : "Onbekend"
+      const initials = profile
+        ? `${(profile.first_name || "")[0] || ""}${(profile.last_name || "")[0] || ""}`.toUpperCase()
+        : "?"
+      allCheckIns.push({
+        id: ci.id,
+        user_id: ci.user_id,
+        client_name: name,
+        client_initials: initials,
+        created_at: ci.check_in_date,
+        type: "daily",
+        has_coach_feedback: !!ci.coach_feedback,
+        weight: ci.weight,
+        note: ci.notes || null,
+      })
+    }
+
+    // Sort by date descending, take limit
+    allCheckIns.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+    return { success: true, checkIns: allCheckIns.slice(0, limit) }
+  } catch (error) {
+    console.error("Error in getDashboardRecentCheckIns:", error)
+    return { success: false, error: "Failed to fetch recent check-ins" }
+  }
+}
+
+// ============================================================
 // CLIENT CHECK-IN SETTINGS
 // ============================================================
 
@@ -1440,5 +1545,173 @@ export async function deleteUser(userId: string): Promise<{ success: boolean; er
   } catch (error) {
     console.error("Error in deleteUser:", error)
     return { success: false, error: "Failed to delete user" }
+  }
+}
+
+// ============================================================
+// DASHBOARD: COMPLIANCE CHART DATA
+// ============================================================
+
+export interface ComplianceChartPoint {
+  week: string
+  training: number
+  voeding: number
+}
+
+export async function getComplianceChartData(): Promise<{ success: boolean; data?: ComplianceChartPoint[]; error?: string }> {
+  try {
+    const currentUser = await getCurrentUser()
+    if (!currentUser || (currentUser.role !== 'ADMIN' && currentUser.role !== 'COACH')) {
+      return { success: false, error: "Unauthorized" }
+    }
+    const supabase = await getSupabaseAdmin()
+
+    // Get coach's assigned client IDs
+    const { data: relationships } = await supabase
+      .from("coaching_relationships")
+      .select("client_id")
+      .eq("coach_id", currentUser.id)
+      .eq("status", "ACTIVE")
+
+    const clientIds = (relationships || []).map(r => r.client_id)
+    if (clientIds.length === 0) {
+      return { success: true, data: [] }
+    }
+
+    // Get check-ins from last 6 weeks for those clients
+    const sixWeeksAgo = new Date(Date.now() - 6 * 7 * 86400000).toISOString()
+    const { data: checkIns } = await supabase
+      .from("check_ins")
+      .select("week_number, year, training_adherence, nutrition_adherence")
+      .in("user_id", clientIds)
+      .gte("created_at", sixWeeksAgo)
+
+    if (!checkIns || checkIns.length === 0) {
+      return { success: true, data: [] }
+    }
+
+    // Group by week and calculate averages
+    const weekMap = new Map<string, { training: number[]; voeding: number[] }>()
+    for (const ci of checkIns) {
+      const key = `${ci.year}-${ci.week_number}`
+      if (!weekMap.has(key)) weekMap.set(key, { training: [], voeding: [] })
+      const w = weekMap.get(key)!
+      if (ci.training_adherence != null) w.training.push(ci.training_adherence)
+      if (ci.nutrition_adherence != null) w.voeding.push(ci.nutrition_adherence)
+    }
+
+    // Sort by year-week and take last 6
+    const sorted = [...weekMap.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-6)
+
+    const data: ComplianceChartPoint[] = sorted.map(([_key, vals], i) => ({
+      week: `Wk ${i + 1}`,
+      training: vals.training.length > 0
+        ? Math.round((vals.training.reduce((s, v) => s + v, 0) / vals.training.length) * 10) // 1-10 → 10-100%
+        : 0,
+      voeding: vals.voeding.length > 0
+        ? Math.round((vals.voeding.reduce((s, v) => s + v, 0) / vals.voeding.length) * 10)
+        : 0,
+    }))
+
+    return { success: true, data }
+  } catch (error) {
+    console.error("Error in getComplianceChartData:", error)
+    return { success: false, error: "Failed to fetch compliance data" }
+  }
+}
+
+// ============================================================
+// DASHBOARD: CLIENT ACTIVITY CHART DATA
+// ============================================================
+
+export interface ActivityChartPoint {
+  dag: string
+  checkins: number
+  workouts: number
+}
+
+export async function getClientActivityChartData(): Promise<{ success: boolean; data?: ActivityChartPoint[]; error?: string }> {
+  try {
+    const currentUser = await getCurrentUser()
+    if (!currentUser || (currentUser.role !== 'ADMIN' && currentUser.role !== 'COACH')) {
+      return { success: false, error: "Unauthorized" }
+    }
+    const supabase = await getSupabaseAdmin()
+
+    // Get coach's assigned client IDs
+    const { data: relationships } = await supabase
+      .from("coaching_relationships")
+      .select("client_id")
+      .eq("coach_id", currentUser.id)
+      .eq("status", "ACTIVE")
+
+    const clientIds = (relationships || []).map(r => r.client_id)
+    if (clientIds.length === 0) {
+      const days = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"]
+      return { success: true, data: days.map(dag => ({ dag, checkins: 0, workouts: 0 })) }
+    }
+
+    // Calculate current week boundaries (Monday to Sunday)
+    const now = new Date()
+    const dayOfWeek = now.getDay() // 0=Sun, 1=Mon, ...
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+    const monday = new Date(now)
+    monday.setDate(now.getDate() + mondayOffset)
+    monday.setHours(0, 0, 0, 0)
+    const sunday = new Date(monday)
+    sunday.setDate(monday.getDate() + 7)
+
+    const mondayISO = monday.toISOString()
+    const sundayISO = sunday.toISOString()
+
+    // Parallel fetch: daily check-ins + completed workouts this week
+    const [checkInsResult, workoutsResult] = await Promise.all([
+      supabase
+        .from("daily_check_ins")
+        .select("check_in_date")
+        .in("user_id", clientIds)
+        .gte("check_in_date", monday.toISOString().split("T")[0])
+        .lte("check_in_date", sunday.toISOString().split("T")[0]),
+      supabase
+        .from("client_workouts")
+        .select("completed_at")
+        .in("client_id", clientIds)
+        .eq("completed", true)
+        .gte("completed_at", mondayISO)
+        .lt("completed_at", sundayISO),
+    ])
+
+    const dayNames = ["Zo", "Ma", "Di", "Wo", "Do", "Vr", "Za"]
+    const orderedDays = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"]
+    const counts: Record<string, { checkins: number; workouts: number }> = {}
+    for (const d of orderedDays) counts[d] = { checkins: 0, workouts: 0 }
+
+    // Count check-ins per day
+    for (const ci of checkInsResult.data || []) {
+      const date = new Date(ci.check_in_date + "T12:00:00")
+      const name = dayNames[date.getDay()]
+      if (counts[name]) counts[name].checkins++
+    }
+
+    // Count workouts per day
+    for (const w of workoutsResult.data || []) {
+      if (!w.completed_at) continue
+      const date = new Date(w.completed_at)
+      const name = dayNames[date.getDay()]
+      if (counts[name]) counts[name].workouts++
+    }
+
+    const data: ActivityChartPoint[] = orderedDays.map(dag => ({
+      dag,
+      checkins: counts[dag].checkins,
+      workouts: counts[dag].workouts,
+    }))
+
+    return { success: true, data }
+  } catch (error) {
+    console.error("Error in getClientActivityChartData:", error)
+    return { success: false, error: "Failed to fetch activity data" }
   }
 }

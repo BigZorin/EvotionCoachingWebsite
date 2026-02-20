@@ -104,7 +104,7 @@ export default function AssignProgramClient({ programId }: { programId: string }
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -112,7 +112,7 @@ export default function AssignProgramClient({ programId }: { programId: string }
   if (!program) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-500">Programma niet gevonden</p>
+        <p className="text-muted-foreground">Programma niet gevonden</p>
       </div>
     )
   }
@@ -147,13 +147,13 @@ export default function AssignProgramClient({ programId }: { programId: string }
                 className="w-20 h-14 rounded-lg object-cover"
               />
             ) : (
-              <div className="w-20 h-14 rounded-lg bg-gradient-to-br from-[#1e1839] to-[#3d2d6b] flex items-center justify-center">
+              <div className="w-20 h-14 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
                 <Layers className="w-6 h-6 text-white/40" />
               </div>
             )}
             <div>
               <h3 className="font-semibold">{program.name}</h3>
-              <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
+              <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
                 <span className="flex items-center gap-1">
                   <Layers className="w-3.5 h-3.5" />
                   {blocks.length} blokken
@@ -197,7 +197,7 @@ export default function AssignProgramClient({ programId }: { programId: string }
                     </SelectItem>
                   ))}
                   {clients.length === 0 && (
-                    <div className="px-3 py-2 text-sm text-gray-500">
+                    <div className="px-3 py-2 text-sm text-muted-foreground">
                       Geen actieve clients gevonden
                     </div>
                   )}
@@ -245,13 +245,13 @@ export default function AssignProgramClient({ programId }: { programId: string }
                   return (
                     <div
                       key={block.id}
-                      className="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-lg text-sm"
+                      className="flex items-center gap-3 px-3 py-2 bg-secondary/50 rounded-lg text-sm"
                     >
                       <Badge variant="secondary" className="font-mono">
                         {i + 1}
                       </Badge>
                       <span className="font-medium">{block.name}</span>
-                      <span className="text-gray-500 ml-auto flex items-center gap-1">
+                      <span className="text-muted-foreground ml-auto flex items-center gap-1">
                         <Calendar className="w-3.5 h-3.5" />
                         {blockStart.toLocaleDateString("nl-NL")} –{" "}
                         {blockEnd.toLocaleDateString("nl-NL")}
@@ -266,7 +266,7 @@ export default function AssignProgramClient({ programId }: { programId: string }
           <Button
             onClick={handleAssign}
             disabled={isAssigning || !selectedClientId}
-            className="w-full bg-[#1e1839] hover:bg-[#2a2054] text-white"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             {isAssigning ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -290,11 +290,11 @@ export default function AssignProgramClient({ programId }: { programId: string }
                 return (
                   <div
                     key={a.id}
-                    className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg"
+                    className="flex items-center justify-between px-4 py-3 bg-secondary/50 rounded-lg"
                   >
                     <div>
                       <span className="font-medium">{clientName}</span>
-                      <span className="text-sm text-gray-500 ml-3">
+                      <span className="text-sm text-muted-foreground ml-3">
                         Start: {new Date(a.start_date).toLocaleDateString("nl-NL")}
                       </span>
                     </div>
@@ -314,7 +314,7 @@ export default function AssignProgramClient({ programId }: { programId: string }
                           ? "Voltooid"
                           : "Gepauzeerd"}
                       </Badge>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-muted-foreground">
                         Blok {a.current_block_index + 1}/{blocks.length}
                       </span>
                     </div>

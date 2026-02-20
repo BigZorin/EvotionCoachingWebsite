@@ -33,14 +33,14 @@ function InfoCard({
 }) {
   if (!value) return null
   return (
-    <div className="bg-gray-50 rounded-lg p-4">
+    <div className="bg-secondary/50 rounded-lg p-4">
       <div className="flex items-center gap-2 mb-1">
         {icon}
-        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {label}
         </span>
       </div>
-      <p className="text-sm text-gray-900 whitespace-pre-line">{value}</p>
+      <p className="text-sm text-foreground whitespace-pre-line">{value}</p>
     </div>
   )
 }
@@ -67,7 +67,7 @@ export default function IntakeViewClient({ clientId }: { clientId: string }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1e1839]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     )
   }
@@ -78,14 +78,14 @@ export default function IntakeViewClient({ clientId }: { clientId: string }) {
       <div className="flex items-center gap-4 mb-8">
         <Link
           href={`/coach/dashboard/clients/${clientId}`}
-          className="p-2 hover:bg-gray-100 rounded-lg transition"
+          className="p-2 hover:bg-secondary rounded-lg transition"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Intake Formulier</h1>
+          <h1 className="text-2xl font-bold text-foreground">Intake Formulier</h1>
           {intake?.completed_at && (
-            <p className="text-sm text-gray-500 flex items-center gap-1">
+            <p className="text-sm text-muted-foreground flex items-center gap-1">
               <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
               Ingevuld op{" "}
               {new Date(intake.completed_at).toLocaleDateString("nl-NL", {
@@ -99,27 +99,27 @@ export default function IntakeViewClient({ clientId }: { clientId: string }) {
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-600 rounded-lg p-4 mb-6 flex items-center gap-2">
+        <div className="bg-destructive/5 text-destructive rounded-lg p-4 mb-6 flex items-center gap-2">
           <AlertCircle className="h-5 w-5 flex-shrink-0" />
           <p>{error}</p>
         </div>
       )}
 
       {!intake ? (
-        <div className="text-center py-16 bg-white rounded-xl border">
-          <AlertCircle className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 text-lg mb-2">Nog niet ingevuld</p>
-          <p className="text-gray-400 text-sm">
+        <div className="text-center py-16 bg-card rounded-xl border">
+          <AlertCircle className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+          <p className="text-muted-foreground text-lg mb-2">Nog niet ingevuld</p>
+          <p className="text-muted-foreground text-sm">
             De client heeft het intake formulier nog niet voltooid.
           </p>
         </div>
       ) : (
         <div className="space-y-6">
           {/* Section 1: Goals & Experience */}
-          <div className="bg-white rounded-xl border p-6 shadow-sm">
+          <div className="bg-card rounded-xl border p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <Trophy className="h-5 w-5 text-amber-500" />
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-foreground">
                 Doelen & Ervaring
               </h2>
             </div>
@@ -134,10 +134,10 @@ export default function IntakeViewClient({ clientId }: { clientId: string }) {
           </div>
 
           {/* Section 2: Health */}
-          <div className="bg-white rounded-xl border p-6 shadow-sm">
+          <div className="bg-card rounded-xl border p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <Heart className="h-5 w-5 text-red-500" />
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-foreground">
                 Gezondheid
               </h2>
             </div>
@@ -152,17 +152,17 @@ export default function IntakeViewClient({ clientId }: { clientId: string }) {
             {!intake.injuries &&
               !intake.medical_conditions &&
               !intake.medications && (
-                <p className="text-sm text-gray-400 italic">
+                <p className="text-sm text-muted-foreground italic">
                   Geen gezondheidsinformatie opgegeven
                 </p>
               )}
           </div>
 
           {/* Section 3: Lifestyle */}
-          <div className="bg-white rounded-xl border p-6 shadow-sm">
+          <div className="bg-card rounded-xl border p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <Moon className="h-5 w-5 text-indigo-500" />
-              <h2 className="text-lg font-semibold text-gray-900">Leefstijl</h2>
+              <h2 className="text-lg font-semibold text-foreground">Leefstijl</h2>
             </div>
             <div className="grid gap-3">
               <InfoCard
@@ -172,21 +172,21 @@ export default function IntakeViewClient({ clientId }: { clientId: string }) {
               <InfoCard label="Allergieën" value={intake.allergies} />
               <InfoCard label="Beroep" value={intake.occupation} />
               {intake.sleep_hours && (
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <div className="bg-secondary/50 rounded-lg p-4">
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Slaap
                   </span>
-                  <p className="text-sm text-gray-900 mt-1">
+                  <p className="text-sm text-foreground mt-1">
                     {intake.sleep_hours} uur per nacht
                   </p>
                 </div>
               )}
               {intake.stress_level && (
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <div className="bg-secondary/50 rounded-lg p-4">
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Stressniveau
                   </span>
-                  <p className="text-sm text-gray-900 mt-1">
+                  <p className="text-sm text-foreground mt-1">
                     {STRESS_LABELS[intake.stress_level] || intake.stress_level} (
                     {intake.stress_level}/5)
                   </p>
@@ -196,24 +196,24 @@ export default function IntakeViewClient({ clientId }: { clientId: string }) {
           </div>
 
           {/* Section 4: Schedule & Equipment */}
-          <div className="bg-white rounded-xl border p-6 shadow-sm">
+          <div className="bg-card rounded-xl border p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <Calendar className="h-5 w-5 text-blue-500" />
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-foreground">
                 Schema & Uitrusting
               </h2>
             </div>
             <div className="grid gap-3">
               {intake.available_days && intake.available_days.length > 0 && (
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <div className="bg-secondary/50 rounded-lg p-4">
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Beschikbare dagen
                   </span>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {intake.available_days.map((day) => (
                       <span
                         key={day}
-                        className="px-3 py-1 bg-[#1e1839] text-white text-xs font-medium rounded-full"
+                        className="px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full"
                       >
                         {day}
                       </span>
@@ -222,13 +222,13 @@ export default function IntakeViewClient({ clientId }: { clientId: string }) {
                 </div>
               )}
               {intake.preferred_training_time && (
-                <div className="bg-gray-50 rounded-lg p-4 flex items-start gap-2">
-                  <Clock className="h-4 w-4 text-gray-400 mt-0.5" />
+                <div className="bg-secondary/50 rounded-lg p-4 flex items-start gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground mt-0.5" />
                   <div>
-                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Voorkeurstijd
                     </span>
-                    <p className="text-sm text-gray-900 mt-1">
+                    <p className="text-sm text-foreground mt-1">
                       {intake.preferred_training_time}
                     </p>
                   </div>

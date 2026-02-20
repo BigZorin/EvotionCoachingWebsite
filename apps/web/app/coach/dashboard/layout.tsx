@@ -2,7 +2,9 @@ import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import CoachSidebar from "./CoachSidebar"
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader"
 
 export const metadata: Metadata = {
   title: "Coach Dashboard - Evotion",
@@ -52,17 +54,19 @@ export default async function CoachDashboardLayout({
     redirect("/dashboard")
   }
 
-  return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <CoachSidebar />
+  // Read sidebar cookie for persisted state
+  const sidebarState = cookieStore.get("sidebar_state")
+  const defaultOpen = sidebarState?.value !== "false"
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-8">
+  return (
+    <SidebarProvider defaultOpen={defaultOpen}>
+      <CoachSidebar />
+      <SidebarInset>
+        <DashboardHeader />
+        <div className="flex-1 overflow-y-auto p-6">
           {children}
         </div>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }
