@@ -20,9 +20,10 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 FROM base AS builder
 WORKDIR /app
 
-# NEXT_PUBLIC_ vars must be available at build time (inlined into client JS)
-ARG NEXT_PUBLIC_SUPABASE_URL
-ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+# NEXT_PUBLIC_ vars must be available at build time (inlined into client JS bundle)
+# These are public keys - safe to hardcode (exposed in browser anyway)
+ENV NEXT_PUBLIC_SUPABASE_URL=https://ezciexorsprdrjhntqie.supabase.co
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_lcQ8K-iCbvoLTUvoNve_HA_saeyI9lo
 
 # Copy deps
 COPY --from=deps /app/node_modules ./node_modules
